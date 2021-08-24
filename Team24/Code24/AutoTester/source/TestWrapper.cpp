@@ -1,4 +1,10 @@
 #include "TestWrapper.h"
+#include "AST.h"
+#include "SimpleLexer.h"
+#include "SimpleParser.h" 
+#include "PKB.h"
+
+using namespace std;
 
 // implementation code of WrapperFactory - do NOT modify the next 5 lines
 AbstractWrapper* WrapperFactory::wrapper = 0;
@@ -13,12 +19,36 @@ volatile bool TestWrapper::GlobalStop = false;
 TestWrapper::TestWrapper() {
   // create any objects here as instance variables of this class
   // as well as any initialization required for your spa program
+    
 }
 
 // method for parsing the SIMPLE source
 void TestWrapper::parse(std::string filename) {
-	// call your parser to do the parsing
-  // ...rest of your code...
+    string program;
+    string currentLine;
+    ifstream program_file(filename);
+
+    while (getline(program_file, currentLine))
+    {
+        program += currentLine;
+    }
+
+    vector<Token> tokens = lex(program);
+
+    // for debugging
+    printTokens(tokens);
+
+    Program* root = parseProgram(tokens);
+
+    if (root == NULL) {
+        cout << "Failed to parse program!";
+    }
+    else {
+        // for debugging
+        cout << root->format();
+    }
+
+    // BUILD PKB HERE
 }
 
 // method to evaluating a query
