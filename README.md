@@ -1,4 +1,4 @@
-# Team 00
+# Team 24
 
 > Please fill in this Readme with the required information, and delete this box.
 > 
@@ -28,4 +28,9 @@ No additional instructions required.
 
 Name | Mobile | Email | Development OS/Toolchain
 -:|:-:|:-|-|
-John Doe | 99887766 | john@doe.com | Windows 10/Visual Studio 2019
+Koh Yi Da | 96744763 | kohyida1997@gmail.com | Windows 10/Visual Studio 2019
+Jia Chen | 91234567 | email@gmail.com | Windows 10/Visual Studio 2019
+Michelle | 91234567 | email@gmail.com | Windows 10/Visual Studio 2019
+Zain | 91234567 | email@gmail.com | Windows 10/Visual Studio 2019
+Manas | 91234567 | email@gmail.com | Windows 10/Visual Studio 2019
+Nicholas | 91234567 | email@gmail.com | Windows 10/Visual Studio 2019
