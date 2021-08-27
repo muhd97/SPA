@@ -33,4 +33,4 @@ Jia Chen | 91234567 | email@gmail.com | Windows 10/Visual Studio 2019
 Michelle | 91234567 | email@gmail.com | Windows 10/Visual Studio 2019
 Zain | 91234567 | email@gmail.com | Windows 10/Visual Studio 2019
 Manas | 91234567 | email@gmail.com | Windows 10/Visual Studio 2019
-Nicholas | 91234567 | email@gmail.com | Windows 10/Visual Studio 2019
+Nicholas | 97890525 | nnjs1998@gmail.com | Windows 10/Visual Studio 2019
