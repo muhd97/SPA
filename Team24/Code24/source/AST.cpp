@@ -49,7 +49,7 @@ string Constant::format(int level) {
 
 
 string CombinationExpression::format(int level) {
-    if (left == NULL) {
+    if (lhs == NULL) {
         return "ERROR: LEFT SHOULD NOT BE NULL";
     }
     return getBopLabel(op) + "[" + lhs->format(level) + ", " + rhs->format(level) + "]";
