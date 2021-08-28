@@ -16,7 +16,11 @@ public:
 };
 
 class Expression : public Node {
-
+public:
+    // Stores the set of all sub expressions
+    virtual unordered_set<string> getSubExpressions() {
+        return unordered_set<string> {};
+    }
 };
 
 class Constant : public Expression {
@@ -32,6 +36,7 @@ public:
     }
 
     string format(int _);
+    unordered_set<string> getSubExpressions() override;
 };
 
 enum class Bop {
@@ -65,6 +70,7 @@ public:
     }
 
     string format(int level);
+    unordered_set<string> getSubExpressions() override;
 };
 
 class ConditionalExpression : public Node {
@@ -186,6 +192,7 @@ public:
     }
 
     string format(int _);
+    unordered_set<string> getSubExpressions() override;
 };
 
 class ErrorStatement : public Statement {

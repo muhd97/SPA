@@ -47,12 +47,30 @@ string Constant::format(int level) {
     return to_string(value);
 }
 
+unordered_set<string> Constant::getSubExpressions() {
+    return unordered_set<string> { this->format(0) };
+}
+
+unordered_set<string> Identifier::getSubExpressions() {
+    return unordered_set<string> { this->format(0) };
+}
 
 string CombinationExpression::format(int level) {
     if (lhs == NULL) {
         return "ERROR: LEFT SHOULD NOT BE NULL";
     }
     return "(" + lhs->format(level) + " " + getBopLabel(op) + " " + rhs->format(level) + ")";
+}
+
+unordered_set<string> CombinationExpression::getSubExpressions() {
+    unordered_set<string> lhsSubExpressions = lhs->getSubExpressions();
+    unordered_set<string> rhsSubExpressions = rhs->getSubExpressions();
+    unordered_set<string> current{ this->format(0) };
+
+    // union of lhs and rhs
+    current.insert(lhsSubExpressions.begin(), lhsSubExpressions.end());
+    current.insert(rhsSubExpressions.begin(), rhsSubExpressions.end());
+    return current;
 }
 
 string BooleanExpression::format(int level) {
