@@ -39,7 +39,7 @@ inline PQLToken PQLParser::eat(PQLTokenType exepctedType)
     }
     else {
         PQLToken temp(exepctedType);
-        cout << "Expected: " << getTokenLabel(temp) << " but got: " << getTokenLabel(tok) << " instead\n";
+        cout << "Expected: " << getPQLTokenLabel(temp) << " but got: " << getPQLTokenLabel(tok) << " instead\n";
     }
     return tok;
 }
@@ -104,7 +104,7 @@ SPtr<DesignEntity> PQLParser::parseDesignEntity()
         cout << "Unrecognized Design Entity!\n";
     }
 
-    return make_shared<DesignEntity>(getTokenLabel(curr));
+    return make_shared<DesignEntity>(getPQLTokenLabel(curr));
 }
 
 

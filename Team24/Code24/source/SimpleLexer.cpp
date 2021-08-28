@@ -14,22 +14,22 @@ const string ELSE = "else";
 // this is isnt allowed in a simple program and can be used as the EOF delimeter
 const char END_TOKEN = '$';
 
-Token makeToken(TokenType type) {
-    struct Token token;
+SimpleToken makeToken(SimpleTokenType type) {
+    struct SimpleToken token;
     token.type = type;
     return token;
 }
 
-Token makeIntToken(int value) {
-    struct Token token;
-    token.type = TokenType::INTEGER;
+SimpleToken makeIntToken(int value) {
+    struct SimpleToken token;
+    token.type = SimpleTokenType::INTEGER;
     token.intValue = value;
     return token;
 }
 
-Token makeStringToken(string value) {
-    struct Token token;
-    token.type = TokenType::NAME;
+SimpleToken makeStringToken(string value) {
+    struct SimpleToken token;
+    token.type = SimpleTokenType::NAME;
     token.stringValue = value;
     return token;
 }
@@ -37,9 +37,9 @@ Token makeStringToken(string value) {
 // Basic lookahead lexer / tokenizer based on chapter 3 of the dragon book
 // TODO: (@jiachen247) optimize for perf
 // TODO: (@jiachen247) check for empty programs and catch syntax errors
-vector<Token> lex(string program)
+vector<SimpleToken> simpleLex(string program)
 {
-    vector<Token> tokens;
+    vector<SimpleToken> tokens;
     char current, lookahead;
 
     program.push_back(END_TOKEN);
@@ -55,77 +55,77 @@ vector<Token> lex(string program)
             continue;
         }
         else if (current == '(') {
-            tokens.push_back(makeToken(TokenType::LEFT_PAREN));
+            tokens.push_back(makeToken(SimpleTokenType::LEFT_PAREN));
         }
         else if (current == ')') {
-            tokens.push_back(makeToken(TokenType::RIGHT_PAREN));
+            tokens.push_back(makeToken(SimpleTokenType::RIGHT_PAREN));
         }
         else if (current == '{') {
-            tokens.push_back(makeToken(TokenType::LEFT_BRACE));
+            tokens.push_back(makeToken(SimpleTokenType::LEFT_BRACE));
         }
         else if (current == '}') {
-            tokens.push_back(makeToken(TokenType::RIGHT_BRACE));
+            tokens.push_back(makeToken(SimpleTokenType::RIGHT_BRACE));
         }
         else if (current == ';') {
-            tokens.push_back(makeToken(TokenType::SEMICOLON));
+            tokens.push_back(makeToken(SimpleTokenType::SEMICOLON));
         }
         else if (current == '+') {
-            tokens.push_back(makeToken(TokenType::PLUS));
+            tokens.push_back(makeToken(SimpleTokenType::PLUS));
         }
         else if (current == '-') {
-            tokens.push_back(makeToken(TokenType::MINUS));
+            tokens.push_back(makeToken(SimpleTokenType::MINUS));
         }
         else if (current == '*') {
-            tokens.push_back(makeToken(TokenType::MUL));
+            tokens.push_back(makeToken(SimpleTokenType::MUL));
         }
         else if (current == '/') {
-            tokens.push_back(makeToken(TokenType::DIV));
+            tokens.push_back(makeToken(SimpleTokenType::DIV));
         }
         else if (current == '%') {
-            tokens.push_back(makeToken(TokenType::MOD));
+            tokens.push_back(makeToken(SimpleTokenType::MOD));
         }
         else if (current == '<') {
             if (lookahead == '=') {
-                tokens.push_back(makeToken(TokenType::LTE));
+                tokens.push_back(makeToken(SimpleTokenType::LTE));
                 i++;
             }
             else {
-                tokens.push_back(makeToken(TokenType::LT));
+                tokens.push_back(makeToken(SimpleTokenType::LT));
             }
         }
         else if (current == '>') {
             if (lookahead == '=') {
-                tokens.push_back(makeToken(TokenType::GTE));
+                tokens.push_back(makeToken(SimpleTokenType::GTE));
                 i++;
             }
             else {
-                tokens.push_back(makeToken(TokenType::GT));
+                tokens.push_back(makeToken(SimpleTokenType::GT));
             }
         }
         else if (current == '=') {
             if (lookahead == '=') {
-                tokens.push_back(makeToken(TokenType::EQ));
+                tokens.push_back(makeToken(SimpleTokenType::EQ));
                 i++;
             }
             else {
-                tokens.push_back(makeToken(TokenType::ASSIGN));
+                tokens.push_back(makeToken(SimpleTokenType::ASSIGN));
             }
         }
         else if (current == '!') {
             if (lookahead == '=') {
-                tokens.push_back(makeToken(TokenType::NEQ));
+                tokens.push_back(makeToken(SimpleTokenType::NEQ));
                 i++;
             }
             else {
-                tokens.push_back(makeToken(TokenType::NOT));
+                tokens.push_back(makeToken(SimpleTokenType::NOT));
             }
         }
         else if (current == '&' && lookahead == '&') {
-            tokens.push_back(makeToken(TokenType::AND));
+            tokens.push_back(makeToken(SimpleTokenType::AND));
             i++;
         }
         else if (current == '|' && lookahead == '|') {
-            tokens.push_back(makeToken(TokenType::OR));
+            tokens.push_back(makeToken(SimpleTokenType::OR));
             i++;
         }
         else if (isdigit(current)) {
@@ -140,7 +140,7 @@ vector<Token> lex(string program)
 
             if (value.size() > 1 && current == '0') {
                 cout << "Integer token cannot start with 0." << endl;
-                return vector<Token>();
+                return vector<SimpleToken>();
             }
 
             value.push_back(current);
@@ -156,28 +156,28 @@ vector<Token> lex(string program)
             value.push_back(current);
 
             if (value == PROCECURE) {
-                tokens.push_back(makeToken(TokenType::PROCEDURE));
+                tokens.push_back(makeToken(SimpleTokenType::PROCEDURE));
             }
             else if (value == READ) {
-                tokens.push_back(makeToken(TokenType::READ));
+                tokens.push_back(makeToken(SimpleTokenType::READ));
             }
             else if (value == PRINT) {
-                tokens.push_back(makeToken(TokenType::PRINT));
+                tokens.push_back(makeToken(SimpleTokenType::PRINT));
             }
             else if (value == CALL) {
-                tokens.push_back(makeToken(TokenType::CALL));
+                tokens.push_back(makeToken(SimpleTokenType::CALL));
             }
             else if (value == WHILE) {
-                tokens.push_back(makeToken(TokenType::WHILE));
+                tokens.push_back(makeToken(SimpleTokenType::WHILE));
             }
             else if (value == IF) {
-                tokens.push_back(makeToken(TokenType::IF));
+                tokens.push_back(makeToken(SimpleTokenType::IF));
             }
             else if (value == THEN) {
-                tokens.push_back(makeToken(TokenType::THEN));
+                tokens.push_back(makeToken(SimpleTokenType::THEN));
             }
             else if (value == ELSE) {
-                tokens.push_back(makeToken(TokenType::ELSE));
+                tokens.push_back(makeToken(SimpleTokenType::ELSE));
             }
             else {
                 tokens.push_back(makeStringToken(value));
@@ -185,7 +185,7 @@ vector<Token> lex(string program)
         }
         else {
             cout << "Lexer: Unknown token '" << current << "'." << endl;
-            return vector<Token>();
+            return vector<SimpleToken>();
         }
         i++;
     }
@@ -193,78 +193,78 @@ vector<Token> lex(string program)
     return tokens;
 }
 
-string getTokenLabel(Token token) {
+string getSimpleTokenLabel(SimpleToken token) {
     switch (token.type)
     {
-    case TokenType::LEFT_PAREN:
+    case SimpleTokenType::LEFT_PAREN:
         return "(";
-    case TokenType::RIGHT_PAREN:
+    case SimpleTokenType::RIGHT_PAREN:
         return ")";
-    case TokenType::LEFT_BRACE:
+    case SimpleTokenType::LEFT_BRACE:
         return "{";
-    case TokenType::RIGHT_BRACE:
+    case SimpleTokenType::RIGHT_BRACE:
         return "}";
-    case TokenType::SEMICOLON:
+    case SimpleTokenType::SEMICOLON:
         return ";";
-    case TokenType::ASSIGN:
+    case SimpleTokenType::ASSIGN:
         return "=";
-    case TokenType::PLUS:
+    case SimpleTokenType::PLUS:
         return "+";
-    case TokenType::MINUS:
+    case SimpleTokenType::MINUS:
         return "-";
-    case TokenType::MUL:
+    case SimpleTokenType::MUL:
         return "*";
-    case TokenType::DIV:
+    case SimpleTokenType::DIV:
         return "/";
-    case TokenType::MOD:
+    case SimpleTokenType::MOD:
         return "%";
-    case TokenType::LT:
+    case SimpleTokenType::LT:
         return "<";
-    case TokenType::LTE:
+    case SimpleTokenType::LTE:
         return "<=";
-    case TokenType::GT:
+    case SimpleTokenType::GT:
         return ">";
-    case TokenType::GTE:
+    case SimpleTokenType::GTE:
         return ">=";
-    case TokenType::EQ:
+    case SimpleTokenType::EQ:
         return "==";
-    case TokenType::NEQ:
+    case SimpleTokenType::NEQ:
         return "!=";
-    case TokenType::NOT:
+    case SimpleTokenType::NOT:
         return "!";
-    case TokenType::AND:
+    case SimpleTokenType::AND:
         return "&&";
-    case TokenType::OR:
+    case SimpleTokenType::OR:
         return "||";
-    case TokenType::READ:
+    case SimpleTokenType::READ:
         return READ;
-    case TokenType::PRINT:
+    case SimpleTokenType::PRINT:
         return PRINT;
-    case TokenType::CALL:
+    case SimpleTokenType::CALL:
         return CALL;
-    case TokenType::WHILE:
+    case SimpleTokenType::WHILE:
         return WHILE;
-    case TokenType::IF:
+    case SimpleTokenType::IF:
         return IF;
-    case TokenType::THEN:
+    case SimpleTokenType::THEN:
         return THEN;
-    case TokenType::ELSE:
+    case SimpleTokenType::ELSE:
         return ELSE;
-    case TokenType::PROCEDURE:
+    case SimpleTokenType::PROCEDURE:
         return PROCECURE;
-    case TokenType::NAME:
+    case SimpleTokenType::NAME:
         return "id(" + token.stringValue + ")";
-    case TokenType::INTEGER:
+    case SimpleTokenType::INTEGER:
         return "int(" + to_string(token.intValue) + ")";
     }
     return "";
 }
 
 // use this for debugging the lexer output
-void printTokens(vector<Token> tokens) {
+void printSimpleTokens(vector<SimpleToken> tokens) {
     cout << "=== Printing Tokens ===" << endl;
-    for (Token token : tokens) {
-        cout << getTokenLabel(token) << " ";
+    for (SimpleToken token : tokens) {
+        cout << getSimpleTokenLabel(token) << " ";
     }
     cout << endl << "=== END ===" << endl << endl;
 }

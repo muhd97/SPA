@@ -71,7 +71,7 @@ public:
 class SimpleParser
 {
 private:
-    vector<Token> tokens;
+    vector<SimpleToken> SimpleTokens;
     int index;
     int size;
 
@@ -82,18 +82,18 @@ private:
         return false;
     }
 public:
-    SimpleParser(vector<Token> tokens) {
-        this->tokens = tokens;
+    SimpleParser(vector<SimpleToken> SimpleTokens) {
+        this->SimpleTokens = SimpleTokens;
         this->index = 0;
-        this->size = tokens.size();
+        this->size = SimpleTokens.size();
     }
 
-    Token peek() {
-        return tokens[index];
+    SimpleToken peek() {
+        return SimpleTokens[index];
     }
 
-    Token peekNext() {
-        return tokens[index + 1];
+    SimpleToken peekNext() {
+        return SimpleTokens[index + 1];
     }
 
     void advance() {
@@ -105,18 +105,18 @@ public:
         }
     }
 
-    void error(vector<TokenType> expectedTypes, Token actual) {
+    void error(vector<SimpleTokenType> expectedTypes, SimpleToken actual) {
         // Can consider adding error productions to carry on parsing to catch more errors
         cout << "Failed to match expected grammer" << endl;
         cout << "Expected [";
 
-        for (TokenType type : expectedTypes) {
-            Token expectedToken;
-            expectedToken.type = type;
-            cout << "'" << getTokenLabel(expectedToken) << "', ";
+        for (SimpleTokenType type : expectedTypes) {
+            SimpleToken expectedSimpleToken;
+            expectedSimpleToken.type = type;
+            cout << "'" << getSimpleTokenLabel(expectedSimpleToken) << "', ";
         }
 
-        cout << "] but got '" << getTokenLabel(actual) << "' instead." << endl;
+        cout << "] but got '" << getSimpleTokenLabel(actual) << "' instead." << endl;
 
         // hack to terminate for now
         exit(0);
@@ -127,15 +127,15 @@ public:
     }
 
 
-    Token eat(TokenType expectedType) {
-        Token actualToken = peek();
-        if (actualToken.type == expectedType) {
+    SimpleToken eat(SimpleTokenType expectedType) {
+        SimpleToken actualSimpleToken = peek();
+        if (actualSimpleToken.type == expectedType) {
             advance();
         }
         else {
-            error({ expectedType }, actualToken);
+            error({ expectedType }, actualSimpleToken);
         }
-        return actualToken;
+        return actualSimpleToken;
     }
 
     Program* parseProgram() {
@@ -168,8 +168,8 @@ public:
     }
 
     Procedure* parseProcedure(Environment* env) {
-        eat(TokenType::PROCEDURE);
-        Token name = eat(TokenType::NAME);
+        eat(SimpleTokenType::PROCEDURE);
+        SimpleToken name = eat(SimpleTokenType::NAME);
         string procName = name.stringValue;
 
         if (env->isProcAlreadyDeclared(procName)) {
@@ -180,9 +180,9 @@ public:
             env->addProc(procName);
         }
 
-        eat(TokenType::LEFT_BRACE);
+        eat(SimpleTokenType::LEFT_BRACE);
         StatementList* stmtList = parseStatementList(env);
-        eat(TokenType::RIGHT_BRACE);
+        eat(SimpleTokenType::RIGHT_BRACE);
 
         return new Procedure(procName, stmtList);
     }
@@ -190,7 +190,7 @@ public:
     StatementList* parseStatementList(Environment* env) {
         vector<Statement*> statements;
 
-        while (peek().type != TokenType::RIGHT_BRACE) {
+        while (peek().type != SimpleTokenType::RIGHT_BRACE) {
             statements.push_back(parseStatement(env));
         }
 
@@ -199,85 +199,85 @@ public:
 
     Statement* parseStatement(Environment* env) {
         switch (peek().type) {
-        case TokenType::READ:
+        case SimpleTokenType::READ:
             return parseReadStatement();
-        case TokenType::PRINT:
+        case SimpleTokenType::PRINT:
             return parsePrintStatement();
-        case TokenType::CALL:
+        case SimpleTokenType::CALL:
             return parseCallStatement(env);
-        case TokenType::WHILE:
+        case SimpleTokenType::WHILE:
             return parseWhileStatement(env);
-        case TokenType::IF:
+        case SimpleTokenType::IF:
             return parseIfStatement(env);
-        case TokenType::NAME:
+        case SimpleTokenType::NAME:
             return  parseAssignStatement();
         default:
-            error({ TokenType::READ, TokenType::PRINT, TokenType::CALL, TokenType::WHILE, TokenType::IF, TokenType::NAME }, peek());
+            error({ SimpleTokenType::READ, SimpleTokenType::PRINT, SimpleTokenType::CALL, SimpleTokenType::WHILE, SimpleTokenType::IF, SimpleTokenType::NAME }, peek());
             return new ErrorStatement(0);
         }
     }
 
     ReadStatement* parseReadStatement() {
         int index = getNextStatementNumber();
-        eat(TokenType::READ);
-        Token name = eat(TokenType::NAME);
-        eat(TokenType::SEMICOLON);
+        eat(SimpleTokenType::READ);
+        SimpleToken name = eat(SimpleTokenType::NAME);
+        eat(SimpleTokenType::SEMICOLON);
         return new ReadStatement(index, new Identifier(name.stringValue));
     }
 
     PrintStatement* parsePrintStatement() {
         int index = getNextStatementNumber();
-        eat(TokenType::PRINT);
-        Token name = eat(TokenType::NAME);
-        eat(TokenType::SEMICOLON);
+        eat(SimpleTokenType::PRINT);
+        SimpleToken name = eat(SimpleTokenType::NAME);
+        eat(SimpleTokenType::SEMICOLON);
         return new PrintStatement(index, new Identifier(name.stringValue));
     }
 
     CallStatement* parseCallStatement(Environment* env) {
         int index = getNextStatementNumber();
-        eat(TokenType::CALL);
-        Token name = eat(TokenType::NAME);
+        eat(SimpleTokenType::CALL);
+        SimpleToken name = eat(SimpleTokenType::NAME);
         string procName = name.stringValue;
         env->addInvokeProcedure(procName);
-        eat(TokenType::SEMICOLON);
+        eat(SimpleTokenType::SEMICOLON);
         return new CallStatement(index, new Identifier(procName));
     }
 
     AssignStatement* parseAssignStatement() {
         int index = getNextStatementNumber();
-        Token name = eat(TokenType::NAME);
-        eat(TokenType::ASSIGN);
+        SimpleToken name = eat(SimpleTokenType::NAME);
+        eat(SimpleTokenType::ASSIGN);
         Expression* expr = parseExpression();
-        eat(TokenType::SEMICOLON);
+        eat(SimpleTokenType::SEMICOLON);
         return new AssignStatement(index, new Identifier(name.stringValue), expr);
     }
 
     WhileStatement* parseWhileStatement(Environment* env) {
         int index = getNextStatementNumber();
-        eat(TokenType::WHILE);
-        eat(TokenType::LEFT_PAREN);
+        eat(SimpleTokenType::WHILE);
+        eat(SimpleTokenType::LEFT_PAREN);
         ConditionalExpression* cond = parseConditionalExpression();
-        eat(TokenType::RIGHT_PAREN);
-        eat(TokenType::LEFT_BRACE);
+        eat(SimpleTokenType::RIGHT_PAREN);
+        eat(SimpleTokenType::LEFT_BRACE);
         StatementList* block = parseStatementList(env);
-        eat(TokenType::RIGHT_BRACE);
+        eat(SimpleTokenType::RIGHT_BRACE);
         return new WhileStatement(index, cond, block);
     }
 
     IfStatement* parseIfStatement(Environment* env) {
         int index = getNextStatementNumber();
-        eat(TokenType::IF);
-        eat(TokenType::LEFT_PAREN);
+        eat(SimpleTokenType::IF);
+        eat(SimpleTokenType::LEFT_PAREN);
         ConditionalExpression* condExpr = parseConditionalExpression();
-        eat(TokenType::RIGHT_PAREN);
-        eat(TokenType::THEN);
-        eat(TokenType::LEFT_BRACE);
+        eat(SimpleTokenType::RIGHT_PAREN);
+        eat(SimpleTokenType::THEN);
+        eat(SimpleTokenType::LEFT_BRACE);
         StatementList* consequent = parseStatementList(env);
-        eat(TokenType::RIGHT_BRACE);
-        eat(TokenType::ELSE);
-        eat(TokenType::LEFT_BRACE);
+        eat(SimpleTokenType::RIGHT_BRACE);
+        eat(SimpleTokenType::ELSE);
+        eat(SimpleTokenType::LEFT_BRACE);
         StatementList* alternative = parseStatementList(env);
-        eat(TokenType::RIGHT_BRACE);
+        eat(SimpleTokenType::RIGHT_BRACE);
         return new IfStatement(index, condExpr, consequent, alternative);
     }
 
@@ -296,15 +296,15 @@ public:
         int index = this->index;
         int nestingDepth = 0;
 
-        if (tokens[index].type != TokenType::LEFT_PAREN) {
+        if (SimpleTokens[index].type != SimpleTokenType::LEFT_PAREN) {
             return false;
         }
 
         index++;
 
         while (index < this->size) {
-            TokenType type = tokens[index].type;
-            if (type == TokenType::RIGHT_PAREN) {
+            SimpleTokenType type = SimpleTokens[index].type;
+            if (type == SimpleTokenType::RIGHT_PAREN) {
                 if (nestingDepth == 0) {
                     index++;
                     break;
@@ -316,7 +316,7 @@ public:
                     nestingDepth--;
                 }
             }
-            else if (type == TokenType::LEFT_PAREN) {
+            else if (type == SimpleTokenType::LEFT_PAREN) {
                 nestingDepth++;
             }
             index++;
@@ -326,15 +326,15 @@ public:
             return false;
         }
 
-        if (tokens[index].type != TokenType::AND && tokens[index].type != TokenType::OR) {
+        if (SimpleTokens[index].type != SimpleTokenType::AND && SimpleTokens[index].type != SimpleTokenType::OR) {
             return false;
         }
 
         nestingDepth = 0;
         while (index < this->size) {
-            TokenType type = tokens[index].type;
+            SimpleTokenType type = SimpleTokens[index].type;
 
-            if (type == TokenType::RIGHT_PAREN) {
+            if (type == SimpleTokenType::RIGHT_PAREN) {
                 if (nestingDepth == 0) {
                     return true;
                 }
@@ -345,7 +345,7 @@ public:
                     nestingDepth--;
                 }
             }
-            else if (type == TokenType::LEFT_PAREN) {
+            else if (type == SimpleTokenType::LEFT_PAREN) {
                 nestingDepth++;
             }
             index++;
@@ -354,49 +354,49 @@ public:
     }
 
     ConditionalExpression* parseConditionalExpression() {
-        if (peek().type == TokenType::NOT) {
-            eat(TokenType::NOT);
-            eat(TokenType::LEFT_PAREN);
+        if (peek().type == SimpleTokenType::NOT) {
+            eat(SimpleTokenType::NOT);
+            eat(SimpleTokenType::LEFT_PAREN);
             ConditionalExpression* expr = parseConditionalExpression();
-            eat(TokenType::RIGHT_PAREN);
+            eat(SimpleTokenType::RIGHT_PAREN);
 
             return new NotExpression(expr);
         }
-        else if (peek().type == TokenType::LEFT_PAREN && tryConditionalExpressionLookaheadHack()) {
-            eat(TokenType::LEFT_PAREN);
+        else if (peek().type == SimpleTokenType::LEFT_PAREN && tryConditionalExpressionLookaheadHack()) {
+            eat(SimpleTokenType::LEFT_PAREN);
             ConditionalExpression* lhs = parseConditionalExpression();
-            eat(TokenType::RIGHT_PAREN);
+            eat(SimpleTokenType::RIGHT_PAREN);
             BooleanExpression* result = parseConditionalExpressionPrime();
 
             result->setLeft(lhs);
             return result;
         }
-        else if (peek().type == TokenType::NAME || peek().type == TokenType::INTEGER || peek().type == TokenType::LEFT_PAREN) {
+        else if (peek().type == SimpleTokenType::NAME || peek().type == SimpleTokenType::INTEGER || peek().type == SimpleTokenType::LEFT_PAREN) {
             return parseRelationalExpression();
         }
         else {
-            error({ TokenType::NOT, TokenType::PRINT, TokenType::LEFT_PAREN, TokenType::WHILE, TokenType::IF, TokenType::NAME }, peek());
+            error({ SimpleTokenType::NOT, SimpleTokenType::PRINT, SimpleTokenType::LEFT_PAREN, SimpleTokenType::WHILE, SimpleTokenType::IF, SimpleTokenType::NAME }, peek());
             return NULL;
         }
     }
 
     BooleanExpression* parseConditionalExpressionPrime() {
         BooleanOperator op;
-        if (peek().type == TokenType::AND) {
-            eat(TokenType::AND);
+        if (peek().type == SimpleTokenType::AND) {
+            eat(SimpleTokenType::AND);
             op = BooleanOperator::AND;
         }
-        else if (peek().type == TokenType::OR) {
-            eat(TokenType::OR);
+        else if (peek().type == SimpleTokenType::OR) {
+            eat(SimpleTokenType::OR);
             op = BooleanOperator::OR;
         }
         else {
-            error({ TokenType::AND, TokenType::OR }, peek());
+            error({ SimpleTokenType::AND, SimpleTokenType::OR }, peek());
             return NULL;
         }
-        eat(TokenType::LEFT_PAREN);
+        eat(SimpleTokenType::LEFT_PAREN);
         ConditionalExpression* rhs = parseConditionalExpression();
-        eat(TokenType::RIGHT_PAREN);
+        eat(SimpleTokenType::RIGHT_PAREN);
 
         return new BooleanExpression(op, rhs);
     }
@@ -405,32 +405,32 @@ public:
         Rop op;
         Expression* lhs = parseRelationalFactor();
 
-        if (peek().type == TokenType::GT) {
-            eat(TokenType::GT);
+        if (peek().type == SimpleTokenType::GT) {
+            eat(SimpleTokenType::GT);
             op = Rop::GT;
         }
-        else if (peek().type == TokenType::GTE) {
-            eat(TokenType::GTE);
+        else if (peek().type == SimpleTokenType::GTE) {
+            eat(SimpleTokenType::GTE);
             op = Rop::GTE;
         }
-        else if (peek().type == TokenType::LTE) {
-            eat(TokenType::LTE);
+        else if (peek().type == SimpleTokenType::LTE) {
+            eat(SimpleTokenType::LTE);
             op = Rop::LT;
         }
-        else if (peek().type == TokenType::LT) {
-            eat(TokenType::LT);
+        else if (peek().type == SimpleTokenType::LT) {
+            eat(SimpleTokenType::LT);
             op = Rop::LTE;
         }
-        else if (peek().type == TokenType::EQ) {
-            eat(TokenType::EQ);
+        else if (peek().type == SimpleTokenType::EQ) {
+            eat(SimpleTokenType::EQ);
             op = Rop::EQ;
         }
-        else if (peek().type == TokenType::NEQ) {
-            eat(TokenType::NEQ);
+        else if (peek().type == SimpleTokenType::NEQ) {
+            eat(SimpleTokenType::NEQ);
             op = Rop::NEQ;
         }
         else {
-            error({ TokenType::GT, TokenType::GTE, TokenType::LTE, TokenType::LT, TokenType::EQ, TokenType::NEQ }, peek());
+            error({ SimpleTokenType::GT, SimpleTokenType::GTE, SimpleTokenType::LTE, SimpleTokenType::LT, SimpleTokenType::EQ, SimpleTokenType::NEQ }, peek());
             return NULL;
         }
         Expression* rhs = parseRelationalFactor();
@@ -456,12 +456,12 @@ public:
 
     CombinationExpression* parseExpressionPrime() {
         Bop op;
-        if (peek().type == TokenType::PLUS) {
-            eat(TokenType::PLUS);
+        if (peek().type == SimpleTokenType::PLUS) {
+            eat(SimpleTokenType::PLUS);
             op = Bop::PLUS;
         }
-        else if (peek().type == TokenType::MINUS) {
-            eat(TokenType::MINUS);
+        else if (peek().type == SimpleTokenType::MINUS) {
+            eat(SimpleTokenType::MINUS);
             op = Bop::MINUS;
         }
         else {
@@ -495,16 +495,16 @@ public:
 
     CombinationExpression* parseTermPrime() {
         Bop op;
-        if (peek().type == TokenType::MUL) {
-            eat(TokenType::MUL);
+        if (peek().type == SimpleTokenType::MUL) {
+            eat(SimpleTokenType::MUL);
             op = Bop::MULTIPLY;
         }
-        else if (peek().type == TokenType::DIV) {
-            eat(TokenType::DIV);
+        else if (peek().type == SimpleTokenType::DIV) {
+            eat(SimpleTokenType::DIV);
             op = Bop::DIVIDE;
         }
-        else if (peek().type == TokenType::MOD) {
-            eat(TokenType::MOD);
+        else if (peek().type == SimpleTokenType::MOD) {
+            eat(SimpleTokenType::MOD);
             op = Bop::MOD;
         }
         else {
@@ -525,28 +525,28 @@ public:
     }
 
     Expression* parseFactor() {
-        if (peek().type == TokenType::NAME) {
-            Token name = eat(TokenType::NAME);
+        if (peek().type == SimpleTokenType::NAME) {
+            SimpleToken name = eat(SimpleTokenType::NAME);
             return new Identifier(name.stringValue);
         }
-        else if (peek().type == TokenType::INTEGER) {
-            Token val = eat(TokenType::INTEGER);
+        else if (peek().type == SimpleTokenType::INTEGER) {
+            SimpleToken val = eat(SimpleTokenType::INTEGER);
             return new Constant(val.intValue);
         }
-        else if (peek().type == TokenType::LEFT_PAREN) {
-            eat(TokenType::LEFT_PAREN);
+        else if (peek().type == SimpleTokenType::LEFT_PAREN) {
+            eat(SimpleTokenType::LEFT_PAREN);
             Expression* expr = parseExpression();
-            eat(TokenType::RIGHT_PAREN);
+            eat(SimpleTokenType::RIGHT_PAREN);
             return expr;
         }
         else {
-            error({ TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN }, peek());
+            error({ SimpleTokenType::NAME, SimpleTokenType::INTEGER, SimpleTokenType::LEFT_PAREN }, peek());
             return NULL;
         }
     }
 };
 
-Program* parseProgram(vector<Token> tokens) {
-    SimpleParser* parser = new SimpleParser(tokens);
+Program* parseSimpleProgram(vector<SimpleToken> SimpleTokens) {
+    SimpleParser* parser = new SimpleParser(SimpleTokens);
     return parser->parseProgram();
 }

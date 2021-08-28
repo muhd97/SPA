@@ -22,7 +22,7 @@ using namespace std;
 void printLexTokens(vector<PQLToken> tokens) {
     cout << "\n=== Printing Tokens ===" << endl;
     for (auto& x : tokens) {
-        cout << getTokenLabel(x) << " | ";
+        cout << getPQLTokenLabel(x) << " | ";
     }
     cout << "\n=== END ===" << "\n\n";
 }
@@ -53,7 +53,7 @@ void runLexerCases() {
 
     cout << "\n==== Lexer Test Cases ====\n";
     for (auto& s : lexerTestCases) {
-        vector<PQLToken> curr = lex(s); // lex(s) is r-value
+        vector<PQLToken> curr = pqlLex(s); // lex(s) is r-value
         printLexTokens(move(curr));
     }
 }
@@ -61,7 +61,7 @@ void runLexerCases() {
 void runParserDeclarationTest() {
     string parserDeclarationTest = "assign a, b, c, test, k, asd, fgh;";
 
-    vector<PQLToken> temp = lex(parserDeclarationTest);
+    vector<PQLToken> temp = pqlLex(parserDeclarationTest);
     PQLParser parser(move(temp));
     auto d = parser.parseDeclaration();
     for (auto& x : d->getSynonyms()) {
@@ -82,7 +82,7 @@ void runParserUsesTestCases() {
 
     for (auto& s : parseUsesTestCases) {
         cout << "\n==== ParseUsesTest: " << s << " ====" << endl;
-        PQLParser usesParser(lex(s));
+        PQLParser usesParser(pqlLex(s));
         SPtr<UsesS> uses = usesParser.parseUses();
         uses->printString();
     }
@@ -163,7 +163,7 @@ void runParserSuchThatCases() {
 
     cout << "\n==== SuchThat Tests ====\n";
     for (auto& s : suchThatTestCases) {
-        PQLParser suchThatParser(lex(s));
+        PQLParser suchThatParser(pqlLex(s));
         auto suchThat = suchThatParser.parseSuchThat();
         cout << "Such That: ";
         suchThat->relRef->printString();
@@ -196,7 +196,7 @@ void runParserSelectCases() {
     cout << "\n==== Select Test Cases ====\n";
     for (auto& t : selectTestCases) {
         cout << "\n";
-        PQLParser p(lex(t));
+        PQLParser p(pqlLex(t));
         auto sel = p.parseSelectCl();
         sel->printString();
         cout << "\n";

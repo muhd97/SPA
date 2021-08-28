@@ -2,4 +2,4 @@
 #include "SimpleLexer.h"
 #include "SimpleAST.h"
 
-Program* parseProgram(vector<Token> tokens);
+Program* parseSimpleProgram(vector<SimpleToken> tokens);

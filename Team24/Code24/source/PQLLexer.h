@@ -90,8 +90,8 @@ public:
 
 };
 
-vector<PQLToken> lex(string& program);
-string getTokenLabel(PQLToken& token);
+vector<PQLToken> pqlLex(string& program);
+string getPQLTokenLabel(PQLToken& token);
 void cleanString(string& program);
 
 

@@ -7,7 +7,7 @@
 
 using namespace std;
 
-enum class TokenType
+enum class SimpleTokenType
 {
     LEFT_PAREN,
     RIGHT_PAREN,
@@ -41,13 +41,13 @@ enum class TokenType
     PROCEDURE,
 };
 
-struct Token
+struct SimpleToken
 {
-    TokenType type;
+    SimpleTokenType type;
     string stringValue;
     int intValue = 0;
 };
 
-vector<Token> lex(string program);
-string getTokenLabel(Token token);
-void printTokens(vector<Token> tokens);
+vector<SimpleToken> simpleLex(string program);
+string getSimpleTokenLabel(SimpleToken token);
+void printSimpleTokens(vector<SimpleToken> tokens);

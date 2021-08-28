@@ -23,7 +23,7 @@ inline bool canBeFollowedByAsterisk(string& test) {
     return test == FOLLOWS || test == PARENT;
 }
 
-vector<PQLToken> lex(string& program) { // pass by ref
+vector<PQLToken> pqlLex(string& program) { // pass by ref
     cleanString(program);
     vector<PQLToken> tokens;
     char curr, lookahead;
@@ -174,7 +174,7 @@ vector<PQLToken> lex(string& program) { // pass by ref
     return tokens;
 }
 
-string getTokenLabel(PQLToken& token) {
+string getPQLTokenLabel(PQLToken& token) {
     switch (token.type)
     {
     case PQLTokenType::LEFT_PAREN:

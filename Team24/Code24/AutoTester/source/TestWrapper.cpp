@@ -4,6 +4,9 @@
 #include "SimpleParser.h" 
 #include "PKB.h"
 
+#include "PQLLexer.h"
+#include "PQLParser.h"
+
 using namespace std;
 
 // implementation code of WrapperFactory - do NOT modify the next 5 lines
@@ -33,12 +36,12 @@ void TestWrapper::parse(std::string filename) {
         program += currentLine;
     }
 
-    vector<Token> tokens = lex(program);
+    vector<SimpleToken> tokens = simpleLex(program);
 
     // for debugging
-    printTokens(tokens);
+    printSimpleTokens(tokens);
 
-    Program* root = parseProgram(tokens);
+    Program* root = parseSimpleProgram(tokens);
 
     if (root == NULL) {
         cout << "Failed to parse program!";
@@ -49,12 +52,21 @@ void TestWrapper::parse(std::string filename) {
     }
 
     // BUILD PKB HERE
+    cout << "Running PQL Tests" << endl;
+
+
+    cout << "End PQL Tests" << endl;
 }
 
 // method to evaluating a query
 void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
 // call your evaluator to evaluate the query here
   // ...code to evaluate query...
+
+    PQLParser p(pqlLex(query));
+    auto sel = p.parseSelectCl();
+    cout << "printing query:" << endl;
+    sel->printString();
 
   // store the answers to the query in the results list (it is initially empty)
   // each result must be a string.
