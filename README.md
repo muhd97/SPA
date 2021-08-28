@@ -27,8 +27,8 @@ No additional instructions required.
 Name | Mobile | Email | Development OS/Toolchain
 -:|:-:|:-|-|
 Koh Yi Da | 96744763 | kohyida1997@gmail.com | Windows 10/Visual Studio 2019
-Liow Jia Chen | 91234567 | jiachen@u.nus.edu | Windows 10/Visual Studio 2019
-Michelle Yong Kai Wen | 91234567 | michelle.yong@u.nus.edu | Windows 10/Visual Studio 2019
+Liow Jia Chen | 83234878 | jiachen@u.nus.edu | Windows 10/Visual Studio 2019
+Michelle Yong Kai Wen | 86661626 | michelle.yong@u.nus.edu | Windows 10/Visual Studio 2019
 Syed Muhammad Zain Alam | 84089025 | zain.sma.mz@gmail.com | Windows 10/Visual Studio 2019
-Vegi Manas | 91234567 | manasvegi@u.nus.edu | Windows 10/Visual Studio 2019
+Vegi Manas | 83539208 | manasvegi@u.nus.edu | Windows 10/Visual Studio 2019
 Nicholas Nge Jing Shou | 97890525 | nnjs1998@gmail.com | Windows 10/Visual Studio 2019
