@@ -24,24 +24,24 @@
     <ClCompile Include="..\source\SimpleLexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\AST.cpp">
+    <ClCompile Include="..\source\SimpleAST.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\source\PQLLexer.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>	
+    </ClCompile>
     <ClCompile Include="..\source\PQLParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\source\PQLParserRunner.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>	
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PKB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\AST.h">
+    <ClInclude Include="..\source\SimpleAST.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\SimpleParser.h">
@@ -55,6 +55,6 @@
     </ClInclude>
     <ClInclude Include="..\source\PQLParser.h">
       <Filter>Header Files</Filter>
-    </ClInclude>	
+    </ClInclude>
   </ItemGroup>
 </Project>

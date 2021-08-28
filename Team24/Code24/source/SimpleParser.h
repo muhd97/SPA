@@ -1,5 +1,5 @@
 #pragma once
 #include "SimpleLexer.h"
-#include "AST.h"
+#include "SimpleAST.h"
 
 Program* parseProgram(vector<Token> tokens);

@@ -1,4 +1,4 @@
-#include "AST.h"
+#include "SimpleAST.h"
 
 
 string indent(int level) {

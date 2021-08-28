@@ -1,6 +1,6 @@
 #include "SimpleParser.h"
 #include "SimpleLexer.h"
-#include "AST.h"
+#include "SimpleAST.h"
 
 using namespace std;
 

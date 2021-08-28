@@ -1,5 +1,5 @@
 #include "TestWrapper.h"
-#include "AST.h"
+#include "SimpleAST.h"
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 
 #include "PKB.h"
