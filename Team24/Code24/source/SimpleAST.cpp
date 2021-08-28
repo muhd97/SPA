@@ -52,21 +52,22 @@ string CombinationExpression::format(int level) {
     if (lhs == NULL) {
         return "ERROR: LEFT SHOULD NOT BE NULL";
     }
-    return getBopLabel(op) + "[" + lhs->format(level) + ", " + rhs->format(level) + "]";
+    return "(" + lhs->format(level) + " " + getBopLabel(op) + " " + rhs->format(level) + ")";
 }
 
 string BooleanExpression::format(int level) {
-    return (op == BooleanOperator::AND ? "&&[" : "||[")
-        + lhs->format(level) + ", "
-        + rhs->format(level) + "]";
+    return "(" 
+        + lhs->format(level)
+        + (op == BooleanOperator::AND ? " && " : " || ") 
+        + rhs->format(level) + ")";
 }
 
 string NotExpression::format(int level) {
-    return "!(" + expr->format(level) + ")";
+    return "(!" + expr->format(level) + ")";
 }
 
 string RelationalExpression::format(int level) {
-    return getRopLabel(op) + "[" + lhs->format(level) + ", " + rhs->format(level) + "]";
+    return "(" + lhs->format(level) + " " + getRopLabel(op) + " " + rhs->format(level) + ")";
 }
 
 string Statement::getStatementLabel() {
