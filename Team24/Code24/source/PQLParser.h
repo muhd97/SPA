@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PQLLexer.h"
+#include "SimpleAST.h"
 #include <vector>
 #include <iostream>
 
@@ -378,11 +379,74 @@ public:
     }
 };
 
+class ExpressionSpec {
+public:
+    bool isAnything;
+    bool isPartialMatch;
+    // TODO (@jiachen) refactor to smart pointer
+    Expression* expression;
+
+    ExpressionSpec(bool isAnything, bool isPartialMatch, Expression* expression)
+    {
+        this->isAnything = isAnything;
+        this->isPartialMatch = isPartialMatch;
+        this->expression = expression;
+    }
+
+    ~ExpressionSpec() {
+        if (DESTRUCTOR_MESSAGE_ENABLED) {
+            cout << "Deleted: ";
+            printString();
+            putchar('\n');
+        }
+
+    }
+
+    void printString() {
+        cout << "ExpressionSpec (";
+        cout << "isAnything(" << isAnything << ") | ";
+        cout << "isPartialMatchs(" << isPartialMatch << ") | ";
+        if (expression != NULL) {
+            cout << "expression: " + expression->format(0);
+        }
+        cout << ")";
+    }
+
+};
+class PatternCl {
+public:
+    string synonym;
+    shared_ptr<EntRef> entRef;
+    shared_ptr<ExpressionSpec> exprSpec;
+
+    PatternCl(string synonym, shared_ptr<EntRef> entRef, shared_ptr<ExpressionSpec> expression)
+        : synonym(move(synonym)), entRef(move(entRef)), exprSpec(move(expression)) {
+
+    }
+
+    ~PatternCl() {
+        if (DESTRUCTOR_MESSAGE_ENABLED) {
+            cout << "Deleted: ";
+            printString();
+            putchar('\n');
+        }
+
+    }
+
+    void printString() {
+        cout << "PatternCl (";
+        cout << "TargetSynonym(" << synonym << ") | ";
+        cout << "entRef(" << entRef->getEntRefTypeName() << ") | ";
+        exprSpec->printString();
+        cout << ")";
+    }
+};
+
 class SelectCl {
 public:
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
-    //vector<SPtr<PatternCl> patternClauses;
+    vector<shared_ptr<PatternCl>> patternClauses;
     string synonym;
 
     SelectCl(string syn, vector<shared_ptr<Declaration>> decl, vector<shared_ptr<SuchThatCl>> stht)
@@ -450,6 +514,8 @@ public:
     shared_ptr<StmtRef> parseStmtRef();
     shared_ptr<EntRef> parseEntRef();
     shared_ptr<UsesS> parseUses();
+    shared_ptr<PatternCl> parsePatternCl();
+    shared_ptr<ExpressionSpec> parseExpressionSpec();
     shared_ptr<SelectCl> parseSelectCl();
 };
 

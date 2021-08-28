@@ -3,9 +3,9 @@
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 
 #include "PKB.h"
-
 #include "PQLLexer.h"
 #include "PQLParser.h"
+#include "PQLParserRunner.cpp"
 
 using namespace std;
 

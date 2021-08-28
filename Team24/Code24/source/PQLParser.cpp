@@ -249,6 +249,70 @@ SPtr<RelRef> PQLParser::parseRelRef() // todo
     }
 }
 
+SPtr<ExpressionSpec> PQLParser::parseExpressionSpec()
+{
+    if (peek().type == PQLTokenType::UNDERSCORE) {
+        eat(PQLTokenType::UNDERSCORE);
+
+        if (peek().type == PQLTokenType::QUOTE_MARK) {
+            eat(PQLTokenType::QUOTE_MARK);
+            
+            // TODO: Expose simple expression parse function
+            // Expression* expr = parseExpression();
+            // hack for now
+            while (peek().type != PQLTokenType::QUOTE_MARK) {
+                advance();
+            }
+            Expression* expr = nullptr;
+
+            eat(PQLTokenType::QUOTE_MARK);
+            eat(PQLTokenType::UNDERSCORE);
+            return make_shared<ExpressionSpec>(false, true, expr);
+        }
+        else {
+            return make_shared<ExpressionSpec>(true, false, nullptr);
+        }
+        
+    }
+    else if (peek().type == PQLTokenType::QUOTE_MARK) {
+        eat(PQLTokenType::QUOTE_MARK);
+        // TODO: Expose simple expression parse function
+        // Expression* expr = parseExpression()
+        // hack for now
+        while (peek().type != PQLTokenType::QUOTE_MARK) {
+            advance();
+        }
+        Expression* expr = nullptr;
+
+        eat(PQLTokenType::QUOTE_MARK);
+        eat(PQLTokenType::UNDERSCORE);
+        return make_shared<ExpressionSpec>(false, false, expr);
+    }
+    else {
+        // TODO: Handle Error. 
+    }
+    return make_shared<ExpressionSpec>(false, false, nullptr);
+}
+
+SPtr<PatternCl> PQLParser::parsePatternCl()
+{
+    eat(PQLTokenType::PATTERN);
+    auto syn = parseSynonym();
+
+    // TODO (@jiachen247) Check syn is of type assign
+
+    eat(PQLTokenType::LEFT_PAREN);
+
+    auto entRef = parseEntRef();
+    eat(PQLTokenType::COMMA);
+    string rawExpression;
+    auto exprSpec = parseExpressionSpec();
+
+    eat(PQLTokenType::RIGHT_PAREN);
+    return make_shared<PatternCl>("x", nullptr, nullptr);
+
+}
+
 inline bool tokenIsDesignEntity(PQLTokenType tk) {
     return tk == PQLTokenType::STMT
         || tk == PQLTokenType::READ
@@ -266,7 +330,7 @@ SPtr<SelectCl> PQLParser::parseSelectCl()
 {
     vector<SPtr<Declaration>> declarations;
     vector<SPtr<SuchThatCl>> suchThatClauses;
-    // vector<SPtr<PatternCl>> patternClauses;
+    vector<SPtr<PatternCl>> patternClauses;
     string synonym;
     while (tokenIsDesignEntity(peek().type)) {
         declarations.push_back(parseDeclaration());
@@ -275,9 +339,24 @@ SPtr<SelectCl> PQLParser::parseSelectCl()
     eat(PQLTokenType::SELECT);
     synonym = parseSynonym();
 
-    if (!tokensAreEmpty()) {
-        if (peek().type == PQLTokenType::SUCH_THAT) {
+    while (!tokensAreEmpty()) {
+        if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::SUCH_THAT) {
+            if (suchThatClauses.size() == 0) {
+                cout << "Duplicate such that clauses are not allowed." << endl;
+                break;
+            }
             suchThatClauses.push_back(parseSuchThat());
+        }
+        else if (peek().type == PQLTokenType::PATTERN) {
+            if (patternClauses.size() == 0) {
+                cout << "Duplicate pattern clauses are not allowed." << endl;
+                break;
+            }
+            patternClauses.push_back(parsePatternCl());
+        }
+        else {
+            cout << "Unknown token: " + getPQLTokenLabel(peek()) << endl;
+            break;
         }
     }
 

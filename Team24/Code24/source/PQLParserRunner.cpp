@@ -187,9 +187,9 @@ void runParserSelectCases() {
     "variable v;\nSelect v such that Uses(14, v)",
     "assign a; while w;\nSelect a such that Parent* (w,a)",
     "stmt s;\nSelect s such that Parent (s,7)",
-        //"assign a;\nSelect a pattern a (_, \"v + x * y + z * t\")",
-        //"assign a;\nSelect a pattern a (_, _\"x*y\"_)",
-        //"assign a;\nSelect a pattern a (_, \"follows*parent\")",
+    "assign a;\nSelect a pattern a (_, \"v + x * y + z * t\")",
+    "assign a;\nSelect a pattern a (_, _\"x*y\"_)",
+    "assign a;\nSelect a pattern a (_, \"follows*parent\")",
     "assign a, b, c, test;      variable v;\nSelect v such that Uses(14, v)" // multiple assignments
     };
 
