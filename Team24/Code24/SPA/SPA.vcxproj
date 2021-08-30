@@ -12,18 +12,27 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\source\AST.cpp" />
+    <ClCompile Include="..\source\PKB\Group.cpp" />
+    <ClCompile Include="..\source\PKB\PKB.cpp" />
+    <ClCompile Include="..\source\PKB\PQLEvaluator.cpp" />
+    <ClCompile Include="..\source\PKB\Statement.cpp" />
+    <ClCompile Include="..\source\PKB\Variable.cpp" />
     <ClCompile Include="..\source\SimpleLexer.cpp" />
     <ClCompile Include="..\source\SimpleParser.cpp" />
-    <ClCompile Include="..\source\PKB.cpp" />
-	<ClCompile Include="..\source\PQLLexer.cpp" />
+    <ClCompile Include="..\source\PQLLexer.cpp" />
     <ClCompile Include="..\source\PQLParser.cpp" />
     <ClCompile Include="..\source\PQLParserRunner.cpp" />
   </ItemGroup>
   <ItemGroup>
-  	<ClInclude Include="..\source\PQLLexer.h" />
+    <ClInclude Include="..\source\PKB\Group.h" />
+    <ClInclude Include="..\source\PKB\PKB.h" />
+    <ClInclude Include="..\source\PKB\PQLEvaluator.h" />
+    <ClInclude Include="..\source\PKB\Statement.h" />
+    <ClInclude Include="..\source\PKB\Synonym.h" />
+    <ClInclude Include="..\source\PKB\Variable.h" />
+    <ClInclude Include="..\source\PQLLexer.h" />
     <ClInclude Include="..\source\PQLParser.h" />
     <ClInclude Include="..\source\AST.h" />
-    <ClInclude Include="..\source\PKB.h" />
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
   </ItemGroup>
