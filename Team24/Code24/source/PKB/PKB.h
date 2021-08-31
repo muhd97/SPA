@@ -1,44 +1,63 @@
 #pragma once
 using namespace std;
+#include <cassert>
 
 class PKB {
 public:
 	using SharedPtr = std::shared_ptr<PKB>;
 
 	enum class Relation {
+		//Parent
 		Parent = 0,
-		ParentT = 1,
-		Follow = 2,
-		FollowT = 3,
-		Uses = 4,
-		Modifies = 5
+		Child = 1,
+		//ParentT
+		ParentT = 2,
+		ChildT = 3,
+		//Follow
+		Follow = 4,
+		//FollowT
+		FollowT = 5,
+		//Uses
+		Uses = 6,
+		//Modifies
+		Modifies = 7
 	};
 
-	vector<Statement::SharedPtr> mStatements;
-	
+	// for all statements, use Synonym::_, where position corresponds to statement index
+	map<Synonym, vector<Statement::SharedPtr>> mStatements;
 
 	// statement number, starting from index 1
 	Statement::SharedPtr getStatement(int stmtNumber) {
-		if (stmtNumber > mStatements.size()) {
+		if (stmtNumber > mStatements[Synonym::_].size()) {
 			throw std::invalid_argument("Requested statement number higher than max number of statements");
 		}
-		return mStatements[stmtNumber];
+		Statement::SharedPtr s = mStatements[stmtNumber];
+		assert(s->getIndex() == stmtNumber);
+		return s;
 	}
 
-	bool getCached(Relation rel, Synonym a, Synonym b, vector<int> res) {
+	// note: position of statement in vector does NOT correspond to statement index except for Synonym::_
+	vector<Statement::SharedPtr> getStmtsOfSynonym(Synonym s) {
+		return mStatements[s];
+	}
+
+	bool getCached(Relation rel, Synonym a, Synonym b, vector<int> &res) {
 		try {
 			//todo @nicholas: check if this is desired behavior
 			res = cache.at(rel).at(a).at(b);
 			return true;
 		}
 		catch (std::out_of_range) {
+			// result does not exist in the map, it is not cached
 			return false;
 		}
 	}
 
-	void insertintoCache(Relation rel, Synonym a, Synonym b, vector<int> res) {
+	void insertintoCache(Relation rel, Synonym a, Synonym b, vector<int> &res) {
 		cache[rel][a][b] = res;
 	}
+
+
 
 
 
@@ -48,4 +67,5 @@ protected:
 	map<Relation, 
 		map<Synonym, 
 		map<Synonym, vector<int>>>> cache;
+
 };

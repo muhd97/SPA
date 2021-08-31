@@ -10,11 +10,12 @@ using namespace std;
 
 class PQLEvaluator {
 public:
+	using SharedPtr = std::shared_ptr<PQLEvaluator>;
 
-	PKB mpPKB;
+	PKB::SharedPtr mpPKB;
 
-	PQLEvaluator(PKB pkb) {
-		
+	SharedPtr create(PKB::SharedPtr pPKB) {
+		return SharedPtr(new PQLEvaluator(pPKB));
 	}
 
 	// Parent
@@ -76,5 +77,42 @@ public:
 
 	// Pattern
 
+protected:
+	PQLEvaluator(PKB::SharedPtr pPKB) {
+		mpPKB = pPKB;
+	}
 
+
+	// we want to return only vector<int>, not vector<Statement::SharedPtr>
+	vector<int> stmtToInt(vector<Statement::SharedPtr> &stmts) {
+		vector<int> res;
+		for (auto& stmt : stmts) {
+			res.emplace_back(stmt->getIndex());
+		}
+		return res;
+	}
+
+	bool isContainerType(Synonym s) {
+		return s == Synonym::If ||
+			s == Synonym::While ||
+			s == Synonym::Procedure ||
+			s == Synonym::_;
+	}
+
+	void addParentStmts(vector<Statement::SharedPtr> &stmts) {
+		// not sure if its faster, but we dont want to iterate over all types, just If, While, Procedure(the container types)
+		vector<Statement::SharedPtr> ifStmts = mpPKB->getStmtsOfSynonym(Synonym::If);
+		vector<Statement::SharedPtr> whileStmts = mpPKB->getStmtsOfSynonym(Synonym::While);
+		vector<Statement::SharedPtr> procedures = mpPKB->getStmtsOfSynonym(Synonym::Procedure);
+		stmts.insert(stmts.end(), ifStmts.begin(), ifStmts.end());
+		stmts.insert(stmts.end(), whileStmts.begin(), whileStmts.end());
+		stmts.insert(stmts.end(), procedures.begin(), procedures.end());
+	}
+
+	// helper function for ParentT (getParentsT)
+	void confirmPending(vector<Statement::SharedPtr> &pendingList, vector<int> &res, int &counter);
+	void discardPending(vector<Statement::SharedPtr>& pendingList, int& counter);
+	bool checkForChildren(Group::SharedPtr grp, Synonym parentType, Synonym childType, vector<Statement::SharedPtr>& pendingList, int &counter);
+
+	//helper function for ParentT (getChildrenT)
 };

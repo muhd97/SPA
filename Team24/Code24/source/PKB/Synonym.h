@@ -1,5 +1,5 @@
 
-enum Synonym {
+enum class Synonym {
 	Read = 0,
 	Print = 1,
 	Assign = 2,

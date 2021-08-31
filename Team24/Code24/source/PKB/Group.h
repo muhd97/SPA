@@ -3,6 +3,7 @@
 #include <memory>
 #include <iostream>
 #include "Synonym.h"
+#include <map>
 
 
 // sets of statement for each scope
@@ -21,12 +22,12 @@ public:
 	map<Synonym, vector<Statement::SharedPtr>> mMembers; // members, mapped by synonym
 	
 	// variables
-	vector<Variable::SharedPtr> uses;
-	vector<Variable::SharedPtr> modifies;
+	vector<Variable::SharedPtr> mUses;
+	vector<Variable::SharedPtr> mModifies;
 
 	// groups
-	Group::SharedPtr parentGroup;
-	vector<Group::SharedPtr> childGroup;
+	Group::SharedPtr mParentGroup;
+	vector<Group::SharedPtr> mChildGroups;
 	
 	Statement::SharedPtr getOwner() {
 		return mOwner;
@@ -35,6 +36,10 @@ public:
 	// get members of particular synonym. to get all members, use Synonym::_
 	vector<Statement::SharedPtr> getMembers(Synonym s) {
 		return mMembers[s];
+	}
+
+	vector<Group::SharedPtr> getChildGroups() {
+		return mChildGroups;
 	}
 
 
