@@ -282,67 +282,173 @@ vector<int> PQLEvaluator::getBefore(Synonym beforeType, int afterIndex)
 	Statement::SharedPtr stmtBefore = mpPKB->getStatement(afterIndex - 1);
 
 	vector<int> res;
-	// pass the type check first
+	// if pass the type check
 	if (beforeType == Synonym::_ || stmtBefore->getType() == beforeType) {
-		// pass the same nesting level check
+		// and pass the same nesting level check
 		if (stmt->getGroup() == stmtBefore->getGroup()) {
-
+			res.emplace_back(stmtBefore->getIndex());
 		}
 	}
 	return res;
 }
 
-vector<int> PQLEvaluator::getBefore(Synonym before, Synonym after)
+vector<int> PQLEvaluator::getBefore(Synonym beforeType, Synonym afterType)
 {
-	return vector<int>();
+	vector<int> res;
+	// check if result is cached, if so return results
+	if (mpPKB->getCached(PKB::Relation::Before, beforeType, afterType, res)) {
+		return res;
+	}
+
+	// get results manually
+	vector<Statement::SharedPtr> stmts = mpPKB->getStmtsOfSynonym(afterType);
+	for (auto& stmt : stmts) {
+		Statement::SharedPtr stmtBefore = mpPKB->getStatement(stmt->getIndex() - 1);
+		// if pass the type check
+		if (beforeType == Synonym::_ || stmtBefore->getType() == beforeType) {
+			// and pass the same nesting level check
+			if (stmt->getGroup() == stmtBefore->getGroup()) {
+				res.emplace_back(stmtBefore->getIndex());
+			}
+		}
+	}
+
+	//insert result into cache
+	mpPKB->insertintoCache(PKB::Relation::Before, beforeType, afterType, res);
+	return res;
 }
 
-vector<int> PQLEvaluator::getBefore(Synonym after)
+vector<int> PQLEvaluator::getBefore(Synonym afterType)
 {
-	return vector<int>();
+	return getBefore(Synonym::_, afterType);
 }
 
-vector<int> PQLEvaluator::getAfter(Synonym after, int before)
+vector<int> PQLEvaluator::getAfter(Synonym afterType, int beforeIndex)
 {
-	return vector<int>();
-}
-
-vector<int> PQLEvaluator::getAfter(Synonym after, Synonym before)
-{
-	return vector<int>();
-}
-
-vector<int> PQLEvaluator::getAfter(Synonym before)
-{
-	return vector<int>();
-}
-
-vector<int> PQLEvaluator::getBeforeT(Synonym before, int after)
-{
-	Statement::SharedPtr stmt = mpPKB->getStatement(afterIndex);
-	Group::SharedPtr grp = stmt->getGroup();
-	vector<Statement::SharedPtr> grpMembers = grp->getMembers(Synonym::_);
+	Statement::SharedPtr stmt = mpPKB->getStatement(beforeIndex);
+	Statement::SharedPtr stmtAfter = mpPKB->getStatement(beforeIndex + 1);
 
 	vector<int> res;
-	for (auto& member : grpMembers) {
-
+	// if pass the type check
+	if (afterType == Synonym::_ || stmtAfter->getType() == afterType) {
+		// and pass the same nesting level check
+		if (stmt->getGroup() == stmtAfter->getGroup()) {
+			res.emplace_back(stmtAfter->getIndex());
+		}
 	}
 	return res;
 }
 
-vector<int> PQLEvaluator::getBeforeT(Synonym before, Synonym after)
+vector<int> PQLEvaluator::getAfter(Synonym beforeType, Synonym afterType)
 {
-	return vector<int>();
+	vector<int> res;
+	// check if result is cached, if so return results
+	if (mpPKB->getCached(PKB::Relation::After, beforeType, afterType, res)) {
+		return res;
+	}
+
+	// get results manually
+	// todo @nicholas: add optimization to go through shorter list of synonym (since both ways cost the same)
+	vector<Statement::SharedPtr> stmts = mpPKB->getStmtsOfSynonym(beforeType);
+	for (auto& stmt : stmts) {
+		Statement::SharedPtr stmtAfter = mpPKB->getStatement(stmt->getIndex() + 1);
+		// if pass the type check
+		if (afterType == Synonym::_ || stmtAfter->getType() == afterType) {
+			// and pass the same nesting level check
+			if (stmt->getGroup() == stmtAfter->getGroup()) {
+				res.emplace_back(stmtAfter->getIndex());
+			}
+		}
+	}
+
+	//insert result into cache
+	mpPKB->insertintoCache(PKB::Relation::After, beforeType, afterType, res);
+	return res;
 }
 
-vector<int> PQLEvaluator::getBeforeT(Synonym after)
+vector<int> PQLEvaluator::getAfter(Synonym beforeType)
 {
-	return vector<int>();
+	return getAfter(Synonym::_, beforeType);
 }
 
-vector<int> PQLEvaluator::getAfterT(Synonym after, int before)
+vector<int> PQLEvaluator::getBeforeT(Synonym beforeType, int afterIndex)
 {
-	return vector<int>();
+	Statement::SharedPtr stmt = mpPKB->getStatement(afterIndex);
+	Group::SharedPtr grp = stmt->getGroup();
+	vector<Statement::SharedPtr> grpMembers = grp->getMembers(beforeType);
+
+	vector<int> res;
+	// assume ascending order of line numbers
+	for (auto& member : grpMembers) {
+		// we've seen past ourself, we can stop now (we could search past since we are searching specific type only)
+		if (member->getIndex() >= afterIndex) {
+			return res;
+		}
+		res.emplace_back(member->getIndex());
+	}
+}
+
+vector<int> PQLEvaluator::getBeforeT(Synonym beforeType, Synonym afterType)
+{
+	vector<int> res;
+
+	// if before type is a container, it can never be in the same nesting level
+	if (beforeType == Synonym::If 
+		|| beforeType == Synonym::While 
+		|| beforeType == Synonym::Procedure 
+		|| afterType == Synonym::Procedure) {
+		return res;
+	}
+
+	// check if result is cached, if so return results
+	if (mpPKB->getCached(PKB::Relation::BeforeT, beforeType, afterType, res)) {
+		return res;
+	}
+
+	// get results manually
+	vector<Statement::SharedPtr> stmts = mpPKB->getStmtsOfSynonym(afterType);
+	int lastSeen; // we have this to ensure we dont repeat 
+	for (auto& stmt : stmts) {
+		Group::SharedPtr grp = stmt->getGroup();
+		vector<Statement::SharedPtr> grpMembers = grp->getMembers(beforeType);
+		for (auto& member : grpMembers) {
+			// we've seen past ourself, we can stop now
+			if (member->getIndex() >= stmt->getIndex()) {
+				return res;
+			}
+			// if we havent seen this before, add it to res (again, possible because ascending line numbers)
+			else if (member->getIndex() > lastSeen) {
+				res.emplace_back(member->getIndex());
+				lastSeen = member->getIndex();
+			}
+		}
+	}
+
+	//insert result into cache
+	mpPKB->insertintoCache(PKB::Relation::BeforeT, beforeType, afterType, res);
+	return res;
+}
+
+vector<int> PQLEvaluator::getBeforeT(Synonym afterType)
+{
+	return getBeforeT(Synonym::_, afterType);
+}
+
+vector<int> PQLEvaluator::getAfterT(Synonym afterType, int beforeIndex)
+{
+	//Statement::SharedPtr stmt = mpPKB->getStatement(beforeIndex);
+	//Group::SharedPtr grp = stmt->getGroup();
+	//vector<Statement::SharedPtr> grpMembers = grp->getMembers(afterType);
+
+	//vector<int> res;
+	//// assume ascending order of line numbers
+	//for (auto& member : grpMembers) {
+	//	// we've seen past ourself, we can stop now (we could search past since we are searching specific type only)
+	//	if (member->getIndex() >= afterIndex) {
+	//		return res;
+	//	}
+	//	res.emplace_back(member->getIndex());
+	//}
 }
 
 vector<int> PQLEvaluator::getAfterT(Synonym after, Synonym before)

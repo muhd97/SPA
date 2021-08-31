@@ -14,13 +14,15 @@ public:
 		ParentT = 2,
 		ChildT = 3,
 		//Follow
-		Follow = 4,
+		Before = 4,
+		After = 5,
 		//FollowT
-		FollowT = 5,
+		BeforeT = 6,
+		AfterT = 7,
 		//Uses
-		Uses = 6,
+		Uses = 8,
 		//Modifies
-		Modifies = 7
+		Modifies = 9
 	};
 
 	// for all statements, use Synonym::_, where position corresponds to statement index

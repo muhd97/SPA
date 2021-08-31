@@ -44,7 +44,7 @@ public:
 	vector<int> getBefore(Synonym after);
 
 	vector<int> getAfter(Synonym after, int before);
-	vector<int> getAfter(Synonym after, Synonym before);
+	vector<int> getAfter(Synonym before, Synonym after);
 	vector<int> getAfter(Synonym before);
 
 	// Follow*
