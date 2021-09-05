@@ -1,5 +1,6 @@
+#pragma once
 
-enum class Synonym {
+enum class PKBDesignEntity {
 	Read = 0,
 	Print = 1,
 	Assign = 2,

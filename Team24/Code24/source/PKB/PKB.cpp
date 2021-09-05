@@ -2,6 +2,6 @@
 #include <memory>
 #include <iostream>
 
-#include "Group.h"
-#include "Statement.h"
+#include "PKBGroup.h"
+#include "PKBStatement.h"
 

@@ -2,21 +2,20 @@
 
 
 
-
-vector<int> PQLEvaluator::getParents(Synonym parentType, int childIndex)
+vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
 {
-	Statement::SharedPtr stmt = mpPKB->getStatement(childIndex);
-	Group::SharedPtr grp = stmt->getGroup();
-	Statement::SharedPtr parent = grp->getOwner();
+	PKBStatement::SharedPtr stmt = mpPKB->getStatement(childIndex);
+	PKBGroup::SharedPtr grp = stmt->getGroup();
+	PKBStatement::SharedPtr parent = mpPKB->getStatement(grp->getOwner());
 	
 	vector<int> res;
-	if (parentType == Synonym::_ || parentType == parent->getType()) {
+	if (parentType == PKBDesignEntity::_ || parentType == parent->getType()) {
 		res.emplace_back(parent->getIndex());
 	}
 	return res;
 }
 
-vector<int> PQLEvaluator::getParents(Synonym parentType, Synonym childType)
+vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
 	vector<int> res;
 
@@ -31,17 +30,17 @@ vector<int> PQLEvaluator::getParents(Synonym parentType, Synonym childType)
 	}
 
 	// if not cached, we find the result manually and insert it into the cache
-	vector<Statement::SharedPtr> parentStmts; 
-	if (parentType == Synonym::_) {
+	vector<PKBStatement::SharedPtr> parentStmts; 
+	if (parentType == PKBDesignEntity::_) {
 		addParentStmts(parentStmts);
 	}
 	else {
-		parentStmts = mpPKB->getStmtsOfSynonym(parentType);
+		parentStmts = mpPKB->getStatements(parentType);
 	}
 	
 	for (auto& stmt : parentStmts) {
-		Group::SharedPtr grp = stmt->getContainerGroup();
-		// if this statement's container group contains at least one child of required type, add stmt to our results
+		PKBGroup::SharedPtr grp = stmt->getContainerGroup();
+		// if this afterStatement's container group contains at least one child of required type, add afterStatement to our results
 		if (!grp->getMembers(childType).empty()) {
 			res.emplace_back(stmt->getIndex());
 		}
@@ -52,28 +51,27 @@ vector<int> PQLEvaluator::getParents(Synonym parentType, Synonym childType)
 	return res;
 }
 
-vector<int> PQLEvaluator::getParents(Synonym childType)
+vector<int> PQLEvaluator::getParents(PKBDesignEntity childType)
 {
-	return getParents(Synonym::_, childType);
+	return getParents(PKBDesignEntity::_, childType);
 }
 
-vector<int> PQLEvaluator::getChildren(Synonym childType, int parentIndex)
+vector<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex)
 {
 	vector<int> res;
-	Statement::SharedPtr stmt = mpPKB->getStatement(parentIndex);
+	PKBStatement::SharedPtr stmt = mpPKB->getStatement(parentIndex);
 	if (!isContainerType(stmt->getType())) {
 		return res;
 	}
 	else {
-		Group::SharedPtr grp = stmt->getContainerGroup();
-		vector<Statement::SharedPtr> stmts = grp->getMembers(childType);
-		res = stmtToInt(stmts);
+		PKBGroup::SharedPtr grp = stmt->getContainerGroup();
+		res = grp->getMembers(childType);
 	}
 	
 	return res;
 }
 
-vector<int> PQLEvaluator::getChildren(Synonym parentType, Synonym childType)
+vector<int> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
 	vector<int> res;
 
@@ -88,18 +86,18 @@ vector<int> PQLEvaluator::getChildren(Synonym parentType, Synonym childType)
 	}
 
 	// if not cached, we find the result manually and insert it into the cache
-	vector<Statement::SharedPtr> parentStmts;
-	if (parentType == Synonym::_) {
+	vector<PKBStatement::SharedPtr> parentStmts;
+	if (parentType == PKBDesignEntity::_) {
 		addParentStmts(parentStmts);
 	}
 	else {
-		parentStmts = mpPKB->getStmtsOfSynonym(parentType);
+		parentStmts = mpPKB->getStatements(parentType);
 	}
 
 	for (auto& stmt : parentStmts) {
-		Group::SharedPtr grp = stmt->getContainerGroup();
-		// if this statement's container group contains at least one child of required type, add stmt to our results
-		vector<int> members = stmtToInt(grp->getMembers(childType));
+		PKBGroup::SharedPtr grp = stmt->getContainerGroup();
+		// if this afterStatement's container group contains at least one child of required type, add afterStatement to our results
+		vector<int> members = grp->getMembers(childType);
 		res.insert(res.end(), members.begin(), members.end());
 	}
 
@@ -108,12 +106,12 @@ vector<int> PQLEvaluator::getChildren(Synonym parentType, Synonym childType)
 	return res;
 }
 
-vector<int> PQLEvaluator::getChildren(Synonym parentType)
+vector<int> PQLEvaluator::getChildren(PKBDesignEntity parentType)
 {
-	return getChildren(Synonym::_, parentType);
+	return getChildren(PKBDesignEntity::_, parentType);
 }
 
-vector<int> PQLEvaluator::getParentsT(Synonym parentType, int childIndex)
+vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex)
 {
 	vector<int> res;
 
@@ -122,21 +120,23 @@ vector<int> PQLEvaluator::getParentsT(Synonym parentType, int childIndex)
 		return res;
 	}
 
-	Statement::SharedPtr stmt = mpPKB->getStatement(childIndex);
-	Synonym curParentType = parentType;
+	PKBStatement::SharedPtr currentStatement = mpPKB->getStatement(childIndex);
 	do {
 		// recurse up the parent tree
-		stmt = stmt->getGroup()->getOwner();
-		if (parentType == stmt->getType()) {
-			res.emplace_back(stmt->getIndex());
+		// replace current afterStatement with parent afterStatement
+		int parentStatementIndex = currentStatement->getGroup()->getOwner(); 
+		currentStatement = mpPKB->getStatement(parentStatementIndex);
+		// if current afterStatement type is the desired type, add it to the results list
+		if (currentStatement->getType() == parentType) {
+			res.emplace_back(parentStatementIndex);
 		}
-		curParentType = stmt->getType();
-	} while (curParentType != Synonym::Procedure);
-	
+	} while (currentStatement->getType() != PKBDesignEntity::Procedure); 
+	// we recurse until our 'afterStatement' is actually a Procedure, then we cant go further up no more
+
 	return res;
 }
 
-vector<int> PQLEvaluator::getParentsT(Synonym parentType, Synonym childType)
+vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
 	vector<int> res;
 
@@ -150,36 +150,37 @@ vector<int> PQLEvaluator::getParentsT(Synonym parentType, Synonym childType)
 		return res;
 	}
 
-	// if parentType is Synonym::_ call the other function instead (temporarily doing this because im scared of bugs)
-	if (parentType == Synonym::_) {
+	// if parentType is PKBDesignEntity::_ call the other function instead (temporarily doing this because im scared of bugs)
+	if (parentType == PKBDesignEntity::_) {
 		return getParentsT(childType);
 	}
 
 	// if not cached, we find the result manually and insert it into the cache
-	vector<Statement::SharedPtr> parentStmts;
-	if (parentType == Synonym::_) {
+	vector<PKBStatement::SharedPtr> parentStmts;
+	if (parentType == PKBDesignEntity::_) {
 		addParentStmts(parentStmts);
 	}
 	else {
-		parentStmts = mpPKB->getStmtsOfSynonym(parentType);
+		parentStmts = mpPKB->getStatements(parentType);
 	}
 
 	// incoming hard and painful and expensive recursive section
-	// relies on assumption that stmts are sorted in ascending line number
-	vector<Statement::SharedPtr> pendingList;
+	// relies on assumption that afterStatements are sorted in ascending line number
+	// todo @nicholas just realised this might not work with PKBDesignEntity::_ because ascending line number assumption may not hold
+	vector<int> pendingList;
 	int counter = 0;
-	while (counter < parentStmts.size()) {
-		Statement::SharedPtr cur = parentStmts[counter];
-		// i still dont know how emplace/push back works, emplace_back might cause a bug when elements in pendingList are destroyed??
-		pendingList.push_back(cur);
-		Group::SharedPtr grp = cur->getContainerGroup();
+	while (counter < (int)parentStmts.size()) {
+		PKBStatement::SharedPtr cur = parentStmts[counter];
+		// afterStatement still dont know how emplace/push back works, emplace_back might cause a bug when elements in pendingList are destroyed??
+		pendingList.push_back(cur->getIndex());
+		PKBGroup::SharedPtr grp = cur->getContainerGroup();
 
 		if (checkForChildren(grp, parentType, childType, pendingList, counter)) {
 			// only here in the root loop do we ever confirm pending, the nested recursive layer only adds to the pendingList
 			confirmPending(pendingList, res, counter);
 		}
 		else {
-			// none of the bloodline have the desired childType, ParentT does not hold for this statement
+			// none of the bloodline have the desired childType, ParentT does not hold for this afterStatement
 			discardPending(pendingList, counter);
 		}
 	}
@@ -189,37 +190,42 @@ vector<int> PQLEvaluator::getParentsT(Synonym parentType, Synonym childType)
 	return res;
 }
 
-void PQLEvaluator::confirmPending(vector<Statement::SharedPtr> &pendingList, vector<int> &res, int &counter) {
-		vector<int> toAdd = stmtToInt(pendingList);
-		res.insert(res.end(), toAdd.begin(), toAdd.end());
+void PQLEvaluator::confirmPending(vector<int> &pendingList, vector<int> &res, int &counter) {
+		res.insert(res.end(), pendingList.begin(), pendingList.end());
 		// move counter up by the number of elements that were in pendingList, this helps us prevent repeats
 		// without using set or some sort of expensive union
 		counter += pendingList.size();
 		pendingList.clear();
 }
 
-void PQLEvaluator::discardPending(vector<Statement::SharedPtr>& pendingList, int& counter) {
+void PQLEvaluator::discardPending(vector<int>& pendingList, int& counter) {
 	// discards the last element of pendingList, moves counter up by 1
 	counter += 1;
 	pendingList.pop_back();
 }
 
 // todo @nicholas: this function confirm will have bugs, dont need to say
-bool PQLEvaluator::checkForChildren(Group::SharedPtr grp, Synonym parentType, Synonym childType, vector<Statement::SharedPtr> &pendingList, int &counter) {
+bool PQLEvaluator::checkForChildren(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, vector<int> &pendingList, int &counter) {
 	// if we have at least one child that is the desired childType
 	if (!grp->getMembers(childType).empty()) {
 		return true;
 	}
-	for (Group::SharedPtr &g : grp->getChildGroups()) {
+	for (PKBGroup::SharedPtr &childGroup : grp->getChildGroups()) {
+		// find childGroupOwner of child group
+		PKBStatement::SharedPtr childGroupOwner = mpPKB->getStatement(childGroup->getOwner());
+
 		// if we found another child group that is parentType, add it to pendingList so we dont repeat it (it is surely next in line due to ascending line order assumption)
-		if (g->getOwner()->getType() == parentType) {
-			pendingList.push_back(g->getOwner());
+		if (childGroupOwner->getType() == parentType) {
+			pendingList.push_back(childGroup->getOwner());
 		}
-		// if any of the childGroup has a child member with the desired type, all ancestors are good to go; recursive step
-		if (checkForChildren(g, parentType, childType, pendingList, counter)) {
+
+		// then, if any of the childGroup has a child member with the desired type, all ancestors are good to go; recursive step
+		if (checkForChildren(childGroup, parentType, childType, pendingList, counter)) {
 			return true;
 		}
-		else if (g->getOwner()->getType() == parentType) {
+		// discard this childGroup from our pending list since we know it doesnt have a child member
+		// dont discard currentGroup yet since we may have other childGroups that may have a child member
+		else if (childGroupOwner->getType() == parentType) {
 			discardPending(pendingList, counter);
 		}
 	}
@@ -227,12 +233,12 @@ bool PQLEvaluator::checkForChildren(Group::SharedPtr grp, Synonym parentType, Sy
 	return false;
 }
 
-vector<int> PQLEvaluator::getParentsT(Synonym childType)
+vector<int> PQLEvaluator::getParentsT(PKBDesignEntity childType)
 {
 	//todo @nicholas can optimise this ALOT, but not urgent for now (specifically, can optimise for procedure and _)
-	vector<int> ifRes = getParentsT(Synonym::If, childType);
-	vector<int> whileRes = getParentsT(Synonym::While, childType);
-	vector<int> procedureRes = getParentsT(Synonym::Procedure, childType);
+	vector<int> ifRes = getParentsT(PKBDesignEntity::If, childType);
+	vector<int> whileRes = getParentsT(PKBDesignEntity::While, childType);
+	vector<int> procedureRes = getParentsT(PKBDesignEntity::Procedure, childType);
 	vector<int> res;
 	res.insert(res.end(), ifRes.begin(), ifRes.end());
 	res.insert(res.end(), whileRes.begin(), whileRes.end());
@@ -240,50 +246,50 @@ vector<int> PQLEvaluator::getParentsT(Synonym childType)
 	return res;
 }
 
-vector<int> PQLEvaluator::getChildrenT(Synonym childType, int parentIndex)
+vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentIndex)
 {
 	vector<int> res;
-	Statement::SharedPtr parent = mpPKB->getStatement(parentIndex);
+	PKBStatement::SharedPtr parent = mpPKB->getStatement(parentIndex);
 
 	// if childType is procedure or parent is not even a container type, there are no such children
-	if (childType == Synonym::Procedure || !isContainerType(parent->getType())) {
+	if (childType == PKBDesignEntity::Procedure || !isContainerType(parent->getType())) {
 		return res;
 	}
 
-	Group::SharedPtr curGroup = parent->getContainerGroup();
-	vector<Group::SharedPtr> toTraverse;
+	PKBGroup::SharedPtr curGroup = parent->getContainerGroup();
+	vector<PKBGroup::SharedPtr> toTraverse;
 	do {
 		// recurse down our children 
 		// first we note that we have to also check current group's childGroups later
-		vector<Group::SharedPtr> curGroupChildren = curGroup->getChildGroups();
+		vector<PKBGroup::SharedPtr> curGroupChildren = curGroup->getChildGroups();
 		toTraverse.insert(toTraverse.end(), curGroupChildren.begin(), curGroupChildren.end());
 		
 		// then we add current group's children members of the desired type
-		vector<int> curGroupMembers = stmtToInt(curGroup->getMembers(childType));
+		vector<int> curGroupMembers = curGroup->getMembers(childType);
 		res.insert(res.end(), curGroupMembers.begin(), curGroupMembers.end());
 	} while (!toTraverse.empty());
 
 	return res;
 }
 
-vector<int> PQLEvaluator::getChildrenT(Synonym parent, Synonym child)
+vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parent, PKBDesignEntity child)
 {
 	return vector<int>();
 }
 
-vector<int> PQLEvaluator::getChildrenT(Synonym parent)
+vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parent)
 {
 	return vector<int>();
 }
 
-vector<int> PQLEvaluator::getBefore(Synonym beforeType, int afterIndex)
+vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 {
-	Statement::SharedPtr stmt = mpPKB->getStatement(afterIndex);
-	Statement::SharedPtr stmtBefore = mpPKB->getStatement(afterIndex - 1);
+	PKBStatement::SharedPtr stmt = mpPKB->getStatement(afterIndex);
+	PKBStatement::SharedPtr stmtBefore = mpPKB->getStatement(afterIndex - 1);
 
 	vector<int> res;
 	// if pass the type check
-	if (beforeType == Synonym::_ || stmtBefore->getType() == beforeType) {
+	if (beforeType == PKBDesignEntity::_ || stmtBefore->getType() == beforeType) {
 		// and pass the same nesting level check
 		if (stmt->getGroup() == stmtBefore->getGroup()) {
 			res.emplace_back(stmtBefore->getIndex());
@@ -292,7 +298,7 @@ vector<int> PQLEvaluator::getBefore(Synonym beforeType, int afterIndex)
 	return res;
 }
 
-vector<int> PQLEvaluator::getBefore(Synonym beforeType, Synonym afterType)
+vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
 	vector<int> res;
 	// check if result is cached, if so return results
@@ -301,11 +307,11 @@ vector<int> PQLEvaluator::getBefore(Synonym beforeType, Synonym afterType)
 	}
 
 	// get results manually
-	vector<Statement::SharedPtr> stmts = mpPKB->getStmtsOfSynonym(afterType);
+	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(afterType);
 	for (auto& stmt : stmts) {
-		Statement::SharedPtr stmtBefore = mpPKB->getStatement(stmt->getIndex() - 1);
+		PKBStatement::SharedPtr stmtBefore = mpPKB->getStatement(stmt->getIndex() - 1);
 		// if pass the type check
-		if (beforeType == Synonym::_ || stmtBefore->getType() == beforeType) {
+		if (beforeType == PKBDesignEntity::_ || stmtBefore->getType() == beforeType) {
 			// and pass the same nesting level check
 			if (stmt->getGroup() == stmtBefore->getGroup()) {
 				res.emplace_back(stmtBefore->getIndex());
@@ -318,19 +324,19 @@ vector<int> PQLEvaluator::getBefore(Synonym beforeType, Synonym afterType)
 	return res;
 }
 
-vector<int> PQLEvaluator::getBefore(Synonym afterType)
+vector<int> PQLEvaluator::getBefore(PKBDesignEntity afterType)
 {
-	return getBefore(Synonym::_, afterType);
+	return getBefore(PKBDesignEntity::_, afterType);
 }
 
-vector<int> PQLEvaluator::getAfter(Synonym afterType, int beforeIndex)
+vector<int> PQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
 {
-	Statement::SharedPtr stmt = mpPKB->getStatement(beforeIndex);
-	Statement::SharedPtr stmtAfter = mpPKB->getStatement(beforeIndex + 1);
+	PKBStatement::SharedPtr stmt = mpPKB->getStatement(beforeIndex);
+	PKBStatement::SharedPtr stmtAfter = mpPKB->getStatement(beforeIndex + 1);
 
 	vector<int> res;
 	// if pass the type check
-	if (afterType == Synonym::_ || stmtAfter->getType() == afterType) {
+	if (afterType == PKBDesignEntity::_ || stmtAfter->getType() == afterType) {
 		// and pass the same nesting level check
 		if (stmt->getGroup() == stmtAfter->getGroup()) {
 			res.emplace_back(stmtAfter->getIndex());
@@ -339,7 +345,7 @@ vector<int> PQLEvaluator::getAfter(Synonym afterType, int beforeIndex)
 	return res;
 }
 
-vector<int> PQLEvaluator::getAfter(Synonym beforeType, Synonym afterType)
+vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
 	vector<int> res;
 	// check if result is cached, if so return results
@@ -349,11 +355,11 @@ vector<int> PQLEvaluator::getAfter(Synonym beforeType, Synonym afterType)
 
 	// get results manually
 	// todo @nicholas: add optimization to go through shorter list of synonym (since both ways cost the same)
-	vector<Statement::SharedPtr> stmts = mpPKB->getStmtsOfSynonym(beforeType);
+	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(beforeType);
 	for (auto& stmt : stmts) {
-		Statement::SharedPtr stmtAfter = mpPKB->getStatement(stmt->getIndex() + 1);
+		PKBStatement::SharedPtr stmtAfter = mpPKB->getStatement(stmt->getIndex() + 1);
 		// if pass the type check
-		if (afterType == Synonym::_ || stmtAfter->getType() == afterType) {
+		if (afterType == PKBDesignEntity::_ || stmtAfter->getType() == afterType) {
 			// and pass the same nesting level check
 			if (stmt->getGroup() == stmtAfter->getGroup()) {
 				res.emplace_back(stmtAfter->getIndex());
@@ -366,37 +372,39 @@ vector<int> PQLEvaluator::getAfter(Synonym beforeType, Synonym afterType)
 	return res;
 }
 
-vector<int> PQLEvaluator::getAfter(Synonym beforeType)
+vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType)
 {
-	return getAfter(Synonym::_, beforeType);
+	return getAfter(PKBDesignEntity::_, beforeType);
 }
 
-vector<int> PQLEvaluator::getBeforeT(Synonym beforeType, int afterIndex)
+vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, int afterIndex)
 {
-	Statement::SharedPtr stmt = mpPKB->getStatement(afterIndex);
-	Group::SharedPtr grp = stmt->getGroup();
-	vector<Statement::SharedPtr> grpMembers = grp->getMembers(beforeType);
+	PKBStatement::SharedPtr statement = mpPKB->getStatement(afterIndex);
+	PKBGroup::SharedPtr grp = statement->getGroup();
+	vector<int> grpStatements = grp->getMembers(beforeType);
 
 	vector<int> res;
 	// assume ascending order of line numbers
-	for (auto& member : grpMembers) {
+	for (int statementIndex : grpStatements) {
 		// we've seen past ourself, we can stop now (we could search past since we are searching specific type only)
-		if (member->getIndex() >= afterIndex) {
+		if (statementIndex >= afterIndex) {
 			return res;
 		}
-		res.emplace_back(member->getIndex());
+		res.emplace_back(statementIndex);
 	}
+
+	return res;
 }
 
-vector<int> PQLEvaluator::getBeforeT(Synonym beforeType, Synonym afterType)
+vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
 	vector<int> res;
 
 	// if before type is a container, it can never be in the same nesting level
-	if (beforeType == Synonym::If 
-		|| beforeType == Synonym::While 
-		|| beforeType == Synonym::Procedure 
-		|| afterType == Synonym::Procedure) {
+	if (beforeType == PKBDesignEntity::If 
+		|| beforeType == PKBDesignEntity::While 
+		|| beforeType == PKBDesignEntity::Procedure 
+		|| afterType == PKBDesignEntity::Procedure) {
 		return res;
 	}
 
@@ -406,20 +414,23 @@ vector<int> PQLEvaluator::getBeforeT(Synonym beforeType, Synonym afterType)
 	}
 
 	// get results manually
-	vector<Statement::SharedPtr> stmts = mpPKB->getStmtsOfSynonym(afterType);
-	int lastSeen; // we have this to ensure we dont repeat 
-	for (auto& stmt : stmts) {
-		Group::SharedPtr grp = stmt->getGroup();
-		vector<Statement::SharedPtr> grpMembers = grp->getMembers(beforeType);
-		for (auto& member : grpMembers) {
+	// get all the 'after' users first
+	vector<PKBStatement::SharedPtr> afterStatements = mpPKB->getStatements(afterType);
+	// keeps track of the furthest afterStatement number seen, so we dont double add users seen b4
+	int furthestIndexSeen = 0; 
+	for (auto& afterStatement : afterStatements) {
+		PKBGroup::SharedPtr grp = afterStatement->getGroup();
+		// get 'before' users of the desired type in the same group as the after afterStatement
+		vector<int> beforeStatements = grp->getMembers(beforeType);
+		for (int beforeStatement : beforeStatements) {
 			// we've seen past ourself, we can stop now
-			if (member->getIndex() >= stmt->getIndex()) {
-				return res;
+			if (beforeStatement >= afterStatement->getIndex()) {
+				break; // this should break back into the outer loop and move the afterStatement index
 			}
 			// if we havent seen this before, add it to res (again, possible because ascending line numbers)
-			else if (member->getIndex() > lastSeen) {
-				res.emplace_back(member->getIndex());
-				lastSeen = member->getIndex();
+			else if (beforeStatement > furthestIndexSeen) {
+				res.emplace_back(beforeStatement);
+				furthestIndexSeen = beforeStatement;
 			}
 		}
 	}
@@ -429,94 +440,184 @@ vector<int> PQLEvaluator::getBeforeT(Synonym beforeType, Synonym afterType)
 	return res;
 }
 
-vector<int> PQLEvaluator::getBeforeT(Synonym afterType)
+vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity afterType)
 {
-	return getBeforeT(Synonym::_, afterType);
+	return getBeforeT(PKBDesignEntity::_, afterType);
 }
 
-vector<int> PQLEvaluator::getAfterT(Synonym afterType, int beforeIndex)
+vector<int> PQLEvaluator::getAfterT(PKBDesignEntity afterType, int beforeIndex)
 {
-	//Statement::SharedPtr stmt = mpPKB->getStatement(beforeIndex);
-	//Group::SharedPtr grp = stmt->getGroup();
-	//vector<Statement::SharedPtr> grpMembers = grp->getMembers(afterType);
+	PKBStatement::SharedPtr statement = mpPKB->getStatement(beforeIndex);
+	PKBGroup::SharedPtr grp = statement->getGroup();
+	vector<int> grpMembers = grp->getMembers(afterType);
 
-	//vector<int> res;
-	//// assume ascending order of line numbers
-	//for (auto& member : grpMembers) {
-	//	// we've seen past ourself, we can stop now (we could search past since we are searching specific type only)
-	//	if (member->getIndex() >= afterIndex) {
-	//		return res;
-	//	}
-	//	res.emplace_back(member->getIndex());
-	//}
+	vector<int> res;
+	// this loops from the back, r stands for reverse
+	// todo @nicholas possible bug place, may be using rbegin wrong
+	for (auto& afterIndex = grpMembers.rbegin(); afterIndex != grpMembers.rend(); ++afterIndex) {
+		// if we go past ourself, we are done
+		if (*afterIndex <= beforeIndex) {
+			return res;
+		}
+		res.emplace_back(*afterIndex);
+	}
+
+	return res;
 }
 
-vector<int> PQLEvaluator::getAfterT(Synonym after, Synonym before)
+vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
-	return vector<int>();
+	vector<int> res;
+
+	// if before type is a container, it can never be in the same nesting level
+	if (beforeType == PKBDesignEntity::If
+		|| beforeType == PKBDesignEntity::While
+		|| beforeType == PKBDesignEntity::Procedure
+		|| afterType == PKBDesignEntity::Procedure) {
+		return res;
+	}
+
+	// check if result is cached, if so return results
+	if (mpPKB->getCached(PKB::Relation::AfterT, beforeType, afterType, res)) {
+		return res;
+	}
+
+	// get results manually
+	// get all the 'before' users first
+	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(beforeType);
+
+	// keeps track of the earliest afterStatement number we've seen, so we dont double add users seen b4
+	int earliestIndexSeen = INT_MAX;
+
+	//count from the back, using rbegin and rend
+	for (auto& beforeStatement = beforeStatements.rbegin(); beforeStatement != beforeStatements.rend(); ++beforeStatement) {
+		PKBGroup::SharedPtr grp = (*beforeStatement)->getGroup();
+		vector<int> afterStatements = grp->getMembers(afterType);
+
+		for (auto& afterStatement = afterStatements.rbegin(); afterStatement != afterStatements.rend(); ++afterStatement) { // count from back again
+			if (*afterStatement <= (*beforeStatement)->getIndex()) {
+				break; // this should break back into the outer loop
+			}
+			// if we havent seen this before, add it to res (count from the back again)
+			else if (*afterStatement < earliestIndexSeen) {
+				res.emplace_back(*afterStatement);
+				earliestIndexSeen = *afterStatement;
+			}
+		}
+	}
+
+	//insert result into cache
+	mpPKB->insertintoCache(PKB::Relation::AfterT, beforeType, afterType, res);
+	return res;
 }
 
-vector<int> PQLEvaluator::getAfterT(Synonym before)
+vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType)
 {
-	return vector<int>();
+	return getAfterT(PKBDesignEntity::_, beforeType);
 }
 
-vector<Variable> PQLEvaluator::getUsed(int statementIndex)
+vector<string> PQLEvaluator::getUsed(int statementIndex)
 {
-	return vector<Variable>();
+	PKBStatement::SharedPtr stmt = mpPKB->getStatement(statementIndex);
+	vector<PKBVariable::SharedPtr> vars = stmt->getVariablesUsed();
+	return varToString(vars);
 }
 
-vector<Variable> PQLEvaluator::getUsed(Synonym statements)
+vector<string> PQLEvaluator::getUsed(PKBDesignEntity userType)
 {
-	return vector<Variable>();
+	vector<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(userType);
+	return varToString(vars);
 }
 
-vector<Variable> PQLEvaluator::getUsed()
+vector<string> PQLEvaluator::getUsed()
 {
-	return vector<Variable>();
+	vector<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
+	return varToString(vars);
 }
 
-vector<int> PQLEvaluator::getUsers(Variable var)
+vector<int> PQLEvaluator::getUsers(string variableName)
 {
-	return vector<int>();
+	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
+	return v->getUsers();
 }
 
-vector<int> PQLEvaluator::getUsers(Synonym statements, Variable var)
+vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName)
 {
-	return vector<int>();
+	// if we are looking for ALL users using the variable, call the other function
+	if (userType == PKBDesignEntity::_) {
+		return getUsers(variableName);
+	}
+
+	vector<int> res;
+	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
+	vector<int> users = v->getUsers();
+
+	// filter only the desired type
+	for (int userIndex : users) {
+		PKBStatement::SharedPtr userStatement = mpPKB->getStatement(userIndex);
+		if (userStatement->getType() == userType) {
+			res.emplace_back(userIndex);
+		}
+	}
+
+	return res;
 }
 
 vector<int> PQLEvaluator::getUsers()
 {
-	return vector<int>();
+	vector<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
+	return stmtToInt(stmts);
 }
 
-vector<Variable> PQLEvaluator::getModified(int statementIndex)
+vector<string> PQLEvaluator::getModified(int statementIndex)
 {
-	return vector<Variable>();
+	PKBStatement::SharedPtr stmt = mpPKB->getStatement(statementIndex);
+	vector<PKBVariable::SharedPtr> vars = stmt->getVariablesModified();
+	return varToString(vars);
 }
 
-vector<Variable> PQLEvaluator::getModified(Synonym statements)
+vector<string> PQLEvaluator::getModified(PKBDesignEntity modifierType)
 {
-	return vector<Variable>();
+	vector<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(modifierType);
+	return varToString(vars);
 }
 
-vector<Variable> PQLEvaluator::getModified()
+vector<string> PQLEvaluator::getModified()
 {
-	return vector<Variable>();
+	vector<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
+	return varToString(vars);
 }
 
-vector<int> PQLEvaluator::getModifiers(Variable var)
+vector<int> PQLEvaluator::getModifiers(string variableName)
 {
-	return vector<int>();
+	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
+	return v->getModifiers();
 }
 
-vector<int> PQLEvaluator::getModifiers(Synonym statements, Variable var)
+vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string variableName)
 {
-	return vector<int>();
+	// if we are looking for ALL users using the variable, call the other function
+	if (modifierType == PKBDesignEntity::_) {
+		return getModifiers(variableName);
+	}
+
+	vector<int> res;
+	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
+	vector<int> modifiers = v->getModifiers();
+
+	// filter only the desired type
+	for (int modifierIndex : modifiers) {
+		PKBStatement::SharedPtr modifierStatement = mpPKB->getStatement(modifierIndex);
+		if (modifierStatement->getType() == modifierType) {
+			res.emplace_back(modifierIndex);
+		}
+	}
+
+	return res;
 }
 
 vector<int> PQLEvaluator::getModifiers()
 {
-	return vector<int>();
+	vector<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
+	return stmtToInt(stmts);
 }

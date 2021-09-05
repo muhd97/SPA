@@ -1,10 +1,14 @@
+#pragma once
+
 #include <vector>
-#include "Statement.h"
 #include <memory>
 #include <iostream>
-#include "Synonym.h"
-#include "Group.h"
+
+#include "PKBStatement.h"
+#include "PKBDesignEntity.h"
+#include "PKBGroup.h"
 #include "PKB.h"
+#include "PKBVariable.h"
 
 using namespace std;
 
@@ -21,58 +25,58 @@ public:
 	// Parent
 	// 1 for each of (constant, synonym, underscore)
 	// Parent(
-	vector<int> getParents(Synonym parent, int child);
-	vector<int> getParents(Synonym parent, Synonym child);
-	vector<int> getParents(Synonym child);
+	vector<int> getParents(PKBDesignEntity parent, int child);
+	vector<int> getParents(PKBDesignEntity parent, PKBDesignEntity child);
+	vector<int> getParents(PKBDesignEntity child);
 
-	vector<int> getChildren(Synonym child, int parent);
-	vector<int> getChildren(Synonym parent, Synonym child);
-	vector<int> getChildren(Synonym parent);
+	vector<int> getChildren(PKBDesignEntity child, int parent);
+	vector<int> getChildren(PKBDesignEntity parent, PKBDesignEntity child);
+	vector<int> getChildren(PKBDesignEntity parent);
 
 	// Parent*
-	vector<int> getParentsT(Synonym parent, int child);
-	vector<int> getParentsT(Synonym parent, Synonym child);
-	vector<int> getParentsT(Synonym child);
+	vector<int> getParentsT(PKBDesignEntity parent, int child);
+	vector<int> getParentsT(PKBDesignEntity parent, PKBDesignEntity child);
+	vector<int> getParentsT(PKBDesignEntity child);
 	
-	vector<int> getChildrenT(Synonym child, int parent);
-	vector<int> getChildrenT(Synonym parent, Synonym child);
-	vector<int> getChildrenT(Synonym parent);
+	vector<int> getChildrenT(PKBDesignEntity child, int parent);
+	vector<int> getChildrenT(PKBDesignEntity parent, PKBDesignEntity child);
+	vector<int> getChildrenT(PKBDesignEntity parent);
 
 	// Follow
-	vector<int> getBefore(Synonym before, int after);
-	vector<int> getBefore(Synonym before, Synonym after);
-	vector<int> getBefore(Synonym after);
+	vector<int> getBefore(PKBDesignEntity before, int after);
+	vector<int> getBefore(PKBDesignEntity before, PKBDesignEntity after);
+	vector<int> getBefore(PKBDesignEntity after);
 
-	vector<int> getAfter(Synonym after, int before);
-	vector<int> getAfter(Synonym before, Synonym after);
-	vector<int> getAfter(Synonym before);
+	vector<int> getAfter(PKBDesignEntity after, int before);
+	vector<int> getAfter(PKBDesignEntity before, PKBDesignEntity after);
+	vector<int> getAfter(PKBDesignEntity before);
 
 	// Follow*
-	vector<int> getBeforeT(Synonym before, int after);
-	vector<int> getBeforeT(Synonym before, Synonym after);
-	vector<int> getBeforeT(Synonym after);
+	vector<int> getBeforeT(PKBDesignEntity before, int after);
+	vector<int> getBeforeT(PKBDesignEntity before, PKBDesignEntity after);
+	vector<int> getBeforeT(PKBDesignEntity after);
 
-	vector<int> getAfterT(Synonym after, int before);
-	vector<int> getAfterT(Synonym after, Synonym before);
-	vector<int> getAfterT(Synonym before);
+	vector<int> getAfterT(PKBDesignEntity afterType, int beforeIndex);
+	vector<int> getAfterT(PKBDesignEntity beforeType, PKBDesignEntity afterType);
+	vector<int> getAfterT(PKBDesignEntity beforeType);
 	
 
 	// Uses
-	vector<Variable> getUsed(int statementIndex);
-	vector<Variable> getUsed(Synonym statements);
-	vector<Variable> getUsed();
+	vector<string> getUsed(int statementIndex);
+	vector<string> getUsed(PKBDesignEntity statements);
+	vector<string> getUsed();
 
-	vector<int> getUsers(Variable var);
-	vector<int> getUsers(Synonym statements, Variable var);
+	vector<int> getUsers(string variableName);
+	vector<int> getUsers(PKBDesignEntity statements, string variableName);
 	vector<int> getUsers();
 
 	// Modifies
-	vector<Variable> getModified(int statementIndex);
-	vector<Variable> getModified(Synonym statements);
-	vector<Variable> getModified();
+	vector<string> getModified(int statementIndex);
+	vector<string> getModified(PKBDesignEntity statements);
+	vector<string> getModified();
 
-	vector<int> getModifiers(Variable var);
-	vector<int> getModifiers(Synonym statements, Variable var);
+	vector<int> getModifiers(string variableName);
+	vector<int> getModifiers(PKBDesignEntity statements, string variableName);
 	vector<int> getModifiers();
 
 	// Pattern
@@ -83,8 +87,8 @@ protected:
 	}
 
 
-	// we want to return only vector<int>, not vector<Statement::SharedPtr>
-	vector<int> stmtToInt(vector<Statement::SharedPtr> &stmts) {
+	// we want to return only vector<int>, not vector<PKBStatement::SharedPtr>
+	vector<int> stmtToInt(vector<PKBStatement::SharedPtr> &stmts) {
 		vector<int> res;
 		for (auto& stmt : stmts) {
 			res.emplace_back(stmt->getIndex());
@@ -92,27 +96,36 @@ protected:
 		return res;
 	}
 
-	bool isContainerType(Synonym s) {
-		return s == Synonym::If ||
-			s == Synonym::While ||
-			s == Synonym::Procedure ||
-			s == Synonym::_;
+	// we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
+	vector<string> varToString(vector<PKBVariable::SharedPtr>& vars) {
+		vector<string> res;
+		for (auto& var: vars) {
+			res.emplace_back(var->getName());
+		}
+		return res;
 	}
 
-	void addParentStmts(vector<Statement::SharedPtr> &stmts) {
+	bool isContainerType(PKBDesignEntity s) {
+		return s == PKBDesignEntity::If ||
+			s == PKBDesignEntity::While ||
+			s == PKBDesignEntity::Procedure ||
+			s == PKBDesignEntity::_;
+	}
+
+	void addParentStmts(vector<PKBStatement::SharedPtr> &stmts) {
 		// not sure if its faster, but we dont want to iterate over all types, just If, While, Procedure(the container types)
-		vector<Statement::SharedPtr> ifStmts = mpPKB->getStmtsOfSynonym(Synonym::If);
-		vector<Statement::SharedPtr> whileStmts = mpPKB->getStmtsOfSynonym(Synonym::While);
-		vector<Statement::SharedPtr> procedures = mpPKB->getStmtsOfSynonym(Synonym::Procedure);
+		vector<PKBStatement::SharedPtr> ifStmts = mpPKB->getStatements(PKBDesignEntity::If);
+		vector<PKBStatement::SharedPtr> whileStmts = mpPKB->getStatements(PKBDesignEntity::While);
+		vector<PKBStatement::SharedPtr> procedures = mpPKB->getStatements(PKBDesignEntity::Procedure);
 		stmts.insert(stmts.end(), ifStmts.begin(), ifStmts.end());
 		stmts.insert(stmts.end(), whileStmts.begin(), whileStmts.end());
 		stmts.insert(stmts.end(), procedures.begin(), procedures.end());
 	}
 
 	// helper function for ParentT (getParentsT)
-	void confirmPending(vector<Statement::SharedPtr> &pendingList, vector<int> &res, int &counter);
-	void discardPending(vector<Statement::SharedPtr>& pendingList, int& counter);
-	bool checkForChildren(Group::SharedPtr grp, Synonym parentType, Synonym childType, vector<Statement::SharedPtr>& pendingList, int &counter);
+	void confirmPending(vector<int> &pendingList, vector<int> &res, int &counter);
+	void discardPending(vector<int>& pendingList, int& counter);
+	bool checkForChildren(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, vector<int>& pendingList, int &counter);
 
 	//helper function for ParentT (getChildrenT)
 };

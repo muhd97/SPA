@@ -39,7 +39,7 @@
     <ClCompile Include="..\source\PQLParserRunner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\PKB\Group.cpp">
+    <ClCompile Include="..\source\PKB\PKBGroup.cpp">
       <Filter>Source Files\PKB</Filter>
     </ClCompile>
     <ClCompile Include="..\source\PKB\Statement.cpp">
@@ -51,7 +51,7 @@
     <ClCompile Include="..\source\PKB\PKB.cpp">
       <Filter>Source Files\PKB</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\PKB\Variable.cpp">
+    <ClCompile Include="..\source\PKB\PKBVariable.cpp">
       <Filter>Source Files\PKB</Filter>
     </ClCompile>
   </ItemGroup>
@@ -71,22 +71,22 @@
     <ClInclude Include="..\source\PQLParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\PKB\Group.h">
+    <ClInclude Include="..\source\PKB\PKBGroup.h">
       <Filter>Header Files\PKB</Filter>
     </ClInclude>
     <ClInclude Include="..\source\PKB\PQLEvaluator.h">
       <Filter>Header Files\PKB</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\PKB\Statement.h">
+    <ClInclude Include="..\source\PKB\PKBStatement.h">
       <Filter>Header Files\PKB</Filter>
     </ClInclude>
     <ClInclude Include="..\source\PKB\PKB.h">
       <Filter>Header Files\PKB</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\PKB\Synonym.h">
+    <ClInclude Include="..\source\PKB\PKBDesignEntity.h">
       <Filter>Header Files\PKB</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\PKB\Variable.h">
+    <ClInclude Include="..\source\PKB\PKBVariable.h">
       <Filter>Header Files\PKB</Filter>
     </ClInclude>
   </ItemGroup>
