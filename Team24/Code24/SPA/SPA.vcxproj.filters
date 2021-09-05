@@ -1,97 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Header Files\PKB">
-      <UniqueIdentifier>{1f2fe4a2-8483-4835-ab79-a20325da34cb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\PKB">
-      <UniqueIdentifier>{58b4c0f7-1432-439e-a48a-fcaed3ee46e8}</UniqueIdentifier>
-    </Filter>
+    <ClCompile Include="..\source\SimpleAST.cpp" />
+    <ClCompile Include="..\source\SimpleLexer.cpp" />
+    <ClCompile Include="..\source\SimpleParser.cpp" />
+    <ClCompile Include="..\source\PKB\PKBGroup.cpp" />
+    <ClCompile Include="..\source\PKB\PKB.cpp" />
+    <ClCompile Include="..\source\PKB\PQLEvaluator.cpp" />
+    <ClCompile Include="..\source\PKB\Statement.cpp" />
+    <ClCompile Include="..\source\PKB\PKBVariable.cpp" />
+    <ClCompile Include="..\source\PQLLexer.cpp" />
+    <ClCompile Include="..\source\PQLParser.cpp" />
+    <ClCompile Include="..\source\PQLParserRunner.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\source\SimpleParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\SimpleLexer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\SimpleAST.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\PQLLexer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\PQLParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\PQLParserRunner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\SimpleAST.h">
-    <ClCompile Include="..\source\PKB\PKBGroup.cpp">
-      <Filter>Source Files\PKB</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\PKB\Statement.cpp">
-      <Filter>Source Files\PKB</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\PKB\PQLEvaluator.cpp">
-      <Filter>Source Files\PKB</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\PKB\PKB.cpp">
-      <Filter>Source Files\PKB</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\PKB\PKBVariable.cpp">
-      <Filter>Source Files\PKB</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\SimpleParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\SimpleLexer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\PQLLexer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\PQLParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\PKB\PKBGroup.h">
-      <Filter>Header Files\PKB</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\PKB\PQLEvaluator.h">
-      <Filter>Header Files\PKB</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\PKB\PKBStatement.h">
-      <Filter>Header Files\PKB</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\PKB\PKB.h">
-      <Filter>Header Files\PKB</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\PKB\PKBDesignEntity.h">
-      <Filter>Header Files\PKB</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\PKB\PKBVariable.h">
-      <Filter>Header Files\PKB</Filter>
-    </ClInclude>
+    <ClInclude Include="..\source\PQLLexer.h" />
+    <ClInclude Include="..\source\PQLParser.h" />
+    <ClInclude Include="..\source\SimpleAST.h" />
+    <ClInclude Include="..\source\PKB\PKBGroup.h" />
+    <ClInclude Include="..\source\PKB\PKB.h" />
+    <ClInclude Include="..\source\PKB\PQLEvaluator.h" />
+    <ClInclude Include="..\source\PKB\PKBStatement.h" />
+    <ClInclude Include="..\source\PKB\PKBDesignEntity.h" />
+    <ClInclude Include="..\source\PKB\PKBVariable.h" />
+    <ClInclude Include="..\source\SimpleLexer.h" />
+    <ClInclude Include="..\source\SimpleParser.h" />
   </ItemGroup>
 </Project>

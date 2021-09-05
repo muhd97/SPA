@@ -63,5 +63,3 @@ protected:
 	// keeps track of total number of groups, also lets us assign group index
 	static int totalGroupCount;
 };
-
-int PKBGroup::totalGroupCount = 0;
