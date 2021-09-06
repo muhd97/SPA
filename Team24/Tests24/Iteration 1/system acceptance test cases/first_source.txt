@@ -1,39 +1,40 @@
 procedure firsttest {
   while (((SHAG <= 999) && (eightmc >= sian)) || (eightmc >= 3203)) {
     read RIP;
-    print MorelikesixteenMC;
     read whySoMuchWork;
+    print MorelikesixteenMC;
 
     if (((eightmc >= 2103) || (2103 <= 37)) && (!(help <= SIX))) then {
       read SHAG;
       while ((12345 != 40 - 40) || ((999 == ByeBye) && (RIP < RIP + 2103))) {
-        if (!(40 - 2103 >= 2103)) then {
-          print RIP;
-        } else {
+        if (40 - 2103 >= 2103) then {
           SHAG = 2103 * SIX;
           print SIX;
           ByeBye = 37 / 1;
           read SIX;
+        } else {
+          print RIP;
         }
         while (((help - pls != FasterEnd) || (2103 - FasterEnd >= FasterEnd)) || (3203 > 40)) {
           read eightmc;
         }
-        print RIP;
         read rEKT;
+        print RIP;
+
       }
       whySoMuchWork = MorelikesixteenMC - RIP;
       if ((!(rEKT - 2103 >= 37)) && ((2103 >= SHAG) && (2103 >= SIX))) then {
-        print help;
         pls = 3203 - 1 + 12345 % 12345;
-      } else {
-        print rEKT;
-        print whySoMuchWork;
         print help;
+      } else {
+        print help;
+        print whySoMuchWork;
+        print rEKT;
       }
       while ((whySoMuchWork < 2103) && ((eightmc + RIP == 12345) || (whySoMuchWork >= 999))) {
         while (2103 + 1 > pls) {
-          read MorelikesixteenMC;
           read sian;
+          read MorelikesixteenMC;
         }
         pls = 1 - MorelikesixteenMC * 1;
       }
