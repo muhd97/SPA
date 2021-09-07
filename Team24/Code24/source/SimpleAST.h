@@ -149,7 +149,8 @@ enum class StatementType {
     READ,
     PRINT,
     CALL,
-    ASSIGN
+    ASSIGN,
+    NONE, // Should not happen
 };
 
 class Statement : public Node {
@@ -162,7 +163,9 @@ public:
         return {};
     }
 
-    virtual StatementType getStatementType();
+    virtual StatementType getStatementType() {
+        return StatementType::NONE;
+    }
     
     int getIndex() {
         return index;

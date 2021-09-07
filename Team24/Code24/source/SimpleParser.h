@@ -2,4 +2,4 @@
 #include "SimpleLexer.h"
 #include "SimpleAST.h"
 
-shared_ptr<Program> parseProgram(vector<SimpleToken> tokens);
+shared_ptr<Program> parseSimpleProgram(vector<SimpleToken> tokens);

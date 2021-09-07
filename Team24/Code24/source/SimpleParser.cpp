@@ -546,7 +546,7 @@ public:
     }
 };
 
-shared_ptr<Program> parseProgram(vector<SimpleToken> tokens) {
+shared_ptr<Program> parseSimpleProgram(vector<SimpleToken> tokens) {
     shared_ptr<SimpleParser> parser = make_shared<SimpleParser>(tokens);
     return parser->parseProgram();
 }
