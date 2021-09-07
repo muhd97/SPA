@@ -5,6 +5,8 @@
 #include "PKB.h"
 #include "PQLLexer.h"
 #include "PQLParser.h"
+#include "PQLProcessor.h"
+#include <memory>
 
 using namespace std;
 
@@ -51,10 +53,14 @@ void TestWrapper::parse(std::string filename) {
     }
 
     // BUILD PKB HERE
-    cout << "Running PQL Tests" << endl;
+    cout << "\n==== Building PKB ====\n";
+    
+    // initializePKB(root, this->pkb);
+    
+    cout << "\n==== Running PQL Tests ====\n";
 
 
-    cout << "End PQL Tests" << endl;
+    cout << "\n==== End PQL Tests ====\n";
 }
 
 // method to evaluating a query
@@ -62,10 +68,37 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
 // call your evaluator to evaluate the query here
   // ...code to evaluate query...
 
+    cout << "\n==== Parsing queries ====\n";
     PQLParser p(pqlLex(query));
     auto sel = p.parseSelectCl();
-    cout << "printing query:" << endl;
+    cout << "\n==== Printing Parsed Query ====\n";
     sel->printString();
+
+    cout << "\n==== Processing PQL Query ====\n";
+    /* Process the parsed query. */
+
+    /* Processor constructor needs Evaluator. Evaluator constructor needs PKB. PKB needs SimpleAST to populate */
+
+    shared_ptr<PKB> mockPKB = make_shared<PKB>();
+    shared_ptr<PKBVariable> mockVariableX = PKBVariable::create("x");
+    shared_ptr<PKBVariable> mockVariableY = PKBVariable::create("y");
+    vector<shared_ptr<PKBVariable>> mockUses = {};
+    vector<shared_ptr<PKBVariable>> mockModifiesX = { mockVariableX };
+    vector<shared_ptr<PKBVariable>> mockModifiesY = { mockVariableY };
+
+    vector<shared_ptr<PKBStatement>> mockPKBStatements = { 
+        PKBStatement::create(1, PKBDesignEntity::Assign, mockUses, mockModifiesX),
+        PKBStatement::create(2, PKBDesignEntity::Assign, mockUses, mockModifiesY)
+    };
+
+    mockPKB->mStatements[PKBDesignEntity::Assign] = move(mockPKBStatements);
+    shared_ptr<PQLEvaluator> mockEvaluator = PQLEvaluator::create(mockPKB);
+    shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(mockEvaluator);
+    vector<shared_ptr<Result>> res = pqlProcessor->processPQLQuery(sel);
+    
+    for (auto& r : res) {
+        results.emplace_back(r->getResultAsString());
+    }
 
   // store the answers to the query in the results list (it is initially empty)
   // each result must be a string.

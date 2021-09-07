@@ -11,7 +11,7 @@ class PKBStatement {
 public:
 	using SharedPtr = std::shared_ptr<PKBStatement>;
 
-	SharedPtr create(int statementIndex, PKBDesignEntity type, vector<PKBVariable::SharedPtr>& uses, vector<PKBVariable::SharedPtr>& modifies) {
+	static SharedPtr create(int statementIndex, PKBDesignEntity type, vector<PKBVariable::SharedPtr>& uses, vector<PKBVariable::SharedPtr>& modifies) {
 		return SharedPtr(new PKBStatement(statementIndex, type, uses, modifies));
 	}
 

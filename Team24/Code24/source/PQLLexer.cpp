@@ -92,7 +92,7 @@ vector<PQLToken> pqlLex(string& program) { // pass by ref
                 lookahead = program[++i + 1];
             }
 
-            if (value == PROCECURE) {
+            if (value == PROCEDURE) {
                 tokens.emplace_back(PQLTokenType::PROCEDURE);
             }
             else if (value == READ) {
@@ -218,7 +218,7 @@ string getPQLTokenLabel(PQLToken& token) {
     case PQLTokenType::IF:
         return IF;
     case PQLTokenType::PROCEDURE:
-        return PROCECURE;
+        return PROCEDURE;
     case PQLTokenType::VARIABLE:
         return VARIABLE;
     case PQLTokenType::SELECT:

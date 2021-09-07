@@ -9,7 +9,7 @@ class PKBVariable {
 public:
 	using SharedPtr = std::shared_ptr<PKBVariable>;
 
-	SharedPtr create(string name) {
+	static SharedPtr create(string name) {
 		return SharedPtr(new PKBVariable(name));
 	}
 

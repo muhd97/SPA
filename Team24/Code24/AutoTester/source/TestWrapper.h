@@ -7,9 +7,13 @@
 
 // include your other headers here
 #include "AbstractWrapper.h"
+#include "PKB.h"
 
 class TestWrapper : public AbstractWrapper {
  public:
+  // Yida: add PKB object
+     shared_ptr<PKB> pkb = nullptr;
+
   // default constructor
   TestWrapper();
   

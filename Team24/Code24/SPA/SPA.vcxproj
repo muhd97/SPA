@@ -22,6 +22,7 @@
     <ClCompile Include="..\source\PQLLexer.cpp" />
     <ClCompile Include="..\source\PQLParser.cpp" />
     <ClCompile Include="..\source\PQLParserRunner.cpp" />
+	<ClCompile Include="..\source\PQLProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQLLexer.h" />
@@ -35,6 +36,7 @@
     <ClInclude Include="..\source\PKB\PKBVariable.h" />
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
+	<ClInclude Include="..\source\PQLProcessor.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DC21A1EA-D2C6-4D14-A2B4-E025B64BDE81}</ProjectGuid>
