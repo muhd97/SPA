@@ -138,10 +138,10 @@ public:
         return actualSimpleToken;
     }
 
-    Program* parseProgram() {
-        vector<Procedure*> procedures;
-        Procedure* procedure;
-        Environment* env = new Environment();
+    shared_ptr<Program> parseProgram() {
+        vector<shared_ptr<Procedure>> procedures;
+        shared_ptr<Procedure> procedure;
+        shared_ptr<Environment> env = make_shared<Environment>();
 
         while (!this->isEmpty()) {
             procedure = parseProcedure(env);
@@ -163,11 +163,11 @@ public:
             return NULL;
         }
         else {
-            return new Program(procedures);
+            return make_shared<Program>(procedures);
         }
     }
 
-    Procedure* parseProcedure(Environment* env) {
+    shared_ptr<Procedure> parseProcedure(shared_ptr<Environment> env) {
         eat(SimpleTokenType::PROCEDURE);
         SimpleToken name = eat(SimpleTokenType::NAME);
         string procName = name.stringValue;
@@ -181,23 +181,23 @@ public:
         }
 
         eat(SimpleTokenType::LEFT_BRACE);
-        StatementList* stmtList = parseStatementList(env);
+        shared_ptr<StatementList> stmtList = parseStatementList(env);
         eat(SimpleTokenType::RIGHT_BRACE);
 
-        return new Procedure(procName, stmtList);
+        return make_shared<Procedure>(procName, stmtList);
     }
 
-    StatementList* parseStatementList(Environment* env) {
-        vector<Statement*> statements;
+    shared_ptr<StatementList> parseStatementList(shared_ptr<Environment> env) {
+        vector<shared_ptr<Statement>> statements;
 
         while (peek().type != SimpleTokenType::RIGHT_BRACE) {
             statements.push_back(parseStatement(env));
         }
 
-        return new StatementList(statements);
+        return make_shared<StatementList>(statements);
     }
 
-    Statement* parseStatement(Environment* env) {
+    shared_ptr<Statement> parseStatement(shared_ptr<Environment> env) {
         switch (peek().type) {
         case SimpleTokenType::READ:
             return parseReadStatement();
@@ -213,72 +213,72 @@ public:
             return  parseAssignStatement();
         default:
             error({ SimpleTokenType::READ, SimpleTokenType::PRINT, SimpleTokenType::CALL, SimpleTokenType::WHILE, SimpleTokenType::IF, SimpleTokenType::NAME }, peek());
-            return new ErrorStatement(0);
+            return make_shared<ErrorStatement>(0);
         }
     }
 
-    ReadStatement* parseReadStatement() {
+    shared_ptr<ReadStatement> parseReadStatement() {
         int index = getNextStatementNumber();
         eat(SimpleTokenType::READ);
         SimpleToken name = eat(SimpleTokenType::NAME);
         eat(SimpleTokenType::SEMICOLON);
-        return new ReadStatement(index, new Identifier(name.stringValue));
+        return make_shared<ReadStatement>(index, make_shared<Identifier>(name.stringValue));
     }
 
-    PrintStatement* parsePrintStatement() {
+    shared_ptr<PrintStatement> parsePrintStatement() {
         int index = getNextStatementNumber();
         eat(SimpleTokenType::PRINT);
         SimpleToken name = eat(SimpleTokenType::NAME);
         eat(SimpleTokenType::SEMICOLON);
-        return new PrintStatement(index, new Identifier(name.stringValue));
+        return make_shared<PrintStatement>(index, make_shared<Identifier>(name.stringValue));
     }
 
-    CallStatement* parseCallStatement(Environment* env) {
+    shared_ptr<CallStatement> parseCallStatement(shared_ptr<Environment> env) {
         int index = getNextStatementNumber();
         eat(SimpleTokenType::CALL);
         SimpleToken name = eat(SimpleTokenType::NAME);
         string procName = name.stringValue;
         env->addInvokeProcedure(procName);
         eat(SimpleTokenType::SEMICOLON);
-        return new CallStatement(index, new Identifier(procName));
+        return make_shared<CallStatement>(index, make_shared<Identifier>(procName));
     }
 
-    AssignStatement* parseAssignStatement() {
+    shared_ptr<AssignStatement> parseAssignStatement() {
         int index = getNextStatementNumber();
         SimpleToken name = eat(SimpleTokenType::NAME);
         eat(SimpleTokenType::ASSIGN);
-        Expression* expr = parseExpression();
+        shared_ptr<Expression> expr = parseExpression();
         eat(SimpleTokenType::SEMICOLON);
-        return new AssignStatement(index, new Identifier(name.stringValue), expr);
+        return make_shared<AssignStatement>(index, make_shared<Identifier>(name.stringValue), expr);
     }
 
-    WhileStatement* parseWhileStatement(Environment* env) {
+    shared_ptr<WhileStatement> parseWhileStatement(shared_ptr<Environment> env) {
         int index = getNextStatementNumber();
         eat(SimpleTokenType::WHILE);
         eat(SimpleTokenType::LEFT_PAREN);
-        ConditionalExpression* cond = parseConditionalExpression();
+        shared_ptr<ConditionalExpression> cond = parseConditionalExpression();
         eat(SimpleTokenType::RIGHT_PAREN);
         eat(SimpleTokenType::LEFT_BRACE);
-        StatementList* block = parseStatementList(env);
+        shared_ptr<StatementList> block = parseStatementList(env);
         eat(SimpleTokenType::RIGHT_BRACE);
-        return new WhileStatement(index, cond, block);
+        return make_shared<WhileStatement>(index, cond, block);
     }
 
-    IfStatement* parseIfStatement(Environment* env) {
+    shared_ptr<IfStatement> parseIfStatement(shared_ptr<Environment> env) {
         int index = getNextStatementNumber();
         eat(SimpleTokenType::IF);
         eat(SimpleTokenType::LEFT_PAREN);
-        ConditionalExpression* condExpr = parseConditionalExpression();
+        shared_ptr<ConditionalExpression> condExpr = parseConditionalExpression();
         eat(SimpleTokenType::RIGHT_PAREN);
         eat(SimpleTokenType::THEN);
         eat(SimpleTokenType::LEFT_BRACE);
-        StatementList* consequent = parseStatementList(env);
+        shared_ptr<StatementList> consequent = parseStatementList(env);
         eat(SimpleTokenType::RIGHT_BRACE);
         eat(SimpleTokenType::ELSE);
         eat(SimpleTokenType::LEFT_BRACE);
-        StatementList* alternative = parseStatementList(env);
+        shared_ptr<StatementList> alternative = parseStatementList(env);
         eat(SimpleTokenType::RIGHT_BRACE);
-        return new IfStatement(index, condExpr, consequent, alternative);
+        return make_shared<IfStatement>(index, condExpr, consequent, alternative);
     }
 
     // This part of the grammer is not in LL(1)
@@ -353,20 +353,20 @@ public:
         return false;
     }
 
-    ConditionalExpression* parseConditionalExpression() {
+    shared_ptr<ConditionalExpression> parseConditionalExpression() {
         if (peek().type == SimpleTokenType::NOT) {
             eat(SimpleTokenType::NOT);
             eat(SimpleTokenType::LEFT_PAREN);
-            ConditionalExpression* expr = parseConditionalExpression();
+            shared_ptr<ConditionalExpression> expr = parseConditionalExpression();
             eat(SimpleTokenType::RIGHT_PAREN);
 
-            return new NotExpression(expr);
+            return make_shared<NotExpression>(expr);
         }
         else if (peek().type == SimpleTokenType::LEFT_PAREN && tryConditionalExpressionLookaheadHack()) {
             eat(SimpleTokenType::LEFT_PAREN);
-            ConditionalExpression* lhs = parseConditionalExpression();
+            shared_ptr<ConditionalExpression> lhs = parseConditionalExpression();
             eat(SimpleTokenType::RIGHT_PAREN);
-            BooleanExpression* result = parseConditionalExpressionPrime();
+            shared_ptr<BooleanExpression> result = parseConditionalExpressionPrime();
 
             result->setLeft(lhs);
             return result;
@@ -380,7 +380,7 @@ public:
         }
     }
 
-    BooleanExpression* parseConditionalExpressionPrime() {
+    shared_ptr<BooleanExpression> parseConditionalExpressionPrime() {
         BooleanOperator op;
         if (peek().type == SimpleTokenType::AND) {
             eat(SimpleTokenType::AND);
@@ -395,15 +395,15 @@ public:
             return NULL;
         }
         eat(SimpleTokenType::LEFT_PAREN);
-        ConditionalExpression* rhs = parseConditionalExpression();
+        shared_ptr<ConditionalExpression> rhs = parseConditionalExpression();
         eat(SimpleTokenType::RIGHT_PAREN);
 
-        return new BooleanExpression(op, rhs);
+        return make_shared<BooleanExpression>(op, rhs);
     }
 
-    RelationalExpression* parseRelationalExpression() {
+    shared_ptr<RelationalExpression> parseRelationalExpression() {
         Rop op;
-        Expression* lhs = parseRelationalFactor();
+        shared_ptr<Expression> lhs = parseRelationalFactor();
 
         if (peek().type == SimpleTokenType::GT) {
             eat(SimpleTokenType::GT);
@@ -433,17 +433,17 @@ public:
             error({ SimpleTokenType::GT, SimpleTokenType::GTE, SimpleTokenType::LTE, SimpleTokenType::LT, SimpleTokenType::EQ, SimpleTokenType::NEQ }, peek());
             return NULL;
         }
-        Expression* rhs = parseRelationalFactor();
-        return new RelationalExpression(op, lhs, rhs);
+        shared_ptr<Expression> rhs = parseRelationalFactor();
+        return make_shared<RelationalExpression>(op, lhs, rhs);
     }
 
-    Expression* parseRelationalFactor() {
+    shared_ptr<Expression> parseRelationalFactor() {
         return parseExpression();
     }
 
-    Expression* parseExpression() {
-        Expression* expr = parseTerm();
-        CombinationExpression* result = parseExpressionPrime();
+    shared_ptr<Expression> parseExpression() {
+        shared_ptr<Expression> expr = parseTerm();
+        shared_ptr<CombinationExpression> result = parseExpressionPrime();
 
         if (result == NULL) {
             return expr;
@@ -454,7 +454,7 @@ public:
         }
     }
 
-    CombinationExpression* parseExpressionPrime() {
+    shared_ptr<CombinationExpression> parseExpressionPrime() {
         Bop op;
         if (peek().type == SimpleTokenType::PLUS) {
             eat(SimpleTokenType::PLUS);
@@ -468,21 +468,21 @@ public:
             // episilon
             return NULL;
         }
-        Expression* rhs = parseTerm();
-        CombinationExpression* nested = parseExpressionPrime();
+        shared_ptr<Expression> rhs = parseTerm();
+        shared_ptr<CombinationExpression> nested = parseExpressionPrime();
 
         if (nested == NULL) {
-            return new CombinationExpression(op, rhs);
+            return make_shared<CombinationExpression>(op, rhs);
         }
         else {
             nested->setLeft(rhs);
-            return new CombinationExpression(op, nested);
+            return make_shared<CombinationExpression>(op, nested);
         }
     }
 
-    Expression* parseTerm() {
-        Expression* factor = parseFactor();
-        CombinationExpression* rest = parseTermPrime();
+    shared_ptr<Expression> parseTerm() {
+        shared_ptr<Expression> factor = parseFactor();
+        shared_ptr<CombinationExpression> rest = parseTermPrime();
 
         if (rest == NULL) {
             return factor;
@@ -493,7 +493,7 @@ public:
         }
     }
 
-    CombinationExpression* parseTermPrime() {
+    shared_ptr<CombinationExpression> parseTermPrime() {
         Bop op;
         if (peek().type == SimpleTokenType::MUL) {
             eat(SimpleTokenType::MUL);
@@ -512,30 +512,30 @@ public:
             return NULL;
         }
 
-        Expression* rhs = parseFactor();
-        CombinationExpression* nested = parseTermPrime();
+        shared_ptr<Expression> rhs = parseFactor();
+        shared_ptr<CombinationExpression> nested = parseTermPrime();
 
         if (nested == NULL) {
-            return new CombinationExpression(op, rhs);
+            return make_shared<CombinationExpression>(op, rhs);
         }
         else {
             nested->setLeft(rhs);
-            return new CombinationExpression(op, nested);
+            return make_shared<CombinationExpression>(op, nested);
         }
     }
 
-    Expression* parseFactor() {
+    shared_ptr<Expression> parseFactor() {
         if (peek().type == SimpleTokenType::NAME) {
             SimpleToken name = eat(SimpleTokenType::NAME);
-            return new Identifier(name.stringValue);
+            return make_shared<Identifier>(name.stringValue);
         }
         else if (peek().type == SimpleTokenType::INTEGER) {
             SimpleToken val = eat(SimpleTokenType::INTEGER);
-            return new Constant(val.intValue);
+            return make_shared<Constant>(val.intValue);
         }
         else if (peek().type == SimpleTokenType::LEFT_PAREN) {
             eat(SimpleTokenType::LEFT_PAREN);
-            Expression* expr = parseExpression();
+            shared_ptr<Expression> expr = parseExpression();
             eat(SimpleTokenType::RIGHT_PAREN);
             return expr;
         }
@@ -546,7 +546,7 @@ public:
     }
 };
 
-Program* parseSimpleProgram(vector<SimpleToken> SimpleTokens) {
-    SimpleParser* parser = new SimpleParser(SimpleTokens);
+shared_ptr<Program> parseProgram(vector<SimpleToken> tokens) {
+    shared_ptr<SimpleParser> parser = make_shared<SimpleParser>(tokens);
     return parser->parseProgram();
 }
