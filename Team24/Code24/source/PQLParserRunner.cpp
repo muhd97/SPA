@@ -175,22 +175,32 @@ void runParserSelectCases() {
 
     vector<string> selectTestCases{
     "variable v;\nSelect v",
+    
     "stmt s;\nSelect s",
     "stmt s;\nSelect s such that Follows* (6,s)",
     "stmt s;\nSelect s such that Follows* (_, _)",
     "variable v; procedure p;\nSelect p such that Modifies(p, \"x\")",
     "variable v; procedure such;\nSelect such such that Modifies(such, \"x\")",
+ 
     "variable v; procedure that;\nSelect that such that Modifies(that, \"x\")",
+    
     "variable such; procedure that;\nSelect that such that Modifies(that, such)",
-    "variable such; procedure that;\nSelect that such that Modifies(such, that)"
+    
+    "variable such; procedure that;\nSelect that such that Modifies(such, that)",
+ 
+    
     "variable v;\nSelect v such that Modifies (6,v)",
+   
     "variable v;\nSelect v such that Uses(14, v)",
+        
     "assign a; while w;\nSelect a such that Parent* (w,a)",
+       
     "stmt s;\nSelect s such that Parent (s,7)",
     "assign a;\nSelect a pattern a (_, \"v + x * y + z * t\")",
     "assign a;\nSelect a pattern a (_, _\"x*y\"_)",
     "assign a;\nSelect a pattern a (_, \"follows*parent\")",
     "assign a, b, c, test;      variable v;\nSelect v such that Uses(14, v)" // multiple assignments
+  
     };
 
     cout << "\n==== Select Test Cases ====\n";

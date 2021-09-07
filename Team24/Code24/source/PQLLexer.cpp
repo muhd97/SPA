@@ -19,10 +19,6 @@ inline void cleanString(string& program) {
     replace(program, "such that", "such@that"); // @ not in grammar
 }
 
-inline bool canBeFollowedByAsterisk(string& test) {
-    return test == FOLLOWS || test == PARENT;
-}
-
 vector<PQLToken> pqlLex(string& program) { // pass by ref
     cleanString(program);
     vector<PQLToken> tokens;
@@ -35,7 +31,7 @@ vector<PQLToken> pqlLex(string& program) { // pass by ref
         curr = program[i];
         lookahead = program[i + 1];
 
-        if (curr == ' ' || curr == '\n' || curr == '\t' || curr == '\r') {
+        if (curr == ' ' || curr == '\n' || curr == '\t' || curr == '\r' || curr == END_TOKEN) {
             i++;
             continue;
         }
@@ -53,7 +49,22 @@ vector<PQLToken> pqlLex(string& program) { // pass by ref
             tokens.emplace_back(PQLTokenType::COMMA);
         }
         else if (curr == '"') {
-            tokens.emplace_back(PQLTokenType::QUOTE_MARK);
+            string value;
+            curr = lookahead;
+            lookahead = program[++i + 1];
+
+            while (curr != '"') {
+                if (i >= n) {
+                    cout << "Error: Could not find closing qoute.";
+                    break;
+                }
+                value.push_back(curr);
+                curr = lookahead;
+                lookahead = program[++i + 1];
+            }
+            PQLToken stringToken = PQLToken(PQLTokenType::STRING);
+            stringToken.stringValue = move(value);
+            tokens.emplace_back(stringToken);
         }
         else if (curr == '_') {
             tokens.emplace_back(PQLTokenType::UNDERSCORE);
@@ -75,23 +86,11 @@ vector<PQLToken> pqlLex(string& program) { // pass by ref
         }
         else if (isalpha(curr)) {
             string value;
-            bool pushAfterExitWhile = true;
-            while (isalpha(lookahead) || isdigit(lookahead) || lookahead == '*' || lookahead == '@') {
-
-
+            while (isalpha(curr) || isdigit(curr) || curr == '@') {
                 value.push_back(curr);
-
-                if (lookahead == '*') { // edge case eg. Select a pattern a (_, "x*y")
-                    if (!canBeFollowedByAsterisk(value)) {
-                        pushAfterExitWhile = false;
-                        break;
-                    }
-                }
-
                 curr = lookahead;
                 lookahead = program[++i + 1];
             }
-            if (pushAfterExitWhile) value.push_back(curr);
 
             if (value == PROCECURE) {
                 tokens.emplace_back(PQLTokenType::PROCEDURE);
@@ -127,16 +126,23 @@ vector<PQLToken> pqlLex(string& program) { // pass by ref
                 tokens.emplace_back(PQLTokenType::STMT);
             }
             else if (value == FOLLOWS) {
-                tokens.emplace_back(PQLTokenType::FOLLOWS);
-            }
-            else if (value == FOLLOWS_T) {
-                tokens.emplace_back(PQLTokenType::FOLLOWS_T);
+                if (curr ==  '*') {
+                    tokens.emplace_back(PQLTokenType::FOLLOWS_T);
+                    i++;
+                }
+                else {
+                    tokens.emplace_back(PQLTokenType::FOLLOWS);
+                }
+                
             }
             else if (value == PARENT) {
-                tokens.emplace_back(PQLTokenType::PARENT);
-            }
-            else if (value == PARENT_T) {
-                tokens.emplace_back(PQLTokenType::PARENT_T);
+                if (curr == '*') {
+                    tokens.emplace_back(PQLTokenType::PARENT_T);
+                    i++;
+                }
+                else {
+                    tokens.emplace_back(PQLTokenType::PARENT);
+                }
             }
             else if (value == MODIFIES) {
                 tokens.emplace_back(PQLTokenType::MODIFIES);
@@ -153,7 +159,7 @@ vector<PQLToken> pqlLex(string& program) { // pass by ref
             else {
                 tokens.emplace_back(std::move(value)); // string token
             }
-
+            continue;
         }
         else if (isdigit(curr)) {
             string value;
@@ -187,8 +193,8 @@ string getPQLTokenLabel(PQLToken& token) {
         return "_";
     case PQLTokenType::COMMA:
         return ",";
-    case PQLTokenType::QUOTE_MARK:
-        return "\"";
+    case PQLTokenType::STRING:
+        return "\"" + token.stringValue + "\"";
     case PQLTokenType::ASSIGN:
         return ASSIGN;
     case PQLTokenType::PLUS:

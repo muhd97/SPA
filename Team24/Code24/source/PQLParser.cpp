@@ -33,7 +33,6 @@ bool PQLParser::tokensAreEmpty()
 inline PQLToken PQLParser::eat(PQLTokenType exepctedType)
 {
     PQLToken tok = peek();
-    //cout << "Eat1\n";
     if (tok.type == exepctedType) {
         advance();
     }
@@ -146,10 +145,9 @@ SPtr<EntRef> PQLParser::parseEntRef()
     case PQLTokenType::NAME:
         return make_shared<EntRef>(EntRefType::SYNONYM, parseSynonym());
 
-    case PQLTokenType::QUOTE_MARK:
-        eat(PQLTokenType::QUOTE_MARK);
-        auto toReturn = make_shared<EntRef>(EntRefType::IDENT, parseSynonym());
-        eat(PQLTokenType::QUOTE_MARK);
+    case PQLTokenType::STRING:
+        auto str = eat(PQLTokenType::STRING);
+        auto toReturn = make_shared<EntRef>(EntRefType::IDENT, str.stringValue);
         return toReturn;
     }
     cout << "Unrecognized entity ref\n";
@@ -250,22 +248,15 @@ SPtr<RelRef> PQLParser::parseRelRef() // todo
 }
 
 SPtr<ExpressionSpec> PQLParser::parseExpressionSpec()
-{
+{ 
     if (peek().type == PQLTokenType::UNDERSCORE) {
         eat(PQLTokenType::UNDERSCORE);
 
-        if (peek().type == PQLTokenType::QUOTE_MARK) {
-            eat(PQLTokenType::QUOTE_MARK);
+        if (peek().type == PQLTokenType::STRING) {
+            eat(PQLTokenType::STRING);
             
-            // TODO: Expose simple expression parse function
-            // Expression* expr = parseExpression();
-            // hack for now
-            while (peek().type != PQLTokenType::QUOTE_MARK) {
-                advance();
-            }
             Expression* expr = nullptr;
 
-            eat(PQLTokenType::QUOTE_MARK);
             eat(PQLTokenType::UNDERSCORE);
             return make_shared<ExpressionSpec>(false, true, expr);
         }
@@ -274,23 +265,14 @@ SPtr<ExpressionSpec> PQLParser::parseExpressionSpec()
         }
         
     }
-    else if (peek().type == PQLTokenType::QUOTE_MARK) {
-        eat(PQLTokenType::QUOTE_MARK);
-        // TODO: Expose simple expression parse function
-        // Expression* expr = parseExpression()
-        // hack for now
-        while (peek().type != PQLTokenType::QUOTE_MARK) {
-            advance();
-        }
-        Expression* expr = nullptr;
-
-        eat(PQLTokenType::QUOTE_MARK);
-        eat(PQLTokenType::UNDERSCORE);
-        return make_shared<ExpressionSpec>(false, false, expr);
+    else if (peek().type == PQLTokenType::STRING) {
+        eat(PQLTokenType::STRING);
+        return make_shared<ExpressionSpec>(false, false, nullptr);
     }
     else {
-        // TODO: Handle Error. 
+        cout << "Error: Invalid expression spec." << endl;
     }
+   
     return make_shared<ExpressionSpec>(false, false, nullptr);
 }
 
@@ -341,14 +323,14 @@ SPtr<SelectCl> PQLParser::parseSelectCl()
 
     while (!tokensAreEmpty()) {
         if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::SUCH_THAT) {
-            if (suchThatClauses.size() == 0) {
+            if (suchThatClauses.size() != 0) {
                 cout << "Duplicate such that clauses are not allowed." << endl;
                 break;
             }
             suchThatClauses.push_back(parseSuchThat());
         }
         else if (peek().type == PQLTokenType::PATTERN) {
-            if (patternClauses.size() == 0) {
+            if (patternClauses.size() != 0) {
                 cout << "Duplicate pattern clauses are not allowed." << endl;
                 break;
             }

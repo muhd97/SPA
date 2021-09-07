@@ -42,7 +42,6 @@ void TestWrapper::parse(std::string filename) {
     printSimpleTokens(tokens);
     
     shared_ptr<Program> root = parseSimpleProgram(tokens);
-    /*
     if (root == NULL) {
         cout << "Failed to parse program!";
     }
@@ -56,7 +55,6 @@ void TestWrapper::parse(std::string filename) {
 
 
     cout << "End PQL Tests" << endl;
-    */
 }
 
 // method to evaluating a query

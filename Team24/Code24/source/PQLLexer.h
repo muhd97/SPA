@@ -9,7 +9,6 @@ enum class PQLTokenType {
     LEFT_PAREN,
     RIGHT_PAREN,
     UNDERSCORE,
-    QUOTE_MARK,
     SEMICOLON,
     COMMA,
 
@@ -44,6 +43,8 @@ enum class PQLTokenType {
     MUL,
     DIV,
     MOD,
+
+    STRING, // We introduce this new token type for anything within qoutes
 };
 
 const string PROCECURE = "procedure";
@@ -65,7 +66,6 @@ const string USES = "Uses";
 const string MODIFIES = "Modifies";
 const string PATTERN = "pattern";
 const string SUCH_THAT = "such@that";
-//const String SUCH = "such";
 
 const char END_TOKEN = '$'; // marker for EOF
 
