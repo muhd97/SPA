@@ -43,6 +43,34 @@ string getRopLabel(Rop op) {
     }
 }
 
+StatementType WhileStatement::getStatementType() {
+    return StatementType::WHILE;
+}
+
+StatementType PrintStatement::getStatementType() {
+    return StatementType::PRINT;
+}
+
+StatementType ErrorStatement::getStatementType() {
+    return StatementType::ERROR;
+}
+
+StatementType IfStatement::getStatementType() {
+    return StatementType::IF;
+}
+
+StatementType CallStatement::getStatementType() {
+    return StatementType::CALL;
+}
+
+StatementType AssignStatement::getStatementType() {
+    return StatementType::ASSIGN;
+}
+
+StatementType ReadStatement::getStatementType() {
+    return StatementType::READ;
+}
+
 string Constant::format(int level) {
     return to_string(value);
 }
@@ -104,7 +132,7 @@ string Statement::format(int level) {
 
 string StatementList::format(int level) {
     string acc = "";
-    for (Statement* statement : statements) {
+    for (shared_ptr<Statement> statement : statements) {
         acc += statement->format(level);
     }
 
@@ -161,7 +189,7 @@ string Program::format() {
 
 string Program::format(int level) {
     string acc = "";
-    for (Procedure* procedure : procedures) {
+    for (shared_ptr<Procedure> procedure : procedures) {
         acc += procedure->format(level) + "\n";
     }
     return acc;

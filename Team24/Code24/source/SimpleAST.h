@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include <string>
 #include <unordered_set>
 
@@ -50,22 +51,22 @@ enum class Bop {
 class CombinationExpression : public Expression {
 private:
     Bop op;
-    Expression* lhs;
-    Expression* rhs;
+    shared_ptr<Expression> lhs;
+    shared_ptr<Expression> rhs;
 public:
-    CombinationExpression(Bop op, Expression* lhs, Expression* rhs) {
+    CombinationExpression(Bop op, shared_ptr<Expression> lhs, shared_ptr<Expression> rhs) {
         this->op = op;
         this->lhs = lhs;
         this->rhs = rhs;
     }
 
-    CombinationExpression(Bop op, Expression* right) {
+    CombinationExpression(Bop op, shared_ptr<Expression> right) {
         this->op = op;
         this->rhs = right;
         this->lhs = NULL;
     }
 
-    void setLeft(Expression* left) {
+    void setLeft(shared_ptr<Expression> left) {
         this->lhs = left;
     }
 
@@ -84,22 +85,22 @@ enum class BooleanOperator {
 class BooleanExpression : public ConditionalExpression {
 private:
     BooleanOperator op;
-    ConditionalExpression* lhs;
-    ConditionalExpression* rhs;
+    shared_ptr<ConditionalExpression> lhs;
+    shared_ptr<ConditionalExpression> rhs;
 public:
-    BooleanExpression(BooleanOperator op, ConditionalExpression* lhs, ConditionalExpression* rhs) {
+    BooleanExpression(BooleanOperator op, shared_ptr<ConditionalExpression> lhs, shared_ptr<ConditionalExpression> rhs) {
         this->op = op;
         this->lhs = lhs;
         this->rhs = rhs;
     }
 
-    BooleanExpression(BooleanOperator op, ConditionalExpression* rhs) {
+    BooleanExpression(BooleanOperator op, shared_ptr<ConditionalExpression> rhs) {
         this->op = op;
         this->rhs = rhs;
         this->lhs = NULL;
     }
 
-    void setLeft(ConditionalExpression* lhs) {
+    void setLeft(shared_ptr<ConditionalExpression> lhs) {
         this->lhs = lhs;
     }
 
@@ -108,9 +109,9 @@ public:
 
 class NotExpression : public ConditionalExpression {
 private:
-    ConditionalExpression* expr;
+    shared_ptr<ConditionalExpression> expr;
 public:
-    NotExpression(ConditionalExpression* expr) {
+    NotExpression(shared_ptr<ConditionalExpression> expr) {
         this->expr = expr;
     }
 
@@ -129,10 +130,10 @@ enum class Rop {
 class RelationalExpression : public ConditionalExpression {
 private:
     Rop op;
-    Expression* lhs;
-    Expression* rhs;
+    shared_ptr<Expression> lhs;
+    shared_ptr<Expression> rhs;
 public:
-    RelationalExpression(Rop op, Expression* lhs, Expression* rhs) {
+    RelationalExpression(Rop op, shared_ptr<Expression> lhs, shared_ptr<Expression> rhs) {
         this->op = op;
         this->lhs = lhs;
         this->rhs = rhs;
@@ -141,15 +142,32 @@ public:
     string format(int level);
 };
 
+enum class StatementType {
+    ERROR,
+    WHILE,
+    IF,
+    READ,
+    PRINT,
+    CALL,
+    ASSIGN
+};
+
 class Statement : public Node {
 private:
     int index = 0;
 protected:
+    string getStatementLabel();
+public:
+    virtual vector<shared_ptr<Statement>> getStatementList() {
+        return {};
+    }
+
+    virtual StatementType getStatementType();
+    
     int getIndex() {
         return index;
     }
-    string getStatementLabel();
-public:
+
     Statement(int index) {
         this->index = index;
     }
@@ -159,17 +177,17 @@ public:
 
 class StatementList : public Node {
 private:
-    vector<Statement*> statements;
+    vector<shared_ptr<Statement>> statements;
 public:
     StatementList() {
-        statements = vector<Statement*>();
+        statements = vector<shared_ptr<Statement>>();
     }
 
-    StatementList(vector<Statement*> statements) {
+    StatementList(vector<shared_ptr<Statement>> statements) {
         this->statements = statements;
     }
 
-    vector<Statement*> getStatements() {
+    vector<shared_ptr<Statement>> getStatements() {
         return statements;
     }
 
@@ -199,107 +217,138 @@ class ErrorStatement : public Statement {
 public:
     ErrorStatement(int index) : Statement(index) {}
     string format(int _);
+    StatementType getStatementType();
 };
 
 class ReadStatement : public Statement {
 private:
-    Identifier* id;
+    shared_ptr<Identifier> id;
 public:
-    ReadStatement(int index, Identifier* id) : Statement(index) {
+    ReadStatement(int index, shared_ptr<Identifier> id) : Statement(index) {
         this->id = id;
     }
 
-    Identifier* getId() {
+    shared_ptr<Identifier> getId() {
         return id;
     }
 
     string format(int level);
+
+    StatementType getStatementType();
+
 };
 
 class PrintStatement : public Statement {
 private:
-    Identifier* id;
+    shared_ptr<Identifier> id;
 public:
-    PrintStatement(int index, Identifier* id) : Statement(index) {
+    PrintStatement(int index, shared_ptr<Identifier> id) : Statement(index) {
         this->id = id;
     }
 
-    Identifier* getId() {
+    shared_ptr<Identifier> getId() {
         return id;
     }
 
     string format(int level);
+    StatementType getStatementType();
+
 };
 
 class CallStatement : public Statement {
 private:
-    Identifier* procId;
+    shared_ptr<Identifier> procId;
 public:
-    CallStatement(int index, Identifier* procId) : Statement(index) {
+    CallStatement(int index, shared_ptr<Identifier> procId) : Statement(index) {
         this->procId = procId;
     }
 
-    Identifier* getProcId() {
+    shared_ptr<Identifier> getProcId() {
         return procId;
     }
 
     string format(int level);
+    StatementType getStatementType();
+
 };
 
 class WhileStatement : public Statement {
 private:
-    ConditionalExpression* cond;
-    StatementList* block;
+    shared_ptr<ConditionalExpression> cond;
+    shared_ptr<StatementList> block;
 public:
-    WhileStatement(int index, ConditionalExpression* cond, StatementList* block) : Statement(index) {
+    WhileStatement(int index, shared_ptr<ConditionalExpression> cond, shared_ptr<StatementList> block) : Statement(index) {
         this->cond = cond;
         this->block = block;
     }
 
     string format(int level);
+
+    StatementType getStatementType();
+    
+    vector<shared_ptr<Statement>> getStatementList() {
+        return block->getStatements();
+    }
+
 };
 
 class IfStatement : public Statement {
 private:
-    ConditionalExpression* cond;
-    StatementList* consequent;
-    StatementList* alternative;
+    shared_ptr<ConditionalExpression> cond;
+    shared_ptr<StatementList> consequent;
+    shared_ptr<StatementList> alternative;
 public:
-    IfStatement(int index, ConditionalExpression* condition,
-        StatementList* consequent,
-        StatementList* alternative) : Statement(index) {
+    IfStatement(int index, shared_ptr<ConditionalExpression> condition,
+        shared_ptr<StatementList> consequent,
+        shared_ptr<StatementList> alternative) : Statement(index) {
         this->cond = condition;
         this->consequent = consequent;
         this->alternative = alternative;
     }
 
     string format(int level);
+    StatementType getStatementType();
+
+    //return a list starting with if statements and ending with else statements
+    vector<shared_ptr<Statement>> getStatementList() {
+        vector<shared_ptr<Statement>> consequentStatements = consequent->getStatements();
+        vector<shared_ptr<Statement>> alternativeStatements = alternative->getStatements();
+        consequentStatements.insert(end(consequentStatements), begin(alternativeStatements), end(alternativeStatements));
+        return consequentStatements;
+    }
+
 };
 
 class AssignStatement : public Statement {
 private:
-    Identifier* id;
-    Expression* expr;
+    shared_ptr<Identifier> id;
+    shared_ptr<Expression> expr;
 public:
-    AssignStatement(int index, Identifier* id, Expression* expr) : Statement(index) {
+    AssignStatement(int index, shared_ptr<Identifier> id, shared_ptr<Expression> expr) : Statement(index) {
         this->id = id;
         this->expr = expr;
     }
     string format(int level);
+    StatementType getStatementType();
+
 };
 
 class Procedure : public Node {
 private:
     string name;
-    StatementList* stmtList;
+    shared_ptr<StatementList> stmtList;
 public:
-    Procedure(string name, StatementList* stmtList) {
+    Procedure(string name, shared_ptr<StatementList> stmtList) {
         this->name = name;
         this->stmtList = stmtList;
     }
 
-    StatementList* getStatementList() {
+    shared_ptr<StatementList> getStatementList() {
         return stmtList;
+    }
+
+    string getName() {
+        return name;
     }
 
     string format(int level);
@@ -308,14 +357,14 @@ public:
 
 class Program : public Node {
 private:
-    vector<Procedure*> procedures;
+    vector<shared_ptr<Procedure>> procedures;
 public:
-    Program(vector<Procedure*> procedures)
+    Program(vector<shared_ptr<Procedure>> procedures)
     {
         this->procedures = procedures;
     }
 
-    vector<Procedure*> getProcedures() {
+    vector<shared_ptr<Procedure>> getProcedures() {
         return procedures;
     }
 
