@@ -26,6 +26,7 @@ TestWrapper::TestWrapper() {
 
 // method for parsing the SIMPLE source
 void TestWrapper::parse(std::string filename) {
+   
     string program;
     string currentLine;
     ifstream program_file(filename);
@@ -36,12 +37,12 @@ void TestWrapper::parse(std::string filename) {
     }
 
     vector<SimpleToken> tokens = simpleLex(program);
-
+    
     // for debugging
     printSimpleTokens(tokens);
-
-    Program* root = parseSimpleProgram(tokens);
-
+    
+    shared_ptr<Program> root = parseSimpleProgram(tokens);
+    /*
     if (root == NULL) {
         cout << "Failed to parse program!";
     }
@@ -55,6 +56,7 @@ void TestWrapper::parse(std::string filename) {
 
 
     cout << "End PQL Tests" << endl;
+    */
 }
 
 // method to evaluating a query
