@@ -83,6 +83,18 @@ unordered_set<string> Identifier::getSubExpressions() {
     return unordered_set<string> { this->format(0) };
 }
 
+ExpressionType Constant::getExpressionType() {
+    return ExpressionType::CONSTANT;
+}
+
+ExpressionType CombinationExpression::getExpressionType() {
+    return ExpressionType::COMBINATION;
+}
+
+ExpressionType Identifier::getExpressionType() {
+    return ExpressionType::IDENTIFIER;
+}
+
 string CombinationExpression::format(int level) {
     if (lhs == NULL) {
         return "ERROR: LEFT SHOULD NOT BE NULL";

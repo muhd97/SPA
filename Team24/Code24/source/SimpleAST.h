@@ -22,6 +22,10 @@ public:
     virtual unordered_set<string> getSubExpressions() {
         return unordered_set<string> {};
     }
+
+    virtual ExpressionType getStatementType() {
+        return ExpressionType::NONE;
+    }
 };
 
 class Constant : public Expression {
@@ -38,6 +42,7 @@ public:
 
     string format(int _);
     unordered_set<string> getSubExpressions() override;
+    ExpressionType getExpressionType();
 };
 
 enum class Bop {
@@ -72,6 +77,7 @@ public:
 
     string format(int level);
     unordered_set<string> getSubExpressions() override;
+    ExpressionType getExpressionType();
 };
 
 class ConditionalExpression : public Node {
@@ -153,6 +159,13 @@ enum class StatementType {
     NONE, // Should not happen
 };
 
+enum class ExpressionType {
+    CONSTANT,
+    COMBINATION,
+    IDENTIFIER,
+    NONE, // Should not happen
+};
+
 class Statement : public Node {
 private:
     int index = 0;
@@ -214,6 +227,7 @@ public:
 
     string format(int _);
     unordered_set<string> getSubExpressions() override;
+    ExpressionType getExpressionType();
 };
 
 class ErrorStatement : public Statement {
