@@ -621,3 +621,8 @@ vector<int> PQLEvaluator::getModifiers()
 	vector<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
 	return stmtToInt(stmts);
 }
+
+const vector<PKBStatement::SharedPtr>& PQLEvaluator::getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const
+{
+	return mpPKB->getStatements(pkbDe);
+}

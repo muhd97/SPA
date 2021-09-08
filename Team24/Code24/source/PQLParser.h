@@ -4,6 +4,7 @@
 #include "SimpleAST.h"
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 
 const bool DESTRUCTOR_MESSAGE_ENABLED = false;
 
@@ -194,6 +195,8 @@ public:
         cout << "RelRef THIS SHOULD NOT BE PRINTED\n";
     }
 
+    virtual inline bool containsSynonym(string s) = 0;
+
 };
 
 class UsesS : public RelRef {
@@ -217,6 +220,19 @@ public:
             putchar('\n');
         }
     }
+
+    inline bool containsSynonym(string s) {
+        bool flag = false;
+        if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
+            flag = stmtRef->getStringVal() == s;
+        }
+
+        if (entRef->getEntRefType() == EntRefType::SYNONYM) {
+            flag = entRef->getStringVal() == s;
+        }
+
+        return flag;
+    }
 };
 
 class UsesP : public RelRef {
@@ -226,6 +242,19 @@ public:
 
     UsesP(shared_ptr<EntRef> eRef1, shared_ptr<EntRef> eRef2) : entRef1(move(eRef1)), entRef2(move(eRef2)) {
 
+    }
+
+    inline bool containsSynonym(string s) {
+        bool flag = false;
+        if (entRef1->getEntRefType() == EntRefType::SYNONYM) {
+            flag = entRef1->getStringVal() == s;
+        }
+
+        if (entRef2->getEntRefType() == EntRefType::SYNONYM) {
+            flag = entRef2->getStringVal() == s;
+        }
+
+        return flag;
     }
 };
 
@@ -250,6 +279,20 @@ public:
             putchar('\n');
         }
     }
+
+    inline bool containsSynonym(string s) {
+        bool flag = false;
+        if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
+            flag = stmtRef->getStringVal() == s;
+        }
+
+        if (entRef->getEntRefType() == EntRefType::SYNONYM) {
+            flag = entRef->getStringVal() == s;
+        }
+
+        return flag;
+    }
+
 };
 
 class ModifiesP : public RelRef {
@@ -259,6 +302,19 @@ public:
 
     ModifiesP(shared_ptr<EntRef> eRef1, shared_ptr<EntRef> eRef2) : entRef1(move(eRef1)), entRef2(move(eRef2)) {
 
+    }
+
+    inline bool containsSynonym(string s) {
+        bool flag = false;
+        if (entRef1->getEntRefType() == EntRefType::SYNONYM) {
+            flag = entRef1->getStringVal() == s;
+        }
+
+        if (entRef2->getEntRefType() == EntRefType::SYNONYM) {
+            flag = entRef2->getStringVal() == s;
+        }
+
+        return flag;
     }
 };
 
@@ -283,6 +339,19 @@ public:
             putchar('\n');
         }
     }
+
+    inline bool containsSynonym(string s) {
+        bool flag = false;
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) {
+            flag = stmtRef1->getStringVal() == s;
+        }
+
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
+            flag = stmtRef2->getStringVal() == s;
+        }
+
+        return flag;
+    }
 };
 
 class ParentT : public RelRef {
@@ -305,6 +374,19 @@ public:
             printString();
             putchar('\n');
         }
+    }
+
+    inline bool containsSynonym(string s) {
+        bool flag = false;
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) {
+            flag = stmtRef1->getStringVal() == s;
+        }
+
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
+            flag = stmtRef2->getStringVal() == s;
+        }
+
+        return flag;
     }
 };
 
@@ -330,6 +412,19 @@ public:
             putchar('\n');
         }
     }
+
+    inline bool containsSynonym(string s) {
+        bool flag = false;
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) {
+            flag = stmtRef1->getStringVal() == s;
+        }
+
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
+            flag = stmtRef2->getStringVal() == s;
+        }
+
+        return flag;
+    }
 };
 
 class FollowsT : public RelRef {
@@ -352,6 +447,19 @@ public:
             printString();
             putchar('\n');
         }
+    }
+
+    inline bool containsSynonym(string s) {
+        bool flag = false;
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) {
+            flag = stmtRef1->getStringVal() == s;
+        }
+
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
+            flag = stmtRef2->getStringVal() == s;
+        }
+
+        return flag;
     }
 };
 
@@ -376,6 +484,10 @@ public:
         cout << "SuchThatCl (";
         relRef->printString();
         cout << ")";
+    }
+
+    inline bool containsSynonym(string s) {
+        return relRef->containsSynonym(s);
     }
 };
 
@@ -440,18 +552,40 @@ public:
         exprSpec->printString();
         cout << ")";
     }
+
+    inline bool containsSynonym(string s) {
+        return synonym == s 
+            || (entRef->getEntRefType() == EntRefType::SYNONYM 
+                && entRef->getStringVal() == s);
+    }
+
 };
 
+/*
+
+YIDA: Note, SelectCl currently only supports 
+
+*/
 class SelectCl {
 public:
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
-    string synonym;
+    string targetSynonym;
+    unordered_map<string, shared_ptr<Declaration>> synonymToParentDeclarationMap;
 
     SelectCl(string syn, vector<shared_ptr<Declaration>> decl, vector<shared_ptr<SuchThatCl>> stht)
-        : synonym(move(syn)), declarations(move(decl)), suchThatClauses(move(stht)) {
+        : targetSynonym(move(syn)), declarations(move(decl)), suchThatClauses(move(stht)) {
 
+        for (auto& d : declarations) {
+            for (string& syn : d->synonyms) {
+                synonymToParentDeclarationMap[syn] = d;
+            }
+        }
+    }
+
+    shared_ptr<Declaration> getParentDeclarationForSynonym(string s) {
+        return synonymToParentDeclarationMap[s];
     }
 
     void printString() {
@@ -462,7 +596,7 @@ public:
         }
         cout << " | ";
 
-        cout << "TargetSynonym(" << synonym << ") | ";
+        cout << "TargetSynonym(" << targetSynonym << ") | ";
 
         for (auto& st : suchThatClauses) {
             st->printString();
@@ -477,6 +611,32 @@ public:
             printString();
             putchar('\n');
         }
+    }
+
+    inline bool hasSuchThatClauses() {
+        return suchThatClauses.size() > 0;
+    }
+
+    inline bool hasPatternClauses() {
+        return patternClauses.size() > 0;
+    }
+
+    inline bool suchThatContainsSynonym(string s) {
+        bool flag = false;
+        for (auto& st : this->suchThatClauses) {
+            flag = st->containsSynonym(s);
+            if (flag) break;
+        }
+        return flag;
+    }
+
+    inline bool patternContainsSynonym(string s) {
+        bool flag = false;
+        for (auto& st : this->suchThatClauses) {
+            flag = st->containsSynonym(s);
+            if (flag) break;
+        }
+        return flag;
     }
 
 };

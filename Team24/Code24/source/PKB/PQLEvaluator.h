@@ -18,7 +18,7 @@ public:
 
 	PKB::SharedPtr mpPKB;
 
-	SharedPtr create(PKB::SharedPtr pPKB) {
+	static SharedPtr create(PKB::SharedPtr pPKB) {
 		return SharedPtr(new PQLEvaluator(pPKB));
 	}
 
@@ -80,6 +80,9 @@ public:
 	vector<int> getModifiers();
 
 	// Pattern
+
+	// General: Access PKB's map<PKBDesignEntity, vector<PKBStatement::SharedPtr>> mStatements;
+	const vector<PKBStatement::SharedPtr>& getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;
 
 protected:
 	PQLEvaluator(PKB::SharedPtr pPKB) {

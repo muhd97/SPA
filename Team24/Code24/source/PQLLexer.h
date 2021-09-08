@@ -47,7 +47,7 @@ enum class PQLTokenType {
     STRING, // We introduce this new token type for anything within qoutes
 };
 
-const string PROCECURE = "procedure";
+const string PROCEDURE = "procedure";
 const string READ = "read";
 const string PRINT = "print";
 const string CALL = "call";
