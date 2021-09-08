@@ -12,7 +12,8 @@
     <ClCompile Include="..\source\PQLLexer.cpp" />
     <ClCompile Include="..\source\PQLParser.cpp" />
     <ClCompile Include="..\source\PQLParserRunner.cpp" />
-	<ClCompile Include="..\source\PQLProcessor.cpp" />
+    <ClCompile Include="..\source\PQLProcessor.cpp" />
+    <ClCompile Include="..\source\CraftingBench.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQLLexer.h" />
@@ -26,6 +27,7 @@
     <ClInclude Include="..\source\PKB\PKBVariable.h" />
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
-	<ClInclude Include="..\source\PQLProcessor.h" />
+    <ClInclude Include="..\source\PQLProcessor.h" />
+    <ClInclude Include="..\source\CraftingBench.h" />
   </ItemGroup>
 </Project>
