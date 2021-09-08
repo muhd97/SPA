@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\CraftingBench.cpp" />
     <ClCompile Include="..\source\SimpleAST.cpp" />
     <ClCompile Include="..\source\SimpleLexer.cpp" />
     <ClCompile Include="..\source\SimpleParser.cpp" />
@@ -24,6 +25,7 @@
     <ClCompile Include="..\source\PQLParserRunner.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\source\CraftingBench.h" />
     <ClInclude Include="..\source\PQLLexer.h" />
     <ClInclude Include="..\source\PQLParser.h" />
     <ClInclude Include="..\source\SimpleAST.h" />
