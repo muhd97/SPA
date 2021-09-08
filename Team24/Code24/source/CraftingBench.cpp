@@ -78,21 +78,62 @@ PKBStatement::SharedPtr CraftingBench::extractProcedure(shared_ptr<Procedure>& p
 }
 
 PKBStatement::SharedPtr CraftingBench::extractAssignStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup) {
-	// create a PKBStatement
+	// 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles PARENTS and FOLLOWS
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+	shared_ptr<AssignStatement> assn = static_pointer_cast<AssignStatement>(statement);
+
+	// 2. MODIFY - process the variable specified by LHS identifier 
+	// get the variable using the variable name
+	PKBVariable::SharedPtr var = getVariable(assn->getId()->getName());
+	// our statement modifies this variable
+	res->addVariableModified(var);
+	// this variable is modified by this statement
+	var->addModifierStatement(res->getIndex());
+
+	// 3. USE - process the variables mentioned by RHS expression
+	// get all identifiers (string) referenced in the expression
+	vector<string> identifiers = getIdentifiers(assn->getExpr());
+	for (auto& identifier : identifiers) {
+		// for each string, we get the variable
+		PKBVariable::SharedPtr var = getVariable(identifier);
+		// our statement modifies this variable
+		res->addVariableUsed(var);
+		// this variable is modified by our statement
+		var->addUserStatement(res->getIndex());
+	}
 
 	return res;
 }
 
 PKBStatement::SharedPtr CraftingBench::extractReadStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup) {
-	// create a PKBStatement
+	// 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles PARENTS and FOLLOWS
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+	shared_ptr<ReadStatement> assn = static_pointer_cast<ReadStatement>(statement);
+
+	// 2. MODIFY - process the variable specified by the identifier 
+	// get the variable using the variable name
+	PKBVariable::SharedPtr var = getVariable(assn->getId()->getName());
+	// statement modifies this variable
+	res->addVariableModified(var);
+	// variable is modified by this statement
+	var->addModifierStatement(res->getIndex());
+
 	return res;
 }
 
 PKBStatement::SharedPtr CraftingBench::extractPrintStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup) {
-	// create a PKBStatement
+	// create the PKBStatement
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+	shared_ptr<PrintStatement> assn = static_pointer_cast<PrintStatement>(statement);
+
+	// 2. USE - handle the variable specified by the identifier 
+	// get the variable using the variable name
+	PKBVariable::SharedPtr var = getVariable(assn->getId()->getName());
+	// statement modifies this variable
+	res->addVariableUsed(var);
+	// variable is modified by this statement
+	var->addUserStatement(res->getIndex());
+
 	return res;
 }
 
@@ -175,5 +216,50 @@ PKBDesignEntity CraftingBench::simpleToPKBType(StatementType simpleStatementType
 	default:
 		throw "hey this Simple StatementType aint supported mate!";
 	}
+}
+
+// Returns variable with given string name if it exists. Else creates it and returns it
+PKBVariable::SharedPtr CraftingBench::getVariable(string name) {
+	if (mVariables.count(name)) {
+		return mVariables[name];
+	}
+	else {
+		PKBVariable::SharedPtr var = PKBVariable::create(name);
+		mVariables[name] = var;
+		return var;
+	}
+}
+
+vector<string> CraftingBench::getIdentifiers(shared_ptr<Expression> expr) {
+	set<string> res; // using a set to prevent duplicates
+	vector<shared_ptr<Expression>> queue = {expr};
+
+	// comb through the expression and pick out all identifiers' names
+	while (!queue.empty()) {
+		// pop the last element
+		shared_ptr<Expression> e = queue.back(); 
+		queue.pop_back(); 
+
+		switch (e->getExpressionType()) {
+		case ExpressionType::CONSTANT:
+			break;
+		case ExpressionType::IDENTIFIER: {
+			shared_ptr<Identifier> id = static_pointer_cast<Identifier>(e);
+			res.insert(id->getName());
+			break;
+		}
+		case ExpressionType::COMBINATION: {
+			shared_ptr<CombinationExpression> cmb = static_pointer_cast<CombinationExpression>(e);
+			queue.emplace_back(cmb->getLHS());
+			queue.emplace_back(cmb->getRHS());
+			break;
+		}
+		default:
+			throw("I dont recognise this Expression Type, sergeant");
+		}
+	}
+
+	// return a vector instead of a set
+	return vector<string>(res.begin(), res.end());
 }
 

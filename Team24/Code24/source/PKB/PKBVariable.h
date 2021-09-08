@@ -27,6 +27,14 @@ public:
 		return mModifiers;
 	}
 
+	void addUserStatement(int userStatementIndex) {
+		mUsers.emplace_back(userStatementIndex);
+	}
+
+	void addModifierStatement(int userStatementIndex) {
+		mModifiers.emplace_back(userStatementIndex);
+	}
+
 	string mName;
 	// list of all the statements that use this variable
 	vector<int> mUsers;

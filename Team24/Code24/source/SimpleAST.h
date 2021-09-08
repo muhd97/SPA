@@ -23,7 +23,7 @@ public:
         return unordered_set<string> {};
     }
 
-    virtual ExpressionType getStatementType() {
+    virtual ExpressionType getExpressionType() {
         return ExpressionType::NONE;
     }
 };
@@ -73,6 +73,14 @@ public:
 
     void setLeft(shared_ptr<Expression> left) {
         this->lhs = left;
+    }
+
+    shared_ptr<Expression> getLHS() {
+        return lhs;
+    }
+    
+    shared_ptr<Expression> getRHS() {
+        return rhs;
     }
 
     string format(int level);
@@ -345,6 +353,15 @@ public:
         this->id = id;
         this->expr = expr;
     }
+
+    shared_ptr<Identifier> getId() {
+        return id;
+    }
+
+    shared_ptr<Expression> getExpr() {
+        return expr;
+    }
+
     string format(int level);
     StatementType getStatementType();
 

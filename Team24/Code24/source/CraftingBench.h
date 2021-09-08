@@ -32,6 +32,8 @@ protected:
 	void addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable);
 	void addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable);
 
+	PKBVariable::SharedPtr getVariable(string name);
+
 	PKBStatement::SharedPtr extractProcedure(shared_ptr<Procedure>& procedure);
 	PKBStatement::SharedPtr extractStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup);
 
@@ -43,6 +45,10 @@ protected:
 	PKBStatement::SharedPtr extractCallStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup);
 
 	PKBStatement::SharedPtr createPKBStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup);
-
+	
+	vector<string> getIdentifiers(shared_ptr<Expression> expr);
+	
 	PKBDesignEntity simpleToPKBType(StatementType);
+
+
 };
