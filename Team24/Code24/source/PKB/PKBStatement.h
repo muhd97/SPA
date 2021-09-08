@@ -27,7 +27,7 @@ public:
 	string mName; // for Procedure only. remove when better organisation exists
 	PKBDesignEntity mType;
 	PKBGroup::SharedPtr mBelongsTo;
-	PKBGroup::SharedPtr mContainerGroup = 0;
+	vector<PKBGroup::SharedPtr> mContainerGroup;
 	vector<PKBVariable::SharedPtr> mUses;
 	vector<PKBVariable::SharedPtr> mModifies;
 
@@ -36,8 +36,8 @@ public:
 	}
 
 	// only for If, While, Procedure statements that are the parent of their group
-	// if statement does not have a container group, will return 0
-	std::shared_ptr<PKBGroup> getContainerGroup() {
+	// if statement does not have a container group, will return empty vector
+	vector<std::shared_ptr<PKBGroup>> getContainerGroups() {
 		return mContainerGroup;
 	}
 
@@ -61,8 +61,8 @@ public:
 		mBelongsTo = belongsTo;
 	}
 
-	void setContainerGroup(PKBGroup::SharedPtr containerGroup) {
-		mContainerGroup = containerGroup;
+	void addContainerGroup(PKBGroup::SharedPtr& containerGroup) {
+		mContainerGroup.emplace_back(containerGroup);
 	}
 
 	void addVariableUsed(PKBVariable::SharedPtr variable) {

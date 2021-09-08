@@ -126,9 +126,7 @@ protected:
 	}
 
 	// helper function for ParentT (getParentsT)
-	void confirmPending(vector<int> &pendingList, vector<int> &res, int &counter);
-	void discardPending(vector<int>& pendingList, int& counter);
-	bool checkForChildren(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, vector<int>& pendingList, int &counter);
+	bool checkForChildrenT(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, set<int>& setResult);
 
 	//helper function for ParentT (getChildrenT)
 };

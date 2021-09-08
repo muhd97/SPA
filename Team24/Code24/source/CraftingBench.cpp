@@ -59,7 +59,7 @@ PKBStatement::SharedPtr CraftingBench::extractProcedure(shared_ptr<Procedure>& p
 
 	// create group of procedureSimple
 	PKBGroup::SharedPtr group = PKBGroup::create(procedureSimple->getName());
-	res->setContainerGroup(group);
+	res->addContainerGroup(group);
 
 	vector<shared_ptr<Statement>> simpleStatements= procedureSimple->getStatementList()->getStatements();
 

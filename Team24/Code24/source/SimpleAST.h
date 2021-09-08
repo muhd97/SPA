@@ -16,6 +16,13 @@ public:
     }
 };
 
+enum class ExpressionType {
+    CONSTANT,
+    COMBINATION,
+    IDENTIFIER,
+    NONE, // Should not happen
+};
+
 class Expression : public Node {
 public:
     // Stores the set of all sub expressions
@@ -164,13 +171,6 @@ enum class StatementType {
     PRINT,
     CALL,
     ASSIGN,
-    NONE, // Should not happen
-};
-
-enum class ExpressionType {
-    CONSTANT,
-    COMBINATION,
-    IDENTIFIER,
     NONE, // Should not happen
 };
 

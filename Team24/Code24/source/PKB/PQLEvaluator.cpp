@@ -39,10 +39,13 @@ vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity
 	}
 	
 	for (auto& stmt : parentStmts) {
-		PKBGroup::SharedPtr grp = stmt->getContainerGroup();
-		// if this afterStatement's container group contains at least one child of required type, add afterStatement to our results
-		if (!grp->getMembers(childType).empty()) {
-			res.emplace_back(stmt->getIndex());
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		// if this statement's container group contains at least one child of required type, add statement to our results
+		for (auto& grp : grps) {
+			if (!grp->getMembers(childType).empty()) {
+				res.emplace_back(stmt->getIndex());
+				break; // this should break out of the inner loop over child groups
+			}
 		}
 	}
 	
@@ -64,8 +67,11 @@ vector<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex
 		return res;
 	}
 	else {
-		PKBGroup::SharedPtr grp = stmt->getContainerGroup();
-		res = grp->getMembers(childType);
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		for (auto& grp : grps) {
+			vector<int> grpStatements = grp->getMembers(childType);
+			res.insert(res.begin(), grpStatements.begin(), grpStatements.end());
+		}
 	}
 	
 	return res;
@@ -95,10 +101,11 @@ vector<int> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntit
 	}
 
 	for (auto& stmt : parentStmts) {
-		PKBGroup::SharedPtr grp = stmt->getContainerGroup();
-		// if this afterStatement's container group contains at least one child of required type, add afterStatement to our results
-		vector<int> members = grp->getMembers(childType);
-		res.insert(res.end(), members.begin(), members.end());
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		for (auto& grp : grps) {
+			vector<int> members = grp->getMembers(childType);
+			res.insert(res.end(), members.begin(), members.end());
+		}
 	}
 
 	// insert into cache for future use
@@ -123,31 +130,31 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex
 	PKBStatement::SharedPtr currentStatement = mpPKB->getStatement(childIndex);
 	do {
 		// recurse up the parent tree
-		// replace current afterStatement with parent afterStatement
+		// replace current statement with parent statement
 		int parentStatementIndex = currentStatement->getGroup()->getOwner(); 
 		currentStatement = mpPKB->getStatement(parentStatementIndex);
-		// if current afterStatement type is the desired type, add it to the results list
+		// if current statement type is the desired type, add it to the results list
 		if (currentStatement->getType() == parentType) {
 			res.emplace_back(parentStatementIndex);
 		}
 	} while (currentStatement->getType() != PKBDesignEntity::Procedure); 
-	// we recurse until our 'afterStatement' is actually a Procedure, then we cant go further up no more
+	// we recurse until our 'statement' is actually a Procedure, then we cant go further up no more
 
 	return res;
 }
 
 vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	vector<int> res;
+	vector<int> result;
 
 	// if parentType is none of the container types, there are no such parents
 	if (!isContainerType(parentType)) {
-		return res;
+		return result;
 	}
 
 	// check if result is cached, if so return results
-	if (mpPKB->getCached(PKB::Relation::ParentT, parentType, childType, res)) {
-		return res;
+	if (mpPKB->getCached(PKB::Relation::ParentT, parentType, childType, result)) {
+		return result;
 	}
 
 	// if parentType is PKBDesignEntity::_ call the other function instead (temporarily doing this because im scared of bugs)
@@ -161,75 +168,55 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntit
 		addParentStmts(parentStmts);
 	}
 	else {
+		// check these 'possible' parent statements
 		parentStmts = mpPKB->getStatements(parentType);
 	}
 
-	// incoming hard and painful and expensive recursive section
-	// relies on assumption that afterStatements are sorted in ascending line number
-	// todo @nicholas just realised this might not work with PKBDesignEntity::_ because ascending line number assumption may not hold
-	vector<int> pendingList;
-	int counter = 0;
-	while (counter < (int)parentStmts.size()) {
-		PKBStatement::SharedPtr cur = parentStmts[counter];
-		// afterStatement still dont know how emplace/push back works, emplace_back might cause a bug when elements in pendingList are destroyed??
-		pendingList.push_back(cur->getIndex());
-		PKBGroup::SharedPtr grp = cur->getContainerGroup();
-
-		if (checkForChildren(grp, parentType, childType, pendingList, counter)) {
-			// only here in the root loop do we ever confirm pending, the nested recursive layer only adds to the pendingList
-			confirmPending(pendingList, res, counter);
+	set<int> setResult;
+	// recursive check on children
+	for (auto& stmt : parentStmts) {
+		// if this statement has already been added in our result set, skip it
+		if (setResult.count(stmt->getIndex())) {
+			continue;
 		}
-		else {
-			// none of the bloodline have the desired childType, ParentT does not hold for this afterStatement
-			discardPending(pendingList, counter);
+		// check for children in the groups that this statement owns
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		for (auto& grp : grps) {
+			if (checkForChildrenT(grp, parentType, childType, setResult)) {
+				setResult.insert(stmt->getIndex());
+				break;
+			}
 		}
 	}
-
+	// add results from set to vector which we are returning
+	result.insert(result.begin(), setResult.begin(), setResult.end());
 	// insert into cache for future use
-	mpPKB->insertintoCache(PKB::Relation::ParentT, parentType, childType, res);
-	return res;
-}
-
-void PQLEvaluator::confirmPending(vector<int> &pendingList, vector<int> &res, int &counter) {
-		res.insert(res.end(), pendingList.begin(), pendingList.end());
-		// move counter up by the number of elements that were in pendingList, this helps us prevent repeats
-		// without using set or some sort of expensive union
-		counter += pendingList.size();
-		pendingList.clear();
-}
-
-void PQLEvaluator::discardPending(vector<int>& pendingList, int& counter) {
-	// discards the last element of pendingList, moves counter up by 1
-	counter += 1;
-	pendingList.pop_back();
+	mpPKB->insertintoCache(PKB::Relation::ParentT, parentType, childType, result);
+	return result;
 }
 
 // todo @nicholas: this function confirm will have bugs, dont need to say
-bool PQLEvaluator::checkForChildren(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, vector<int> &pendingList, int &counter) {
+bool PQLEvaluator::checkForChildrenT(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, set<int>& setResult) {
 	// if we have at least one child that is the desired childType
 	if (!grp->getMembers(childType).empty()) {
 		return true;
 	}
-	for (PKBGroup::SharedPtr &childGroup : grp->getChildGroups()) {
-		// find childGroupOwner of child group
-		PKBStatement::SharedPtr childGroupOwner = mpPKB->getStatement(childGroup->getOwner());
 
-		// if we found another child group that is parentType, add it to pendingList so we dont repeat it (it is surely next in line due to ascending line order assumption)
-		if (childGroupOwner->getType() == parentType) {
-			pendingList.push_back(childGroup->getOwner());
-		}
-
-		// then, if any of the childGroup has a child member with the desired type, all ancestors are good to go; recursive step
-		if (checkForChildren(childGroup, parentType, childType, pendingList, counter)) {
+	for (PKBGroup::SharedPtr& childGroup : grp->getChildGroups()) {
+		// recursive step: on the childGroups of grp
+		if (checkForChildrenT(childGroup, parentType, childType, setResult)) {
+			// if one of grp's childGrps does have a child of desired type:
+			PKBStatement::SharedPtr childGroupOwner = mpPKB->getStatement(childGroup->getOwner());
+			// add that childGrp if it also qualifies as a parent
+			if (childGroupOwner->getType() == parentType) {
+				setResult.insert(childGroupOwner->getIndex());
+			}
+			// and let grp's parents know we found a desired child
 			return true;
 		}
-		// discard this childGroup from our pending list since we know it doesnt have a child member
-		// dont discard currentGroup yet since we may have other childGroups that may have a child member
-		else if (childGroupOwner->getType() == parentType) {
-			discardPending(pendingList, counter);
-		}
 	}
-	// none of our childGroups have a child member with the desired type, return false
+
+	// none of grp's childGroups have a child member with the desired type, return false
 	return false;
 }
 
@@ -256,29 +243,36 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentInde
 		return res;
 	}
 
-	PKBGroup::SharedPtr curGroup = parent->getContainerGroup();
-	vector<PKBGroup::SharedPtr> toTraverse;
-	do {
-		// recurse down our children 
+	vector<PKBGroup::SharedPtr> grps = parent->getContainerGroups();
+	vector<PKBGroup::SharedPtr> toTraverse = grps;
+	
+	// recurse down our children 
+	while (!toTraverse.empty()) {
+		// pop the last element from toTraverse
+		PKBGroup::SharedPtr curGroup = toTraverse.back();
+		toTraverse.pop_back();
+
 		// first we note that we have to also check current group's childGroups later
 		vector<PKBGroup::SharedPtr> curGroupChildren = curGroup->getChildGroups();
 		toTraverse.insert(toTraverse.end(), curGroupChildren.begin(), curGroupChildren.end());
-		
+
 		// then we add current group's children members of the desired type
 		vector<int> curGroupMembers = curGroup->getMembers(childType);
 		res.insert(res.end(), curGroupMembers.begin(), curGroupMembers.end());
-	} while (!toTraverse.empty());
+	}
 
 	return res;
 }
 
 vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parent, PKBDesignEntity child)
 {
+	// todo @nicholas
 	return vector<int>();
 }
 
 vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parent)
 {
+	// todo @nicholas
 	return vector<int>();
 }
 
@@ -416,18 +410,18 @@ vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity
 	// get results manually
 	// get all the 'after' users first
 	vector<PKBStatement::SharedPtr> afterStatements = mpPKB->getStatements(afterType);
-	// keeps track of the furthest afterStatement number seen, so we dont double add users seen b4
+	// keeps track of the furthest statement number seen, so we dont double add users seen b4
 	int furthestIndexSeen = 0; 
 	for (auto& afterStatement : afterStatements) {
 		PKBGroup::SharedPtr grp = afterStatement->getGroup();
-		// get 'before' users of the desired type in the same group as the after afterStatement
+		// get 'before' users of the desired type in the same group as the after statement
 		vector<int> beforeStatements = grp->getMembers(beforeType);
 		for (int beforeStatement : beforeStatements) {
 			// we've seen past ourself, we can stop now
 			if (beforeStatement >= afterStatement->getIndex()) {
-				break; // this should break back into the outer loop and move the afterStatement index
+				break; // this should break back into the outer loop and move the statement index
 			}
-			// if we havent seen this before, add it to res (again, possible because ascending line numbers)
+			// if we havent seen this before, add it to result (again, possible because ascending line numbers)
 			else if (beforeStatement > furthestIndexSeen) {
 				res.emplace_back(beforeStatement);
 				furthestIndexSeen = beforeStatement;
@@ -486,7 +480,7 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 	// get all the 'before' users first
 	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(beforeType);
 
-	// keeps track of the earliest afterStatement number we've seen, so we dont double add users seen b4
+	// keeps track of the earliest statement number we've seen, so we dont double add users seen b4
 	int earliestIndexSeen = INT_MAX;
 
 	//count from the back, using rbegin and rend
@@ -498,7 +492,7 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 			if (*afterStatement <= (*beforeStatement)->getIndex()) {
 				break; // this should break back into the outer loop
 			}
-			// if we havent seen this before, add it to res (count from the back again)
+			// if we havent seen this before, add it to result (count from the back again)
 			else if (*afterStatement < earliestIndexSeen) {
 				res.emplace_back(*afterStatement);
 				earliestIndexSeen = *afterStatement;
