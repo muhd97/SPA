@@ -1,5 +1,7 @@
 #include "PQLParser.h"
 #include <iostream>
+#include <regex>
+#include <regex>
 
 using namespace std;
 
@@ -147,7 +149,9 @@ SPtr<EntRef> PQLParser::parseEntRef()
 
     case PQLTokenType::STRING:
         auto str = eat(PQLTokenType::STRING);
-        auto toReturn = make_shared<EntRef>(EntRefType::IDENT, str.stringValue);
+        // remove leading and trailing whitespaces
+        string cleaned = regex_replace(str.stringValue, regex("^ +| +$"), "");
+        auto toReturn = make_shared<EntRef>(EntRefType::IDENT, cleaned);
         return toReturn;
     }
     cout << "Unrecognized entity ref\n";
@@ -251,23 +255,22 @@ SPtr<ExpressionSpec> PQLParser::parseExpressionSpec()
 { 
     if (peek().type == PQLTokenType::UNDERSCORE) {
         eat(PQLTokenType::UNDERSCORE);
-
         if (peek().type == PQLTokenType::STRING) {
-            eat(PQLTokenType::STRING);
-            
-            Expression* expr = nullptr;
-
+            auto token = eat(PQLTokenType::STRING);
+            auto expressionTokens = simpleLex(token.stringValue);
+            shared_ptr<Expression> expr = parseSimpleExpression(expressionTokens);
             eat(PQLTokenType::UNDERSCORE);
             return make_shared<ExpressionSpec>(false, true, expr);
         }
         else {
             return make_shared<ExpressionSpec>(true, false, nullptr);
         }
-        
     }
     else if (peek().type == PQLTokenType::STRING) {
-        eat(PQLTokenType::STRING);
-        return make_shared<ExpressionSpec>(false, false, nullptr);
+        auto token = eat(PQLTokenType::STRING);
+        auto expressionTokens = simpleLex(token.stringValue);
+        shared_ptr<Expression> expr = parseSimpleExpression(expressionTokens);
+        return make_shared<ExpressionSpec>(false, false, expr);
     }
     else {
         cout << "Error: Invalid expression spec." << endl;
@@ -291,7 +294,7 @@ SPtr<PatternCl> PQLParser::parsePatternCl()
     auto exprSpec = parseExpressionSpec();
 
     eat(PQLTokenType::RIGHT_PAREN);
-    return make_shared<PatternCl>("x", nullptr, nullptr);
+    return make_shared<PatternCl>(syn, entRef, exprSpec);
 
 }
 
@@ -342,7 +345,7 @@ SPtr<SelectCl> PQLParser::parseSelectCl()
         }
     }
 
-    return make_shared<SelectCl>(move(synonym), move(declarations), move(suchThatClauses));
+    return make_shared<SelectCl>(move(synonym), move(declarations), move(suchThatClauses), move(patternClauses));
 
 }
 

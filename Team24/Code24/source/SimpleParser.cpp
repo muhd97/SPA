@@ -89,7 +89,16 @@ public:
     }
 
     SimpleToken peek() {
-        return SimpleTokens[index];
+        if (index < SimpleTokens.size()) {
+            return SimpleTokens[index];
+        }
+        else {
+            // parsing expression might peek into end of tokens
+            SimpleToken empty;
+            empty.type = SimpleTokenType::EMPTY;
+            return empty;
+        }
+        
     }
 
     SimpleToken peekNext() {
@@ -549,4 +558,9 @@ public:
 shared_ptr<Program> parseSimpleProgram(vector<SimpleToken> tokens) {
     shared_ptr<SimpleParser> parser = make_shared<SimpleParser>(tokens);
     return parser->parseProgram();
+}
+
+shared_ptr<Expression> parseSimpleExpression(vector<SimpleToken> tokens) {
+    shared_ptr<SimpleParser> parser = make_shared<SimpleParser>(tokens);
+    return parser->parseExpression();
 }

@@ -2,6 +2,8 @@
 
 #include "PQLLexer.h"
 #include "SimpleAST.h"
+#include "SimpleLexer.h"
+#include "SimpleParser.h"
 #include <vector>
 #include <iostream>
 #include <unordered_map>
@@ -495,14 +497,12 @@ class ExpressionSpec {
 public:
     bool isAnything;
     bool isPartialMatch;
-    // TODO (@jiachen) refactor to smart pointer
-    Expression* expression;
+    shared_ptr<Expression> expression;
 
-    ExpressionSpec(bool isAnything, bool isPartialMatch, Expression* expression)
+    ExpressionSpec(bool isAnything, bool isPartialMatch, shared_ptr<Expression> expression) : expression(move(expression))
     {
         this->isAnything = isAnything;
         this->isPartialMatch = isPartialMatch;
-        this->expression = expression;
     }
 
     ~ExpressionSpec() {
@@ -518,7 +518,7 @@ public:
         cout << "ExpressionSpec (";
         cout << "isAnything(" << isAnything << ") | ";
         cout << "isPartialMatchs(" << isPartialMatch << ") | ";
-        if (expression != NULL) {
+        if (expression != nullptr) {
             cout << "expression: " + expression->format(0);
         }
         cout << ")";
@@ -574,8 +574,8 @@ public:
     string targetSynonym;
     unordered_map<string, shared_ptr<Declaration>> synonymToParentDeclarationMap;
 
-    SelectCl(string syn, vector<shared_ptr<Declaration>> decl, vector<shared_ptr<SuchThatCl>> stht)
-        : targetSynonym(move(syn)), declarations(move(decl)), suchThatClauses(move(stht)) {
+    SelectCl(string syn, vector<shared_ptr<Declaration>> decl, vector<shared_ptr<SuchThatCl>> stht, vector<shared_ptr<PatternCl>> pttn)
+        : targetSynonym(move(syn)), declarations(move(decl)), suchThatClauses(move(stht)), patternClauses(move(pttn)) {
 
         for (auto& d : declarations) {
             for (string& syn : d->synonyms) {
@@ -600,6 +600,10 @@ public:
 
         for (auto& st : suchThatClauses) {
             st->printString();
+        }
+
+        for (auto& pt : patternClauses) {
+            pt->printString();
         }
 
         cout << ")";

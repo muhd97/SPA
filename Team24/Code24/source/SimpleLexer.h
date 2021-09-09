@@ -39,6 +39,7 @@ enum class SimpleTokenType
     NAME,
     INTEGER,
     PROCEDURE,
+    EMPTY,
 };
 
 struct SimpleToken

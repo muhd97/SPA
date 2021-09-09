@@ -85,7 +85,7 @@ namespace UnitTesting
 
             auto seven_1 = actualTokens[7]; 
             string seven_2 = getPQLTokenLabel(seven_1);
-            Assert::IsTrue(seven_2 == "name(p + q)"); //failing
+            Assert::IsTrue(seven_2 == "($p + $q)");
         }
 
         TEST_METHOD(TestpqlLex_PatternAnyLHSAnyRHS)
