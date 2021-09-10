@@ -58,6 +58,11 @@ void TestWrapper::parse(std::string filename) {
     this->pkb->initialise();
     this->pkb->extractDesigns(root);
 
+    cout << "NUM VARIABLE USED BY ASSIGN: " << this->pkb->mUsedVariables[PKBDesignEntity::Assign].size() << endl;
+    for (auto& v : this->pkb->mUsedVariables[PKBDesignEntity::Assign]) {
+        cout << "VARIABLE USED BY ASSIGN: " << v->getName() << endl;
+    }
+
     cout << "\n==== PKB has been populated. ====\n";
 
     // initializePKB(root, this->pkb);
@@ -74,28 +79,35 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
   // ...code to evaluate query...
 
     cout << "\n==== Parsing queries ====\n";
-    PQLParser p(pqlLex(query));
-    auto sel = p.parseSelectCl();
-    cout << "\n==== Printing Parsed Query ====\n";
-    sel->printString();
 
-    cout << "\n==== Processing PQL Query ====\n";
+    try {
+        PQLParser p(pqlLex(query));
+        auto sel = p.parseSelectCl();
+        cout << "\n==== Printing Parsed Query ====\n";
+        sel->printString();
 
-    shared_ptr<PQLEvaluator> evaluator = PQLEvaluator::create(this->pkb);
+        cout << "\n==== Processing PQL Query ====\n";
 
-    cout << "\n==== Created PQLEvaluator using PKB ====\n";
+        shared_ptr<PQLEvaluator> evaluator = PQLEvaluator::create(this->pkb);
 
-    shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
+        cout << "\n==== Created PQLEvaluator using PKB ====\n";
 
-    cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
+        shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
 
-    vector<shared_ptr<Result>> res = pqlProcessor->processPQLQuery(sel);
- 
-    for (auto& r : res) {
-        results.emplace_back(r->getResultAsString());
+        cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
+
+        vector<shared_ptr<Result>> res = pqlProcessor->processPQLQuery(sel);
+
+        for (auto& r : res) {
+            results.emplace_back(r->getResultAsString());
+        }
+
+    }
+    catch (const invalid_argument & e) {
+
     }
 
-    cout << "\n======== Finished Processing PQL Queries ========\n";
+    cout << "\n<<<< ======== Finished Processing PQL Queries ======== >>>>\n";
 
   // store the answers to the query in the results list (it is initially empty)
   // each result must be a string.

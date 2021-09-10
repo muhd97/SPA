@@ -39,6 +39,7 @@ inline PQLToken PQLParser::eat(PQLTokenType exepctedType)
     else {
         PQLToken temp(exepctedType);
         cout << "Expected: " << getPQLTokenLabel(temp) << " but got: " << getPQLTokenLabel(tok) << " instead\n";
+        throw std::invalid_argument("Error parsing PQL Query!!");
     }
     return tok;
 }
@@ -96,7 +97,7 @@ shared_ptr<DesignEntity> PQLParser::parseDesignEntity()
         eat(PQLTokenType::PROCEDURE);
         break;
     default:
-        cout << "Unrecognized Design Entity!\n";
+        cout << "WARNING: Unrecognized Design Entity!\n";
     }
 
     return make_shared<DesignEntity>(getPQLTokenLabel(curr));
@@ -311,6 +312,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
     string synonym;
+
     while (tokenIsDesignEntity(peek().type)) {
         declarations.push_back(parseDeclaration());
     }

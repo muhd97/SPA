@@ -519,13 +519,13 @@ vector<string> PQLEvaluator::getUsed(int statementIndex)
 
 vector<string> PQLEvaluator::getUsed(PKBDesignEntity userType)
 {
-	vector<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(userType);
+	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(userType);
 	return varToString(vars);
 }
 
 vector<string> PQLEvaluator::getUsed()
 {
-	vector<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
+	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
 	return varToString(vars);
 }
 
@@ -572,13 +572,13 @@ vector<string> PQLEvaluator::getModified(int statementIndex)
 
 vector<string> PQLEvaluator::getModified(PKBDesignEntity modifierType)
 {
-	vector<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(modifierType);
+	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(modifierType);
 	return varToString(vars);
 }
 
 vector<string> PQLEvaluator::getModified()
 {
-	vector<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
+	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
 	return varToString(vars);
 }
 
@@ -620,3 +620,33 @@ const vector<PKBStatement::SharedPtr>& PQLEvaluator::getStatementsByPKBDesignEnt
 {
 	return mpPKB->getStatements(pkbDe);
 }
+
+vector<PKBStatement::SharedPtr> PQLEvaluator::getAllStatements()
+{
+
+	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(PKBDesignEntity::_);
+
+	vector<PKBStatement::SharedPtr> toReturn;
+	toReturn.reserve(stmts.size());
+
+	for (auto& s : stmts) {
+		if (s->mType != PKBDesignEntity::Procedure) {
+			toReturn.emplace_back(s);
+		}
+	}
+
+	return move(toReturn);
+}
+
+vector<PKBVariable::SharedPtr> PQLEvaluator::getAllVariables()
+{
+	const unordered_map<string, PKBVariable::SharedPtr>& map = mpPKB->getAllVariablesMap();
+	vector<shared_ptr<PKBVariable>> vars;
+	vars.reserve(map.size());
+	for (auto& kv : map) {
+		vars.emplace_back(kv.second);
+	}
+
+	return move(vars);
+}
+

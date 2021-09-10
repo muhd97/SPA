@@ -1,15 +1,55 @@
-1 - comment
+1 - Select all Assign statements
 assign a;
 Select a
-1, 2
+1, 2, 5, 6
 5000
-2 - comment
+2 - Select all Read statements
 read r;
 Select r
-3
+3, 8
 5000
-3 - comment
+3 - Select all Print statements
 print p;
 Select p
-4
+4, 7
+5000
+4 - Negative Case: Procedure spelled wrongly
+procecure kz;
+Select kz
+
+5000
+5 - Select all Procedures
+procedure kz;
+Select kz
+yida1, yida2
+5000
+6 - Select all Variables
+variable vsew;
+Select vsew
+x, q, i, a, y, j, b, w
+5000
+7 - Select all Variables, but with redundant declaration
+variable vsew, k; assign a; stmt k;
+Select vsew
+x, q, i, a, y, j, b, w
+5000
+8 - Select all Assign, but with redundant declaration
+variable vsew, k; assign a; stmt k; procedure sd; print p; read r;
+Select a
+1, 2, 5, 6
+5000
+9 - Select all Procedures, but with redundant declaration
+variable vsew, k; assign a; stmt k; procedure sd; print p; read r;
+Select sd
+yida1, yida2
+5000
+10 - Select all Statements
+stmt s;
+Select s
+1, 4, 2, 3, 5, 7, 6, 8
+5000
+11 - Select v such that Uses(a, v)
+assign a; variable v;
+Select v such that Uses(a, v)
+x, y, z
 5000

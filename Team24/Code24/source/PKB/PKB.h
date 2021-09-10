@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cassert>
+#include <unordered_map>
+#include <set>
 #include "PKBVariable.h"
 #include "PKBDesignEntity.h"
 #include "PKBStatement.h"
@@ -35,14 +37,17 @@ public:
 	void extractDesigns(shared_ptr<Program> program);
 
 	// for all statements, use PKBDesignEntity::_, where position corresponds to statement index
-	map<PKBDesignEntity, vector<PKBStatement::SharedPtr>> mStatements;
+	unordered_map<PKBDesignEntity, vector<PKBStatement::SharedPtr>> mStatements;
 
 	// for each type (synonym), contains a vector of all the variables used/modified by all statements of that type 
-	map<PKBDesignEntity, vector<PKBVariable::SharedPtr>> mUsedVariables;
-	map<PKBDesignEntity, vector<PKBVariable::SharedPtr>> mModifiedVariables;
+	unordered_map<PKBDesignEntity, set<PKBVariable::SharedPtr>> mUsedVariables;
+	unordered_map<PKBDesignEntity, set<PKBVariable::SharedPtr>> mModifiedVariables;
 
-	// maps string to variable
-	map<string, PKBVariable::SharedPtr> mVariables;
+	// maps variable name (string) to PKBVariable object
+	unordered_map<string, PKBVariable::SharedPtr> mVariables;
+
+	// maps 
+
 	vector<PKBStatement::SharedPtr> mAllUseStmts; // statements that use a variable
 	vector<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
 
@@ -65,13 +70,13 @@ public:
 
 	// get used variables used by statements of a specified DesignEntity
 	// to get all used variables (by all statements), use PKBDesignEntity::_
-	vector<PKBVariable::SharedPtr> getUsedVariables(PKBDesignEntity s) {
+	set<PKBVariable::SharedPtr> getUsedVariables(PKBDesignEntity s) {
 		return mUsedVariables[s];
 	}
 
 	// get used variables modified by statements of a specified DesignEntity
 // to get all modified variables (by all statements), use PKBDesignEntity::_
-	vector<PKBVariable::SharedPtr> getModifiedVariables(PKBDesignEntity s) {
+	set<PKBVariable::SharedPtr> getModifiedVariables(PKBDesignEntity s) {
 		return mModifiedVariables[s];
 	}
 
@@ -103,6 +108,8 @@ public:
 	void insertintoCache(Relation rel, PKBDesignEntity a, PKBDesignEntity b, vector<int> &res) {
 		cache[rel][a][b] = res;
 	}
+
+	const unordered_map<string, PKBVariable::SharedPtr>& getAllVariablesMap() const;
 
 
 protected:

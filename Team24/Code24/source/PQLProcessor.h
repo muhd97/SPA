@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 
 #include ".\PKB\PQLEvaluator.h"
 #include "PQLParser.h"
@@ -22,18 +21,39 @@ tuples or other data types might be returned as result. As such, it will be usef
 a generic Result class to extend from.
 
 */
-enum class ResultType { StmtLineSingleResult, ProcedureNameSingleResult };
+enum class ResultType { StmtLineSingleResult, ProcedureNameSingleResult, VariableNameSingleResult, ConstantValueSingleResult };
 
 class Result {
 public:
+
+    static string dummy;
+
     virtual ResultType getResultType() {
         return ResultType::StmtLineSingleResult;
     }
-    virtual string getResultAsString() {
-        return "BaseResult: getResultAsString()";
+    virtual const string& getResultAsString() const {
+        return dummy;
     }
 };
 
+
+class VariableNameSingleResult : public Result {
+public:
+    string variableName;
+
+    VariableNameSingleResult(string varName) : variableName(move(varName)) {
+
+    }
+
+    ResultType getResultType() {
+        return ResultType::ProcedureNameSingleResult;
+    }
+
+    const string& getResultAsString() const override {
+        return variableName;
+    }
+
+};
 
 class ProcedureNameSingleResult : public Result {
 public:
@@ -47,7 +67,7 @@ public:
         return ResultType::ProcedureNameSingleResult;
     }
 
-    string getResultAsString() override {
+    const string& getResultAsString() const override {
         return procedureName;
     }
 
@@ -57,8 +77,9 @@ class StmtLineSingleResult : public Result {
 public:
 
     int stmtLine = -1;
+    string stmtLineString;
 
-    StmtLineSingleResult(int line) : stmtLine(line) {
+    StmtLineSingleResult(int line) : stmtLine(line), stmtLineString(to_string(stmtLine)) {
 
     }
 
@@ -70,8 +91,8 @@ public:
         return stmtLine;
     }
 
-    string getResultAsString() override {
-        return to_string(stmtLine);
+    const string& getResultAsString() const override {
+        return stmtLineString;
     }
 };
 
@@ -92,8 +113,8 @@ public:
     vector<shared_ptr<Result>> processPQLQuery(shared_ptr<SelectCl> selectCl);
 
 private:
-    vector<Result> processSuchThatClause(shared_ptr<SuchThatCl> suchThatCl);
-
+    vector<shared_ptr<Result>> handleNoRelRefOrPatternCase(shared_ptr<SelectCl> selectCl);
+    void handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl, vector<shared_ptr<Result>>& toReturn);
 };
 
 /*
@@ -102,6 +123,6 @@ This class is to be responsible for the formatting of the results from the PQL q
 
 */
 
-class PQLResultProcessor {
+class PQLResultFormatter {
 
 };

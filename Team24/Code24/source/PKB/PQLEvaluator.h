@@ -84,6 +84,12 @@ public:
 	// General: Access PKB's map<PKBDesignEntity, vector<PKBStatement::SharedPtr>> mStatements;
 	const vector<PKBStatement::SharedPtr>& getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;
 
+	// General: Get all statements in the PKB
+	vector<PKBStatement::SharedPtr> getAllStatements();
+
+	// General: Access PKB's unordered_map<string, PKBVariable::SharedPtr> mVariables;
+	vector<PKBVariable::SharedPtr> getAllVariables();
+
 protected:
 	PQLEvaluator(PKB::SharedPtr pPKB) {
 		mpPKB = pPKB;
@@ -100,12 +106,20 @@ protected:
 	}
 
 	// we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
-	vector<string> varToString(vector<PKBVariable::SharedPtr>& vars) {
+	vector<string> varToString(set<PKBVariable::SharedPtr>& vars) {
 		vector<string> res;
 		for (auto& var: vars) {
 			res.emplace_back(var->getName());
 		}
-		return res;
+		return move(res);
+	}
+
+	vector<string> varToString(vector<PKBVariable::SharedPtr>& vars) {
+		vector<string> res;
+		for (auto& var : vars) {
+			res.emplace_back(var->getName());
+		}
+		return move(res);
 	}
 
 	bool isContainerType(PKBDesignEntity s) {

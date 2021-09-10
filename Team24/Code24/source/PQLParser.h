@@ -185,7 +185,7 @@ public:
 
 };
 
-
+enum class RelRefType { USES_S, USES_P, MODIFIES_S, MODIFIES_P, FOLLOWS, FOLLOWS_T, PARENT, PARENT_T };
 
 // extend entRef to catch synonym vs. underscore vs. ident
 
@@ -199,6 +199,7 @@ public:
 
     virtual inline bool containsSynonym(string s) = 0;
 
+    virtual inline RelRefType getType() = 0;
 };
 
 class UsesS : public RelRef {
@@ -235,6 +236,10 @@ public:
 
         return flag;
     }
+
+    inline RelRefType getType() {
+        return RelRefType::USES_S;
+    }
 };
 
 class UsesP : public RelRef {
@@ -257,6 +262,10 @@ public:
         }
 
         return flag;
+    }
+
+    inline RelRefType getType() {
+        return RelRefType::USES_P;
     }
 };
 
@@ -295,6 +304,10 @@ public:
         return flag;
     }
 
+    inline RelRefType getType() {
+        return RelRefType::MODIFIES_S;
+    }
+
 };
 
 class ModifiesP : public RelRef {
@@ -317,6 +330,10 @@ public:
         }
 
         return flag;
+    }
+
+    inline RelRefType getType() {
+        return RelRefType::MODIFIES_P;
     }
 };
 
@@ -354,6 +371,10 @@ public:
 
         return flag;
     }
+
+    inline RelRefType getType() {
+        return RelRefType::PARENT;
+    }
 };
 
 class ParentT : public RelRef {
@@ -389,6 +410,10 @@ public:
         }
 
         return flag;
+    }
+
+    inline RelRefType getType() {
+        return RelRefType::PARENT_T;
     }
 };
 
@@ -427,6 +452,10 @@ public:
 
         return flag;
     }
+
+    inline RelRefType getType() {
+        return RelRefType::FOLLOWS;
+    }
 };
 
 class FollowsT : public RelRef {
@@ -462,6 +491,10 @@ public:
         }
 
         return flag;
+    }
+
+    inline RelRefType getType() {
+        return RelRefType::FOLLOWS_T;
     }
 };
 
@@ -584,7 +617,7 @@ public:
         }
     }
 
-    shared_ptr<Declaration> getParentDeclarationForSynonym(string s) {
+    shared_ptr<Declaration>& getParentDeclarationForSynonym(string s) {
         return synonymToParentDeclarationMap[s];
     }
 

@@ -21,13 +21,10 @@ void PKB::extractDesigns(shared_ptr<Program> program) {
 	set<string> extractedProcedures;
 
 
-	cout << "FOUND " << procedures.size() << " PROCEDURES TO EXTRACT\n";
-
 	for (shared_ptr<Procedure> procedure : procedures) {
 		// if we have not already extracted this procedureSimple, extract it
 
 		if (extractedProcedures.find(procedure->getName()) == extractedProcedures.end()) {
-			cout << "EXTRACTING PROCEDURE: " << procedure->getName() << endl;
 			extractProcedure(procedure);
 		}
 	}
@@ -68,8 +65,6 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSi
 	// add this statement to our 'global' list of all statements
 	addStatement(res, PKBDesignEntity::Procedure);
 
-	cout << "HELLO <<<<<<<<<<<<<<<<<<\n";
-
 	// create group of procedureSimple
 	PKBGroup::SharedPtr group = PKBGroup::create(procedureSimple->getName());
 	res->addContainerGroup(group);
@@ -91,6 +86,7 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSi
 }
 
 PKBStatement::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup) {
+
 	// 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles PARENTS and FOLLOWS
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
 	shared_ptr<AssignStatement> assn = static_pointer_cast<AssignStatement>(statement);
@@ -103,16 +99,23 @@ PKBStatement::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement>& state
 	// this variable is modified by this statement
 	var->addModifierStatement(res->getIndex());
 
+	// YIDA: For the var Modified by this Assign statement, we need to add it to the pkb's mModifiedVariables map.
+	addModifiedVariable(PKBDesignEntity::Assign, var);
+
 	// 3. USE - process the variables mentioned by RHS expression
 	// get all identifiers (string) referenced in the expression
 	vector<string> identifiers = getIdentifiers(assn->getExpr());
+
 	for (auto& identifier : identifiers) {
 		// for each string, we get the variable
 		PKBVariable::SharedPtr var = getVariable(identifier);
-		// our statement modifies this variable
+		// our statement uses this variable
 		res->addVariableUsed(var);
 		// this variable is modified by our statement
 		var->addUserStatement(res->getIndex());
+
+		// YIDA: For the var Used by this Assign statement, we need to add it to the pkb's mUsedVariables map.
+		addUsedVariable(PKBDesignEntity::Assign, var);
 	}
 
 	return res;
@@ -178,20 +181,20 @@ void PKB::addStatement(PKBStatement::SharedPtr& statement, PKBDesignEntity desig
 }
 
 void PKB::addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable) {
-	mUsedVariables[designEntity].emplace_back(variable);
+	mUsedVariables[designEntity].insert(variable);
 
 	// also put it in the global bucket list
 	if (designEntity != PKBDesignEntity::_) {
-		mUsedVariables[PKBDesignEntity::_].emplace_back(variable);
+		mUsedVariables[PKBDesignEntity::_].insert(variable);
 	}
 }
 
 void PKB::addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable) {
-	mModifiedVariables[designEntity].emplace_back(variable);
+	mModifiedVariables[designEntity].insert(variable);
 
 	// also put it in the global bucket list
 	if (designEntity != PKBDesignEntity::_) {
-		mModifiedVariables[PKBDesignEntity::_].emplace_back(variable);
+		mModifiedVariables[PKBDesignEntity::_].insert(variable);
 	}
 }
 
@@ -243,12 +246,18 @@ PKBVariable::SharedPtr PKB::getVariable(string name) {
 	}
 }
 
+const unordered_map<string, PKBVariable::SharedPtr>& PKB::getAllVariablesMap() const
+{
+	return mVariables;
+}
+
 vector<string> PKB::getIdentifiers(shared_ptr<Expression> expr) {
 	set<string> res; // using a set to prevent duplicates
 	vector<shared_ptr<Expression>> queue = { expr };
 
 	// comb through the expression and pick out all identifiers' names
 	while (!queue.empty()) {
+
 		// pop the last element
 		shared_ptr<Expression> e = queue.back();
 		queue.pop_back();
