@@ -5,8 +5,6 @@
 
 using namespace std;
 
-template <typename T>
-using SPtr = std::shared_ptr<T>;
 
 PQLToken PQLParser::peek() {
     return tokens[index];
@@ -45,14 +43,10 @@ inline PQLToken PQLParser::eat(PQLTokenType exepctedType)
     return tok;
 }
 
-void PQLParser::parsePQLQuery()
-{
-}
-
-SPtr<Declaration> PQLParser::parseDeclaration()
+shared_ptr<Declaration> PQLParser::parseDeclaration()
 {
     vector<string> synonyms;
-    SPtr<DesignEntity> d = parseDesignEntity();
+    shared_ptr<DesignEntity> d = parseDesignEntity();
 
     synonyms.push_back(parseSynonym());
 
@@ -67,7 +61,7 @@ SPtr<Declaration> PQLParser::parseDeclaration()
 }
 
 
-SPtr<DesignEntity> PQLParser::parseDesignEntity()
+shared_ptr<DesignEntity> PQLParser::parseDesignEntity()
 {
     PQLToken curr = peek();
     switch (curr.type) {
@@ -123,7 +117,7 @@ inline int PQLParser::parseInteger()
     return intToReturn.intValue;
 }
 
-SPtr<StmtRef> PQLParser::parseStmtRef()
+shared_ptr<StmtRef> PQLParser::parseStmtRef()
 {
     switch (peek().type) {
     case PQLTokenType::INTEGER:
@@ -136,7 +130,7 @@ SPtr<StmtRef> PQLParser::parseStmtRef()
     }
 }
 
-SPtr<EntRef> PQLParser::parseEntRef()
+shared_ptr<EntRef> PQLParser::parseEntRef()
 {
 
     switch (peek().type) {
@@ -158,7 +152,7 @@ SPtr<EntRef> PQLParser::parseEntRef()
     return make_shared<EntRef>(EntRefType::UNDERSCORE);
 }
 
-SPtr<UsesS> PQLParser::parseUses()
+shared_ptr<UsesS> PQLParser::parseUses()
 {
     eat(PQLTokenType::USES);
     eat(PQLTokenType::LEFT_PAREN);
@@ -173,7 +167,7 @@ SPtr<UsesS> PQLParser::parseUses()
     return make_shared<UsesS>(sRef, rRef);
 }
 
-SPtr<SuchThatCl> PQLParser::parseSuchThat() // todo
+shared_ptr<SuchThatCl> PQLParser::parseSuchThat() // todo
 {
     eat(PQLTokenType::SUCH_THAT);
     auto r = parseRelRef();
@@ -181,7 +175,7 @@ SPtr<SuchThatCl> PQLParser::parseSuchThat() // todo
 
 }
 
-SPtr<RelRef> PQLParser::parseRelRef() // todo
+shared_ptr<RelRef> PQLParser::parseRelRef() // todo
 {
     switch (peek().type) {
     case PQLTokenType::FOLLOWS:
@@ -251,7 +245,7 @@ SPtr<RelRef> PQLParser::parseRelRef() // todo
     }
 }
 
-SPtr<ExpressionSpec> PQLParser::parseExpressionSpec()
+shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
 { 
     if (peek().type == PQLTokenType::UNDERSCORE) {
         eat(PQLTokenType::UNDERSCORE);
@@ -279,7 +273,7 @@ SPtr<ExpressionSpec> PQLParser::parseExpressionSpec()
     return make_shared<ExpressionSpec>(false, false, nullptr);
 }
 
-SPtr<PatternCl> PQLParser::parsePatternCl()
+shared_ptr<PatternCl> PQLParser::parsePatternCl()
 {
     eat(PQLTokenType::PATTERN);
     auto syn = parseSynonym();
@@ -311,11 +305,11 @@ inline bool tokenIsDesignEntity(PQLTokenType tk) {
         || tk == PQLTokenType::PROCEDURE;
 }
 
-SPtr<SelectCl> PQLParser::parseSelectCl()
+shared_ptr<SelectCl> PQLParser::parseSelectCl()
 {
-    vector<SPtr<Declaration>> declarations;
-    vector<SPtr<SuchThatCl>> suchThatClauses;
-    vector<SPtr<PatternCl>> patternClauses;
+    vector<shared_ptr<Declaration>> declarations;
+    vector<shared_ptr<SuchThatCl>> suchThatClauses;
+    vector<shared_ptr<PatternCl>> patternClauses;
     string synonym;
     while (tokenIsDesignEntity(peek().type)) {
         declarations.push_back(parseDeclaration());

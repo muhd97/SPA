@@ -23,7 +23,7 @@ volatile bool TestWrapper::GlobalStop = false;
 TestWrapper::TestWrapper() {
   // create any objects here as instance variables of this class
   // as well as any initialization required for your spa program
-    
+    pkb = make_shared<PKB>();
 }
 
 // method for parsing the SIMPLE source
@@ -77,7 +77,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
     cout << "\n==== Processing PQL Query ====\n";
     /* Process the parsed query. */
 
-    /* Processor constructor needs Evaluator. Evaluator constructor needs PKB. PKB needs SimpleAST to populate */
+    /* PQLProcessor constructor needs Evaluator. Evaluator constructor needs PKB. PKB needs SimpleAST to populate */
 
     shared_ptr<PKB> mockPKB = make_shared<PKB>();
     shared_ptr<PKBVariable> mockVariableX = PKBVariable::create("x");

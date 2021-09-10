@@ -668,7 +668,6 @@ public:
     void advance();
     bool tokensAreEmpty();
     PQLToken eat(PQLTokenType exepctedType);
-    void parsePQLQuery();
     shared_ptr<Declaration> parseDeclaration();
     shared_ptr<DesignEntity> parseDesignEntity();
     shared_ptr<SuchThatCl> parseSuchThat();
