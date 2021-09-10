@@ -3,3 +3,13 @@ assign a;
 Select a
 1, 2
 5000
+2 - comment
+read r;
+Select r
+3
+5000
+3 - comment
+print p;
+Select p
+4
+5000

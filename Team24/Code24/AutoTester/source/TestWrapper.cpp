@@ -54,7 +54,12 @@ void TestWrapper::parse(std::string filename) {
 
     // BUILD PKB HERE
     cout << "\n==== Building PKB ====\n";
-    
+
+    this->pkb->initialise();
+    this->pkb->extractDesigns(root);
+
+    cout << "\n==== PKB has been populated. ====\n";
+
     // initializePKB(root, this->pkb);
     
     cout << "\n==== Running PQL Tests ====\n";
@@ -75,30 +80,22 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
     sel->printString();
 
     cout << "\n==== Processing PQL Query ====\n";
-    /* Process the parsed query. */
 
-    /* PQLProcessor constructor needs Evaluator. Evaluator constructor needs PKB. PKB needs SimpleAST to populate */
+    shared_ptr<PQLEvaluator> evaluator = PQLEvaluator::create(this->pkb);
 
-    shared_ptr<PKB> mockPKB = make_shared<PKB>();
-    shared_ptr<PKBVariable> mockVariableX = PKBVariable::create("x");
-    shared_ptr<PKBVariable> mockVariableY = PKBVariable::create("y");
-    vector<shared_ptr<PKBVariable>> mockUses = {};
-    vector<shared_ptr<PKBVariable>> mockModifiesX = { mockVariableX };
-    vector<shared_ptr<PKBVariable>> mockModifiesY = { mockVariableY };
+    cout << "\n==== Created PQLEvaluator using PKB ====\n";
 
-    vector<shared_ptr<PKBStatement>> mockPKBStatements = { 
-        PKBStatement::create(1, PKBDesignEntity::Assign, mockUses, mockModifiesX),
-        PKBStatement::create(2, PKBDesignEntity::Assign, mockUses, mockModifiesY)
-    };
+    shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
 
-    mockPKB->mStatements[PKBDesignEntity::Assign] = move(mockPKBStatements);
-    shared_ptr<PQLEvaluator> mockEvaluator = PQLEvaluator::create(mockPKB);
-    shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(mockEvaluator);
+    cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
+
     vector<shared_ptr<Result>> res = pqlProcessor->processPQLQuery(sel);
-    
+ 
     for (auto& r : res) {
         results.emplace_back(r->getResultAsString());
     }
+
+    cout << "\n======== Finished Processing PQL Queries ========\n";
 
   // store the answers to the query in the results list (it is initially empty)
   // each result must be a string.

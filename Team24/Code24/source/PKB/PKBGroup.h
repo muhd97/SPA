@@ -11,6 +11,7 @@ using namespace std;
 class PKBGroup {
 public:	
 	using SharedPtr = std::shared_ptr<PKBGroup>;
+	using WeakPtr = std::weak_ptr<PKBGroup>;
 
 	static SharedPtr create(int ownerStatementIndex) {
 		return SharedPtr(new PKBGroup(ownerStatementIndex));
@@ -33,12 +34,16 @@ public:
 	set<PKBVariable::SharedPtr> mModifies;
 
 	// groups
-	PKBGroup::SharedPtr mParentGroup;
-	vector<PKBGroup::SharedPtr> mChildGroups;
+	PKBGroup::WeakPtr mParentGroup; // Weak pointer to parentGroup
+	vector<PKBGroup::SharedPtr> mChildGroups; // vector of shared pointer to all of it's child groups.
 	
 	// returns index (statement number) of statement which owns this group
 	int getOwner() {
 		return mOwnerIndex;
+	}
+
+	const weak_ptr<PKBGroup>& getParentGroupWeakPtr() const {
+		return mParentGroup;
 	}
 
 	// get members of particular synonym. to get all members, use PKBDesignEntity::_

@@ -1,4 +1,6 @@
 procedure yida1 {
     x = 1;
     y = 2;
+	read a;
+	print b;
 }
