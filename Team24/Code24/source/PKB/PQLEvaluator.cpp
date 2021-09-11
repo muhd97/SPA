@@ -182,7 +182,7 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntit
 		// check for children in the groups that this statement owns
 		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
 		for (auto& grp : grps) {
-			if (checkForChildrenT(grp, parentType, childType, setResult)) {
+			if (hasEligibleChildRecursive(grp, parentType, childType, setResult)) {
 				setResult.insert(stmt->getIndex());
 				break;
 			}
@@ -196,7 +196,7 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntit
 }
 
 // todo @nicholas: this function confirm will have bugs, dont need to say
-bool PQLEvaluator::checkForChildrenT(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, set<int>& setResult) {
+bool PQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, set<int>& setResult) {
 	// if we have at least one child that is the desired childType
 	if (!grp->getMembers(childType).empty()) {
 		return true;
@@ -204,10 +204,10 @@ bool PQLEvaluator::checkForChildrenT(PKBGroup::SharedPtr grp, PKBDesignEntity pa
 
 	for (PKBGroup::SharedPtr& childGroup : grp->getChildGroups()) {
 		// recursive step: on the childGroups of grp
-		if (checkForChildrenT(childGroup, parentType, childType, setResult)) {
+		if (hasEligibleChildRecursive(childGroup, parentType, childType, setResult)) {
 			// if one of grp's childGrps does have a child of desired type:
 			PKBStatement::SharedPtr childGroupOwner = mpPKB->getStatement(childGroup->getOwner());
-			// add that childGrp if it also qualifies as a parent
+			// add the grp's childGrp if it also qualifies as a parent
 			if (childGroupOwner->getType() == parentType) {
 				setResult.insert(childGroupOwner->getIndex());
 			}
@@ -264,16 +264,74 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentInde
 	return res;
 }
 
-vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parent, PKBDesignEntity child)
+// todo @nicholas probably missing some edge case testing
+vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	// todo @nicholas
-	return vector<int>();
+	vector<int> result;
+
+	// if parentType is none of the container types, there are no such children
+	if (!isContainerType(parentType)) {
+		return result;
+	}
+
+	// check if result is cached, if so return results
+	if (mpPKB->getCached(PKB::Relation::ChildT, parentType, childType, result)) {
+		return result;
+	}
+
+	// if parentType is PKBDesignEntity::_ call the other function instead (temporarily doing this because im scared of bugs)
+	if (parentType == PKBDesignEntity::_) {
+		return getChildrenT(childType);
+	}
+
+	// if not cached, we find the result manually and insert it into the cache
+	// note: even though we are finding children this time, it is still easier to traverse the parents instead
+	vector<PKBStatement::SharedPtr> parentStmts;
+	if (parentType == PKBDesignEntity::_) {
+		addParentStmts(parentStmts);
+	}
+	else {
+		// check these 'possible' parent statements
+		parentStmts = mpPKB->getStatements(parentType);
+	}
+
+	set<int> setResult;
+	// Iterative implementation of recursive concept
+	// 1. store a vector of groups we need to go through
+	vector<PKBGroup::SharedPtr> toTraverse;
+
+	// 2. add all the groups of the parent statements we need to go through
+	for (auto& stmt : parentStmts) {
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		toTraverse.insert(toTraverse.end(), grps.begin(), grps.end());
+	}
+
+	// 3. go through all the groups one by one, adding relevant children statements
+	while (!toTraverse.empty()) {
+		// pop the last group
+		PKBGroup::SharedPtr grp = toTraverse.back();
+		toTraverse.pop_back();
+
+		// add all desired children of that group to the result set
+		vector<int>& desiredChildren = grp->getMembers(childType);
+		setResult.insert(desiredChildren.begin(), desiredChildren.end());
+
+		// add all childGroups of grp to our toTraverse list (hence, list grows too)
+		for (PKBGroup::SharedPtr& childGroup : grp->getChildGroups()) {
+			toTraverse.emplace_back(childGroup);
+		}
+	}
+
+	// add results from set to vector which we are returning
+	result.insert(result.begin(), setResult.begin(), setResult.end());
+	// insert into cache for future use
+	mpPKB->insertintoCache(PKB::Relation::ChildT, parentType, childType, result);
+	return result;
 }
 
-vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parent)
+vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType)
 {
-	// todo @nicholas
-	return vector<int>();
+	return getChildrenT(parentType, PKBDesignEntity::_);
 }
 
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
@@ -649,4 +707,3 @@ vector<PKBVariable::SharedPtr> PQLEvaluator::getAllVariables()
 
 	return move(vars);
 }
-

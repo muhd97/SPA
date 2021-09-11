@@ -25,22 +25,22 @@ public:
 	// Parent
 	// 1 for each of (constant, synonym, underscore)
 	// Parent(
-	vector<int> getParents(PKBDesignEntity parent, int child);
-	vector<int> getParents(PKBDesignEntity parent, PKBDesignEntity child);
-	vector<int> getParents(PKBDesignEntity child);
+	vector<int> getParents(PKBDesignEntity parentType, int child);
+	vector<int> getParents(PKBDesignEntity parentType, PKBDesignEntity childType);
+	vector<int> getParents(PKBDesignEntity childType);
 
-	vector<int> getChildren(PKBDesignEntity child, int parent);
-	vector<int> getChildren(PKBDesignEntity parent, PKBDesignEntity child);
-	vector<int> getChildren(PKBDesignEntity parent);
+	vector<int> getChildren(PKBDesignEntity childType, int parent);
+	vector<int> getChildren(PKBDesignEntity parentType, PKBDesignEntity childType);
+	vector<int> getChildren(PKBDesignEntity parentType);
 
 	// Parent*
-	vector<int> getParentsT(PKBDesignEntity parent, int child);
-	vector<int> getParentsT(PKBDesignEntity parent, PKBDesignEntity child);
-	vector<int> getParentsT(PKBDesignEntity child);
+	vector<int> getParentsT(PKBDesignEntity parentType, int child);
+	vector<int> getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType);
+	vector<int> getParentsT(PKBDesignEntity childType);
 	
 	vector<int> getChildrenT(PKBDesignEntity child, int parent);
-	vector<int> getChildrenT(PKBDesignEntity parent, PKBDesignEntity child);
-	vector<int> getChildrenT(PKBDesignEntity parent);
+	vector<int> getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType);
+	vector<int> getChildrenT(PKBDesignEntity parentType);
 
 	// Follow
 	vector<int> getBefore(PKBDesignEntity before, int after);
@@ -132,7 +132,5 @@ protected:
 	}
 
 	// helper function for ParentT (getParentsT)
-	bool checkForChildrenT(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, set<int>& setResult);
-
-	//helper function for ParentT (getChildrenT)
+	bool hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, set<int>& setResult);
 };
