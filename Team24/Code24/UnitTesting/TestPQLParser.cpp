@@ -67,7 +67,28 @@ namespace UnitTesting
 
             auto actualResult = PQLParser(input).parseSuchThat();
 
-            Assert::IsTrue(actualResult->containsSynonym("x")); //any suggestions on how to improve this?
+            Assert::IsTrue(actualResult->containsSynonym("x")); 
+            
+            // Redirect cout.
+            streambuf* oldCoutStreamBuf = cout.rdbuf();
+
+            ostringstream strCout;
+            
+            cout.rdbuf(strCout.rdbuf());
+
+            // This goes to the string stream.
+            actualResult->relRef->printString();
+
+            // Restore old cout.
+            cout.rdbuf(oldCoutStreamBuf);
+
+            // Will output our string from above.
+            //cout << strCout.str();
+
+            std::string actualResultString = strCout.str();
+           
+            //Logger::WriteMessage(actualout.c_str());
+            Assert::IsTrue(actualResultString == "Parent*[synonym(x), _]");
         }
 
         TEST_METHOD(TestpqlParse_Select)
