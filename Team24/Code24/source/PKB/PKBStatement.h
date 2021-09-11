@@ -11,7 +11,7 @@ class PKBStatement {
 public:
 	using SharedPtr = std::shared_ptr<PKBStatement>;
 
-	static SharedPtr create(int statementIndex, PKBDesignEntity type, vector<PKBVariable::SharedPtr> uses, vector<PKBVariable::SharedPtr> modifies) {
+	static SharedPtr create(int statementIndex, PKBDesignEntity type, set<PKBVariable::SharedPtr> uses, set<PKBVariable::SharedPtr> modifies) {
 		return SharedPtr(new PKBStatement(statementIndex, type, uses, modifies));
 	}
 
@@ -28,8 +28,8 @@ public:
 	PKBDesignEntity mType;
 	PKBGroup::SharedPtr mBelongsTo;
 	vector<PKBGroup::SharedPtr> mContainerGroup;
-	vector<PKBVariable::SharedPtr> mUses;
-	vector<PKBVariable::SharedPtr> mModifies;
+	set<PKBVariable::SharedPtr> mUses;
+	set<PKBVariable::SharedPtr> mModifies;
 
 	std::shared_ptr<PKBGroup> getGroup() {
 		return mBelongsTo;
@@ -41,11 +41,11 @@ public:
 		return mContainerGroup;
 	}
 
-	std::vector<std::shared_ptr<PKBVariable>> getVariablesUsed() {
+	std::set<std::shared_ptr<PKBVariable>> getUsedVariables() {
 		return mUses;
 	}
 
-	std::vector<std::shared_ptr<PKBVariable>> getVariablesModified() {
+	std::set<std::shared_ptr<PKBVariable>> getModifiedVariables() {
 		return mModifies;
 	}
 
@@ -65,17 +65,25 @@ public:
 		mContainerGroup.emplace_back(containerGroup);
 	}
 
-	void addVariableUsed(PKBVariable::SharedPtr variable) {
-		mUses.emplace_back(variable);
+	void addUsedVariable(PKBVariable::SharedPtr variable) {
+		mUses.insert(variable);
 	}
 
-	void addVariableModified(PKBVariable::SharedPtr variable) {
-		mModifies.emplace_back(variable);
+	void addModifiedVariable(PKBVariable::SharedPtr variable) {
+		mModifies.insert(variable);
+	}
+
+	void addUsedVariables(set<PKBVariable::SharedPtr> variables) {
+		mUses.insert(variables.begin(), variables.end());
+	}
+
+	void addModifiedVariables(set<PKBVariable::SharedPtr> variables) {
+		mUses.insert(variables.begin(), variables.end());
 	}
 
 protected:
 	PKBStatement(int statementIndex, PKBDesignEntity type, 
-		vector<PKBVariable::SharedPtr> uses, vector<PKBVariable::SharedPtr> modifies) {
+		set<PKBVariable::SharedPtr> uses, set<PKBVariable::SharedPtr> modifies) {
 		mIndex = statementIndex;
 		mType = type;
 		mUses = uses;

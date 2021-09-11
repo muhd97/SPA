@@ -70,8 +70,8 @@ PKBStatement::SharedPtr CraftingBench::extractProcedure(shared_ptr<Procedure>& p
 		group->addMember(child->getIndex(), child->getType());
 
 		// add the uses/modifies variables of child
-		group->addUsedVariables(child->getVariablesUsed());
-		group->addModifiedVariables(child->getVariablesModified());
+		group->addUsedVariables(child->getUsedVariables());
+		group->addModifiedVariables(child->getModifiedVariables());
 	}
 
 	return res;
@@ -86,7 +86,7 @@ PKBStatement::SharedPtr CraftingBench::extractAssignStatement(shared_ptr<Stateme
 	// get the variable using the variable name
 	PKBVariable::SharedPtr var = getVariable(assn->getId()->getName());
 	// our statement modifies this variable
-	res->addVariableModified(var);
+	res->addModifiedVariable(var);
 	// this variable is modified by this statement
 	var->addModifierStatement(res->getIndex());
 
@@ -97,7 +97,7 @@ PKBStatement::SharedPtr CraftingBench::extractAssignStatement(shared_ptr<Stateme
 		// for each string, we get the variable
 		PKBVariable::SharedPtr var = getVariable(identifier);
 		// our statement modifies this variable
-		res->addVariableUsed(var);
+		res->addUsedVariable(var);
 		// this variable is modified by our statement
 		var->addUserStatement(res->getIndex());
 	}
@@ -114,7 +114,7 @@ PKBStatement::SharedPtr CraftingBench::extractReadStatement(shared_ptr<Statement
 	// get the variable using the variable name
 	PKBVariable::SharedPtr var = getVariable(assn->getId()->getName());
 	// statement modifies this variable
-	res->addVariableModified(var);
+	res->addModifiedVariable(var);
 	// variable is modified by this statement
 	var->addModifierStatement(res->getIndex());
 
@@ -130,7 +130,7 @@ PKBStatement::SharedPtr CraftingBench::extractPrintStatement(shared_ptr<Statemen
 	// get the variable using the variable name
 	PKBVariable::SharedPtr var = getVariable(assn->getId()->getName());
 	// statement modifies this variable
-	res->addVariableUsed(var);
+	res->addUsedVariable(var);
 	// variable is modified by this statement
 	var->addUserStatement(res->getIndex());
 

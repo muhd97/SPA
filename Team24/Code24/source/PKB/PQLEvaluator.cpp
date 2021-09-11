@@ -513,7 +513,7 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType)
 vector<string> PQLEvaluator::getUsed(int statementIndex)
 {
 	PKBStatement::SharedPtr stmt = mpPKB->getStatement(statementIndex);
-	vector<PKBVariable::SharedPtr> vars = stmt->getVariablesUsed();
+	set<PKBVariable::SharedPtr> vars = stmt->getUsedVariables();
 	return varToString(vars);
 }
 
@@ -566,7 +566,7 @@ vector<int> PQLEvaluator::getUsers()
 vector<string> PQLEvaluator::getModified(int statementIndex)
 {
 	PKBStatement::SharedPtr stmt = mpPKB->getStatement(statementIndex);
-	vector<PKBVariable::SharedPtr> vars = stmt->getVariablesModified();
+	set<PKBVariable::SharedPtr> vars = stmt->getModifiedVariables();
 	return varToString(vars);
 }
 

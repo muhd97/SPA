@@ -95,8 +95,18 @@ public:
     ExpressionType getExpressionType();
 };
 
-class ConditionalExpression : public Node {
+enum class ConditionalType {
+    BOOLEAN,
+    NOT,
+    RELATIONAL,
+    NONE,
+};
 
+class  ConditionalExpression : public Node {
+public:
+    virtual ConditionalType getConditionalType() {
+        return ConditionalType::NONE;
+    }
 };
 
 enum class BooleanOperator {
@@ -125,7 +135,16 @@ public:
         this->lhs = lhs;
     }
 
+    shared_ptr<ConditionalExpression> getLHS() {
+        return lhs;
+    }
+
+    shared_ptr<ConditionalExpression> getRHS() {
+        return rhs;
+    }
+
     string format(int level);
+    ConditionalType getConditionalType();
 };
 
 class NotExpression : public ConditionalExpression {
@@ -136,7 +155,12 @@ public:
         this->expr = expr;
     }
 
+    shared_ptr<ConditionalExpression> getExpr() {
+        return expr;
+    }
+
     string format(int level);
+    ConditionalType getConditionalType();
 };
 
 enum class Rop {
@@ -160,7 +184,16 @@ public:
         this->rhs = rhs;
     }
 
+    shared_ptr<Expression> getLHS() {
+        return lhs;
+    }
+
+    shared_ptr<Expression> getRHS() {
+        return rhs;
+    }
+
     string format(int level);
+    ConditionalType getConditionalType();
 };
 
 enum class StatementType {
@@ -315,6 +348,9 @@ public:
         return block->getStatements();
     }
 
+    shared_ptr<ConditionalExpression> getConditional() {
+        return cond;
+    }
 };
 
 class IfStatement : public Statement {
@@ -342,6 +378,19 @@ public:
         return consequentStatements;
     }
 
+    //return a consequent statement list
+    shared_ptr<StatementList> getConsequent() {
+        return consequent;
+    }
+
+    //return a consequent statement list
+    shared_ptr<StatementList> getAlternative() {
+        return alternative;
+    }
+
+    shared_ptr<ConditionalExpression> getConditional() {
+        return cond;
+    }
 };
 
 class AssignStatement : public Statement {

@@ -55,12 +55,12 @@ public:
 		return mChildGroups;
 	}
 
-	vector<PKBVariable::SharedPtr> getVariablesUsed() {
-		return vector(mUses.begin(), mUses.end());
+	set<PKBVariable::SharedPtr> getUsedVariables() {
+		return mUses;
 	}
 
-	vector<PKBVariable::SharedPtr> getVariablesModified() {
-		return vector(mModifies.begin(), mModifies.end());
+	set<PKBVariable::SharedPtr> getModifiedVariables() {
+		return mModifies;
 	}
 
 	// add a statement of type specified by designEntity
@@ -73,12 +73,21 @@ public:
 		}
 	}
 
-	void addUsedVariables(vector<PKBVariable::SharedPtr> variables) {
+	void addUsedVariables(set<PKBVariable::SharedPtr>& variables) {
 		mUses.insert(variables.begin(), variables.end());
 	}
 
-	void addModifiedVariables(vector<PKBVariable::SharedPtr> variables) {
+	void addModifiedVariables(set<PKBVariable::SharedPtr>& variables) {
 		mModifies.insert(variables.begin(), variables.end());
+	}
+
+	void addChildGroup(PKBGroup::SharedPtr& childGroup) {
+		mChildGroups.emplace_back(childGroup);
+	}
+
+	void setParentGroup(PKBGroup::SharedPtr& parentGroup) {
+		// todo @nicholas weak ptr = shared ptr ?? dunno if have problem
+		mParentGroup = parentGroup;
 	}
 
 protected:

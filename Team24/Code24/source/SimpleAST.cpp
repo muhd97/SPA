@@ -95,6 +95,18 @@ ExpressionType Identifier::getExpressionType() {
     return ExpressionType::IDENTIFIER;
 }
 
+ConditionalType BooleanExpression::getConditionalType() {
+    return ConditionalType::BOOLEAN;
+}
+
+ConditionalType NotExpression::getConditionalType() {
+    return ConditionalType::NOT;
+}
+
+ConditionalType RelationalExpression::getConditionalType() {
+    return ConditionalType::RELATIONAL;
+}
+
 string CombinationExpression::format(int level) {
     if (lhs == NULL) {
         return "ERROR: LEFT SHOULD NOT BE NULL";

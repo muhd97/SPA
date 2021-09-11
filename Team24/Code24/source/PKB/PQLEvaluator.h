@@ -114,14 +114,6 @@ protected:
 		return move(res);
 	}
 
-	vector<string> varToString(vector<PKBVariable::SharedPtr>& vars) {
-		vector<string> res;
-		for (auto& var : vars) {
-			res.emplace_back(var->getName());
-		}
-		return move(res);
-	}
-
 	bool isContainerType(PKBDesignEntity s) {
 		return s == PKBDesignEntity::If ||
 			s == PKBDesignEntity::While ||

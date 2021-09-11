@@ -136,10 +136,18 @@ protected:
 	PKBStatement::SharedPtr extractCallStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup);
 
 	PKBStatement::SharedPtr createPKBStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup);
+	PKBGroup::SharedPtr createPKBGroup(string& name, PKBStatement::SharedPtr& ownerStatement);
+	PKBGroup::SharedPtr createPKBGroup(PKBStatement::SharedPtr& ownerStatement, PKBGroup::SharedPtr& parentGroup);
 
 	vector<string> getIdentifiers(shared_ptr<Expression> expr);
+	vector<string> getIdentifiers(shared_ptr<ConditionalExpression> expr);
 
 	PKBDesignEntity simpleToPKBType(StatementType);
 
-
+private:
+	// map used to keep track of extracted Procedures during DesignExtraction, not needed thereafter
+	// if a procedure has been extracted, it will be present in this map, else it has not been extracted
+	map<string, PKBStatement::SharedPtr> extractedProcedures;
+	// remembers the main program node
+	shared_ptr<Program> programToExtract;
 };

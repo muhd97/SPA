@@ -14,21 +14,21 @@ void PKB::initialise() {
 		mUsedVariables[de] = {};
 		mModifiedVariables[de] = {};
 	}
+	// reset extracted Procedures
+	extractedProcedures.clear();
 }
 
 void PKB::extractDesigns(shared_ptr<Program> program) {
+	// store reference to program to be extracted
+	programToExtract = program;
+	
 	vector<shared_ptr<Procedure>> procedures = program->getProcedures();
-	set<string> extractedProcedures;
-
-
 	for (shared_ptr<Procedure> procedure : procedures) {
 		// if we have not already extracted this procedureSimple, extract it
-
-		if (extractedProcedures.find(procedure->getName()) == extractedProcedures.end()) {
+		if (!extractedProcedures.count(procedure->getName())) {
 			extractProcedure(procedure);
 		}
 	}
-
 }
 
 PKBStatement::SharedPtr PKB::extractStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& group) {
@@ -62,12 +62,13 @@ PKBStatement::SharedPtr PKB::extractStatement(shared_ptr<Statement>& statement, 
 PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSimple) {
 	// create procedureSimple statement
 	PKBStatement::SharedPtr res = PKBStatement::create(procedureSimple->getName(), PKBDesignEntity::Procedure);
-	// add this statement to our 'global' list of all statements
+	// add this procedureCalled to the list of extracted simpleProcedures (used to prevent repeat extraction during DesignExtraction)
+	extractedProcedures.insert({ procedureSimple->getName(), res });
+	// add this statement to our 'global' list of all simpleStatements
 	addStatement(res, PKBDesignEntity::Procedure);
 
-	// create group of procedureSimple
-	PKBGroup::SharedPtr group = PKBGroup::create(procedureSimple->getName());
-	res->addContainerGroup(group);
+	// create and link group of procedureSimple (linking in createPKBGroup function)
+	PKBGroup::SharedPtr group = createPKBGroup(procedureSimple->getName(), res);
 
 	vector<shared_ptr<Statement>> simpleStatements = procedureSimple->getStatementList()->getStatements();
 
@@ -78,9 +79,13 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSi
 		group->addMember(child->getIndex(), child->getType());
 
 		// add the uses/modifies variables of child
-		group->addUsedVariables(child->getVariablesUsed());
-		group->addModifiedVariables(child->getVariablesModified());
+		group->addUsedVariables(child->getUsedVariables());
+		group->addModifiedVariables(child->getModifiedVariables());
 	}
+
+	// now the original statement inherits from the group
+	res->addUsedVariables(group->getUsedVariables());
+	res->addModifiedVariables(group->getModifiedVariables());
 
 	return res;
 }
@@ -89,31 +94,29 @@ PKBStatement::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement>& state
 
 	// 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles PARENTS and FOLLOWS
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
-	shared_ptr<AssignStatement> assn = static_pointer_cast<AssignStatement>(statement);
+	shared_ptr<AssignStatement> assignStatement = static_pointer_cast<AssignStatement>(statement);
 
 	// 2. MODIFY - process the variable specified by LHS identifier 
 	// get the variable using the variable name
-	PKBVariable::SharedPtr var = getVariable(assn->getId()->getName());
+	PKBVariable::SharedPtr var = getVariable(assignStatement->getId()->getName());
 	// our statement modifies this variable
-	res->addVariableModified(var);
+	res->addModifiedVariable(var);
 	// this variable is modified by this statement
 	var->addModifierStatement(res->getIndex());
-
 	// YIDA: For the var Modified by this Assign statement, we need to add it to the pkb's mModifiedVariables map.
 	addModifiedVariable(PKBDesignEntity::Assign, var);
 
 	// 3. USE - process the variables mentioned by RHS expression
 	// get all identifiers (string) referenced in the expression
-	vector<string> identifiers = getIdentifiers(assn->getExpr());
+	vector<string> identifiers = getIdentifiers(assignStatement->getExpr());
 
 	for (auto& identifier : identifiers) {
 		// for each string, we get the variable
 		PKBVariable::SharedPtr var = getVariable(identifier);
 		// our statement uses this variable
-		res->addVariableUsed(var);
+		res->addUsedVariable(var);
 		// this variable is modified by our statement
 		var->addUserStatement(res->getIndex());
-
 		// YIDA: For the var Used by this Assign statement, we need to add it to the pkb's mUsedVariables map.
 		addUsedVariable(PKBDesignEntity::Assign, var);
 	}
@@ -124,15 +127,17 @@ PKBStatement::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement>& state
 PKBStatement::SharedPtr PKB::extractReadStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup) {
 	// 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles PARENTS and FOLLOWS
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
-	shared_ptr<ReadStatement> assn = static_pointer_cast<ReadStatement>(statement);
+	shared_ptr<ReadStatement> readStatement = static_pointer_cast<ReadStatement>(statement);
 
 	// 2. MODIFY - process the variable specified by the identifier 
 	// get the variable using the variable name
-	PKBVariable::SharedPtr var = getVariable(assn->getId()->getName());
+	PKBVariable::SharedPtr var = getVariable(readStatement->getId()->getName());
 	// statement modifies this variable
-	res->addVariableModified(var);
+	res->addModifiedVariable(var);
 	// variable is modified by this statement
 	var->addModifierStatement(res->getIndex());
+	// YIDA: For the var Modified by this Read statement, we need to add it to the pkb's mModifiedVariables map.
+	addModifiedVariable(PKBDesignEntity::Read, var);
 
 	return res;
 }
@@ -140,34 +145,148 @@ PKBStatement::SharedPtr PKB::extractReadStatement(shared_ptr<Statement>& stateme
 PKBStatement::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup) {
 	// create the PKBStatement
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
-	shared_ptr<PrintStatement> assn = static_pointer_cast<PrintStatement>(statement);
+	shared_ptr<PrintStatement> printStatement = static_pointer_cast<PrintStatement>(statement);
 
 	// 2. USE - handle the variable specified by the identifier 
 	// get the variable using the variable name
-	PKBVariable::SharedPtr var = getVariable(assn->getId()->getName());
+	PKBVariable::SharedPtr var = getVariable(printStatement->getId()->getName());
 	// statement modifies this variable
-	res->addVariableUsed(var);
+	res->addUsedVariable(var);
 	// variable is modified by this statement
 	var->addUserStatement(res->getIndex());
+	// YIDA: For the var Used by this Assign statement, we need to add it to the pkb's mUsedVariables map.
+	addUsedVariable(PKBDesignEntity::Assign, var);
 
 	return res;
 }
 
 PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup) {
-	// create a PKBStatement
+	// 1. create a PKBStatement
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+	shared_ptr<IfStatement> ifStatement = static_pointer_cast<IfStatement>(statement);
+
+	// 2. USE - process the variables mentioned by conditional statement
+	// get all identifiers (string) referenced in the expression
+	vector<string> identifiers = getIdentifiers(ifStatement->getConditional());
+	for (auto& identifier : identifiers) {
+		// for each string, we get the variable
+		PKBVariable::SharedPtr var = getVariable(identifier);
+		// our statement uses this variable
+		res->addUsedVariable(var);
+		// this variable is modified by our statement
+		var->addUserStatement(res->getIndex());
+		// YIDA: For the var Used by this Assign statement, we need to add it to the pkb's mUsedVariables map.
+		addUsedVariable(PKBDesignEntity::Assign, var);
+	}
+
+	// 3. create and link two groups for consequent and alternative of IfStatement (linking in createPKBGroup)
+	PKBGroup::SharedPtr consequentGroup = createPKBGroup(res, parentGroup);
+	PKBGroup::SharedPtr alternativeGroup = createPKBGroup(res, parentGroup);
+
+	vector<shared_ptr<Statement>> consequentStatements = ifStatement->getConsequent()->getStatements();
+	vector<shared_ptr<Statement>> alternativeStatements = ifStatement->getAlternative()->getStatements();
+
+	for (shared_ptr<Statement> ss : consequentStatements) {
+		PKBStatement::SharedPtr child = extractStatement(ss, consequentGroup);
+
+		// add the statementIndex to our group member list
+		consequentGroup->addMember(child->getIndex(), child->getType());
+
+		// add the uses/modifies variables of child
+		consequentGroup->addUsedVariables(child->getUsedVariables());
+		consequentGroup->addModifiedVariables(child->getModifiedVariables());
+	}
+
+	for (shared_ptr<Statement> ss : alternativeStatements) {
+		PKBStatement::SharedPtr child = extractStatement(ss, alternativeGroup);
+
+		// add the statementIndex to our group member list
+		alternativeGroup->addMember(child->getIndex(), child->getType());
+
+		// add the uses/modifies variables of child
+		alternativeGroup->addUsedVariables(child->getUsedVariables());
+		alternativeGroup->addModifiedVariables(child->getModifiedVariables());
+	}
+	
+	// now the original statement inherits from the group
+	res->addUsedVariables(consequentGroup->getUsedVariables());
+	res->addModifiedVariables(consequentGroup->getModifiedVariables());
+	res->addUsedVariables(alternativeGroup->getUsedVariables());
+	res->addModifiedVariables(alternativeGroup->getModifiedVariables());
+
 	return res;
 }
 
 PKBStatement::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup) {
-	// create a PKBStatement
+	// 1. create a PKBStatement
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+	shared_ptr<WhileStatement> whileStatement = static_pointer_cast<WhileStatement>(statement);
+
+	// 2. USE - process the variables mentioned by conditional statement
+	// get all identifiers (string) referenced in the expression
+	vector<string> identifiers = getIdentifiers(whileStatement->getConditional());
+	for (auto& identifier : identifiers) {
+		// for each string, we get the variable
+		PKBVariable::SharedPtr var = getVariable(identifier);
+		// our statement uses this variable
+		res->addUsedVariable(var);
+		// this variable is modified by our statement
+		var->addUserStatement(res->getIndex());
+		// YIDA: For the var Used by this Assign statement, we need to add it to the pkb's mUsedVariables map.
+		addUsedVariable(PKBDesignEntity::Assign, var);
+	}
+
+	// 3. create and link a group for block of WhileStatement (linking in createPKBGroup)
+	PKBGroup::SharedPtr group = createPKBGroup(res, parentGroup);
+
+	vector<shared_ptr<Statement>> simpleStatements = whileStatement->getStatementList();
+	for (shared_ptr<Statement> ss : simpleStatements) {
+		PKBStatement::SharedPtr child = extractStatement(ss, group);
+
+		// add the statementIndex to our group member list
+		group->addMember(child->getIndex(), child->getType());
+
+		// add the uses/modifies variables of child
+		group->addUsedVariables(child->getUsedVariables());
+		group->addModifiedVariables(child->getModifiedVariables());
+	}
+
+	// now the original statement inherits from the group
+	res->addUsedVariables(group->getUsedVariables());
+	res->addModifiedVariables(group->getModifiedVariables());
+
 	return res;
 }
 
 PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& parentGroup) {
-	// create a PKBStatement
+	// 1. create a PKBStatement
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+	shared_ptr<CallStatement> callStatement = static_pointer_cast<CallStatement>(statement);
+
+	// 2. we need to either extract the called procedure if it hasnt been extracted, or retrieve it if it has been
+	string procedureName = callStatement->getProcId()->getName();
+	PKBStatement::SharedPtr procedureCalled;
+	if (!extractedProcedures.count(procedureName)) {
+		// we need to locate the simple node for called procedure
+		vector<shared_ptr<Procedure>> simpleProcedures = programToExtract->getProcedures();
+		// loop through simpleProcedures to find the desired procedure node
+		for (auto& p : simpleProcedures) {
+			if (p->getName() == procedureName) {
+				// extract desired procedure
+				procedureCalled = extractProcedure(p);
+				break;
+			}
+		}
+	}
+	else {
+		// we have already extracted this procedure before, we just need to retrieve it
+		procedureCalled = extractedProcedures[procedureName];
+	}
+
+	// now the call statement inherits from the procedure
+	res->addUsedVariables(procedureCalled->getUsedVariables());
+	res->addModifiedVariables(procedureCalled->getModifiedVariables());
+
 	return res;
 }
 
@@ -175,7 +294,7 @@ void PKB::addStatement(PKBStatement::SharedPtr& statement, PKBDesignEntity desig
 	mStatements[designEntity].emplace_back(statement);
 
 	// also put it in the global bucket list
-	if (designEntity != PKBDesignEntity::_) {
+	if (designEntity != PKBDesignEntity::Procedure && designEntity != PKBDesignEntity::_) {
 		mStatements[PKBDesignEntity::_].emplace_back(statement);
 	}
 }
@@ -206,7 +325,7 @@ PKBStatement::SharedPtr PKB::createPKBStatement(shared_ptr<Statement>& statement
 	// 1. create a PKBStatement
 	PKBStatement::SharedPtr res = PKBStatement::create(statement->getIndex(), de);
 
-	// 2. add this statement to our 'global' list of all statements sorted by type
+	// 2. add this statement to our 'global' list of all simpleStatements sorted by type
 	addStatement(res, de);
 
 	// 3. set the group of the child statement to be our group
@@ -214,6 +333,27 @@ PKBStatement::SharedPtr PKB::createPKBStatement(shared_ptr<Statement>& statement
 	return res;
 }
 
+// this is a wrapper around PKBGroup::create()
+// we need a wrapper because there are administrative tasks after creating the PKBGroup to handle child/parent group relationships
+PKBGroup::SharedPtr PKB::createPKBGroup(PKBStatement::SharedPtr& ownerStatement, PKBGroup::SharedPtr& parentGroup) {
+	// create group
+	PKBGroup::SharedPtr group = PKBGroup::create(ownerStatement->getIndex());
+	// handle group relationships (parent/child group)
+	group->setParentGroup(parentGroup);
+	parentGroup->addChildGroup(group);
+	// handle group-statement relationships
+	ownerStatement->addContainerGroup(group);
+	return group;
+}
+
+// version for Procedure PKBGroup, it doesnt have a parentGroup
+PKBGroup::SharedPtr PKB::createPKBGroup(string& name, PKBStatement::SharedPtr& ownerStatement) {
+	// create group
+	PKBGroup::SharedPtr group = PKBGroup::create(name);
+	// handle group-statement relationships
+	ownerStatement->addContainerGroup(group);
+	return group;
+}
 
 PKBDesignEntity PKB::simpleToPKBType(StatementType simpleStatementType) {
 	switch (simpleStatementType) {
@@ -285,3 +425,46 @@ vector<string> PKB::getIdentifiers(shared_ptr<Expression> expr) {
 	return vector<string>(res.begin(), res.end());
 }
 
+vector<string> PKB::getIdentifiers(shared_ptr<ConditionalExpression> expr) {
+	set<string> res; // using a set to prevent duplicates
+	vector<shared_ptr<ConditionalExpression>> queue = { expr };
+
+	// comb through the expression and pick out all identifiers' names
+	while (!queue.empty()) {
+
+		// pop the last element
+		shared_ptr<ConditionalExpression> e = queue.back();
+		queue.pop_back();
+
+		switch (e->getConditionalType()) {
+		case ConditionalType::BOOLEAN: {
+			shared_ptr<BooleanExpression> bln = static_pointer_cast<BooleanExpression>(e);
+			// recurse down
+			queue.emplace_back(bln->getLHS());
+			queue.emplace_back(bln->getRHS());
+			break;
+		}
+		case ConditionalType::NOT: {
+			shared_ptr<NotExpression> not = static_pointer_cast<NotExpression>(e);
+			// recurse down
+			queue.emplace_back(not->getExpr());
+			break;
+		}
+		case ConditionalType::RELATIONAL: {
+			shared_ptr<RelationalExpression> reln = static_pointer_cast<RelationalExpression>(e);
+			// use getIdentifiers(EXPRESSION) on LHS and RHS
+			vector<string> lhsIdentifiers = getIdentifiers(reln->getLHS());
+			vector<string> rhsIdentifiers = getIdentifiers(reln->getRHS());
+			// inefficient way since we convert from vector to set multiple times, but for now it will do
+			res.insert(lhsIdentifiers.begin(), lhsIdentifiers.end());
+			res.insert(rhsIdentifiers.begin(), rhsIdentifiers.end());
+			break;
+		}
+		default:
+			throw("On that final day, not all who call upon this function will be called a ConditionalType");
+		}
+	}
+
+	// return a vector instead of a set
+	return vector<string>(res.begin(), res.end());
+}
