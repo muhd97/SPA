@@ -4,7 +4,18 @@
 string Result::dummy = "BaseResult: getResultAsString()";
 
 inline bool targetSynonymMatchesType(shared_ptr<SelectCl> selectCl, string targetType) {
-    return selectCl->synonymToParentDeclarationMap[selectCl->targetSynonym]->getDesignEntityType()->getEntityTypeName() == targetType;
+    return selectCl->getDesignEntityTypeBySynonym(selectCl->targetSynonym) == targetType;
+}
+
+inline bool targetSynonymMatchesMultipleTypes(shared_ptr<SelectCl> selectCl, initializer_list<string> list) {
+    bool flag = false;
+    string toMatch = selectCl->getDesignEntityTypeBySynonym(selectCl->targetSynonym);
+    
+    for (auto& s : list) {
+        flag = toMatch == s;
+        if (flag) return flag;
+    }
+    return flag;
 }
 
 inline bool targetSynonymIsInClauses(shared_ptr<SelectCl> selectCl) {
@@ -110,7 +121,8 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
             if (usesCl->entRef->getEntRefType() == EntRefType::SYNONYM) { /* Uses (1, x), x is a variable */
 
                 shared_ptr<EntRef>& entRef = usesCl->entRef;
-                if (selectCl->synonymToParentDeclarationMap[entRef->getStringVal()]->getDesignEntityType()->getEntityTypeName() != VARIABLE) { // Uses (1, x), x is NOT a variable
+                
+                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { // Uses (1, x), x is NOT a variable
                     cout << "TODO: Handle error case. Uses(1, p), but p is not a variable delcaration.\n";
                 }
 
@@ -139,7 +151,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                     }
                 }
 
-                if (singleRefSynonymMatchesTargetSynonym(stmtRefLeft, selectCl) && !targetSynonymMatchesType(selectCl, PROCEDURE)) { /* Uses (syn, v) -> Select syn (only select statements of type syn that use a variable) (BUT SYN CANNOT BE A PROCEDURE or CALL) */
+                if (singleRefSynonymMatchesTargetSynonym(stmtRefLeft, selectCl) && !targetSynonymMatchesMultipleTypes(selectCl, {PROCEDURE, CALL})) { /* Uses (syn, v) -> Select syn (only select statements of type syn that use a variable) (BUT SYN CANNOT BE A PROCEDURE or CALL) */
                     shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
                     PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntityType());
               

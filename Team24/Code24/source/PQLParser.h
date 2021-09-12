@@ -679,6 +679,10 @@ public:
         return flag;
     }
 
+    string getDesignEntityTypeBySynonym(string s) {
+        return synonymToParentDeclarationMap[s]->getDesignEntityType()->getEntityTypeName();
+    }
+
 };
 
 class PQLParser {
