@@ -48,7 +48,9 @@ public:
 
 	// maps 
 
-	vector<PKBStatement::SharedPtr> mAllUseStmts; // statements that use a variable
+	set<PKBStatement::SharedPtr> mAllUseStmts; // statements that use a variable
+	unordered_map<PKBDesignEntity, set<PKBStatement::SharedPtr>> designEntityToStatementsThatUseVarsMap;
+
 	vector<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
 
 	// statement number, starting from index 1
@@ -87,8 +89,12 @@ public:
 		return mVariables[s];
 	}
 
-	vector<PKBStatement::SharedPtr> getAllUseStmts() {
+	set<PKBStatement::SharedPtr> getAllUseStmts() {
 		return mAllUseStmts;
+	}
+
+	set<PKBStatement::SharedPtr> getAllUseStmts(PKBDesignEntity pkbde) {
+		return designEntityToStatementsThatUseVarsMap[pkbde];
 	}
 
 	vector<PKBStatement::SharedPtr> getAllModifyStmts() {

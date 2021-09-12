@@ -13,6 +13,7 @@ void PKB::initialise() {
 		mStatements[de] = {};
 		mUsedVariables[de] = {};
 		mModifiedVariables[de] = {};
+		designEntityToStatementsThatUseVarsMap[de] = {};
 	}
 	// reset extracted Procedures
 	extractedProcedures.clear();
@@ -110,6 +111,11 @@ PKBStatement::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement>& state
 	// get all identifiers (string) referenced in the expression
 	vector<string> identifiers = getIdentifiers(assignStatement->getExpr());
 
+	if (identifiers.size() > 0) {
+		mAllUseStmts.insert(res);
+		designEntityToStatementsThatUseVarsMap[PKBDesignEntity::Assign].insert(res);
+	}
+
 	for (auto& identifier : identifiers) {
 		// for each string, we get the variable
 		PKBVariable::SharedPtr var = getVariable(identifier);
@@ -155,8 +161,12 @@ PKBStatement::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement>& statem
 	// variable is modified by this statement
 	var->addUserStatement(res->getIndex());
 
+	
 	// YIDA: For the var Used by this PRINT statement, we need to add it to the pkb's mUsedVariables map.
 	addUsedVariable(PKBDesignEntity::Print, var);
+	mAllUseStmts.insert(res);
+	designEntityToStatementsThatUseVarsMap[PKBDesignEntity::Print].insert(res);
+
 
 	return res;
 }
@@ -169,6 +179,12 @@ PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement>& statement
 	// 2. USE - process the variables mentioned by conditional statement
 	// get all identifiers (string) referenced in the expression
 	vector<string> identifiers = getIdentifiers(ifStatement->getConditional());
+
+	if (identifiers.size() > 0) {
+		mAllUseStmts.insert(res);
+		designEntityToStatementsThatUseVarsMap[PKBDesignEntity::If].insert(res);
+	}
+
 	for (auto& identifier : identifiers) {
 		// for each string, we get the variable
 		PKBVariable::SharedPtr var = getVariable(identifier);
@@ -226,6 +242,12 @@ PKBStatement::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement>& statem
 	// 2. USE - process the variables mentioned by conditional statement
 	// get all identifiers (string) referenced in the expression
 	vector<string> identifiers = getIdentifiers(whileStatement->getConditional());
+
+	if (identifiers.size() > 0) {
+		mAllUseStmts.insert(res);
+		designEntityToStatementsThatUseVarsMap[PKBDesignEntity::While].insert(res);
+	}
+
 	for (auto& identifier : identifiers) {
 		// for each string, we get the variable
 		PKBVariable::SharedPtr var = getVariable(identifier);

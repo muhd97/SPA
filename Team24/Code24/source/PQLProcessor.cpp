@@ -3,12 +3,20 @@
 
 string Result::dummy = "BaseResult: getResultAsString()";
 
+inline bool targetSynonymMatchesType(shared_ptr<SelectCl> selectCl, string targetType) {
+    return selectCl->synonymToParentDeclarationMap[selectCl->targetSynonym]->getDesignEntityType()->getEntityTypeName() == targetType;
+}
+
 inline bool targetSynonymIsInClauses(shared_ptr<SelectCl> selectCl) {
     string& targetSynonym = selectCl->targetSynonym;
     return selectCl->suchThatContainsSynonym(targetSynonym) 
         || selectCl->patternContainsSynonym(targetSynonym);
 }
 
+template <typename Ref>
+inline bool singleRefSynonymMatchesTargetSynonym(shared_ptr<Ref>& refToCheck, shared_ptr<SelectCl>& selectCl) {
+    return refToCheck->getStringVal() == selectCl->targetSynonym;
+}
 
 /* YIDA Note: design entity PROCEDURE and VARIABLE and CONSTANT are not supported here!! */
 inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<DesignEntity> de) {
@@ -79,48 +87,81 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoRelRefOrPatternCase(shared_ptr<
     return move(toReturn);
 }
 
+
+
+
 /* PRE-CONDITION: Target synonym of the SelectCl must be inside the Uses() clause. */
 void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl, vector<shared_ptr<Result>>& toReturn) {  // TODO IMPLEMENT
     switch (suchThatCl->relRef->getType()) 
     {
-    case RelRefType::USES_S:
+    case RelRefType::USES_S: /* Uses(s, v) where s is a STATEMENT. */
     {
         shared_ptr<UsesS> usesCl = static_pointer_cast<UsesS>(suchThatCl->relRef);
-        if (usesCl->stmtRef->getStmtRefType() == StmtRefType::UNDERSCORE) { // Uses(_, x) ERROR cannot have underscore as first arg!! 
+
+        /* Uses(_, x) ERROR cannot have underscore as first arg!! */
+        if (usesCl->stmtRef->getStmtRefType() == StmtRefType::UNDERSCORE) { 
             cout << "TODO: Handle Uses error case\n";
         }
 
-        if (usesCl->stmtRef->getStmtRefType() == StmtRefType::INTEGER) { // Uses (1, ?)
+        /* Uses (1, ?) */
+        if (usesCl->stmtRef->getStmtRefType() == StmtRefType::INTEGER) { 
             shared_ptr<StmtRef>& stmtRef = usesCl->stmtRef;
             vector<string> variablesUsedByStmtNo = evaluator->getUsed(stmtRef->getIntVal());
-            if (usesCl->entRef->getEntRefType() == EntRefType::SYNONYM) { // Uses (1, x), x is a variable
+            if (usesCl->entRef->getEntRefType() == EntRefType::SYNONYM) { /* Uses (1, x), x is a variable */
 
                 shared_ptr<EntRef>& entRef = usesCl->entRef;
                 if (selectCl->synonymToParentDeclarationMap[entRef->getStringVal()]->getDesignEntityType()->getEntityTypeName() != VARIABLE) { // Uses (1, x), x is NOT a variable
                     cout << "TODO: Handle error case. Uses(1, p), but p is not a variable delcaration.\n";
                 }
+
                 for (auto& s : variablesUsedByStmtNo) {
                     toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
                 }
             }
+
+            if (usesCl->entRef->getEntRefType() == EntRefType::IDENT) {
+
+            }
         }
 
-        if (usesCl->stmtRef->getStmtRefType() == StmtRefType::SYNONYM) { // Uses (a, ?) 
-            if (usesCl->entRef->getEntRefType() == EntRefType::SYNONYM) { // Uses (a, v) 
-                cout << "hello =========================================\n";
-                shared_ptr<StmtRef>& stmtRef = usesCl->stmtRef;
-                cout << "stmtref name = " << selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()]->getDesignEntityType()->getEntityTypeName() << endl;
-                PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(
-                    selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()]->getDesignEntityType());
-                for (auto& s : evaluator->getUsed(pkbDe)) {
-                    toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
+        /* Uses (syn, ?) */
+        if (usesCl->stmtRef->getStmtRefType() == StmtRefType::SYNONYM) { 
+            if (usesCl->entRef->getEntRefType() == EntRefType::SYNONYM) { /* Uses (syn, v) -> a can be assign or print */
+                shared_ptr<StmtRef>& stmtRefLeft = usesCl->stmtRef;
+                shared_ptr<EntRef>& entRefRight = usesCl->entRef;
+
+                if (singleRefSynonymMatchesTargetSynonym(entRefRight, selectCl)) { /* Uses (syn, v) -> Select v */
+                    shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
+                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntityType());
+
+                    for (auto& s : evaluator->getUsed(pkbDe)) {
+                        toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
+                    }
                 }
+
+                if (singleRefSynonymMatchesTargetSynonym(stmtRefLeft, selectCl) && !targetSynonymMatchesType(selectCl, PROCEDURE)) { /* Uses (syn, v) -> Select syn (only select statements of type syn that use a variable) (BUT SYN CANNOT BE A PROCEDURE or CALL) */
+                    shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
+                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntityType());
+              
+                    for (auto& s : evaluator->getUsers(pkbDe)) {
+                        toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
+                    }
+                }           
+
             }
         }
 
         break;
     }
-    case RelRefType::MODIFIES_S:
+    case RelRefType::USES_P: /* Uses(pc, v) where pc is a procedure or call. */
+    {
+        break;
+    }
+    case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
+    {
+        break;
+    }
+    case RelRefType::MODIFIES_P: /* Modifies(pc, v) where pc is a procedure or call. */
     {
         break;
     }

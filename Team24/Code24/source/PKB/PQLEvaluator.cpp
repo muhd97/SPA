@@ -617,7 +617,18 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName
 
 vector<int> PQLEvaluator::getUsers()
 {
-	vector<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
+	set<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
+	return stmtToInt(stmts);
+}
+
+vector<int> PQLEvaluator::getUsers(PKBDesignEntity entityType)
+{
+	vector<PKBStatement::SharedPtr> stmts;
+
+	for (auto& ptr : mpPKB->getAllUseStmts(entityType)) {
+		stmts.emplace_back(ptr);
+	}
+
 	return stmtToInt(stmts);
 }
 
@@ -670,7 +681,7 @@ vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string vari
 
 vector<int> PQLEvaluator::getModifiers()
 {
-	vector<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
+	set<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
 	return stmtToInt(stmts);
 }
 

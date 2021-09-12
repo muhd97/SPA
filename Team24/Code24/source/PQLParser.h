@@ -225,9 +225,11 @@ public:
     }
 
     inline bool containsSynonym(string s) {
+        
         bool flag = false;
         if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
             flag = stmtRef->getStringVal() == s;
+            if (flag) return flag;
         }
 
         if (entRef->getEntRefType() == EntRefType::SYNONYM) {
@@ -668,6 +670,7 @@ public:
     }
 
     inline bool patternContainsSynonym(string s) {
+        cout << "PATTERN contains synonym? \n";
         bool flag = false;
         for (auto& st : this->suchThatClauses) {
             flag = st->containsSynonym(s);

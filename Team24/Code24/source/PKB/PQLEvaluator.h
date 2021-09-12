@@ -66,9 +66,10 @@ public:
 	vector<string> getUsed(PKBDesignEntity statements);
 	vector<string> getUsed();
 
-	vector<int> getUsers(string variableName);
-	vector<int> getUsers(PKBDesignEntity statements, string variableName);
-	vector<int> getUsers();
+	vector<int> getUsers(string variableName); /* Get all stmts that use a given variableName (IDENT) */
+	vector<int> getUsers(PKBDesignEntity statements, string variableName); /* Get all stmts that use a given variableName (IDENT), and are of given PKBDesignEntity type */
+	vector<int> getUsers(); /* Get all stmts that use a variable */
+	vector<int> getUsers(PKBDesignEntity entityType); /* Get all stmts that use a variable, and are of given entityType */
 
 	// Modifies
 	vector<string> getModified(int statementIndex);
@@ -102,7 +103,15 @@ protected:
 		for (auto& stmt : stmts) {
 			res.emplace_back(stmt->getIndex());
 		}
-		return res;
+		return move(res);
+	}
+
+	vector<int> stmtToInt(set<PKBStatement::SharedPtr>& stmts) {
+		vector<int> res;
+		for (auto& stmt : stmts) {
+			res.emplace_back(stmt->getIndex());
+		}
+		return move(res);
 	}
 
 	// we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
