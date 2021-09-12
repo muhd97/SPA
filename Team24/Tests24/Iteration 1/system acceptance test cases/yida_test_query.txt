@@ -53,3 +53,19 @@ assign a; variable v;
 Select v such that Uses(a, v)
 x, y, z
 5000
+12 - Select v such that Uses(3, v)
+variable variablee;
+Select variablee such that Uses(3, variablee)
+y, x
+5000
+13 - Select v such that Uses(8, v)
+variable suchthat;
+Select suchthat such that Uses(8, suchthat)
+y, x, z
+5000
+14 - Select v such that Uses(1, v) // EMPTY RESULT
+variable suchthat;
+Select suchthat such that Uses(1, suchthat)
+
+5000
+

@@ -1,7 +1,7 @@
 <?xml-stylesheet type="text/xsl" href="analysis.xsl"?>
 <test_results>
 <info>
-<name>system acceptance test cases</name><parsing_time_taken>14.000000</parsing_time_taken>
+<name>system acceptance test cases</name><parsing_time_taken>18.000000</parsing_time_taken>
 </info>
 <queries>
 <query>
@@ -15,14 +15,14 @@
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Select all Read statements">2</id><querystr><![CDATA[read r; Select r]]></querystr>
 <stuans>4,10</stuans>
 <correct>4,10</correct>
-<time_taken>10.000000</time_taken>
+<time_taken>11.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Select all Print statements">3</id><querystr><![CDATA[print p; Select p]]></querystr>
 <stuans>5,9</stuans>
 <correct>5,9</correct>
-<time_taken>7.000000</time_taken>
+<time_taken>13.000000</time_taken>
 <passed/>
 </query>
 <query>
@@ -36,48 +36,69 @@
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Select all Procedures">5</id><querystr><![CDATA[procedure kz; Select kz]]></querystr>
 <stuans>yida1,yida2</stuans>
 <correct>yida1,yida2</correct>
-<time_taken>9.000000</time_taken>
+<time_taken>11.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Select all Variables">6</id><querystr><![CDATA[variable vsew; Select vsew]]></querystr>
 <stuans>p,x,i,a,y,j,b,z,q,w</stuans>
 <correct>x,y,z,a,b,i,j,p,q,w</correct>
-<time_taken>14.000000</time_taken>
+<time_taken>9.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Select all Variables, but with redundant declaration">7</id><querystr><![CDATA[variable vsew, k; assign a; stmt k; Select vsew]]></querystr>
 <stuans>p,x,i,a,y,j,b,z,q,w</stuans>
 <correct>x,y,z,a,b,i,j,p,q,w</correct>
-<time_taken>10.000000</time_taken>
+<time_taken>13.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Select all Assign, but with redundant declaration">8</id><querystr><![CDATA[variable vsew, k; assign a; stmt k; procedure sd; print p; read r; Select a]]></querystr>
 <stuans>1,2,3,6,7,8</stuans>
 <correct>1,2,3,6,7,8</correct>
-<time_taken>13.000000</time_taken>
+<time_taken>11.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Select all Procedures, but with redundant declaration">9</id><querystr><![CDATA[variable vsew, k; assign a; stmt k; procedure sd; print p; read r; Select sd]]></querystr>
 <stuans>yida1,yida2</stuans>
 <correct>yida1,yida2</correct>
-<time_taken>10.000000</time_taken>
+<time_taken>9.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Select all Statements">10</id><querystr><![CDATA[stmt s; Select s]]></querystr>
 <stuans>1,2,3,4,5,6,7,8,9,10</stuans>
 <correct>1,2,3,4,5,6,7,8,9,10</correct>
-<time_taken>11.000000</time_taken>
+<time_taken>8.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" Uses="1" SuchThat="1" CondNum="3" RelNum="1" comment="Select v such that Uses(a, v)">11</id><querystr><![CDATA[assign a; variable v; Select v such that Uses(a, v)]]></querystr>
 <stuans>x,y,z</stuans>
 <correct>x,y,z</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Uses="1" SuchThat="1" CondNum="3" RelNum="1" comment="Select v such that Uses(3, v)">12</id><querystr><![CDATA[variable variablee; Select variablee such that Uses(3, variablee)]]></querystr>
+<stuans>x,y</stuans>
+<correct>y,x</correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Uses="1" SuchThat="1" CondNum="3" RelNum="1" comment="Select v such that Uses(8, v)">13</id><querystr><![CDATA[variable suchthat; Select suchthat such that Uses(8, suchthat)]]></querystr>
+<stuans>x,y,z</stuans>
+<correct>y,x,z</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Uses="1" SuchThat="1" CondNum="3" RelNum="1" comment="Select v such that Uses(1, v) // EMPTY RESULT">14</id><querystr><![CDATA[variable suchthat; Select suchthat such that Uses(1, suchthat)]]></querystr>
+<stuans></stuans>
+<correct></correct>
 <time_taken>10.000000</time_taken>
 <passed/>
 </query>
