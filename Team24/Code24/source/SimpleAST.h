@@ -90,6 +90,10 @@ public:
         return rhs;
     }
 
+    Bop getOp() {
+        return op;
+    }
+
     string format(int level);
     unordered_set<string> getSubExpressions() override;
     ExpressionType getExpressionType();
