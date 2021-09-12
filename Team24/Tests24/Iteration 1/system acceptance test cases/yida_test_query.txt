@@ -1,17 +1,17 @@
 1 - Select all Assign statements
 assign a;
 Select a
-1, 2, 5, 6
+1, 2, 3, 6, 7, 8
 5000
 2 - Select all Read statements
 read r;
 Select r
-3, 8
+4, 10
 5000
 3 - Select all Print statements
 print p;
 Select p
-4, 7
+5, 9
 5000
 4 - Negative Case: Procedure spelled wrongly
 procecure kz;
@@ -26,17 +26,17 @@ yida1, yida2
 6 - Select all Variables
 variable vsew;
 Select vsew
-x, q, i, a, y, j, b, w
+x, y, z, a, b, i, j, p, q, w
 5000
 7 - Select all Variables, but with redundant declaration
 variable vsew, k; assign a; stmt k;
 Select vsew
-x, q, i, a, y, j, b, w
+x, y, z, a, b, i, j, p, q, w
 5000
 8 - Select all Assign, but with redundant declaration
 variable vsew, k; assign a; stmt k; procedure sd; print p; read r;
 Select a
-1, 2, 5, 6
+1, 2, 3, 6, 7, 8
 5000
 9 - Select all Procedures, but with redundant declaration
 variable vsew, k; assign a; stmt k; procedure sd; print p; read r;
@@ -46,7 +46,7 @@ yida1, yida2
 10 - Select all Statements
 stmt s;
 Select s
-1, 4, 2, 3, 5, 7, 6, 8
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10
 5000
 11 - Select v such that Uses(a, v)
 assign a; variable v;

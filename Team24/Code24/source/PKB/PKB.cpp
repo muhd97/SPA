@@ -154,8 +154,9 @@ PKBStatement::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement>& statem
 	res->addUsedVariable(var);
 	// variable is modified by this statement
 	var->addUserStatement(res->getIndex());
-	// YIDA: For the var Used by this Assign statement, we need to add it to the pkb's mUsedVariables map.
-	addUsedVariable(PKBDesignEntity::Assign, var);
+
+	// YIDA: For the var Used by this PRINT statement, we need to add it to the pkb's mUsedVariables map.
+	addUsedVariable(PKBDesignEntity::Print, var);
 
 	return res;
 }
@@ -176,7 +177,7 @@ PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement>& statement
 		// this variable is modified by our statement
 		var->addUserStatement(res->getIndex());
 		// YIDA: For the var Used by this Assign statement, we need to add it to the pkb's mUsedVariables map.
-		addUsedVariable(PKBDesignEntity::Assign, var);
+		addUsedVariable(PKBDesignEntity::If, var);
 	}
 
 	// 3. create and link two groups for consequent and alternative of IfStatement (linking in createPKBGroup)
@@ -233,7 +234,7 @@ PKBStatement::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement>& statem
 		// this variable is modified by our statement
 		var->addUserStatement(res->getIndex());
 		// YIDA: For the var Used by this Assign statement, we need to add it to the pkb's mUsedVariables map.
-		addUsedVariable(PKBDesignEntity::Assign, var);
+		addUsedVariable(PKBDesignEntity::While, var);
 	}
 
 	// 3. create and link a group for block of WhileStatement (linking in createPKBGroup)
