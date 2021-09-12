@@ -452,18 +452,10 @@ public:
 
     shared_ptr<Expression> parseExpression() {
         shared_ptr<Expression> expr = parseTerm();
-        shared_ptr<CombinationExpression> result = parseExpressionPrime();
-
-        if (result == NULL) {
-            return expr;
-        }
-        else {
-            result->setLeft(expr);
-            return result;
-        }
+        return parseExpressionPrime(expr);
     }
 
-    shared_ptr<CombinationExpression> parseExpressionPrime() {
+    shared_ptr<Expression> parseExpressionPrime(shared_ptr<Expression> lhs) {
         Bop op;
         if (peek().type == SimpleTokenType::PLUS) {
             eat(SimpleTokenType::PLUS);
@@ -475,34 +467,18 @@ public:
         }
         else {
             // episilon
-            return NULL;
+            return lhs;
         }
         shared_ptr<Expression> rhs = parseTerm();
-        shared_ptr<CombinationExpression> nested = parseExpressionPrime();
-
-        if (nested == NULL) {
-            return make_shared<CombinationExpression>(op, rhs);
-        }
-        else {
-            nested->setLeft(rhs);
-            return make_shared<CombinationExpression>(op, nested);
-        }
+        return parseExpressionPrime(make_shared<CombinationExpression>(op, move(lhs), move(rhs)));
     }
 
     shared_ptr<Expression> parseTerm() {
         shared_ptr<Expression> factor = parseFactor();
-        shared_ptr<CombinationExpression> rest = parseTermPrime();
-
-        if (rest == NULL) {
-            return factor;
-        }
-        else {
-            rest->setLeft(factor);
-            return rest;
-        }
+        return parseTermPrime(factor);
     }
 
-    shared_ptr<CombinationExpression> parseTermPrime() {
+    shared_ptr<Expression> parseTermPrime(shared_ptr<Expression> lhs) {
         Bop op;
         if (peek().type == SimpleTokenType::MUL) {
             eat(SimpleTokenType::MUL);
@@ -518,19 +494,11 @@ public:
         }
         else {
             // episilon
-            return NULL;
+            return lhs;
         }
 
         shared_ptr<Expression> rhs = parseFactor();
-        shared_ptr<CombinationExpression> nested = parseTermPrime();
-
-        if (nested == NULL) {
-            return make_shared<CombinationExpression>(op, rhs);
-        }
-        else {
-            nested->setLeft(rhs);
-            return make_shared<CombinationExpression>(op, nested);
-        }
+        return parseTermPrime(make_shared<CombinationExpression>(op, move(lhs), move(rhs)));
     }
 
     shared_ptr<Expression> parseFactor() {
