@@ -179,6 +179,8 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     case RelRefType::USES_P: /* Uses("INDENT", v). */
     {
 
+        /* TODO: Yida catch error case when v is not a variable synonym. */
+
         if (targetSynonymMatchesMultipleTypes(selectCl, { DesignEntity::VARIABLE })) { /* Uses ("PROC_IDENTIFER", v) Select variable v. */
             shared_ptr<UsesP> usesP = static_pointer_cast<UsesP>(suchThatCl->relRef);
             for (auto& s : evaluator->getUsedByProcName(usesP->entRef1->getStringVal())) {

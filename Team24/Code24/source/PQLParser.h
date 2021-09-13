@@ -297,7 +297,6 @@ public:
 
     void printString() override {
         cout << "ModifiesS[" << stmtRef->getStmtRefTypeName() << ", " << entRef->getEntRefTypeName() << "]";
-
     }
 
     ~ModifiesS() {
@@ -351,6 +350,10 @@ public:
 
     inline RelRefType getType() {
         return RelRefType::MODIFIES_P;
+    }
+
+    void printString() override {
+        cout << "ModifiesP[" << entRef1->getEntRefTypeName() << ", " << entRef2->getEntRefTypeName() << "]";
     }
 };
 
@@ -732,6 +735,7 @@ public:
     shared_ptr<StmtRef> parseStmtRef();
     shared_ptr<EntRef> parseEntRef();
     shared_ptr<RelRef> parseUses();
+    shared_ptr<RelRef> parseModifies();
     shared_ptr<PatternCl> parsePatternCl();
     shared_ptr<ExpressionSpec> parseExpressionSpec();
     shared_ptr<SelectCl> parseSelectCl();

@@ -590,9 +590,6 @@ vector<string> PQLEvaluator::getUsed()
 vector<string> PQLEvaluator::getUsedByProcName(string procname)
 {
 	PKBStatement::SharedPtr& procedure = mpPKB->getProcedureByName(procname);
-
-	cout << "GET USED BY PROCNAME, PROCNAME = " << procedure->mName << endl;
-
 	vector<PKBVariable::SharedPtr> vars;
 	const set<PKBVariable::SharedPtr>& varsUsed = procedure->getUsedVariables();
 	vars.reserve(varsUsed.size());

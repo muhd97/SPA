@@ -168,7 +168,7 @@ shared_ptr<RelRef> PQLParser::parseUses()
     eat(PQLTokenType::USES);
     eat(PQLTokenType::LEFT_PAREN);
 
-    if (peek().type == PQLTokenType::STRING) {
+    if (peek().type == PQLTokenType::STRING) { /* If first arg of Uses() is a string, it must be a UsesP */
         auto eRef = parseEntRef();
         if (eRef->getEntRefType() == EntRefType::UNDERSCORE) {
             // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
@@ -191,7 +191,29 @@ shared_ptr<RelRef> PQLParser::parseUses()
         return make_shared<UsesS>(sRef, rRef);
     }
 
+}
 
+shared_ptr<RelRef> PQLParser::parseModifies()
+{
+    if (peek().type == PQLTokenType::STRING) { /* If first arg of Modifies() is a string, it must be a ModifiesP */
+        eat(PQLTokenType::MODIFIES);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto sRef11 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto eRef12 = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<ModifiesS>(sRef11, eRef12);
+    }
+    else {
+        eat(PQLTokenType::MODIFIES);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto eRef11 = parseEntRef();
+        eat(PQLTokenType::COMMA);
+        auto eRef12 = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<ModifiesP>(eRef11, eRef12);
+    }
+    
 }
 
 shared_ptr<SuchThatCl> PQLParser::parseSuchThat() // todo
@@ -248,27 +270,14 @@ shared_ptr<RelRef> PQLParser::parseRelRef() // todo
         return make_shared<ParentT>(sRef7, sRef8);
     }
 
-    case PQLTokenType::USES: // ONLY UsesS, not UsesP
+    case PQLTokenType::USES:
     {
-        //eat(PQLTokenType::USES);
-        //eat(PQLTokenType::LEFT_PAREN);
-        //auto sRef9 = parseStmtRef();
-        //eat(PQLTokenType::COMMA);
-        //auto eRef10 = parseEntRef();
-        //eat(PQLTokenType::RIGHT_PAREN);
-        //return make_shared<RelRef>(sRef9, eRef10);
         return parseUses();
     }
 
-    default: // Only ModifiesS, not ModifiesP
+    default: 
     {
-        eat(PQLTokenType::MODIFIES);
-        eat(PQLTokenType::LEFT_PAREN);
-        auto sRef11 = parseStmtRef();
-        eat(PQLTokenType::COMMA);
-        auto eRef12 = parseEntRef();
-        eat(PQLTokenType::RIGHT_PAREN);
-        return make_shared<ModifiesS>(sRef11, eRef12);
+        return parseModifies();
     }
     }
 }
