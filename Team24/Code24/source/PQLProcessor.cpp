@@ -126,11 +126,14 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         if (usesCl->stmtRef->getStmtRefType() == StmtRefType::INTEGER) { 
             shared_ptr<StmtRef>& stmtRef = usesCl->stmtRef;
             vector<string> variablesUsedByStmtNo = evaluator->getUsed(stmtRef->getIntVal());
-            if (usesCl->entRef->getEntRefType() == EntRefType::SYNONYM) { /* Uses (1, x), x is a variable */
+            
+            /* Uses (1, syn) */
+            if (usesCl->entRef->getEntRefType() == EntRefType::SYNONYM) {
 
                 shared_ptr<EntRef>& entRef = usesCl->entRef;
                 
-                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { // Uses (1, x), x is NOT a variable
+                /* Uses (1, x), x is NOT a variable */
+                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { 
                     cout << "TODO: Handle error case. Uses(1, p), but p is not a variable delcaration.\n";
                 }
 
@@ -139,8 +142,9 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                 }
             }
 
+            /* Uses (1, 2) violates pre-condition. Should not come here. */
             if (usesCl->entRef->getEntRefType() == EntRefType::IDENT) {
-
+                cout << "Pre-condition VIOLATED. Target synonym of the SelectCl must be inside the Uses() clause\n";
             }
         }
 
@@ -148,11 +152,14 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         StmtRefType leftType = usesCl->stmtRef->getStmtRefType();
         EntRefType rightType = usesCl->entRef->getEntRefType();
         if (leftType == StmtRefType::SYNONYM) { 
-            if (rightType == EntRefType::SYNONYM || rightType == EntRefType::UNDERSCORE) { /* Uses (syn, v) OR Uses(syn, _) */
+
+            /* Uses (syn, v) OR Uses(syn, _) */
+            if (rightType == EntRefType::SYNONYM || rightType == EntRefType::UNDERSCORE) { 
                 shared_ptr<StmtRef>& stmtRefLeft = usesCl->stmtRef;
                 shared_ptr<EntRef>& entRefRight = usesCl->entRef;
 
-                if (singleRefSynonymMatchesTargetSynonym(entRefRight, selectCl)) { /* Uses (syn, v) -> Select v */
+                /* Uses (syn, v) -> Select v */
+                if (singleRefSynonymMatchesTargetSynonym(entRefRight, selectCl)) { 
                     shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
                     PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
@@ -191,7 +198,8 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
         /* TODO: Yida catch error case when v is not a variable synonym. */
 
-        if (targetSynonymMatchesMultipleTypes(selectCl, { DesignEntity::VARIABLE })) { /* Uses ("PROC_IDENTIFER", v) Select variable v. */
+        /* Uses ("PROC_IDENTIFER", v) Select variable v. */
+        if (targetSynonymMatchesMultipleTypes(selectCl, { DesignEntity::VARIABLE })) { 
             shared_ptr<UsesP> usesP = static_pointer_cast<UsesP>(suchThatCl->relRef);
             for (auto& s : evaluator->getUsedByProcName(usesP->entRef1->getStringVal())) {
                 toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
