@@ -67,8 +67,6 @@ public:
 	}
 
 	void addUsedVariable(PKBVariable::SharedPtr variable) {
-		
-
 		mUses.insert(variable);
 	}
 
@@ -77,8 +75,6 @@ public:
 	}
 
 	void addUsedVariables(set<PKBVariable::SharedPtr> variables) {
-		
-
 		mUses.insert(variables.begin(), variables.end());
 	}
 
