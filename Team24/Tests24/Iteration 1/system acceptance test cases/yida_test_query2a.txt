@@ -1,40 +1,40 @@
 1 - SELECT ALL PROCEDURES
 procedure p;
 Select p
-yidaIfEmpty, yidaIfStmt, yidaWhileEmpty, yidaWhileStmt, yidaWhileInsideIf
+yidaIfEmpty, yidaIfStmt, yidaWhileEmpty, yidaWhileStmt, yidaWhileInsideIf, yidaProcToCall
 25
 2 - SELECT ALL IFS
 if ifs;
 Select ifs
-1, 2, 5, 10
+1, 2, 5, 10, 16
 25
 3 - Select ifs such that Uses(ifs, v) // SELECT IFS THAT USE VAR
 if ifs;
 Select ifs such that Uses(ifs, v)
-1, 2, 10
+1, 2, 10, 16
 25
 4 - Select v such that Uses(ifs, v) // SELECT VARS USED BY IFS
 if ifs; variable v;
 Select v such that Uses(ifs, v)
-y, x, z, p, xx, aa, yy, kk, bb
+y, x, z, p, xx, aa, yy, kk, bb, calledX, calledY, calledA, calledB, a
 25
 5 - SELECT ALL WHILES
 while ifs;
 Select ifs
-6, 7, 8, 11, 13
+6, 7, 8, 11, 13, 21
 25
 6 - Select w such that Uses(w, v) // SELECT WHILE THAT USE VAR
 while ifs;
 Select ifs such that Uses(ifs, v)
-6, 8, 11, 13
+6, 8, 11, 13, 21
 25
 7 - Select v such that Uses(w, v) // SELECT VARS USED BY WHILE
 while ifs; variable v;
 Select v such that Uses(ifs, v)
-a, b, yy, kk, aa, bb
+a, b, yy, kk, aa, bb, calledA, calledB
 25
 8 - Select a // SELECT ALL ASSIGNS
 while ifs; assign v;
 Select v
-3, 4, 9, 12, 14
+3, 4, 9, 12, 14, 17, 19
 25

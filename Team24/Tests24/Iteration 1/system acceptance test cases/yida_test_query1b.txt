@@ -63,3 +63,8 @@ procedure k;
 Select k such that Uses(k, v)
 yida1, yida2, yida3
 25
+14 - Select stmt such that Uses(stmt, v) // NEGATIVE TEST CASE, should return nothing
+variable v; stmt s;
+Select s such that Uses(s, v)
+
+25
