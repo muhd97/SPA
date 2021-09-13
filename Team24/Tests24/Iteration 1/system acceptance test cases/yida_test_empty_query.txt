@@ -1,0 +1,5 @@
+1 - Select v such that Uses("IDENT", v) // Select Prints that use a variable
+variable v;
+Select v such that Uses("yida1", v)
+x, y, b
+50

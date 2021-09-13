@@ -63,7 +63,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoRelRefOrPatternCase(shared_ptr<
     string& targetSynonym = selectCl->targetSynonym;
     shared_ptr<DesignEntity> de = selectCl
         ->getParentDeclarationForSynonym(targetSynonym)
-        ->getDesignEntityType();
+        ->getDesignEntity();
 
     vector<shared_ptr<Result>> toReturn;
 
@@ -144,36 +144,55 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
                 if (singleRefSynonymMatchesTargetSynonym(entRefRight, selectCl)) { /* Uses (syn, v) -> Select v */
                     shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
-                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntityType());
+                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
                     for (auto& s : evaluator->getUsed(pkbDe)) {
                         toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
                     }
                 }
 
-                if (singleRefSynonymMatchesTargetSynonym(stmtRefLeft, selectCl) && !targetSynonymMatchesMultipleTypes(selectCl, {PROCEDURE, CALL})) { /* Uses (syn, v) -> Select syn (only select statements of type syn that use a variable) (BUT SYN CANNOT BE A PROCEDURE or CALL) */
+                /* Uses (syn, v) -> Select syn (only select statements of type syn that use a variable) (BUT SYN CANNOT BE A PROCEDURE or CALL) */
+                if (singleRefSynonymMatchesTargetSynonym(stmtRefLeft, selectCl) && !targetSynonymMatchesMultipleTypes(selectCl, {DesignEntity::PROCEDURE, DesignEntity::CALL})) { 
                     shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
-                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntityType());
+                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity()); // TODO: currently only works for ASSIGN. Container statements?
               
                     for (auto& s : evaluator->getUsers(pkbDe)) {
                         toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
                     }
-                }           
+                }
+
+                /* Uses (syn, v) -> Select syn (only select statements of type syn that use a variable) syn = PROCEDURE or CALL */
+                if (singleRefSynonymMatchesTargetSynonym(stmtRefLeft, selectCl) && targetSynonymMatchesMultipleTypes(selectCl, { DesignEntity::PROCEDURE, DesignEntity::CALL })) {
+                    shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
+                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
+
+                    for (auto& s : evaluator->getUsers(pkbDe)) {
+                        toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
+                    }
+                }
 
             }
         }
 
         break;
     }
-    case RelRefType::USES_P: /* Uses(pc, v) where pc is a procedure or call. */
+    case RelRefType::USES_P: /* Uses("INDENT", v). */
     {
+
+        if (targetSynonymMatchesMultipleTypes(selectCl, { DesignEntity::VARIABLE })) { /* Uses ("PROC_IDENTIFER", v) Select variable v. */
+            shared_ptr<UsesP> usesP = static_pointer_cast<UsesP>(suchThatCl->relRef);
+            for (auto& s : evaluator->getUsedByProcName(usesP->entRef1->getStringVal())) {
+                toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
+            }
+        }
+
         break;
     }
     case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
     {
         break;
     }
-    case RelRefType::MODIFIES_P: /* Modifies(pc, v) where pc is a procedure or call. */
+    case RelRefType::MODIFIES_P: /* Modifies("IDENT", v) where pc is a procedure or call. */
     {
         break;
     }
@@ -204,7 +223,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
 /*
 
-YIDA: Can only handle queries that return statement numbers for now.
+YIDA: Can only handle queries that return statement numbers and procedure names for now.
 
 */
 vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> selectCl)
@@ -220,7 +239,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
         string& targetSynonym = selectCl->targetSynonym;
         shared_ptr<DesignEntity> de = selectCl
             ->getParentDeclarationForSynonym(targetSynonym)
-            ->getDesignEntityType();
+            ->getDesignEntity();
         cout << "Todo: target Synonym is not in clauses. DesignEntity: " <<  de->getEntityTypeName() << endl;
 
         /*
@@ -229,7 +248,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
             string& targetSynonym = selectCl->targetSynonym;
             shared_ptr<DesignEntity> de = selectCl
                 ->getParentDeclarationForSynonym(targetSynonym)
-                ->getDesignEntityType();
+                ->getDesignEntity();
 
            // evaluator- get all statements that match this DesignEntity
 

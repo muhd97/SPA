@@ -16,7 +16,7 @@ void PKB::initialise() {
 		designEntityToStatementsThatUseVarsMap[de] = {};
 	}
 	// reset extracted Procedures
-	extractedProcedures.clear();
+	procedureNameToProcedureMap.clear();
 }
 
 void PKB::extractDesigns(shared_ptr<Program> program) {
@@ -26,7 +26,7 @@ void PKB::extractDesigns(shared_ptr<Program> program) {
 	vector<shared_ptr<Procedure>> procedures = program->getProcedures();
 	for (shared_ptr<Procedure> procedure : procedures) {
 		// if we have not already extracted this procedureSimple, extract it
-		if (!extractedProcedures.count(procedure->getName())) {
+		if (!procedureNameToProcedureMap.count(procedure->getName())) {
 			extractProcedure(procedure);
 		}
 	}
@@ -64,7 +64,7 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSi
 	// create procedureSimple statement
 	PKBStatement::SharedPtr res = PKBStatement::create(procedureSimple->getName(), PKBDesignEntity::Procedure);
 	// add this procedureCalled to the list of extracted simpleProcedures (used to prevent repeat extraction during DesignExtraction)
-	extractedProcedures.insert({ procedureSimple->getName(), res });
+	procedureNameToProcedureMap.insert({ procedureSimple->getName(), res });
 	// add this statement to our 'global' list of all simpleStatements
 	addStatement(res, PKBDesignEntity::Procedure);
 
@@ -73,11 +73,18 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSi
 
 	vector<shared_ptr<Statement>> simpleStatements = procedureSimple->getStatementList()->getStatements();
 
+	//cout << "PKB.cpp PROCNAME: " << procedureSimple->getName() << endl;
+
 	for (shared_ptr<Statement> ss : simpleStatements) {
+
 		PKBStatement::SharedPtr child = extractStatement(ss, group);
+
+		//cout << "PKB.cpp Stmt no: " << ss->getIndex() << endl;
 
 		// add the statementIndex to our group member list
 		group->addMember(child->getIndex(), child->getType());
+
+		//cout << "PKB.cpp NumOfVarsUsedInChild = " << child->getUsedVariables().size() << endl;
 
 		// add the uses/modifies variables of child
 		group->addUsedVariables(child->getUsedVariables());
@@ -289,7 +296,7 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 	// 2. we need to either extract the called procedure if it hasnt been extracted, or retrieve it if it has been
 	string procedureName = callStatement->getProcId()->getName();
 	PKBStatement::SharedPtr procedureCalled;
-	if (!extractedProcedures.count(procedureName)) {
+	if (!procedureNameToProcedureMap.count(procedureName)) {
 		// we need to locate the simple node for called procedure
 		vector<shared_ptr<Procedure>> simpleProcedures = programToExtract->getProcedures();
 		// loop through simpleProcedures to find the desired procedure node
@@ -303,7 +310,7 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 	}
 	else {
 		// we have already extracted this procedure before, we just need to retrieve it
-		procedureCalled = extractedProcedures[procedureName];
+		procedureCalled = procedureNameToProcedureMap[procedureName];
 	}
 
 	// now the call statement inherits from the procedure

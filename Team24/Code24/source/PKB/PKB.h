@@ -50,8 +50,12 @@ public:
 
 	set<PKBStatement::SharedPtr> mAllUseStmts; // statements that use a variable
 	unordered_map<PKBDesignEntity, set<PKBStatement::SharedPtr>> designEntityToStatementsThatUseVarsMap;
-
+	
 	vector<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
+
+	// YIDA: map used to keep track of extracted Procedures during DesignExtraction, will need it after design extraction to easily access Procedures
+	// if a procedure has been extracted, it will be present in this map, else it has not been extracted
+	unordered_map<string, PKBStatement::SharedPtr> procedureNameToProcedureMap;
 
 	// statement number, starting from index 1
 	PKBStatement::SharedPtr getStatement(int stmtNumber) {
@@ -99,6 +103,10 @@ public:
 
 	vector<PKBStatement::SharedPtr> getAllModifyStmts() {
 		return mAllModifyStmts;
+	}
+
+	PKBStatement::SharedPtr getProcedureByName(string procname) {
+		return procedureNameToProcedureMap[procname];
 	}
 
 	bool getCached(Relation rel, PKBDesignEntity a, PKBDesignEntity b, vector<int> &res) {
@@ -153,9 +161,6 @@ protected:
 	PKBDesignEntity simpleToPKBType(StatementType);
 
 private:
-	// map used to keep track of extracted Procedures during DesignExtraction, not needed thereafter
-	// if a procedure has been extracted, it will be present in this map, else it has not been extracted
-	map<string, PKBStatement::SharedPtr> extractedProcedures;
 	// remembers the main program node
 	shared_ptr<Program> programToExtract;
 };

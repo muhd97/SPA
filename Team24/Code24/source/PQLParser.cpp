@@ -5,6 +5,16 @@
 
 using namespace std;
 
+string DesignEntity::PRINT = "print";
+string DesignEntity::STMT = "stmt";
+string DesignEntity::READ = "read";
+string DesignEntity::WHILE = "while";
+string DesignEntity::IF = "if";
+string DesignEntity::ASSIGN = "assign";
+string DesignEntity::VARIABLE = "variable";
+string DesignEntity::CONSTANT = "constant";
+string DesignEntity::PROCEDURE = "procedure";
+string DesignEntity::CALL = "call";
 
 PQLToken PQLParser::peek() {
     return tokens[index];
@@ -153,19 +163,35 @@ shared_ptr<EntRef> PQLParser::parseEntRef()
     return make_shared<EntRef>(EntRefType::UNDERSCORE);
 }
 
-shared_ptr<UsesS> PQLParser::parseUses()
+shared_ptr<RelRef> PQLParser::parseUses()
 {
     eat(PQLTokenType::USES);
     eat(PQLTokenType::LEFT_PAREN);
-    auto sRef = parseStmtRef();
-    if (sRef->getStmtRefType() == StmtRefType::UNDERSCORE) {
-        // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
+
+    if (peek().type == PQLTokenType::STRING) {
+        auto eRef = parseEntRef();
+        if (eRef->getEntRefType() == EntRefType::UNDERSCORE) {
+            // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
+        }
+
+        eat(PQLTokenType::COMMA);
+        auto rRef = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<UsesP>(eRef, rRef);
+    }
+    else {
+        auto sRef = parseStmtRef();
+        if (sRef->getStmtRefType() == StmtRefType::UNDERSCORE) {
+            // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
+        }
+
+        eat(PQLTokenType::COMMA);
+        auto rRef = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<UsesS>(sRef, rRef);
     }
 
-    eat(PQLTokenType::COMMA);
-    auto rRef = parseEntRef();
-    eat(PQLTokenType::RIGHT_PAREN);
-    return make_shared<UsesS>(sRef, rRef);
+
 }
 
 shared_ptr<SuchThatCl> PQLParser::parseSuchThat() // todo
@@ -224,13 +250,14 @@ shared_ptr<RelRef> PQLParser::parseRelRef() // todo
 
     case PQLTokenType::USES: // ONLY UsesS, not UsesP
     {
-        eat(PQLTokenType::USES);
-        eat(PQLTokenType::LEFT_PAREN);
-        auto sRef9 = parseStmtRef();
-        eat(PQLTokenType::COMMA);
-        auto eRef10 = parseEntRef();
-        eat(PQLTokenType::RIGHT_PAREN);
-        return make_shared<UsesS>(sRef9, eRef10);
+        //eat(PQLTokenType::USES);
+        //eat(PQLTokenType::LEFT_PAREN);
+        //auto sRef9 = parseStmtRef();
+        //eat(PQLTokenType::COMMA);
+        //auto eRef10 = parseEntRef();
+        //eat(PQLTokenType::RIGHT_PAREN);
+        //return make_shared<RelRef>(sRef9, eRef10);
+        return parseUses();
     }
 
     default: // Only ModifiesS, not ModifiesP

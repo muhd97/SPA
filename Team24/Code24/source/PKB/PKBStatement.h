@@ -42,6 +42,7 @@ public:
 	}
 
 	std::set<std::shared_ptr<PKBVariable>> getUsedVariables() {
+		//cout << mName << " proc | " << "GETUSEDVARIABLES: size = " << mUses.size() << endl;
 		return mUses;
 	}
 
@@ -66,6 +67,8 @@ public:
 	}
 
 	void addUsedVariable(PKBVariable::SharedPtr variable) {
+		
+
 		mUses.insert(variable);
 	}
 
@@ -74,11 +77,13 @@ public:
 	}
 
 	void addUsedVariables(set<PKBVariable::SharedPtr> variables) {
+		
+
 		mUses.insert(variables.begin(), variables.end());
 	}
 
 	void addModifiedVariables(set<PKBVariable::SharedPtr> variables) {
-		mUses.insert(variables.begin(), variables.end());
+		mModifies.insert(variables.begin(), variables.end());
 	}
 
 protected:

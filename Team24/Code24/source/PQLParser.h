@@ -16,6 +16,18 @@ class DesignEntity {
 private:
     string entityTypeName;
 public:
+
+    static string STMT;
+    static string READ;
+    static string PRINT;
+    static string WHILE;
+    static string IF;
+    static string ASSIGN;
+    static string PROCEDURE;
+    static string VARIABLE;
+    static string CONSTANT;
+    static string CALL;
+
     DesignEntity(string name) : entityTypeName(move(name)) {
 
     }
@@ -50,7 +62,7 @@ public:
         return synonyms;
     }
 
-    shared_ptr<DesignEntity> getDesignEntityType() {
+    shared_ptr<DesignEntity> getDesignEntity() {
         return de;
     }
 
@@ -213,7 +225,6 @@ public:
 
     void printString() override {
         cout << "UsesS[" << stmtRef->getStmtRefTypeName() << ", " << entRef->getEntRefTypeName() << "]";
-
     }
 
     ~UsesS() {
@@ -251,6 +262,10 @@ public:
 
     UsesP(shared_ptr<EntRef> eRef1, shared_ptr<EntRef> eRef2) : entRef1(move(eRef1)), entRef2(move(eRef2)) {
 
+    }
+
+    void printString() override {
+        cout << "UsesP[" << entRef1->getEntRefTypeName() << ", " << entRef2->getEntRefTypeName() << "]";
     }
 
     inline bool containsSynonym(string s) {
@@ -680,7 +695,7 @@ public:
     }
 
     string getDesignEntityTypeBySynonym(string s) {
-        return synonymToParentDeclarationMap[s]->getDesignEntityType()->getEntityTypeName();
+        return synonymToParentDeclarationMap[s]->getDesignEntity()->getEntityTypeName();
     }
 
 };
@@ -716,7 +731,7 @@ public:
     int parseInteger();
     shared_ptr<StmtRef> parseStmtRef();
     shared_ptr<EntRef> parseEntRef();
-    shared_ptr<UsesS> parseUses();
+    shared_ptr<RelRef> parseUses();
     shared_ptr<PatternCl> parsePatternCl();
     shared_ptr<ExpressionSpec> parseExpressionSpec();
     shared_ptr<SelectCl> parseSelectCl();
