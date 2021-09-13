@@ -51,6 +51,8 @@ public:
 	set<PKBStatement::SharedPtr> mAllUseStmts; // statements that use a variable
 	unordered_map<PKBDesignEntity, set<PKBStatement::SharedPtr>> designEntityToStatementsThatUseVarsMap;
 	
+	set<PKBStatement::SharedPtr> setOfProceduresThatUseVars;
+
 	vector<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
 
 	// YIDA: map used to keep track of extracted Procedures during DesignExtraction, will need it after design extraction to easily access Procedures
@@ -136,7 +138,9 @@ protected:
 		map<PKBDesignEntity, vector<int>>>> cache;
 
 	void addStatement(PKBStatement::SharedPtr& statement, PKBDesignEntity designEntity);
-	void addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable);
+	inline void addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable);
+	void addUsedVariable(PKBDesignEntity designEntity, vector<PKBVariable::SharedPtr>& variables);
+	void addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr>& variables);
 	void addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable);
 
 	PKBVariable::SharedPtr getVariable(string name);

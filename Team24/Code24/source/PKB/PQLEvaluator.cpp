@@ -572,19 +572,19 @@ vector<string> PQLEvaluator::getUsed(int statementIndex)
 {
 	PKBStatement::SharedPtr stmt = mpPKB->getStatement(statementIndex);
 	set<PKBVariable::SharedPtr> vars = stmt->getUsedVariables();
-	return varToString(vars);
+	return varToString(move(vars));
 }
 
 vector<string> PQLEvaluator::getUsed(PKBDesignEntity userType)
 {
 	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(userType);
-	return varToString(vars);
+	return varToString(move(vars));
 }
 
 vector<string> PQLEvaluator::getUsed()
 {
 	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
-	return varToString(vars);
+	return varToString(move(vars));
 }
 
 vector<string> PQLEvaluator::getUsedByProcName(string procname)
@@ -629,10 +629,12 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName
 	return res;
 }
 
+
+
 vector<int> PQLEvaluator::getUsers()
 {
 	set<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
-	return stmtToInt(stmts);
+	return stmtToInt(move(stmts));
 }
 
 vector<int> PQLEvaluator::getUsers(PKBDesignEntity entityType)
@@ -643,7 +645,11 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity entityType)
 		stmts.emplace_back(ptr);
 	}
 
-	return stmtToInt(stmts);
+	return stmtToInt(move(stmts));
+}
+
+vector<string> PQLEvaluator::getProceduresThatUseVars() {
+	return procedureToString(mpPKB->setOfProceduresThatUseVars);
 }
 
 vector<string> PQLEvaluator::getModified(int statementIndex)

@@ -73,18 +73,13 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSi
 
 	vector<shared_ptr<Statement>> simpleStatements = procedureSimple->getStatementList()->getStatements();
 
-	//cout << "PKB.cpp PROCNAME: " << procedureSimple->getName() << endl;
 
 	for (shared_ptr<Statement> ss : simpleStatements) {
 
 		PKBStatement::SharedPtr child = extractStatement(ss, group);
 
-		//cout << "PKB.cpp Stmt no: " << ss->getIndex() << endl;
-
 		// add the statementIndex to our group member list
 		group->addMember(child->getIndex(), child->getType());
-
-		//cout << "PKB.cpp NumOfVarsUsedInChild = " << child->getUsedVariables().size() << endl;
 
 		// add the uses/modifies variables of child
 		group->addUsedVariables(child->getUsedVariables());
@@ -94,6 +89,10 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSi
 	// now the original statement inherits from the group
 	res->addUsedVariables(group->getUsedVariables());
 	res->addModifiedVariables(group->getModifiedVariables());
+
+	if (res->getUsedVariables().size() > 0) {
+		setOfProceduresThatUseVars.insert(res);
+	}
 
 	return res;
 }
@@ -174,7 +173,6 @@ PKBStatement::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement>& statem
 	mAllUseStmts.insert(res);
 	designEntityToStatementsThatUseVarsMap[PKBDesignEntity::Print].insert(res);
 
-
 	return res;
 }
 
@@ -234,8 +232,11 @@ PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement>& statement
 	
 	// now the original statement inherits from the group
 	res->addUsedVariables(consequentGroup->getUsedVariables());
-	res->addModifiedVariables(consequentGroup->getModifiedVariables());
 	res->addUsedVariables(alternativeGroup->getUsedVariables());
+	addUsedVariable(PKBDesignEntity::If, consequentGroup->getUsedVariables());
+	addUsedVariable(PKBDesignEntity::If, alternativeGroup->getUsedVariables());
+
+	res->addModifiedVariables(consequentGroup->getModifiedVariables());
 	res->addModifiedVariables(alternativeGroup->getModifiedVariables());
 
 	return res;
@@ -283,6 +284,7 @@ PKBStatement::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement>& statem
 
 	// now the original statement inherits from the group
 	res->addUsedVariables(group->getUsedVariables());
+	addUsedVariable(PKBDesignEntity::While, group->getUsedVariables());
 	res->addModifiedVariables(group->getModifiedVariables());
 
 	return res;
@@ -315,7 +317,13 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 
 	// now the call statement inherits from the procedure
 	res->addUsedVariables(procedureCalled->getUsedVariables());
+	addUsedVariable(PKBDesignEntity::Call, procedureCalled->getUsedVariables());
 	res->addModifiedVariables(procedureCalled->getModifiedVariables());
+
+	if (res->getUsedVariables().size() > 0) {
+		mAllUseStmts.insert(res);
+		designEntityToStatementsThatUseVarsMap[PKBDesignEntity::Call].insert(res);
+	}
 
 	return res;
 }
@@ -329,12 +337,24 @@ void PKB::addStatement(PKBStatement::SharedPtr& statement, PKBDesignEntity desig
 	}
 }
 
-void PKB::addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable) {
+inline void PKB::addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable) {
 	mUsedVariables[designEntity].insert(variable);
 
 	// also put it in the global bucket list
 	if (designEntity != PKBDesignEntity::_) {
 		mUsedVariables[PKBDesignEntity::_].insert(variable);
+	}
+}
+
+void PKB::addUsedVariable(PKBDesignEntity designEntity, vector<PKBVariable::SharedPtr>& variables)
+{
+	for (auto& v : variables) addUsedVariable(designEntity, v);
+}
+
+void PKB::addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr>& variables)
+{
+	for (auto v : variables) {
+		addUsedVariable(designEntity, v);
 	}
 }
 
