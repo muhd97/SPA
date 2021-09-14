@@ -292,8 +292,8 @@ protected:
 			s == PKBDesignEntity::AllExceptProcedure;
 	}
 
-	PKBStatement::SharedPtr getStatementBefore(PKBStatement::SharedPtr statementAfter);
-	PKBStatement::SharedPtr getStatementAfter(PKBStatement::SharedPtr statementBefore);
+	bool getStatementBefore(PKBStatement::SharedPtr& statementAfter, PKBStatement::SharedPtr& result);
+	bool getStatementAfter(PKBStatement::SharedPtr& statementBefore, PKBStatement::SharedPtr& result);
 
 	void addParentStmts(vector<PKBStatement::SharedPtr> &stmts) {
 		// not sure if its faster, but we dont want to iterate over all types, just If, While, Procedure(the container types)
