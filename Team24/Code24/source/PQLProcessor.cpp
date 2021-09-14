@@ -41,6 +41,9 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<Design
         return PKBDesignEntity::Assign;
     }
     else if (s == STMT) {
+
+        cout << "STMT MATCH ================= \n";
+
         return PKBDesignEntity::_; // ALL STATEMENTS
     }
     else if (s == READ) {
