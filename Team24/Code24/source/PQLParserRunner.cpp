@@ -84,7 +84,7 @@ void runParserUsesTestCases() {
         cout << "\n==== ParseUsesTest: " << s << " ====" << endl;
         PQLParser usesParser(pqlLex(s));
         SPtr<RelRef> uses = usesParser.parseUses();
-        uses->printString();
+        cout << uses->format();
     }
 }
 
@@ -165,9 +165,7 @@ void runParserSuchThatCases() {
     for (auto& s : suchThatTestCases) {
         PQLParser suchThatParser(pqlLex(s));
         auto suchThat = suchThatParser.parseSuchThat();
-        cout << "Such That: ";
-        suchThat->relRef->printString();
-        cout << endl;
+        cout << "Such That: " << suchThat->relRef->format() << endl;
     }
 }
 
@@ -208,8 +206,7 @@ void runParserSelectCases() {
         cout << "\n";
         PQLParser p(pqlLex(t));
         auto sel = p.parseSelectCl();
-        sel->printString();
-        cout << "\n";
+        cout << sel->format() << endl;
     }
 
 }

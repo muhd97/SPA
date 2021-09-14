@@ -66,19 +66,17 @@ public:
         return de;
     }
 
-    void printString() {
-        cout << "Declaration<" << de->getEntityTypeName() << "> " << "(";
+    string format() {
+        auto builder = de->getEntityTypeName() + " [";
         for (auto& s : synonyms) {
-            cout << s << ", ";
+            builder += s + ", ";
         }
-        cout << ")";
+        return builder + "]";
     }
 
     ~Declaration() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << "Deleted: " << format() << endl;
         }
     }
 };
@@ -116,7 +114,7 @@ public:
         case StmtRefType::INTEGER:
             return "int(" + to_string(getIntVal()) + ")";
         case StmtRefType::SYNONYM:
-            return "synonym(" + getStringVal() + ")";
+            return "syn(" + getStringVal() + ")";
         case StmtRefType::UNDERSCORE:
             return "_";
         }
@@ -175,7 +173,7 @@ public:
         case EntRefType::IDENT:
             return "ident(" + getStringVal() + ")";
         case EntRefType::SYNONYM:
-            return "synonym(" + getStringVal() + ")";
+            return "syn(" + getStringVal() + ")";
         case EntRefType::UNDERSCORE:
             return "_";
         }
@@ -189,10 +187,13 @@ public:
 
     ~EntRef() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            cout << "EntRef(" << getEntRefTypeName() << ")\n";
+            cout << "Deleted: " << format();
         }
 
+    }
+
+    string format() {
+        return getEntRefTypeName();
     }
 
 };
@@ -205,8 +206,8 @@ enum class RelRefType { USES_S, USES_P, MODIFIES_S, MODIFIES_P, FOLLOWS, FOLLOWS
 
 class RelRef {
 public:
-    virtual void printString() {
-        cout << "RelRef THIS SHOULD NOT BE PRINTED\n";
+    virtual string format() {
+        return "RelRef THIS SHOULD NOT BE PRINTED";
     }
 
     virtual inline bool containsSynonym(string s) = 0;
@@ -223,15 +224,14 @@ public:
 
     }
 
-    void printString() override {
-        cout << "UsesS[" << stmtRef->getStmtRefTypeName() << ", " << entRef->getEntRefTypeName() << "]";
+    string format() override {
+        return "UsesS(" + stmtRef->getStmtRefTypeName() + ", " + entRef->getEntRefTypeName() + ")";
     }
 
     ~UsesS() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
             cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << format() << endl;
         }
     }
 
@@ -264,8 +264,8 @@ public:
 
     }
 
-    void printString() override {
-        cout << "UsesP[" << entRef1->getEntRefTypeName() << ", " << entRef2->getEntRefTypeName() << "]";
+    string format() override {
+        return "UsesP(" + entRef1->getEntRefTypeName() + ", " + entRef2->getEntRefTypeName() + ")";
     }
 
     inline bool containsSynonym(string s) {
@@ -295,15 +295,13 @@ public:
 
     }
 
-    void printString() override {
-        cout << "ModifiesS[" << stmtRef->getStmtRefTypeName() << ", " << entRef->getEntRefTypeName() << "]";
+    string format() override {
+        return "ModifiesS(" + stmtRef->getStmtRefTypeName() + ", " + entRef->getEntRefTypeName() + ")";
     }
 
     ~ModifiesS() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << "Deleted: " << format() << endl;
         }
     }
 
@@ -352,8 +350,8 @@ public:
         return RelRefType::MODIFIES_P;
     }
 
-    void printString() override {
-        cout << "ModifiesP[" << entRef1->getEntRefTypeName() << ", " << entRef2->getEntRefTypeName() << "]";
+    string format() override {
+        return "ModifiesP(" + entRef1->getEntRefTypeName() + ", " + entRef2->getEntRefTypeName() + ")";
     }
 };
 
@@ -366,16 +364,14 @@ public:
 
     }
 
-    void printString() override {
-        cout << "Parent[" << stmtRef1->getStmtRefTypeName() << ", " << stmtRef2->getStmtRefTypeName() << "]";
+    string format() override {
+        return "Parent(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
 
     }
 
     ~Parent() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << "Deleted: " << format();
         }
     }
 
@@ -406,16 +402,13 @@ public:
 
     }
 
-    void printString() override {
-        cout << "Parent*[" << stmtRef1->getStmtRefTypeName() << ", " << stmtRef2->getStmtRefTypeName() << "]";
-
+    string format() override {
+        return "Parent*(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
     }
 
     ~ParentT() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << "Deleted: " << format() << endl;
         }
     }
 
@@ -446,17 +439,14 @@ public:
 
     }
 
-    void printString() override {
-        cout << "Follows[" << stmtRef1->getStmtRefTypeName() << ", " << stmtRef2->getStmtRefTypeName() << "]";
-
+    string format() override {
+        return "Follows(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
     }
 
     ~Follows()
     {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << "Deleted: " << format() << endl;
         }
     }
 
@@ -487,16 +477,14 @@ public:
 
     }
 
-    void printString() override {
-        cout << "Follows*[" << stmtRef1->getStmtRefTypeName() << ", " << stmtRef2->getStmtRefTypeName() << "]";
+    string format() override {
+        return "Follows*(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
 
     }
 
     ~FollowsT() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << "Deleted: " << format() << endl;
         }
     }
 
@@ -528,17 +516,13 @@ public:
 
     ~SuchThatCl() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << "Deleted: " << format() << endl;
         }
 
     }
 
-    void printString() {
-        cout << "SuchThatCl (";
-        relRef->printString();
-        cout << ")";
+    string format() {
+        return "\nSUCHTHAT " + relRef->format();
     }
 
     inline bool containsSynonym(string s) {
@@ -560,21 +544,21 @@ public:
 
     ~ExpressionSpec() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << "Deleted: " << format() << endl;
         }
 
     }
 
-    void printString() {
-        cout << "ExpressionSpec (";
-        cout << "isAnything(" << isAnything << ") | ";
-        cout << "isPartialMatchs(" << isPartialMatch << ") | ";
-        if (expression != nullptr) {
-            cout << "expression: " + expression->format(0);
+    string format() {
+        if (isAnything) {
+            return "_";
         }
-        cout << ")";
+        else if (isPartialMatch) {
+            return "_\"" + expression->format(0) + "\"_";
+        }
+        else {
+            return "\"" + expression->format(0) + "\"";
+        }
     }
 
 };
@@ -591,19 +575,12 @@ public:
 
     ~PatternCl() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << "Deleted: " << format() << endl;
         }
-
     }
 
-    void printString() {
-        cout << "PatternCl (";
-        cout << "TargetSynonym(" << synonym << ") | ";
-        cout << "entRef(" << entRef->getEntRefTypeName() << ") | ";
-        exprSpec->printString();
-        cout << ")";
+    string format() {
+        return "\nPATTERN " + synonym + " (" + entRef->format() + ", " + exprSpec->format() + ")";
     }
 
     inline bool containsSynonym(string s) {
@@ -611,14 +588,8 @@ public:
             || (entRef->getEntRefType() == EntRefType::SYNONYM 
                 && entRef->getStringVal() == s);
     }
-
 };
 
-/*
-
-YIDA: Note, SelectCl currently only supports 
-
-*/
 class SelectCl {
 public:
     vector<shared_ptr<Declaration>> declarations;
@@ -641,32 +612,28 @@ public:
         return synonymToParentDeclarationMap[s];
     }
 
-    void printString() {
-        cout << "SelectCl ( ";
+    string format() {
+        string builder = "";
         for (auto& d : declarations) {
-            d->printString();
-            cout << " $ ";
+            builder += d->format() + ",";
         }
-        cout << " | ";
 
-        cout << "TargetSynonym(" << targetSynonym << ") | ";
+        builder += "\nSELECT " + targetSynonym;
 
         for (auto& st : suchThatClauses) {
-            st->printString();
+            builder += st->format();
         }
 
         for (auto& pt : patternClauses) {
-            pt->printString();
+            builder += pt->format();
         }
 
-        cout << ")";
+        return builder;
     }
 
     ~SelectCl() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: ";
-            printString();
-            putchar('\n');
+            cout << "Deleted: " << format() << endl;
         }
     }
 
@@ -716,8 +683,7 @@ public:
 
     ~PQLParser() {
         if (DESTRUCTOR_MESSAGE_ENABLED) {
-            cout << "Deleted: PQLParser";
-            putchar('\n');
+            cout << "Deleted: PQLParser" << endl;
         }
     }
 
