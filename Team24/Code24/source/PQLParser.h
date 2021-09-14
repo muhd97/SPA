@@ -615,7 +615,7 @@ public:
     string format() {
         string builder = "";
         for (auto& d : declarations) {
-            builder += d->format() + ",";
+            builder += d->format() + ", ";
         }
 
         builder += "\nSELECT " + targetSynonym;
