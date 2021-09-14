@@ -395,7 +395,7 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity 
 	for (auto& stmt : stmts) {
 		// if there is no statement before, go next
 		if (!getStatementBefore(stmt, stmtBefore)) {
-			break;
+			continue;
 		}
 
 		// if pass the type check
@@ -451,7 +451,7 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity a
 	for (auto& stmt : stmts) {
 		// if there is no statement after, go next
 		if (!getStatementAfter(stmt, stmtAfter)) {
-			break;
+			continue;
 		}
 
 		// if pass the type check
