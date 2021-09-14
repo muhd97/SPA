@@ -117,6 +117,10 @@ public:
 	}
 
 	PKBStatement::SharedPtr getProcedureByName(string procname) {
+		if (procedureNameToProcedureMap.find(procname) == procedureNameToProcedureMap.end()) {
+			return nullptr;
+		}
+
 		return procedureNameToProcedureMap[procname];
 	}
 

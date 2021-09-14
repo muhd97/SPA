@@ -649,7 +649,12 @@ bool PQLEvaluator::checkUsed()
 
 vector<string> PQLEvaluator::getUsedByProcName(string procname)
 {
+	if (mpPKB->getProcedureByName(procname) == nullptr) {
+		return vector<string>();
+	}
+
 	PKBStatement::SharedPtr& procedure = mpPKB->getProcedureByName(procname);
+
 	vector<PKBVariable::SharedPtr> vars;
 	const set<PKBVariable::SharedPtr>& varsUsed = procedure->getUsedVariables();
 	vars.reserve(varsUsed.size());
