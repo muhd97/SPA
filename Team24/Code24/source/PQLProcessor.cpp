@@ -44,7 +44,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<Design
 
         cout << "STMT MATCH ================= \n";
 
-        return PKBDesignEntity::_; // ALL STATEMENTS
+        return PKBDesignEntity::AllExceptProcedure; // ALL STATEMENTS
     }
     else if (s == READ) {
         return PKBDesignEntity::Read;
@@ -97,7 +97,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoRelRefOrPatternCase(shared_ptr<
     PKBDesignEntity pkbde = resolvePQLDesignEntityToPKBDesignEntity(de);
     vector<shared_ptr<PKBStatement>> stmts;
     
-    if (pkbde == PKBDesignEntity::_) stmts = evaluator->getAllStatements();
+    if (pkbde == PKBDesignEntity::AllExceptProcedure) stmts = evaluator->getAllStatements();
     else stmts = evaluator->getStatementsByPKBDesignEntity(pkbde);
 
     for (auto& ptr : stmts) {
@@ -120,7 +120,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     {
         shared_ptr<UsesS> usesCl = static_pointer_cast<UsesS>(suchThatCl->relRef);
 
-        /* Uses(_, x) ERROR cannot have underscore as first arg!! */
+        /* Uses(AllExceptProcedure, x) ERROR cannot have underscore as first arg!! */
         if (usesCl->stmtRef->getStmtRefType() == StmtRefType::UNDERSCORE) { 
             cout << "TODO: Handle Uses error case\n";
         }
@@ -156,7 +156,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         EntRefType rightType = usesCl->entRef->getEntRefType();
         if (leftType == StmtRefType::SYNONYM) { 
 
-            /* Uses (syn, v) OR Uses(syn, _) */
+            /* Uses (syn, v) OR Uses(syn, AllExceptProcedure) */
             if (rightType == EntRefType::SYNONYM || rightType == EntRefType::UNDERSCORE) { 
                 shared_ptr<StmtRef>& stmtRefLeft = usesCl->stmtRef;
                 shared_ptr<EntRef>& entRefRight = usesCl->entRef;

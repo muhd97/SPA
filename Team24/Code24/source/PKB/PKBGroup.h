@@ -46,7 +46,7 @@ public:
 		return mParentGroup;
 	}
 
-	// get members of particular synonym. to get all members, use PKBDesignEntity::_
+	// get members of particular synonym. to get all members, use PKBDesignEntity::AllExceptProcedure
 	vector<int> getMembers(PKBDesignEntity s) {
 		return mMembers[s];
 	}
@@ -68,8 +68,8 @@ public:
 		mMembers[designEntity].emplace_back(statementIndex);
 
 		// also add it to the combined list of all members
-		if (designEntity != PKBDesignEntity::_) {
-			mMembers[PKBDesignEntity::_].emplace_back(statementIndex);
+		if (designEntity != PKBDesignEntity::AllExceptProcedure) {
+			mMembers[PKBDesignEntity::AllExceptProcedure].emplace_back(statementIndex);
 		}
 	}
 

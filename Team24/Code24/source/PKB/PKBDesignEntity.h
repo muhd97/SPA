@@ -9,7 +9,7 @@ enum class PKBDesignEntity {
 	While = 4,
 	If = 5,
 	Procedure = 6,
-	_ = 7
+	AllExceptProcedure = 7
 };
 
 
@@ -35,4 +35,4 @@ public:
 	bool operator!=(const Iterator& i) { return val != i.val; }
 };
 
-typedef Iterator<PKBDesignEntity, PKBDesignEntity::Read, PKBDesignEntity::_> PKBDesignEntityIterator;
+typedef Iterator<PKBDesignEntity, PKBDesignEntity::Read, PKBDesignEntity::AllExceptProcedure> PKBDesignEntityIterator;

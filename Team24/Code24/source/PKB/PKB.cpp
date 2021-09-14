@@ -51,7 +51,7 @@ PKBStatement::SharedPtr PKB::extractStatement(shared_ptr<Statement>& statement, 
 		return extractIfStatement(statement, group);
 	case PKBDesignEntity::Procedure:
 		throw ("procedure statement found in procedure, this should not occur");
-	case PKBDesignEntity::_:
+	case PKBDesignEntity::AllExceptProcedure:
 		throw ("_ statement found in procedure, this should not occur");
 	default:
 		throw ("cannot recognise design entity");
@@ -332,8 +332,8 @@ void PKB::addStatement(PKBStatement::SharedPtr& statement, PKBDesignEntity desig
 	mStatements[designEntity].emplace_back(statement);
 
 	// also put it in the global bucket list
-	if (designEntity != PKBDesignEntity::Procedure && designEntity != PKBDesignEntity::_) {
-		mStatements[PKBDesignEntity::_].emplace_back(statement);
+	if (designEntity != PKBDesignEntity::Procedure && designEntity != PKBDesignEntity::AllExceptProcedure) {
+		mStatements[PKBDesignEntity::AllExceptProcedure].emplace_back(statement);
 	}
 }
 
@@ -341,8 +341,8 @@ inline void PKB::addUsedVariable(PKBDesignEntity designEntity, PKBVariable::Shar
 	mUsedVariables[designEntity].insert(variable);
 
 	// also put it in the global bucket list
-	if (designEntity != PKBDesignEntity::_) {
-		mUsedVariables[PKBDesignEntity::_].insert(variable);
+	if (designEntity != PKBDesignEntity::AllExceptProcedure) {
+		mUsedVariables[PKBDesignEntity::AllExceptProcedure].insert(variable);
 	}
 }
 
@@ -362,8 +362,8 @@ void PKB::addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedP
 	mModifiedVariables[designEntity].insert(variable);
 
 	// also put it in the global bucket list
-	if (designEntity != PKBDesignEntity::_) {
-		mModifiedVariables[PKBDesignEntity::_].insert(variable);
+	if (designEntity != PKBDesignEntity::AllExceptProcedure) {
+		mModifiedVariables[PKBDesignEntity::AllExceptProcedure].insert(variable);
 	}
 }
 

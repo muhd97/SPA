@@ -9,7 +9,7 @@ vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
 	PKBStatement::SharedPtr parent = mpPKB->getStatement(grp->getOwner());
 	
 	vector<int> res;
-	if (parentType == PKBDesignEntity::_ || parentType == parent->getType()) {
+	if (parentType == PKBDesignEntity::AllExceptProcedure || parentType == parent->getType()) {
 		res.emplace_back(parent->getIndex());
 	}
 	return res;
@@ -31,7 +31,7 @@ vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity
 
 	// if not cached, we find the result manually and insert it into the cache
 	vector<PKBStatement::SharedPtr> parentStmts; 
-	if (parentType == PKBDesignEntity::_) {
+	if (parentType == PKBDesignEntity::AllExceptProcedure) {
 		addParentStmts(parentStmts);
 	}
 	else {
@@ -56,7 +56,7 @@ vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity
 
 vector<int> PQLEvaluator::getParents(PKBDesignEntity childType)
 {
-	return getParents(PKBDesignEntity::_, childType);
+	return getParents(PKBDesignEntity::AllExceptProcedure, childType);
 }
 
 vector<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex)
@@ -93,7 +93,7 @@ vector<int> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntit
 
 	// if not cached, we find the result manually and insert it into the cache
 	vector<PKBStatement::SharedPtr> parentStmts;
-	if (parentType == PKBDesignEntity::_) {
+	if (parentType == PKBDesignEntity::AllExceptProcedure) {
 		addParentStmts(parentStmts);
 	}
 	else {
@@ -115,7 +115,7 @@ vector<int> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntit
 
 vector<int> PQLEvaluator::getChildren(PKBDesignEntity parentType)
 {
-	return getChildren(PKBDesignEntity::_, parentType);
+	return getChildren(PKBDesignEntity::AllExceptProcedure, parentType);
 }
 
 vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex)
@@ -157,14 +157,14 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntit
 		return result;
 	}
 
-	// if parentType is PKBDesignEntity::_ call the other function instead (temporarily doing this because im scared of bugs)
-	if (parentType == PKBDesignEntity::_) {
+	// if parentType is PKBDesignEntity::AllExceptProcedure call the other function instead (temporarily doing this because im scared of bugs)
+	if (parentType == PKBDesignEntity::AllExceptProcedure) {
 		return getParentsT(childType);
 	}
 
 	// if not cached, we find the result manually and insert it into the cache
 	vector<PKBStatement::SharedPtr> parentStmts;
-	if (parentType == PKBDesignEntity::_) {
+	if (parentType == PKBDesignEntity::AllExceptProcedure) {
 		addParentStmts(parentStmts);
 	}
 	else {
@@ -222,7 +222,7 @@ bool PQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignE
 
 vector<int> PQLEvaluator::getParentsT(PKBDesignEntity childType)
 {
-	//todo @nicholas can optimise this ALOT, but not urgent for now (specifically, can optimise for procedure and _)
+	//todo @nicholas can optimise this ALOT, but not urgent for now (specifically, can optimise for procedure and AllExceptProcedure)
 	vector<int> ifRes = getParentsT(PKBDesignEntity::If, childType);
 	vector<int> whileRes = getParentsT(PKBDesignEntity::While, childType);
 	vector<int> procedureRes = getParentsT(PKBDesignEntity::Procedure, childType);
@@ -279,15 +279,15 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEnti
 		return result;
 	}
 
-	// if parentType is PKBDesignEntity::_ call the other function instead (temporarily doing this because im scared of bugs)
-	if (parentType == PKBDesignEntity::_) {
+	// if parentType is PKBDesignEntity::AllExceptProcedure call the other function instead (temporarily doing this because im scared of bugs)
+	if (parentType == PKBDesignEntity::AllExceptProcedure) {
 		return getChildrenT(childType);
 	}
 
 	// if not cached, we find the result manually and insert it into the cache
 	// note: even though we are finding children this time, it is still easier to traverse the parents instead
 	vector<PKBStatement::SharedPtr> parentStmts;
-	if (parentType == PKBDesignEntity::_) {
+	if (parentType == PKBDesignEntity::AllExceptProcedure) {
 		addParentStmts(parentStmts);
 	}
 	else {
@@ -331,7 +331,7 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEnti
 
 vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType)
 {
-	return getChildrenT(parentType, PKBDesignEntity::_);
+	return getChildrenT(parentType, PKBDesignEntity::AllExceptProcedure);
 }
 
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
@@ -341,7 +341,7 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 
 	vector<int> res;
 	// if pass the type check
-	if (beforeType == PKBDesignEntity::_ || stmtBefore->getType() == beforeType) {
+	if (beforeType == PKBDesignEntity::AllExceptProcedure || stmtBefore->getType() == beforeType) {
 		// and pass the same nesting level check
 		if (stmt->getGroup() == stmtBefore->getGroup()) {
 			res.emplace_back(stmtBefore->getIndex());
@@ -363,7 +363,7 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity 
 	for (auto& stmt : stmts) {
 		PKBStatement::SharedPtr stmtBefore = mpPKB->getStatement(stmt->getIndex() - 1);
 		// if pass the type check
-		if (beforeType == PKBDesignEntity::_ || stmtBefore->getType() == beforeType) {
+		if (beforeType == PKBDesignEntity::AllExceptProcedure || stmtBefore->getType() == beforeType) {
 			// and pass the same nesting level check
 			if (stmt->getGroup() == stmtBefore->getGroup()) {
 				res.emplace_back(stmtBefore->getIndex());
@@ -378,7 +378,7 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity 
 
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity afterType)
 {
-	return getBefore(PKBDesignEntity::_, afterType);
+	return getBefore(PKBDesignEntity::AllExceptProcedure, afterType);
 }
 
 vector<int> PQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
@@ -388,7 +388,7 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
 
 	vector<int> res;
 	// if pass the type check
-	if (afterType == PKBDesignEntity::_ || stmtAfter->getType() == afterType) {
+	if (afterType == PKBDesignEntity::AllExceptProcedure || stmtAfter->getType() == afterType) {
 		// and pass the same nesting level check
 		if (stmt->getGroup() == stmtAfter->getGroup()) {
 			res.emplace_back(stmtAfter->getIndex());
@@ -411,7 +411,7 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity a
 	for (auto& stmt : stmts) {
 		PKBStatement::SharedPtr stmtAfter = mpPKB->getStatement(stmt->getIndex() + 1);
 		// if pass the type check
-		if (afterType == PKBDesignEntity::_ || stmtAfter->getType() == afterType) {
+		if (afterType == PKBDesignEntity::AllExceptProcedure || stmtAfter->getType() == afterType) {
 			// and pass the same nesting level check
 			if (stmt->getGroup() == stmtAfter->getGroup()) {
 				res.emplace_back(stmtAfter->getIndex());
@@ -426,7 +426,7 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity a
 
 vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType)
 {
-	return getAfter(PKBDesignEntity::_, beforeType);
+	return getAfter(PKBDesignEntity::AllExceptProcedure, beforeType);
 }
 
 vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, int afterIndex)
@@ -494,7 +494,7 @@ vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity
 
 vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity afterType)
 {
-	return getBeforeT(PKBDesignEntity::_, afterType);
+	return getBeforeT(PKBDesignEntity::AllExceptProcedure, afterType);
 }
 
 vector<int> PQLEvaluator::getAfterT(PKBDesignEntity afterType, int beforeIndex)
@@ -565,7 +565,7 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 
 vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType)
 {
-	return getAfterT(PKBDesignEntity::_, beforeType);
+	return getAfterT(PKBDesignEntity::AllExceptProcedure, beforeType);
 }
 
 vector<string> PQLEvaluator::getUsed(int statementIndex)
@@ -584,7 +584,7 @@ vector<string> PQLEvaluator::getUsed(PKBDesignEntity userType)
 
 vector<string> PQLEvaluator::getUsed()
 {
-	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
+	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::AllExceptProcedure);
 	return varToString(move(vars));
 }
 
@@ -611,7 +611,7 @@ vector<int> PQLEvaluator::getUsers(string variableName)
 vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName)
 {
 	// if we are looking for ALL users using the variable, call the other function
-	if (userType == PKBDesignEntity::_) {
+	if (userType == PKBDesignEntity::AllExceptProcedure) {
 		return getUsers(variableName);
 	}
 
@@ -642,9 +642,9 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity entityType)
 {
 	vector<PKBStatement::SharedPtr> stmts;
 
-	/* YIDA Todo: Check if using getAllUseStmts(PKBDesignEntity::_) and getAllUseStmts() is intended to be identical? It is currently not. */
+	/* YIDA Todo: Check if using getAllUseStmts(PKBDesignEntity::AllExceptProcedure) and getAllUseStmts() is intended to be identical? It is currently not. */
 
-	set<PKBStatement::SharedPtr>& useStmtsToCopyOver = entityType != PKBDesignEntity::_ ? mpPKB->getAllUseStmts(entityType) : mpPKB->getAllUseStmts();
+	set<PKBStatement::SharedPtr>& useStmtsToCopyOver = entityType != PKBDesignEntity::AllExceptProcedure ? mpPKB->getAllUseStmts(entityType) : mpPKB->getAllUseStmts();
 
 	for (auto& ptr : useStmtsToCopyOver) {
 		stmts.emplace_back(ptr);
@@ -674,7 +674,7 @@ vector<string> PQLEvaluator::getModified(PKBDesignEntity modifierType)
 vector<string> PQLEvaluator::getModified()
 {
 	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
-	set<PKBVariable::SharedPtr> vars = mpPKB->getModifiedVariables(PKBDesignEntity::_);
+	set<PKBVariable::SharedPtr> vars = mpPKB->getModifiedVariables(PKBDesignEntity::AllExceptProcedure);
 	return varToString(vars);
 }
 
@@ -687,7 +687,7 @@ vector<int> PQLEvaluator::getModifiers(string variableName)
 vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string variableName)
 {
 	// if we are looking for ALL users using the variable, call the other function
-	if (modifierType == PKBDesignEntity::_) {
+	if (modifierType == PKBDesignEntity::AllExceptProcedure) {
 		return getModifiers(variableName);
 	}
 
@@ -721,7 +721,7 @@ const vector<PKBStatement::SharedPtr>& PQLEvaluator::getStatementsByPKBDesignEnt
 vector<PKBStatement::SharedPtr> PQLEvaluator::getAllStatements()
 {
 
-	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(PKBDesignEntity::_);
+	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(PKBDesignEntity::AllExceptProcedure);
 
 	vector<PKBStatement::SharedPtr> toReturn;
 	toReturn.reserve(stmts.size());

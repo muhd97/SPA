@@ -28,7 +28,7 @@ public:
 	
 	// Get parent statement if it is of type {parentType} of child statement indexed {child} 
 	// eg. stmt s; Select s such that Parent( s, 14 ); 
-	// => getParents( PKBDE::_, 14 ) // find parent stmt of stmt 14
+	// => getParents( PKBDE::AllExceptProcedure, 14 ) // find parent stmt of stmt 14
 	// eg. if ifs; Select ifs such that Parent( ifs, 14 ); 
 	// => getParents( PKBDE::If, 14 ) // find parent stmt of stmt 14 if parent is an 'if' stmt
 	vector<int> getParents(PKBDesignEntity parentType, int child);
@@ -45,7 +45,7 @@ public:
 
 	// Get all children statements of type {childType} of parent statement indexed {parent} 
 	// eg. stmt s; Select s such that Parent( 14, s ); 
-	// => getChildren( PKBDE::_, 14 ) // find children stmts of stmt 14
+	// => getChildren( PKBDE::AllExceptProcedure, 14 ) // find children stmts of stmt 14
 	// eg. if ifs; Select ifs such that Parent( 14, ifs ); 
 	// => getChildren( PKBDE::If, 14 ) // find 'if' children stmts of stmt 14 
 	vector<int> getChildren(PKBDesignEntity childType, int parent);
@@ -64,7 +64,7 @@ public:
 
 	// Get all direct/indirect parent statements of type {parentType} of child statement indexed {child} 
 	// eg. stmt s; Select s such that ParentT( s, 14 ); 
-	// => getParentsT( PKBDE::_, 14 ) // find all direct/indirect parent stmts of stmt 14
+	// => getParentsT( PKBDE::AllExceptProcedure, 14 ) // find all direct/indirect parent stmts of stmt 14
 	// eg. if ifs; Select ifs such that ParentT( ifs, 14 ); 
 	// => getParentsT( PKBDE::If, 14 ) // find all direct/indirect 'if' parent stmts of stmt 14
 	vector<int> getParentsT(PKBDesignEntity parentType, int child);
@@ -81,7 +81,7 @@ public:
 	
 	// Get all direct/indirect children statements of type {childType} with parent statement indexed {parent} 
 	// eg. stmt s; Select s such that ParentT( 14, s ); 
-	// => getChildrenT( PKBDE::_, 14 ) // find all direct/indirect children stmts of stmt 14
+	// => getChildrenT( PKBDE::AllExceptProcedure, 14 ) // find all direct/indirect children stmts of stmt 14
 	// eg. if ifs; Select ifs such that ParentT( 14, ifs ); 
 	// => getChildrenT( PKBDE::If, 14 ) // find all direct/indirect 'if' children stmts of stmt 14 
 	vector<int> getChildrenT(PKBDesignEntity child, int parent);
@@ -100,7 +100,7 @@ public:
 
 	// Get statement if it is of type {beforeType} and followed by statement indexed {after} 
 	// eg. stmt s; Select s such that Follows( s, 14 ); 
-	// => getBefore( PKBDE::_, 14 )
+	// => getBefore( PKBDE::AllExceptProcedure, 14 )
 	// eg. if ifs; Select ifs such that Follows( ifs, 14 ); 
 	// => getBefore( PKBDE::If, 14 )
 	vector<int> getBefore(PKBDesignEntity beforeType, int after);
@@ -117,7 +117,7 @@ public:
 
 	// Get statement if it is of type {afterType} and follows child statement indexed {child} 
 	// eg. stmt s; Select s such that Follows( 14, s ); 
-	// => getAfter( PKBDE::_, 14 )
+	// => getAfter( PKBDE::AllExceptProcedure, 14 )
 	// eg. if ifs; Select ifs such that Follows( 14, ifs ); 
 	// => getAfter( PKBDE::If, 14 )
 	vector<int> getAfter(PKBDesignEntity afterType, int before);
@@ -136,7 +136,7 @@ public:
 
 	// Get all statements of type {beforeType} followed directly/indirectly by statement indexed {after} 
 	// eg. stmt s; Select s such that FollowsT( s, 14 ); 
-	// => getBeforeT( PKBDE::_, 14 )
+	// => getBeforeT( PKBDE::AllExceptProcedure, 14 )
 	// eg. if ifs; Select ifs such that FollowsT( ifs, 14 ); 
 	// => getBeforeT( PKBDE::If, 14 )
 	vector<int> getBeforeT(PKBDesignEntity beforeType, int after);
@@ -153,7 +153,7 @@ public:
 
 	// Get statement if it is of type {afterType} and follows directly/indirectly child statement indexed {child} 
 	// eg. stmt s; Select s such that FollowsT( 14, s ); 
-	// => getAfterT( PKBDE::_, 14 )
+	// => getAfterT( PKBDE::AllExceptProcedure, 14 )
 	// eg. if ifs; Select ifs such that FollowsT( 14, ifs ); 
 	// => getAfterT( PKBDE::If, 14 )
 	vector<int> getAfterT(PKBDesignEntity afterType, int beforeIndex);
@@ -281,7 +281,7 @@ protected:
 		return s == PKBDesignEntity::If ||
 			s == PKBDesignEntity::While ||
 			s == PKBDesignEntity::Procedure ||
-			s == PKBDesignEntity::_;
+			s == PKBDesignEntity::AllExceptProcedure;
 	}
 
 	void addParentStmts(vector<PKBStatement::SharedPtr> &stmts) {
