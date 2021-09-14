@@ -84,7 +84,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
         cout << "\n==== Printing Parsed Query ====\n";
-        sel->printString();
+        cout << sel->format() << endl;
 
         cout << "\n==== Processing PQL Query ====\n";
 
@@ -104,7 +104,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
 
     }
     catch (const invalid_argument & e) {
-
+        cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
     }
 
     cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";

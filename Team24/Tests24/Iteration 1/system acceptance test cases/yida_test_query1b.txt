@@ -63,8 +63,19 @@ procedure k;
 Select k such that Uses(k, v)
 yida1, yida2, yida3
 25
-14 - Select stmt such that Uses(stmt, v) // NEGATIVE TEST CASE, should return nothing
+14 - Select stmt such that Uses(stmt, v) // Return only assign/if/while/print/call
 variable v; stmt s;
 Select s such that Uses(s, v)
+11, 12, 9, 8, 5, 3
+25
+15 - Select v such that Uses(INT, v) // NEGATIVE CASE: INT is a non-Uses statement?
+variable v;
+Select v such that Uses(4, v)
 
 25
+16 - Select v such that Uses(s, v) // s is general STMT
+stmt s; variable v;
+Select v such that Uses(s, v)
+z, x, y, b, q
+25
+

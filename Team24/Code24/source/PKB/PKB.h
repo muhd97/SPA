@@ -36,7 +36,7 @@ public:
 	void initialise();
 	void extractDesigns(shared_ptr<Program> program);
 
-	// for all statements, use PKBDesignEntity::_, where position corresponds to statement index
+	// for all statements, use PKBDesignEntity::AllExceptProcedure, where position corresponds to statement index
 	unordered_map<PKBDesignEntity, vector<PKBStatement::SharedPtr>> mStatements;
 
 	// for each type (synonym), contains a vector of all the variables used/modified by all statements of that type 
@@ -62,31 +62,31 @@ public:
 
 	// statement number, starting from index 1
 	PKBStatement::SharedPtr getStatement(int stmtNumber) {
-		if (stmtNumber > (int)mStatements[PKBDesignEntity::_].size()) {
+		if (stmtNumber > (int)mStatements[PKBDesignEntity::AllExceptProcedure].size()) {
 			throw std::invalid_argument("Requested statement number higher than max number of statements");
 		}
 		// get the stmt from list of all statements
 		/* YIDA Note: vector<> of statements is 0-based, stmtNumber is 1-based. Need to substract 1. */
 		int targetIndexInMStatementsVector = stmtNumber - 1;
-		PKBStatement::SharedPtr s = mStatements[PKBDesignEntity::_][targetIndexInMStatementsVector];
+		PKBStatement::SharedPtr s = mStatements[PKBDesignEntity::AllExceptProcedure][targetIndexInMStatementsVector];
 		assert(s->getIndex() == stmtNumber);
 		return s;
 	}
 
-	// note: position of statement in vector does NOT correspond to statement index except for PKBDesignEntity::_
+	// note: position of statement in vector does NOT correspond to statement index except for PKBDesignEntity::AllExceptProcedure
 	// this function gets all the statements corresponding to a specified type: eg. assign, call etc.
 	vector<PKBStatement::SharedPtr>& getStatements(PKBDesignEntity s) {
 		return mStatements[s];
 	}
 
 	// get used variables used by statements of a specified DesignEntity
-	// to get all used variables (by all statements), use PKBDesignEntity::_
+	// to get all used variables (by all statements), use PKBDesignEntity::AllExceptProcedure
 	set<PKBVariable::SharedPtr> getUsedVariables(PKBDesignEntity s) {
 		return mUsedVariables[s];
 	}
 
 	// get used variables modified by statements of a specified DesignEntity
-	// to get all modified variables (by all statements), use PKBDesignEntity::_
+	// to get all modified variables (by all statements), use PKBDesignEntity::AllExceptProcedure
 	set<PKBVariable::SharedPtr> getModifiedVariables(PKBDesignEntity s) {
 		return mModifiedVariables[s];
 	}
