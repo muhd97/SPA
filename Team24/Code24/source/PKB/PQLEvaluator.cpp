@@ -354,8 +354,8 @@ PKBStatement::SharedPtr PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr
 	// todo @nicholas very inefficient bug fix
 // find the statement before in the stmt's group
 	PKBGroup::SharedPtr grp = statementAfter->getGroup();
-	for (auto& member = grp->getMembers(PKBDesignEntity::AllExceptProcedure).begin();
-		member < grp->getMembers(PKBDesignEntity::AllExceptProcedure).end(); member++) {
+	vector<int> members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
+	for (auto& member = members.begin(); member < members.end(); member++) {
 		if (statementAfter->getIndex() == *member) {
 			member--;
 			return mpPKB->getStatement(*member);
@@ -367,8 +367,8 @@ PKBStatement::SharedPtr PQLEvaluator::getStatementAfter(PKBStatement::SharedPtr 
 	// todo @nicholas very inefficient bug fix
 // find the statement before in the stmt's group
 	PKBGroup::SharedPtr grp = statementBefore->getGroup();
-	for (auto& member = grp->getMembers(PKBDesignEntity::AllExceptProcedure).begin();
-		member < grp->getMembers(PKBDesignEntity::AllExceptProcedure).end(); member++) {
+	vector<int> members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
+	for (auto& member = members.begin(); member < members.end(); member++) {
 		if (statementBefore->getIndex() == *member) {
 			member++;
 			return mpPKB->getStatement(*member);
