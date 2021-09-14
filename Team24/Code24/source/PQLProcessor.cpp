@@ -41,9 +41,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<Design
         return PKBDesignEntity::Assign;
     }
     else if (s == STMT) {
-
-        cout << "STMT MATCH ================= \n";
-
+        
         return PKBDesignEntity::AllExceptProcedure; // ALL STATEMENTS
     }
     else if (s == READ) {
@@ -119,94 +117,35 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     case RelRefType::USES_S: /* Uses(s, v) where s is a STATEMENT. */
     {
         shared_ptr<UsesS> usesCl = static_pointer_cast<UsesS>(suchThatCl->relRef);
+        StmtRefType leftType = usesCl->stmtRef->getStmtRefType();
+        EntRefType rightType = usesCl->entRef->getEntRefType();
 
         /* Uses(AllExceptProcedure, x) ERROR cannot have underscore as first arg!! */
-        if (usesCl->stmtRef->getStmtRefType() == StmtRefType::UNDERSCORE) { 
+        if (leftType == StmtRefType::UNDERSCORE) {
             cout << "TODO: Handle Uses error case\n";
         }
 
         /* Uses (1, ?) */
-        if (usesCl->stmtRef->getStmtRefType() == StmtRefType::INTEGER) { 
-            shared_ptr<StmtRef>& stmtRef = usesCl->stmtRef;
-            vector<string> variablesUsedByStmtNo = evaluator->getUsed(stmtRef->getIntVal());
-            
-            /* Uses (1, syn) */
-            if (usesCl->entRef->getEntRefType() == EntRefType::SYNONYM) {
-
-                shared_ptr<EntRef>& entRef = usesCl->entRef;
-                
-                /* Uses (1, x), x is NOT a variable */
-                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { 
-                    cout << "TODO: Handle error case. Uses(1, p), but p is not a variable delcaration.\n";
-                }
-
-                for (auto& s : variablesUsedByStmtNo) {
-                    toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
-                }
-            }
-
-            /* Uses (1, 2) violates pre-condition. Should not come here. */
-            if (usesCl->entRef->getEntRefType() == EntRefType::IDENT) {
-                cout << "Pre-condition VIOLATED. Target synonym of the SelectCl must be inside the Uses() clause\n";
-            }
+        if (leftType == StmtRefType::INTEGER) {
+            handleUsesSFirstArgInteger(selectCl, usesCl, toReturn);
         }
 
         /* Uses (syn, ?) */
-        StmtRefType leftType = usesCl->stmtRef->getStmtRefType();
-        EntRefType rightType = usesCl->entRef->getEntRefType();
+
         if (leftType == StmtRefType::SYNONYM) { 
-
-            /* Uses (syn, v) OR Uses(syn, AllExceptProcedure) */
-            if (rightType == EntRefType::SYNONYM || rightType == EntRefType::UNDERSCORE) { 
-                shared_ptr<StmtRef>& stmtRefLeft = usesCl->stmtRef;
-                shared_ptr<EntRef>& entRefRight = usesCl->entRef;
-
-                /* Uses (syn, v) -> Select v */
-                if (singleRefSynonymMatchesTargetSynonym(entRefRight, selectCl)) { 
-                    shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
-                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-
-                    for (auto& s : evaluator->getUsed(pkbDe)) {
-                        toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
-                    }
-                }
-
-                /* Uses (syn, v) -> Select syn (only select statements of type syn that use a variable) syn != PROCEDURE, syn can be call */
-                if (singleRefSynonymMatchesTargetSynonym(stmtRefLeft, selectCl) && !targetSynonymIsProcedure(selectCl)) { 
-                    shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
-                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity()); // TODO: currently only works for ASSIGN. Container statements?
-              
-                    for (auto& s : evaluator->getUsers(pkbDe)) {
-                        toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
-                    }
-                }
-
-                /* Uses (syn, v) -> Select syn (only select statements of type syn that use a variable) syn = PROCEDURE */
-                if (singleRefSynonymMatchesTargetSynonym(stmtRefLeft, selectCl) && targetSynonymIsProcedure(selectCl)) {
-                    shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
-                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-
-                    for (auto& s : evaluator->getProceduresThatUseVars()) {
-                        toReturn.emplace_back(make_shared<ProcedureNameSingleResult>(move(s)));
-                    }
-                }
-
-            }
+            handleUsesSFirstArgSyn(selectCl, usesCl, toReturn);
         }
 
         break;
     }
     case RelRefType::USES_P: /* Uses("INDENT", v). */
     {
+        shared_ptr<UsesP> usesCl = static_pointer_cast<UsesP>(suchThatCl->relRef);
+        EntRefType leftType = usesCl->entRef1->getEntRefType();
+        EntRefType rightType = usesCl->entRef2->getEntRefType();
 
-        /* TODO: Yida catch error case when v is not a variable synonym. */
-
-        /* Uses ("PROC_IDENTIFER", v) Select variable v. */
-        if (targetSynonymMatchesMultipleTypes(selectCl, { DesignEntity::VARIABLE })) { 
-            shared_ptr<UsesP> usesP = static_pointer_cast<UsesP>(suchThatCl->relRef);
-            for (auto& s : evaluator->getUsedByProcName(usesP->entRef1->getStringVal())) {
-                toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
-            }
+        if (leftType == EntRefType::IDENT) {
+            handleUsesPFirstArgIdent(selectCl, usesCl, toReturn);
         }
 
         break;
@@ -242,6 +181,86 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
     }
     return;
+}
+
+void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<Result>>& toReturn)
+{
+    shared_ptr<StmtRef>& stmtRef = usesCl->stmtRef;
+    vector<string> variablesUsedByStmtNo = evaluator->getUsed(stmtRef->getIntVal());
+
+    /* Uses (1, syn) */
+    if (usesCl->entRef->getEntRefType() == EntRefType::SYNONYM) {
+
+        shared_ptr<EntRef>& entRef = usesCl->entRef;
+
+        /* Uses (1, x), x is NOT a variable */
+        if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) {
+            cout << "TODO: Handle error case. Uses(1, p), but p is not a variable delcaration.\n";
+        }
+
+        for (auto& s : variablesUsedByStmtNo) {
+            toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
+        }
+    }
+
+    /* Uses (1, 2) violates pre-condition. Should not come here. */
+    if (usesCl->entRef->getEntRefType() == EntRefType::IDENT) {
+        cout << "Pre-condition VIOLATED. Target synonym of the SelectCl must be inside the Uses() clause\n";
+    }
+}
+
+void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<Result>>& toReturn)
+{
+    StmtRefType leftType = usesCl->stmtRef->getStmtRefType();
+    EntRefType rightType = usesCl->entRef->getEntRefType();
+    /* Uses (syn, v) OR Uses(syn, AllExceptProcedure) */
+    if (rightType == EntRefType::SYNONYM || rightType == EntRefType::UNDERSCORE) {
+        shared_ptr<StmtRef>& stmtRefLeft = usesCl->stmtRef;
+        shared_ptr<EntRef>& entRefRight = usesCl->entRef;
+
+        /* Uses (syn, v) -> Select v */
+        if (singleRefSynonymMatchesTargetSynonym(entRefRight, selectCl)) {
+            shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
+            PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
+
+            for (auto& s : evaluator->getUsed(pkbDe)) {
+                toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
+            }
+        }
+
+        /* Uses (syn, v) -> Select syn (only select statements of type syn that use a variable) syn != PROCEDURE, syn can be call */
+        if (singleRefSynonymMatchesTargetSynonym(stmtRefLeft, selectCl) && !targetSynonymIsProcedure(selectCl)) {
+            shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
+            PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity()); // TODO: currently only works for ASSIGN. Container statements?
+
+            for (auto& s : evaluator->getUsers(pkbDe)) {
+                toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
+            }
+        }
+
+        /* Uses (syn, v) -> Select syn (only select statements of type syn that use a variable) syn = PROCEDURE */
+        if (singleRefSynonymMatchesTargetSynonym(stmtRefLeft, selectCl) && targetSynonymIsProcedure(selectCl)) {
+            shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
+            PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
+
+            for (auto& s : evaluator->getProceduresThatUseVars()) {
+                toReturn.emplace_back(make_shared<ProcedureNameSingleResult>(move(s)));
+            }
+        }
+
+    }
+}
+
+void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesCl, vector<shared_ptr<Result>>& toReturn)
+{
+    /* TODO: Yida catch error case when v is not a variable synonym. */
+
+    /* Uses ("PROC_IDENTIFER", v) Select variable v. */
+    if (targetSynonymMatchesMultipleTypes(selectCl, { DesignEntity::VARIABLE })) {
+        for (auto& s : evaluator->getUsedByProcName(usesCl->entRef1->getStringVal())) {
+            toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
+        }
+    }
 }
 
 /*
