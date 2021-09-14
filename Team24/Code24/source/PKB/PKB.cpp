@@ -371,10 +371,6 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 	// now the call statement inherits from the procedure
 	res->addUsedVariables(procedureCalled->getUsedVariables());
 
-	for (auto& ptr : procedureCalled->getUsedVariables()) {
-		ptr->addUserStatement(res->getIndex());
-	}
-
 	addUsedVariable(PKBDesignEntity::Call, procedureCalled->getUsedVariables());
 	res->addModifiedVariables(procedureCalled->getModifiedVariables());
 
