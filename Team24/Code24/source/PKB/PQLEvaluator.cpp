@@ -578,6 +578,7 @@ vector<string> PQLEvaluator::getUsed(int statementIndex)
 vector<string> PQLEvaluator::getUsed(PKBDesignEntity userType)
 {
 	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(userType);
+	
 	return varToString(move(vars));
 }
 
@@ -641,7 +642,11 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity entityType)
 {
 	vector<PKBStatement::SharedPtr> stmts;
 
-	for (auto& ptr : mpPKB->getAllUseStmts(entityType)) {
+	/* YIDA Todo: Check if using getAllUseStmts(PKBDesignEntity::_) and getAllUseStmts() is intended to be identical? It is currently not. */
+
+	set<PKBStatement::SharedPtr>& useStmtsToCopyOver = entityType != PKBDesignEntity::_ ? mpPKB->getAllUseStmts(entityType) : mpPKB->getAllUseStmts();
+
+	for (auto& ptr : useStmtsToCopyOver) {
 		stmts.emplace_back(ptr);
 	}
 
@@ -661,12 +666,14 @@ vector<string> PQLEvaluator::getModified(int statementIndex)
 
 vector<string> PQLEvaluator::getModified(PKBDesignEntity modifierType)
 {
+	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
 	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(modifierType);
 	return varToString(vars);
 }
 
 vector<string> PQLEvaluator::getModified()
 {
+	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
 	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
 	return varToString(vars);
 }
@@ -701,6 +708,7 @@ vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string vari
 
 vector<int> PQLEvaluator::getModifiers()
 {
+	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
 	set<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
 	return stmtToInt(stmts);
 }
