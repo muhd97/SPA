@@ -11,8 +11,6 @@
 
 class TestWrapper : public AbstractWrapper {
  public:
-  // Yida: add PKB object
-     shared_ptr<PKB> pkb = nullptr;
 
   // default constructor
   TestWrapper();
@@ -25,6 +23,10 @@ class TestWrapper : public AbstractWrapper {
   
   // method for evaluating a query
   virtual void evaluate(std::string query, std::list<std::string>& results);
+
+private:
+    // Yida: add PKB object
+    shared_ptr<PKB> pkb = nullptr;
 };
 
 #endif
