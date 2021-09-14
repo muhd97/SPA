@@ -104,7 +104,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
 
     }
     catch (const invalid_argument & e) {
-
+        cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
     }
 
     cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";
