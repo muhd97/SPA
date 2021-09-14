@@ -113,6 +113,7 @@ PKBStatement::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement>& state
 
 	//every assignment modifies variable
 	designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::Assign].insert(res);
+	mAllModifyStmts.insert(res);
 
 	// YIDA: For the var Modified by this Assign statement, we need to add it to the pkb's mModifiedVariables map.
 	addModifiedVariable(PKBDesignEntity::Assign, var);
