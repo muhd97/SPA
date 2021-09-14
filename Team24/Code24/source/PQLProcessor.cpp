@@ -257,7 +257,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                 } else {
                     if (singleRefSynonymMatchesTargetSynonym(stmtRef, selectCl) && !targetSynonymMatchesMultipleTypes(selectCl, {PROCEDURE, CALL})) { //Select s such that Modifies (s, v)
                         shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
-                        PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntityType());
+                        PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
                         for (auto& s : evaluator->getModifiers(pkbDe)) {
                             toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
@@ -266,7 +266,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
                     if (singleRefSynonymMatchesTargetSynonym(entRef, selectCl)) { //Select v such that Modifies (s, v)
                         shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
-                        PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntityType());
+                        PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
                         for (auto& v : evaluator->getModified(pkbDe)) {
                             toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(v)));
@@ -279,7 +279,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                 //Must mean that the stmtRef's synonym matches the target synonym of the select clause
                 if (singleRefSynonymMatchesTargetSynonym(stmtRef, selectCl)) {
                     shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
-                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntityType());
+                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
                     for (auto& s : evaluator->getModifiers()) {
                         toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
