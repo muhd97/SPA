@@ -667,14 +667,14 @@ vector<string> PQLEvaluator::getModified(int statementIndex)
 vector<string> PQLEvaluator::getModified(PKBDesignEntity modifierType)
 {
 	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
-	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(modifierType);
+	set<PKBVariable::SharedPtr> vars = mpPKB->getModifiedVariables(modifierType);
 	return varToString(vars);
 }
 
 vector<string> PQLEvaluator::getModified()
 {
 	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
-	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
+	set<PKBVariable::SharedPtr> vars = mpPKB->getModifiedVariables(PKBDesignEntity::_);
 	return varToString(vars);
 }
 
