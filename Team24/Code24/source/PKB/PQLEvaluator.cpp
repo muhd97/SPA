@@ -632,6 +632,7 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity entityType)
 	return stmtToInt(stmts);
 }
 
+/* Get all variable names modified by the particular statement */
 vector<string> PQLEvaluator::getModified(int statementIndex)
 {
 	PKBStatement::SharedPtr stmt = mpPKB->getStatement(statementIndex);
@@ -639,15 +640,16 @@ vector<string> PQLEvaluator::getModified(int statementIndex)
 	return varToString(vars);
 }
 
+/* Get all variable names modified by the particular statement */
 vector<string> PQLEvaluator::getModified(PKBDesignEntity modifierType)
 {
-	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(modifierType);
+	set<PKBVariable::SharedPtr> vars = mpPKB->getModifiedVariables(modifierType);
 	return varToString(vars);
 }
 
 vector<string> PQLEvaluator::getModified()
 {
-	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::_);
+	set<PKBVariable::SharedPtr> vars = mpPKB->getModifiedVariables(PKBDesignEntity::_);
 	return varToString(vars);
 }
 
@@ -681,7 +683,17 @@ vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string vari
 
 vector<int> PQLEvaluator::getModifiers()
 {
-	set<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
+	set<PKBStatement::SharedPtr> stmts = mpPKB->getAllModifyingStmts();
+	return stmtToInt(stmts);
+}
+
+vector<int> PQLEvaluator::getModifiers(PKBDesignEntity entityType) {
+	vector<PKBStatement::SharedPtr> stmts;
+
+	for (auto& ptr : mpPKB->getAllModifyingStmts(entityType)) {
+		stmts.emplace_back(ptr);
+	}
+
 	return stmtToInt(stmts);
 }
 

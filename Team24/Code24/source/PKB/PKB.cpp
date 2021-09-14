@@ -88,6 +88,8 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSi
 	res->addUsedVariables(group->getUsedVariables());
 	res->addModifiedVariables(group->getModifiedVariables());
 
+	//we do not add procedures to the mAllUseStmts or mAllModifyStmts since those are just for statements
+
 	return res;
 }
 
@@ -104,6 +106,10 @@ PKBStatement::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement>& state
 	res->addModifiedVariable(var);
 	// this variable is modified by this statement
 	var->addModifierStatement(res->getIndex());
+
+	//every assignment modifies variable
+	designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::Assign].insert(res);
+
 	// YIDA: For the var Modified by this Assign statement, we need to add it to the pkb's mModifiedVariables map.
 	addModifiedVariable(PKBDesignEntity::Assign, var);
 
@@ -140,8 +146,13 @@ PKBStatement::SharedPtr PKB::extractReadStatement(shared_ptr<Statement>& stateme
 	PKBVariable::SharedPtr var = getVariable(readStatement->getId()->getName());
 	// statement modifies this variable
 	res->addModifiedVariable(var);
-	// variable is modified by this statement
+	// variable is modified by this statementa
 	var->addModifierStatement(res->getIndex());
+
+	//every read modifies variable
+	designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::Read].insert(res);
+	mAllModifyStmts.insert(res);
+
 	// YIDA: For the var Modified by this Read statement, we need to add it to the pkb's mModifiedVariables map.
 	addModifiedVariable(PKBDesignEntity::Read, var);
 
@@ -231,6 +242,11 @@ PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement>& statement
 	res->addUsedVariables(alternativeGroup->getUsedVariables());
 	res->addModifiedVariables(alternativeGroup->getModifiedVariables());
 
+	if (consequentGroup->getModifiedVariables().size() > 0 || alternativeGroup->getModifiedVariables().size() > 0) {
+		designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::If].insert(res);
+		mAllModifyStmts.insert(res);
+	}
+
 	return res;
 }
 
@@ -278,6 +294,12 @@ PKBStatement::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement>& statem
 	res->addUsedVariables(group->getUsedVariables());
 	res->addModifiedVariables(group->getModifiedVariables());
 
+	if (group->getModifiedVariables().size() > 0) {
+		//contained statements of the while loop modify variable(s)
+		designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::While].insert(res);
+		mAllModifyStmts.insert(res);
+	}
+
 	return res;
 }
 
@@ -309,6 +331,12 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 	// now the call statement inherits from the procedure
 	res->addUsedVariables(procedureCalled->getUsedVariables());
 	res->addModifiedVariables(procedureCalled->getModifiedVariables());
+
+	if (procedureCalled->getModifiedVariables().size() > 0) {
+		//the procedure call modifies variable(s) within
+		designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::If].insert(res);
+		mAllModifyStmts.insert(res);
+	}
 
 	return res;
 }

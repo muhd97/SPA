@@ -51,7 +51,8 @@ public:
 	set<PKBStatement::SharedPtr> mAllUseStmts; // statements that use a variable
 	unordered_map<PKBDesignEntity, set<PKBStatement::SharedPtr>> designEntityToStatementsThatUseVarsMap;
 
-	vector<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
+	set<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
+	unordered_map<PKBDesignEntity, set<PKBStatement::SharedPtr>> designEntityToStatementsThatModifyVarsMap;
 
 	// statement number, starting from index 1
 	PKBStatement::SharedPtr getStatement(int stmtNumber) {
@@ -79,7 +80,7 @@ public:
 	}
 
 	// get used variables modified by statements of a specified DesignEntity
-// to get all modified variables (by all statements), use PKBDesignEntity::_
+	// to get all modified variables (by all statements), use PKBDesignEntity::_
 	set<PKBVariable::SharedPtr> getModifiedVariables(PKBDesignEntity s) {
 		return mModifiedVariables[s];
 	}
@@ -97,7 +98,11 @@ public:
 		return designEntityToStatementsThatUseVarsMap[pkbde];
 	}
 
-	vector<PKBStatement::SharedPtr> getAllModifyStmts() {
+	set<PKBStatement::SharedPtr> getAllModifyingStmts(PKBDesignEntity pkbDe) {
+		return designEntityToStatementsThatModifyVarsMap[pkbDe];
+	}
+
+	set<PKBStatement::SharedPtr> getAllModifyingStmts() {
 		return mAllModifyStmts;
 	}
 

@@ -78,7 +78,8 @@ public:
 
 	vector<int> getModifiers(string variableName);
 	vector<int> getModifiers(PKBDesignEntity statements, string variableName);
-	vector<int> getModifiers();
+	vector<int> getModifiers(); /* Get all stmts that modify a variable */
+	vector<int> getModifiers(PKBDesignEntity entityType); /* Get all stmts of a given type that modify variable(s) */
 
 	// Pattern
 
