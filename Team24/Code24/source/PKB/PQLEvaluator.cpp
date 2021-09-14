@@ -709,7 +709,7 @@ vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string vari
 vector<int> PQLEvaluator::getModifiers()
 {
 	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
-	set<PKBStatement::SharedPtr> stmts = mpPKB->getAllUseStmts();
+	set<PKBStatement::SharedPtr> stmts = mpPKB->getAllModifyStmts();
 	return stmtToInt(stmts);
 }
 

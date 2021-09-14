@@ -53,7 +53,7 @@ public:
 	
 	set<PKBStatement::SharedPtr> setOfProceduresThatUseVars;
 
-	vector<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
+	set<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
 
 	// YIDA: map used to keep track of extracted Procedures during DesignExtraction, will need it after design extraction to easily access Procedures
 	// if a procedure has been extracted, it will be present in this map, else it has not been extracted
@@ -103,7 +103,7 @@ public:
 		return designEntityToStatementsThatUseVarsMap[pkbde];
 	}
 
-	vector<PKBStatement::SharedPtr> getAllModifyStmts() {
+	set<PKBStatement::SharedPtr> getAllModifyStmts() {
 		return mAllModifyStmts;
 	}
 
