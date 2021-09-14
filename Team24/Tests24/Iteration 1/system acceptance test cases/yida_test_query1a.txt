@@ -63,5 +63,18 @@ variable v;
 Select v such that Modifies(4, v)
 a
 25
+14 - NEGATIVE CASE: Duplicate synonym, BAD query
+stmt v; variable v;
+Select v such that Modifies(4, v)
 
+25
+15 - NEGATIVE CASE: Duplicate synonym, BAD query
+variable v; stmt v; assign a; print a;
+Select v such that Modifies(4, v)
 
+25
+16 - NEGATIVE CASE: Synonym was not defined. BAD query (throws exception)
+variable v;
+Select v such that Uses(4, x)
+
+25
