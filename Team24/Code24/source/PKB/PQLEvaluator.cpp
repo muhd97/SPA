@@ -710,6 +710,10 @@ vector<int> PQLEvaluator::getModifiers()
 vector<int> PQLEvaluator::getModifiers(PKBDesignEntity entityType) {
 	vector<PKBStatement::SharedPtr> stmts;
 
+	if (entityType == PKBDesignEntity::_) {
+		return getModifiers();
+	}
+
 	for (auto& ptr : mpPKB->getAllModifyingStmts(entityType)) {
 		stmts.emplace_back(ptr);
 	}
