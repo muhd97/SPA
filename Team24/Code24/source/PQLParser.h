@@ -286,6 +286,7 @@ public:
         bool flag = false;
         if (entRef1->getEntRefType() == EntRefType::SYNONYM) {
             flag = entRef1->getStringVal() == s->getValue();
+            if (flag) return flag;
         }
 
         if (entRef2->getEntRefType() == EntRefType::SYNONYM) {
@@ -392,6 +393,7 @@ public:
         bool flag = false;
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) {
             flag = stmtRef1->getStringVal() == s->getValue();
+            if (flag) return flag;
         }
 
         if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
@@ -429,6 +431,7 @@ public:
         bool flag = false;
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) {
             flag = stmtRef1->getStringVal() == s->getValue();
+            if (flag) return flag;
         }
 
         if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
@@ -467,6 +470,7 @@ public:
         bool flag = false;
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) {
             flag = stmtRef1->getStringVal() == s->getValue();
+            if (flag) return flag;
         }
 
         if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
@@ -505,6 +509,7 @@ public:
         bool flag = false;
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) {
             flag = stmtRef1->getStringVal() == s->getValue();
+            if (flag) return flag;
         }
 
         if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
