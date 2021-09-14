@@ -367,7 +367,7 @@ void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shar
     }
 }
 
-/* PRE-CONDITION: Target synonym of the SelectCl NOT be inside the SuchThat clause. */
+/* PRE-CONDITION: Target synonym of the SelectCl must NOT be inside the SuchThat clause. */
 bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl)
 {
     switch (suchThatCl->relRef->getType())

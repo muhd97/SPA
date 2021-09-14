@@ -630,6 +630,24 @@ public:
         return synonymToParentDeclarationMap[s->getValue()];
     }
 
+    inline string getDesignEntityTypeForSynonym(string& s) {
+        if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end()) {
+            cout << "Warning: requested synonym of value [" << s << "] is NOT declared in this SelectCl. Null DesignEntityType is returned.\n";
+            return "";
+        }
+
+        return synonymToParentDeclarationMap[s]->getDesignEntity()->getEntityTypeName();
+    }
+
+    inline string getDesignEntityTypeForSynonym(shared_ptr<Synonym>& s) {
+        if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end()) {
+            cout << "Warning: requested synonym of value [" << s->getValue() << "] is NOT declared in this SelectCl. Null DesignEntityType is returned.\n";
+            return "";
+        }
+
+        return synonymToParentDeclarationMap[s->getValue()]->getDesignEntity()->getEntityTypeName();
+    }
+
     string format() {
         string builder = "";
         for (auto& d : declarations) {
