@@ -86,8 +86,19 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSi
 		group->addModifiedVariables(child->getModifiedVariables());
 	}
 
+	set<PKBVariable::SharedPtr> varsUsedByGroup = group->getUsedVariables();
+	
+	for (auto& ptr : varsUsedByGroup) {
+		if (variableNameToProceduresThatUseVarMap.find(ptr->getName()) == variableNameToProceduresThatUseVarMap.end()) {
+			variableNameToProceduresThatUseVarMap[ptr->getName()] = {res};
+		}
+		else {
+			variableNameToProceduresThatUseVarMap[ptr->getName()].insert(res);
+		}
+	}
+	
 	// now the original statement inherits from the group
-	res->addUsedVariables(group->getUsedVariables());
+	res->addUsedVariables(move(varsUsedByGroup));
 	res->addModifiedVariables(group->getModifiedVariables());
 
 	if (res->getUsedVariables().size() > 0) {
@@ -338,6 +349,11 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 
 	// now the call statement inherits from the procedure
 	res->addUsedVariables(procedureCalled->getUsedVariables());
+
+	for (auto& ptr : procedureCalled->getUsedVariables()) {
+		ptr->addUserStatement(res->getIndex());
+	}
+
 	addUsedVariable(PKBDesignEntity::Call, procedureCalled->getUsedVariables());
 	res->addModifiedVariables(procedureCalled->getModifiedVariables());
 

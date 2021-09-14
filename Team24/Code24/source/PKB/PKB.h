@@ -52,6 +52,7 @@ public:
 	unordered_map<PKBDesignEntity, set<PKBStatement::SharedPtr>> designEntityToStatementsThatUseVarsMap;
 	
 	set<PKBStatement::SharedPtr> setOfProceduresThatUseVars;
+	unordered_map<string, set<PKBStatement::SharedPtr>> variableNameToProceduresThatUseVarMap;
 
 	set<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
 	unordered_map<PKBDesignEntity, set<PKBStatement::SharedPtr>> designEntityToStatementsThatModifyVarsMap;
@@ -93,6 +94,9 @@ public:
 
 	// todo @nicholas obviously string is not the correct type, change soon
 	PKBVariable::SharedPtr getVarByName(string s) {
+		if (mVariables.find(s) == mVariables.end()) { /* Exceptional Case: requested variable is NOT found. */
+			return nullptr;
+		}
 		return mVariables[s];
 	}
 

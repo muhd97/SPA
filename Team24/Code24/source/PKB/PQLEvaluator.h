@@ -202,6 +202,8 @@ public:
 	// Get all procedures that use at least one variable
 	vector<string> getProceduresThatUseVars();
 
+	// Get all procedures that use the given variable of {variableName}
+	vector<string> getProceduresThatUseVar(string variableName);
 
 	// Modifies
 

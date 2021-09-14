@@ -575,6 +575,11 @@ vector<string> PQLEvaluator::getUsed(int statementIndex)
 	return varToString(move(vars));
 }
 
+bool PQLEvaluator::checkUsed(int statementIndex)
+{
+	return false;
+}
+
 vector<string> PQLEvaluator::getUsed(PKBDesignEntity userType)
 {
 	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(userType);
@@ -582,10 +587,20 @@ vector<string> PQLEvaluator::getUsed(PKBDesignEntity userType)
 	return varToString(move(vars));
 }
 
+bool PQLEvaluator::checkUsed(PKBDesignEntity entityType)
+{
+	return false;
+}
+
 vector<string> PQLEvaluator::getUsed()
 {
 	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(PKBDesignEntity::AllExceptProcedure);
 	return varToString(move(vars));
+}
+
+bool PQLEvaluator::checkUsed()
+{
+	return false;
 }
 
 vector<string> PQLEvaluator::getUsedByProcName(string procname)
@@ -602,9 +617,17 @@ vector<string> PQLEvaluator::getUsedByProcName(string procname)
 	return varToString(move(vars));
 }
 
+bool PQLEvaluator::checkUsedByProcName(string procname)
+{
+	return false;
+}
+
 vector<int> PQLEvaluator::getUsers(string variableName)
 {
 	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
+
+	if (v == nullptr) return vector<int>();
+
 	return v->getUsers();
 }
 
@@ -617,6 +640,9 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName
 
 	vector<int> res;
 	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
+
+	if (v == nullptr) return move(res);
+
 	vector<int> users = v->getUsers();
 
 	// filter only the desired type
@@ -627,7 +653,7 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName
 		}
 	}
 
-	return res;
+	return move(res);
 }
 
 
@@ -655,6 +681,24 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity entityType)
 
 vector<string> PQLEvaluator::getProceduresThatUseVars() {
 	return procedureToString(mpPKB->setOfProceduresThatUseVars);
+}
+
+vector<string> PQLEvaluator::getProceduresThatUseVar(string variableName)
+{
+	vector<string> toReturn;
+
+	if (mpPKB->variableNameToProceduresThatUseVarMap.find(variableName) == mpPKB->variableNameToProceduresThatUseVarMap.end()) {
+		return move(toReturn);
+	}
+
+	set<PKBStatement::SharedPtr>& procedures = mpPKB->variableNameToProceduresThatUseVarMap[variableName];
+	toReturn.reserve(procedures.size());
+
+	for (auto& ptr : procedures) {
+		toReturn.emplace_back(ptr->mName);
+	}
+
+	return move(toReturn);
 }
 
 /* Get all variable names modified by the particular statement */

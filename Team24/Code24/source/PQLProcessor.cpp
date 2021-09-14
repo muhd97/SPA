@@ -110,7 +110,7 @@ inline bool targetSynonymIsProcedure(shared_ptr<SelectCl> selectCl) {
 }
 
 
-/* PRE-CONDITION: Target synonym of the SelectCl must be inside the Uses() clause. */
+/* PRE-CONDITION: Target synonym of the SelectCl must be inside the SuchThat clause. */
 void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl, vector<shared_ptr<Result>>& toReturn) {  // TODO IMPLEMENT
     switch (suchThatCl->relRef->getType()) 
     {
@@ -263,6 +263,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     return;
 }
 
+/* PRE-CONDITION: Target synonym of the SelectCl must be inside the Uses() clause. */
 void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<Result>>& toReturn)
 {
     shared_ptr<StmtRef>& stmtRef = usesCl->stmtRef;
@@ -289,15 +290,16 @@ void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, sh
     }
 }
 
+/* PRE-CONDITION: Target synonym of the SelectCl must be inside the Uses() clause. */
 void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<Result>>& toReturn)
 {
     StmtRefType leftType = usesCl->stmtRef->getStmtRefType();
     EntRefType rightType = usesCl->entRef->getEntRefType();
+    shared_ptr<StmtRef>& stmtRefLeft = usesCl->stmtRef;
+    shared_ptr<EntRef>& entRefRight = usesCl->entRef;
     /* Uses (syn, v) OR Uses(syn, AllExceptProcedure) */
     if (rightType == EntRefType::SYNONYM || rightType == EntRefType::UNDERSCORE) {
-        shared_ptr<StmtRef>& stmtRefLeft = usesCl->stmtRef;
-        shared_ptr<EntRef>& entRefRight = usesCl->entRef;
-
+        
         /* Uses (syn, v) -> Select v */
         if (singleRefSynonymMatchesTargetSynonym(entRefRight, selectCl)) {
             shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
@@ -329,8 +331,30 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared
         }
 
     }
+    
+    /* Uses (syn, "IDENT") -> syn MUST be target synonym. */
+    if (rightType == EntRefType::IDENT) {
+        shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
+        PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
+        string identVarName = entRefRight->getStringVal();
+
+        /* Uses (syn, "IDENT") -> syn is NOT a procedure. */
+        if (!targetSynonymIsProcedure(selectCl)) {
+            for (auto& s : evaluator->getUsers(pkbDe, move(identVarName))) {
+                toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
+            }
+        }
+
+        /* Uses (syn, "IDENT") -> syn is a procedure. */
+        if (targetSynonymIsProcedure(selectCl)) {
+            for (auto& p : evaluator->getProceduresThatUseVar(identVarName)) {
+                toReturn.emplace_back(make_shared<ProcedureNameSingleResult>(move(p)));
+            }
+        }
+    }
 }
 
+/* PRE-CONDITION: Target synonym of the SelectCl must be inside the Uses() clause. */
 void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesCl, vector<shared_ptr<Result>>& toReturn)
 {
     /* TODO: Yida catch error case when v is not a variable synonym. */
@@ -343,8 +367,53 @@ void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shar
     }
 }
 
+/* PRE-CONDITION: Target synonym of the SelectCl NOT be inside the SuchThat clause. */
 bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl)
 {
+    switch (suchThatCl->relRef->getType())
+    {
+    case RelRefType::USES_S: /* Uses(s, v) where s is a STATEMENT. */
+    {
+        
+
+        break;
+    }
+    case RelRefType::USES_P: /* Uses("INDENT", v). */
+    {
+
+        break;
+    }
+    case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
+    {
+       
+        break;
+    }
+    case RelRefType::MODIFIES_P: /* Modifies("IDENT", v) where v must be a variable. */
+    {
+        break;
+    }
+    case RelRefType::PARENT:
+    {
+        break;
+    }
+    case RelRefType::PARENT_T:
+    {
+        break;
+    }
+    case RelRefType::FOLLOWS:
+    {
+        break;
+    }
+    case RelRefType::FOLLOWS_T:
+    {
+        break;
+    }
+    default:
+    {
+        break;
+    }
+
+    }
     return false;
 }
 
