@@ -212,11 +212,14 @@ public:
 	// Get all statements that modify the variable of name {variableName}
 	vector<int> getModifiers(string variableName);
 
+	
 	// Get all statements of type {entityType} that modify the variable of name {variableName}
-	vector<int> getModifiers(PKBDesignEntity entityType, string variableName);
+	vector<int> getModifiers(PKBDesignEntity statements, string variableName);
 
 	// Get all statements that modify at least one variable
 	vector<int> getModifiers();
+
+	vector<int> getModifiers(PKBDesignEntity entityType); /* Get all stmts of a given type that modify variable(s) */
 
 	// Pattern
 
