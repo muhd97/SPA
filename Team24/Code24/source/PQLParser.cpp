@@ -5,6 +5,16 @@
 
 using namespace std;
 
+string DesignEntity::PRINT = "print";
+string DesignEntity::STMT = "stmt";
+string DesignEntity::READ = "read";
+string DesignEntity::WHILE = "while";
+string DesignEntity::IF = "if";
+string DesignEntity::ASSIGN = "assign";
+string DesignEntity::VARIABLE = "variable";
+string DesignEntity::CONSTANT = "constant";
+string DesignEntity::PROCEDURE = "procedure";
+string DesignEntity::CALL = "call";
 
 PQLToken PQLParser::peek() {
     return tokens[index];
@@ -153,19 +163,57 @@ shared_ptr<EntRef> PQLParser::parseEntRef()
     return make_shared<EntRef>(EntRefType::UNDERSCORE);
 }
 
-shared_ptr<UsesS> PQLParser::parseUses()
+shared_ptr<RelRef> PQLParser::parseUses()
 {
     eat(PQLTokenType::USES);
     eat(PQLTokenType::LEFT_PAREN);
-    auto sRef = parseStmtRef();
-    if (sRef->getStmtRefType() == StmtRefType::UNDERSCORE) {
-        // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
+
+    if (peek().type == PQLTokenType::STRING) { /* If first arg of Uses() is a string, it must be a UsesP */
+        auto eRef = parseEntRef();
+        if (eRef->getEntRefType() == EntRefType::UNDERSCORE) {
+            // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
+        }
+
+        eat(PQLTokenType::COMMA);
+        auto rRef = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<UsesP>(eRef, rRef);
+    }
+    else {
+        auto sRef = parseStmtRef();
+        if (sRef->getStmtRefType() == StmtRefType::UNDERSCORE) {
+            // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
+        }
+
+        eat(PQLTokenType::COMMA);
+        auto rRef = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<UsesS>(sRef, rRef);
     }
 
-    eat(PQLTokenType::COMMA);
-    auto rRef = parseEntRef();
-    eat(PQLTokenType::RIGHT_PAREN);
-    return make_shared<UsesS>(sRef, rRef);
+}
+
+shared_ptr<RelRef> PQLParser::parseModifies()
+{
+    if (peek().type == PQLTokenType::STRING) { /* If first arg of Modifies() is a string, it must be a ModifiesP */
+        eat(PQLTokenType::MODIFIES);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto sRef11 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto eRef12 = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<ModifiesS>(sRef11, eRef12);
+    }
+    else {
+        eat(PQLTokenType::MODIFIES);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto eRef11 = parseEntRef();
+        eat(PQLTokenType::COMMA);
+        auto eRef12 = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<ModifiesP>(eRef11, eRef12);
+    }
+    
 }
 
 shared_ptr<SuchThatCl> PQLParser::parseSuchThat() // todo
@@ -222,26 +270,14 @@ shared_ptr<RelRef> PQLParser::parseRelRef() // todo
         return make_shared<ParentT>(sRef7, sRef8);
     }
 
-    case PQLTokenType::USES: // ONLY UsesS, not UsesP
+    case PQLTokenType::USES:
     {
-        eat(PQLTokenType::USES);
-        eat(PQLTokenType::LEFT_PAREN);
-        auto sRef9 = parseStmtRef();
-        eat(PQLTokenType::COMMA);
-        auto eRef10 = parseEntRef();
-        eat(PQLTokenType::RIGHT_PAREN);
-        return make_shared<UsesS>(sRef9, eRef10);
+        return parseUses();
     }
 
-    default: // Only ModifiesS, not ModifiesP
+    default: 
     {
-        eat(PQLTokenType::MODIFIES);
-        eat(PQLTokenType::LEFT_PAREN);
-        auto sRef11 = parseStmtRef();
-        eat(PQLTokenType::COMMA);
-        auto eRef12 = parseEntRef();
-        eat(PQLTokenType::RIGHT_PAREN);
-        return make_shared<ModifiesS>(sRef11, eRef12);
+        return parseModifies();
     }
     }
 }

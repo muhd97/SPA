@@ -31,7 +31,7 @@ namespace UnitTesting
             Assert::IsTrue(actualResult_1b == expectedResult_1b);
 
 
-            auto actualResult_2 = PQLParser(input).parseDeclaration()->getDesignEntityType()->getEntityTypeName();
+            auto actualResult_2 = PQLParser(input).parseDeclaration()->getDesignEntity()->getEntityTypeName();
             Assert::IsTrue(actualResult_2 == PROCEDURE);           
         }
 
@@ -112,7 +112,7 @@ namespace UnitTesting
             
             Assert::IsTrue(actualResult->declarations.size() == 1);
             Assert::IsFalse(actualResult->hasPatternClauses());
-            Assert::IsTrue(actualResult->getParentDeclarationForSynonym("s")->getDesignEntityType()->getEntityTypeName() == STMT);
+            Assert::IsTrue(actualResult->getParentDeclarationForSynonym("s")->getDesignEntity()->getEntityTypeName() == STMT);
         }
     };
 

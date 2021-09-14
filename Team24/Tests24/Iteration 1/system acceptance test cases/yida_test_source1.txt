@@ -18,3 +18,7 @@ procedure yida3 {
 	call yida1;
 	call yida2;
 }
+
+procedure yida4 {
+
+}

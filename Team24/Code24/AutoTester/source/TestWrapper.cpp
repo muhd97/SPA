@@ -107,7 +107,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
 
     }
 
-    cout << "\n<<<< ======== Finished Processing PQL Queries ======== >>>>\n";
+    cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";
 
   // store the answers to the query in the results list (it is initially empty)
   // each result must be a string.

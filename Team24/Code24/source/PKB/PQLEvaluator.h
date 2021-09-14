@@ -65,11 +65,13 @@ public:
 	vector<string> getUsed(int statementIndex);
 	vector<string> getUsed(PKBDesignEntity statements);
 	vector<string> getUsed();
+	vector<string> getUsedByProcName(string procname);
 
 	vector<int> getUsers(string variableName); /* Get all stmts that use a given variableName (IDENT) */
 	vector<int> getUsers(PKBDesignEntity statements, string variableName); /* Get all stmts that use a given variableName (IDENT), and are of given PKBDesignEntity type */
 	vector<int> getUsers(); /* Get all stmts that use a variable */
 	vector<int> getUsers(PKBDesignEntity entityType); /* Get all stmts that use a variable, and are of given entityType */
+	vector<string> getProceduresThatUseVars();
 
 	// Modifies
 	vector<string> getModified(int statementIndex);
@@ -121,6 +123,22 @@ protected:
 		for (auto& var: vars) {
 			res.emplace_back(var->getName());
 		}
+		return move(res);
+	}
+
+	// we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
+	vector<string> varToString(vector<PKBVariable::SharedPtr>& vars) {
+		vector<string> res;
+		for (auto& var : vars) {
+			res.emplace_back(var->getName());
+		}
+		return move(res);
+	}
+
+	vector<string> procedureToString(set<PKBStatement::SharedPtr>& procs) {
+		vector<string> res;
+		res.reserve(procs.size());
+		for (auto& p : procs) res.emplace_back(p->mName);
 		return move(res);
 	}
 

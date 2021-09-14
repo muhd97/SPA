@@ -68,7 +68,7 @@ void runParserDeclarationTest() {
         cout << x << " | ";
     }
 
-    cout << "\nDesignEntityType: " << d->getDesignEntityType()->getEntityTypeName() << endl;
+    cout << "\nDesignEntityType: " << d->getDesignEntity()->getEntityTypeName() << endl;
 
 }
 
@@ -83,7 +83,7 @@ void runParserUsesTestCases() {
     for (auto& s : parseUsesTestCases) {
         cout << "\n==== ParseUsesTest: " << s << " ====" << endl;
         PQLParser usesParser(pqlLex(s));
-        SPtr<UsesS> uses = usesParser.parseUses();
+        SPtr<RelRef> uses = usesParser.parseUses();
         uses->printString();
     }
 }
