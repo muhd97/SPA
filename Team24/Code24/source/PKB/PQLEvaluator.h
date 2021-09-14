@@ -207,21 +207,21 @@ public:
 
 	// Get all statements that use the variable of name {variableName}
 	vector<int> getUsers(string variableName); 
-	
 	// Get all statements of type {entityType} that use the variable of name {variableName}
 	vector<int> getUsers(PKBDesignEntity entityType, string variableName);
-	
 	// Get all statements that use at least one variable
 	vector<int> getUsers(); 
-	
 	// Get all statements of type {entityType} that use at least one variable
 	vector<int> getUsers(PKBDesignEntity entityType); 
-	
+
 	// Get all procedures that use at least one variable
 	vector<string> getProceduresThatUseVars();
-
+	/* Check if there are procedures that use variables */
+	bool checkAnyProceduresUseVars();
 	// Get all procedures that use the given variable of {variableName}
 	vector<string> getProceduresThatUseVar(string variableName);
+	/* Check if there are procedures that use the given variable {variableName} */
+	bool checkAnyProceduresUseVars(string variableName);
 
 	// Modifies
 

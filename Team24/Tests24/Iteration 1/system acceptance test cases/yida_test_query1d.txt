@@ -33,3 +33,153 @@ read r;
 Select r such that Uses(8, "z")
 4, 10
 25
+8 - Select all Procedures - TargetSynonym Not in Uses (ass, v)
+variable vsew, k; assign a; stmt x; procedure sd; print p; read r;
+Select sd such that Uses(a, vsew)
+yida1, yida3, yida2, yida4
+25
+9 - Select all Assign - TargetSynonym Not in Uses (ass, _)
+variable vsew, k; assign a, b; stmt x; procedure sd; print p; read r;
+Select a such that Uses(b, _)
+1, 2, 3, 6, 7, 8
+25
+10 - Select all Statements - TargetSynonym Not in Uses(ass, "z")
+stmt s; assign a;
+Select s such that Uses(a,  "z")
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
+25
+11 - Select all Procedures - TargetSynonym Not in Uses (pr, v)
+variable vsew, k; assign a; stmt x; procedure sd; print p; read r;
+Select sd such that Uses(p, vsew)
+yida1, yida3, yida2, yida4
+25
+12 - Select all Assign - TargetSynonym Not in Uses (pr, _)
+variable vsew, k; assign a, b; stmt x; procedure sd; print p; read r;
+Select a such that Uses(p, _)
+1, 2, 3, 6, 7, 8
+25
+13 - Select all Statements - TargetSynonym Not in Uses(pr, "q")
+stmt s; assign a; print p;
+Select s such that Uses(p,  "q")
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
+25
+14 - Select all Procedures - TargetSynonym Not in Uses (proc, v)
+variable vsew, k; assign a; stmt x; procedure sd, sdd; print p; read r;
+Select sdd such that Uses(sd, vsew)
+yida1, yida3, yida2, yida4
+25
+15 - Select all Assign - TargetSynonym Not in Uses (proc, _)
+variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
+Select a such that Uses(sd, _)
+1, 2, 3, 6, 7, 8
+25
+16 - Select all Statements - TargetSynonym Not in Uses(proc, "q")
+stmt s; assign a; print p; procedure pr;
+Select s such that Uses(pr,  "q")
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
+25
+17 - Select all Procedures - TargetSynonym Not in Uses (call, v)
+variable vsew, k; assign a; stmt x; procedure sd; print p; read r; call cc;
+Select sd such that Uses(cc, vsew)
+yida1, yida3, yida2, yida4
+25
+18 - Select all Assign - TargetSynonym Not in Uses (call, _)
+variable vsew, k; assign a, b; stmt x; procedure sd; print p; read r; call cc;
+Select a such that Uses(cc, _)
+1, 2, 3, 6, 7, 8
+25
+19 - Select all Statements - TargetSynonym Not in Uses(call, "q")
+stmt s; assign a; print p; call dd;
+Select s such that Uses(dd,  "q")
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
+25
+20 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(call, "i")
+stmt s; assign a; print p; call dd;
+Select s such that Uses(dd,  "i")
+
+25
+21 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(proc, "i")
+stmt s; assign a; print p; call dd; procedure k;
+Select s such that Uses(k,  "i")
+
+25
+22 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(ass, "i")
+stmt s; assign a; print p; call dd; procedure k;
+Select s such that Uses(a,  "i")
+
+25
+23 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(read, "i")
+stmt s; assign a; print p; call dd; procedure k; read r;
+Select s such that Uses(r,  "i")
+
+25
+24 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(read, _)
+stmt s; assign a; print p; call dd; procedure k; read r;
+Select s such that Uses(r,  _)
+
+25
+25 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(while, _)
+stmt s; assign a; print p; call dd; procedure k; read r; while w; variable v;
+Select s such that Uses(w,  _)
+
+25
+26 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(ifs, v)
+stmt s; assign a; print p; call dd; procedure k; read r; while w; variable v; if ifs;
+Select s such that Uses(ifs,  v)
+
+25
+27 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses(ifs, "nonExistentVar")
+stmt s; assign a; print p; call dd; procedure k; read r; while w; variable v; if ifs;
+Select a such that Uses(s,  "nonExistentVar")
+
+25
+28 - Select all Assign - TargetSynonym Not in Uses ("procName", v)
+variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
+Select a such that Uses("yida1", vsew)
+1, 2, 3, 6, 7, 8
+25
+29 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses ("procName", v)
+variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
+Select a such that Uses("yida4", vsew)
+
+25
+30 - Select all Assign - TargetSynonym Not in Uses ("procName", _)
+variable vsew, z; assign a, b; stmt k; procedure sd; print p; read r;
+Select k such that Uses("yida2", _)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
+25
+31 - Select all Assign - TargetSynonym Not in Uses ("procName", _)
+variable vsew, z; assign a, b; stmt k; procedure sd; print p; read r;
+Select k such that Uses("yida1", _)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
+25
+32 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses ("procName", _)
+variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
+Select k such that Uses("yida4", _)
+
+25
+33 - Select all Assign - TargetSynonym Not in Uses ("procName", "x")
+variable vsew, z; assign a, b; stmt k; procedure sd; print p; read r;
+Select k such that Uses("yida2", "x")
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
+25
+34 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses ("procName", "i")
+variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
+Select k such that Uses("yida2", "i")
+
+25
+35 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses ("procName", "nonExistentVar")
+variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
+Select k such that Uses("yida1", "nonExistentVar")
+
+25
+36 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses ("nonExistentProc", "x")
+variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
+Select k such that Uses("nonExistentProc", "x")
+
+25
+37 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses ("nonExistentProc", v)
+variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
+Select k such that Uses("nonExistentProc", vsew)
+
+25

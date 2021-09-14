@@ -641,7 +641,7 @@ vector<string> PQLEvaluator::getUsed(PKBDesignEntity userType)
 
 bool PQLEvaluator::checkUsed(PKBDesignEntity entityType)
 {
-	return mpPKB->getUsedVariablesSize() > 0;
+	return mpPKB->getUsedVariables(entityType).size() > 0;
 }
 
 bool PQLEvaluator::checkUsed(PKBDesignEntity entityType, string ident)
@@ -660,7 +660,8 @@ vector<string> PQLEvaluator::getUsed()
 
 bool PQLEvaluator::checkUsed()
 {
-	return false;
+	set<PKBVariable::SharedPtr>& vars = mpPKB->getUsedVariables(PKBDesignEntity::AllExceptProcedure);
+	return vars.size() > 0;
 }
 
 vector<string> PQLEvaluator::getUsedByProcName(string procname)
@@ -684,12 +685,25 @@ vector<string> PQLEvaluator::getUsedByProcName(string procname)
 
 bool PQLEvaluator::checkUsedByProcName(string procname)
 {
-	return false;
+
+	PKBStatement::SharedPtr procedure;
+	if ((procedure = mpPKB->getProcedureByName(procname)) == nullptr) {
+		return false;
+	}
+	return procedure->getUsedVariablesSize() > 0;
 }
 
 bool PQLEvaluator::checkUsedByProcName(string procname, string ident)
 {
-	return false;
+	PKBStatement::SharedPtr procedure;
+	if ((procedure = mpPKB->getProcedureByName(procname)) == nullptr) return false;
+
+	PKBVariable::SharedPtr targetVar;
+	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr) return false;
+
+	const set<PKBVariable::SharedPtr>& varsUsed = procedure->getUsedVariables();
+
+	return varsUsed.find(targetVar) != varsUsed.end();
 }
 
 vector<int> PQLEvaluator::getUsers(string variableName)
@@ -753,6 +767,11 @@ vector<string> PQLEvaluator::getProceduresThatUseVars() {
 	return procedureToString(mpPKB->setOfProceduresThatUseVars);
 }
 
+bool PQLEvaluator::checkAnyProceduresUseVars()
+{
+	return mpPKB->setOfProceduresThatUseVars.size() > 0;
+}
+
 vector<string> PQLEvaluator::getProceduresThatUseVar(string variableName)
 {
 	vector<string> toReturn;
@@ -769,6 +788,13 @@ vector<string> PQLEvaluator::getProceduresThatUseVar(string variableName)
 	}
 
 	return move(toReturn);
+}
+
+bool PQLEvaluator::checkAnyProceduresUseVars(string variableName)
+{
+	if (mpPKB->variableNameToProceduresThatUseVarMap.find(variableName) == mpPKB->variableNameToProceduresThatUseVarMap.end()) return false;
+
+	return mpPKB->variableNameToProceduresThatUseVarMap[variableName].size() > 0;
 }
 
 /* Get all variable names modified by the particular statement */

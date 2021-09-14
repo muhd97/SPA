@@ -29,17 +29,17 @@ Select vsew
 x, y, z, a, b, i, j, p, q, w
 25
 7 - Select all Variables, but with redundant declaration
-variable vsew, k; assign a; stmt k;
+variable vsew, k; assign a; stmt x;
 Select vsew
 x, y, z, a, b, i, j, p, q, w
 25
 8 - Select all Assign, but with redundant declaration
-variable vsew, k; assign a; stmt k; procedure sd; print p; read r;
+variable vsew, k; assign a; stmt x; procedure sd; print p; read r;
 Select a
 1, 2, 3, 6, 7, 8
 25
 9 - Select all Procedures, but with redundant declaration
-variable vsew, k; assign a; stmt k; procedure sd; print p; read r;
+variable vsew, k; assign a; stmt x; procedure sd; print p; read r;
 Select sd
 yida1, yida3, yida2, yida4
 25

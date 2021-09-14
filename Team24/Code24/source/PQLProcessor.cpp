@@ -63,6 +63,33 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<Design
     }
 }
 
+inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(string s) {
+    if (s == ASSIGN) {
+        return PKBDesignEntity::Assign;
+    }
+    else if (s == STMT) {
+
+        return PKBDesignEntity::AllExceptProcedure; // ALL STATEMENTS
+    }
+    else if (s == READ) {
+        return PKBDesignEntity::Read;
+    }
+    else if (s == CALL) {
+        return PKBDesignEntity::Call;
+    }
+    else if (s == WHILE) {
+        return PKBDesignEntity::While;
+    }
+    else if (s == IF) {
+        return PKBDesignEntity::If;
+    }
+    else if (s == PRINT) {
+        return PKBDesignEntity::Print;
+    }
+    else { // s == PROCEDURE
+        return PKBDesignEntity::Procedure;
+    }
+}
 
 vector<shared_ptr<Result>> PQLProcessor::handleNoRelRefOrPatternCase(shared_ptr<SelectCl> selectCl) {
     shared_ptr<Synonym> targetSynonym = selectCl->targetSynonym;
@@ -266,7 +293,9 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 /* PRE-CONDITION: Target synonym of the SelectCl must be inside the Uses() clause. */
 void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<Result>>& toReturn)
 {
+
     shared_ptr<StmtRef>& stmtRef = usesCl->stmtRef;
+    assert(stmtRef->getStmtRefType() == StmtRefType::INTEGER);
     vector<string> variablesUsedByStmtNo = evaluator->getUsed(stmtRef->getIntVal());
 
     /* Uses (1, syn) */
@@ -274,7 +303,7 @@ void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, sh
 
         shared_ptr<EntRef>& entRef = usesCl->entRef;
 
-        /* Uses (1, x), x is NOT a variable */
+        /* Uses (1, syn), syn is NOT a variable */
         if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) {
             cout << "TODO: Handle error case. Uses(1, p), but p is not a variable delcaration.\n";
         }
@@ -284,7 +313,7 @@ void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, sh
         }
     }
 
-    /* Uses (1, 2) violates pre-condition. Should not come here. */
+    /* Uses (1, "x") violates pre-condition. Should not come here. */
     if (usesCl->entRef->getEntRefType() == EntRefType::IDENT) {
         cout << "Pre-condition VIOLATED. Target synonym of the SelectCl must be inside the Uses() clause\n";
     }
@@ -298,6 +327,9 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared
     shared_ptr<StmtRef>& stmtRefLeft = usesCl->stmtRef;
     shared_ptr<EntRef>& entRefRight = usesCl->entRef;
     /* Uses (syn, v) OR Uses(syn, AllExceptProcedure) */
+
+    assert(leftType == StmtRefType::SYNONYM);
+
     if (rightType == EntRefType::SYNONYM || rightType == EntRefType::UNDERSCORE) {
         
         /* Uses (syn, v) -> Select v */
@@ -359,6 +391,8 @@ void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shar
 {
     /* TODO: Yida catch error case when v is not a variable synonym. */
 
+    assert(usesCl->entRef1->getEntRefType() == EntRefType::IDENT);
+
     /* Uses ("PROC_IDENTIFER", v) Select variable v. */
     if (targetSynonymMatchesMultipleTypes(selectCl, { DesignEntity::VARIABLE })) {
         for (auto& s : evaluator->getUsedByProcName(usesCl->entRef1->getStringVal())) {
@@ -373,6 +407,9 @@ bool PQLProcessor::verifyUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, sh
     shared_ptr<StmtRef>& leftArg = usesCl->stmtRef;
     shared_ptr<EntRef>& rightArg = usesCl->entRef;
     EntRefType rightType = usesCl->entRef->getEntRefType();
+
+    assert(leftArg->getStmtRefType() == StmtRefType::INTEGER);
+
     if (rightType == EntRefType::SYNONYM) {
         // Check if rightArg is VARIABLE
         if (selectCl->getDesignEntityTypeBySynonym(rightArg->getStringVal()) != DesignEntity::VARIABLE) {
@@ -397,12 +434,84 @@ bool PQLProcessor::verifyUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, sh
 /* PRE-CONDITION: Target synonym of the SelectCl must NOT be inside the SuchThat clause. */
 bool PQLProcessor::verifyUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl)
 {
+    shared_ptr<StmtRef>& leftArg = usesCl->stmtRef;
+    shared_ptr<EntRef>& rightArg = usesCl->entRef;
+    EntRefType rightType = usesCl->entRef->getEntRefType();
+
+    assert(leftArg->getStmtRefType() == StmtRefType::SYNONYM);
+
+    if (rightType == EntRefType::SYNONYM) {
+        // Check if rightArg is VARIABLE
+        if (selectCl->getDesignEntityTypeBySynonym(rightArg->getStringVal()) != DesignEntity::VARIABLE) {
+            cout << "TODO: Handle Uses error case: Synonym in second arg of Uses() must be declared VARIABLE\n";
+            return false;
+        }
+
+        string& leftType = selectCl->getDesignEntityTypeBySynonym(leftArg->getStringVal());
+        if (leftType != DesignEntity::PROCEDURE) {
+            return evaluator->checkUsed(resolvePQLDesignEntityToPKBDesignEntity(leftType));
+        }
+
+        if (leftType == DesignEntity::PROCEDURE) {
+            return evaluator->checkAnyProceduresUseVars();
+        }
+    }
+
+    if (rightType == EntRefType::UNDERSCORE) {
+        string& leftType = selectCl->getDesignEntityTypeBySynonym(leftArg->getStringVal());
+        if (leftType != DesignEntity::PROCEDURE) {
+            return evaluator->checkUsed(resolvePQLDesignEntityToPKBDesignEntity(leftType));
+        }
+
+        if (leftType == DesignEntity::PROCEDURE) {
+            return evaluator->checkAnyProceduresUseVars();
+        }
+    }
+
+    if (rightType == EntRefType::IDENT) {
+        string& leftType = selectCl->getDesignEntityTypeBySynonym(leftArg->getStringVal());
+        if (leftType != DesignEntity::PROCEDURE) {
+            return evaluator->checkUsed(resolvePQLDesignEntityToPKBDesignEntity(leftType), rightArg->getStringVal());
+        }
+
+        if (leftType == DesignEntity::PROCEDURE) {
+            return evaluator->checkAnyProceduresUseVars(rightArg->getStringVal());
+        }
+    }
+
     return false;
 }
 
 /* PRE-CONDITION: Target synonym of the SelectCl must NOT be inside the SuchThat clause. */
 bool PQLProcessor::verifyUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesCl)
 {
+
+    shared_ptr<EntRef>& leftArg = usesCl->entRef1;
+    shared_ptr<EntRef>& rightArg = usesCl->entRef2;
+
+    assert(leftArg->getEntRefType() == EntRefType::IDENT);    
+
+    EntRefType rightType = usesCl->entRef2->getEntRefType();
+    string identName = leftArg->getStringVal();
+
+
+    if (rightType == EntRefType::SYNONYM) {
+        // Check if rightArg is VARIABLE
+        if (selectCl->getDesignEntityTypeBySynonym(rightArg->getStringVal()) != DesignEntity::VARIABLE) {
+            cout << "TODO: Handle Uses error case: Synonym in second arg of Uses() must be declared VARIABLE\n";
+            return false;
+        }
+        return evaluator->checkUsedByProcName(identName);
+    }
+
+    if (rightType == EntRefType::UNDERSCORE) {
+        return evaluator->checkUsedByProcName(identName);
+    }
+
+    if (rightType == EntRefType::IDENT) {
+        return evaluator->checkUsedByProcName(identName, rightArg->getStringVal());
+    }
+
     return false;
 }
 
@@ -437,8 +546,8 @@ bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     }
     case RelRefType::USES_P: /* Uses("INDENT", v). */
     {
-
-        break;
+        shared_ptr<UsesP> usesCl = static_pointer_cast<UsesP>(suchThatCl->relRef);
+        return verifyUsesPFirstArgIdent(selectCl, usesCl);
     }
     case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
     {
@@ -490,6 +599,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     /* Pre-Validate PQLQuery first to catch simple errors like a synonym not being declared first. */
 
     // TODO @kohyida1997 implement validation.
+    // TODO @kohyida1997 catch duplicate synonyms!!
 
     // preValidateQuery(selectCl);
 

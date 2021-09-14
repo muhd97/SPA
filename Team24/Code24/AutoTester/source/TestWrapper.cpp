@@ -86,6 +86,8 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
         cout << "\n==== Printing Parsed Query ====\n";
         cout << sel->format() << endl;
 
+        // TODO: @kohyida1997 PRE VALIDATE THE QUERY FIRST!!! Handle duplicate declaration, undeclared synonyms.
+
         cout << "\n==== Processing PQL Query ====\n";
 
         shared_ptr<PQLEvaluator> evaluator = PQLEvaluator::create(this->pkb);
