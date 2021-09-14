@@ -683,6 +683,7 @@ vector<string> PQLEvaluator::getProceduresThatUseVars() {
 	return procedureToString(mpPKB->setOfProceduresThatUseVars);
 }
 
+/* Get all variable names modified by the particular statement */
 vector<string> PQLEvaluator::getModified(int statementIndex)
 {
 	PKBStatement::SharedPtr stmt = mpPKB->getStatement(statementIndex);
@@ -690,6 +691,7 @@ vector<string> PQLEvaluator::getModified(int statementIndex)
 	return varToString(vars);
 }
 
+/* Get all variable names modified by the particular statement */
 vector<string> PQLEvaluator::getModified(PKBDesignEntity modifierType)
 {
 	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
@@ -699,7 +701,6 @@ vector<string> PQLEvaluator::getModified(PKBDesignEntity modifierType)
 
 vector<string> PQLEvaluator::getModified()
 {
-	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
 	set<PKBVariable::SharedPtr> vars = mpPKB->getModifiedVariables(PKBDesignEntity::AllExceptProcedure);
 	return varToString(vars);
 }
@@ -734,8 +735,21 @@ vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string vari
 
 vector<int> PQLEvaluator::getModifiers()
 {
-	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
-	set<PKBStatement::SharedPtr> stmts = mpPKB->getAllModifyStmts();
+	set<PKBStatement::SharedPtr> stmts = mpPKB->getAllModifyingStmts();
+	return stmtToInt(stmts);
+}
+
+vector<int> PQLEvaluator::getModifiers(PKBDesignEntity entityType) {
+	vector<PKBStatement::SharedPtr> stmts;
+
+	if (entityType == PKBDesignEntity::AllExceptProcedure) {
+		return getModifiers();
+	}
+
+	for (auto& ptr : mpPKB->getAllModifyingStmts(entityType)) {
+		stmts.emplace_back(ptr);
+	}
+
 	return stmtToInt(stmts);
 }
 

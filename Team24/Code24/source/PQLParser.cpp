@@ -195,7 +195,7 @@ shared_ptr<RelRef> PQLParser::parseUses()
 
 shared_ptr<RelRef> PQLParser::parseModifies()
 {
-    if (peek().type == PQLTokenType::STRING) { /* If first arg of Modifies() is a string, it must be a ModifiesP */
+    if (peek().type != PQLTokenType::STRING) { /* If first arg of Modifies() is a string, it must be a ModifiesP */
         eat(PQLTokenType::MODIFIES);
         eat(PQLTokenType::LEFT_PAREN);
         auto sRef11 = parseStmtRef();
