@@ -48,5 +48,20 @@ stmt s;
 Select s
 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
 25
+11 - Select all Statements that modify a variable (both synonyms)
+stmt s; variable v;
+Select s such that Modifies(s, v)
+1, 2, 3, 4, 6, 7, 8, 10, 11, 12
+25
+12 - Select all variables that are modified by a statement (both synonyms)
+stmt s; variable v;
+Select v such that Modifies(s, v)
+x, y, z, a, i, j, p, w
+25
+13 - Select all variables modified by a specific statement number
+variable v;
+Select v such that Modifies(4, v)
+a
+25
 
 
