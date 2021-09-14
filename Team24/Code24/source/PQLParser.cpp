@@ -56,7 +56,7 @@ inline PQLToken PQLParser::eat(PQLTokenType exepctedType)
 
 shared_ptr<Declaration> PQLParser::parseDeclaration()
 {
-    vector<string> synonyms;
+    vector<shared_ptr<Synonym>> synonyms;
     shared_ptr<DesignEntity> d = parseDesignEntity();
 
     synonyms.push_back(parseSynonym());
@@ -114,11 +114,11 @@ shared_ptr<DesignEntity> PQLParser::parseDesignEntity()
 }
 
 
-inline string PQLParser::parseSynonym()
+inline shared_ptr<Synonym> PQLParser::parseSynonym()
 {
     PQLToken t = peek();
     eat(PQLTokenType::NAME);
-    return t.stringValue;
+    return make_shared<Synonym>(t.stringValue);
 }
 
 inline int PQLParser::parseInteger()
@@ -137,7 +137,7 @@ shared_ptr<StmtRef> PQLParser::parseStmtRef()
         eat(PQLTokenType::UNDERSCORE);
         return make_shared<StmtRef>(StmtRefType::UNDERSCORE);
     default:
-        return make_shared<StmtRef>(StmtRefType::SYNONYM, parseSynonym());
+        return make_shared<StmtRef>(StmtRefType::SYNONYM, parseSynonym()->getValue());
     }
 }
 
@@ -150,7 +150,7 @@ shared_ptr<EntRef> PQLParser::parseEntRef()
         return make_shared<EntRef>(EntRefType::UNDERSCORE);
 
     case PQLTokenType::NAME:
-        return make_shared<EntRef>(EntRefType::SYNONYM, parseSynonym());
+        return make_shared<EntRef>(EntRefType::SYNONYM, parseSynonym()->getValue());
 
     case PQLTokenType::STRING:
         auto str = eat(PQLTokenType::STRING);
@@ -195,7 +195,7 @@ shared_ptr<RelRef> PQLParser::parseUses()
 
 shared_ptr<RelRef> PQLParser::parseModifies()
 {
-    if (peek().type == PQLTokenType::STRING) { /* If first arg of Modifies() is a string, it must be a ModifiesP */
+    if (peek().type != PQLTokenType::STRING) { /* If first arg of Modifies() is a string, it must be a ModifiesP */
         eat(PQLTokenType::MODIFIES);
         eat(PQLTokenType::LEFT_PAREN);
         auto sRef11 = parseStmtRef();
@@ -347,7 +347,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
-    string synonym;
+    shared_ptr<Synonym> synonym;
 
     while (tokenIsDesignEntity(peek().type)) {
         declarations.push_back(parseDeclaration());

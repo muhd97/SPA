@@ -54,6 +54,7 @@ public:
 	set<PKBStatement::SharedPtr> setOfProceduresThatUseVars;
 
 	set<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
+	unordered_map<PKBDesignEntity, set<PKBStatement::SharedPtr>> designEntityToStatementsThatModifyVarsMap;
 
 	// YIDA: map used to keep track of extracted Procedures during DesignExtraction, will need it after design extraction to easily access Procedures
 	// if a procedure has been extracted, it will be present in this map, else it has not been extracted
@@ -85,7 +86,7 @@ public:
 	}
 
 	// get used variables modified by statements of a specified DesignEntity
-// to get all modified variables (by all statements), use PKBDesignEntity::AllExceptProcedure
+	// to get all modified variables (by all statements), use PKBDesignEntity::AllExceptProcedure
 	set<PKBVariable::SharedPtr> getModifiedVariables(PKBDesignEntity s) {
 		return mModifiedVariables[s];
 	}
@@ -103,7 +104,11 @@ public:
 		return designEntityToStatementsThatUseVarsMap[pkbde];
 	}
 
-	set<PKBStatement::SharedPtr> getAllModifyStmts() {
+	set<PKBStatement::SharedPtr> getAllModifyingStmts(PKBDesignEntity pkbDe) {
+		return designEntityToStatementsThatModifyVarsMap[pkbDe];
+	}
+
+	set<PKBStatement::SharedPtr> getAllModifyingStmts() {
 		return mAllModifyStmts;
 	}
 
