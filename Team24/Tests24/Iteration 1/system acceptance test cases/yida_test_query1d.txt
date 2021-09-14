@@ -1,0 +1,35 @@
+1 - Select all Assign statements - TargetSynonym Not in Uses(3, _)
+assign a;
+Select a such that Uses(3, _)
+1, 2, 3, 6, 7, 8
+25
+2 - Select all Assign statements - NEGATIVE CASE: TargetSynonym Not in Uses(1, _)
+assign a;
+Select a such that Uses(1, _)
+
+25
+3 - Select all Procedures - TargetSynonym not in Uses(3, v)
+procedure kz; variable v;
+Select kz such that Uses(3, v)
+yida1, yida2, yida3, yida4
+25
+4 - Select all Variables - NEGATIVE CASE: TargetSynonym Not in Uses(4, v)
+variable vsew; variable v;
+Select vsew such that Uses(4, v)
+
+25
+5 - Select all Variables - TargetSynonym Not in Uses(11, v)
+variable vsew; variable v;
+Select vsew such that Uses(11, v)
+x, y, z, a, b, i, j, p, q, w
+25
+6 - Select all Variables - NEGATIVE CASE: TargetSynonym Not in Uses(3, "i")
+variable vsew; variable v;
+Select vsew such that Uses(3, "i")
+
+25
+7 - Select all Read statements - TargetSynonym Not in Uses(8, "z")
+read r;
+Select r such that Uses(8, "z")
+4, 10
+25

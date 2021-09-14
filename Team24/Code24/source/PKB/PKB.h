@@ -86,6 +86,10 @@ public:
 		return mUsedVariables[s];
 	}
 
+	int getUsedVariablesSize() {
+		return mUsedVariables.size();
+	}
+
 	// get used variables modified by statements of a specified DesignEntity
 	// to get all modified variables (by all statements), use PKBDesignEntity::AllExceptProcedure
 	set<PKBVariable::SharedPtr> getModifiedVariables(PKBDesignEntity s) {

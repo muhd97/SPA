@@ -173,19 +173,37 @@ public:
 	
 	// Get the names of all variables used by statement indexed {statementIndex}
 	vector<string> getUsed(int statementIndex);
+	/* Check if the given stmt Index USES any variables. */
 	bool checkUsed(int statementIndex);
+	/* Check if the given stmt Index USES a specific variable specified by {ident} */
+	bool checkUsed(int statementIndex, string ident);
+
+
 
 	// Get the names of all variables used by all statements of type {entityType}
 	vector<string> getUsed(PKBDesignEntity entityType);
+	/* Check if the given {entityType} uses any variables */
 	bool checkUsed(PKBDesignEntity entityType);
+	/* Check if the given {entityType} uses a given variable specified by {ident} */
+	bool checkUsed(PKBDesignEntity entityType, string ident);
+
+
 
 	// Get the names of all variables used by at least one statement
 	vector<string> getUsed();
+	/* Check if at least one statement uses a variable. */
 	bool checkUsed();
+
+
 
 	// Get the names of all variables used by procedure with name {procname}
 	vector<string> getUsedByProcName(string procname);
+	/* Check if given procedure {procname} uses at least one variable. */
 	bool checkUsedByProcName(string procname);
+	/* Check if given procedure {procname} uses the variable specified by {ident}. */
+	bool checkUsedByProcName(string procname, string ident);
+
+
 
 	// Get all statements that use the variable of name {variableName}
 	vector<int> getUsers(string variableName); 
@@ -218,7 +236,6 @@ public:
 
 	// Get all statements that modify the variable of name {variableName}
 	vector<int> getModifiers(string variableName);
-
 	
 	// Get all statements of type {entityType} that modify the variable of name {variableName}
 	vector<int> getModifiers(PKBDesignEntity statements, string variableName);

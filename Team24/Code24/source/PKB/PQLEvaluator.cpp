@@ -621,19 +621,35 @@ vector<string> PQLEvaluator::getUsed(int statementIndex)
 
 bool PQLEvaluator::checkUsed(int statementIndex)
 {
-	return false;
+	return mpPKB->getStatement(statementIndex)->getUsedVariablesSize() > 0;
+}
+
+bool PQLEvaluator::checkUsed(int statementIndex, string ident)
+{
+	PKBVariable::SharedPtr targetVar;
+	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr) return false;
+	
+	set<PKBVariable::SharedPtr>& allVars = mpPKB->getStatement(statementIndex)->getUsedVariables();
+	return allVars.find(targetVar) != allVars.end();
 }
 
 vector<string> PQLEvaluator::getUsed(PKBDesignEntity userType)
 {
 	set<PKBVariable::SharedPtr> vars = mpPKB->getUsedVariables(userType);
-	
 	return varToString(move(vars));
 }
 
 bool PQLEvaluator::checkUsed(PKBDesignEntity entityType)
 {
-	return false;
+	return mpPKB->getUsedVariablesSize() > 0;
+}
+
+bool PQLEvaluator::checkUsed(PKBDesignEntity entityType, string ident)
+{
+	PKBVariable::SharedPtr targetVar;
+	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr) return false;
+	set<PKBVariable::SharedPtr>& allVars = mpPKB->getUsedVariables(entityType);
+	return allVars.find(targetVar) != allVars.end();
 }
 
 vector<string> PQLEvaluator::getUsed()
@@ -667,6 +683,11 @@ vector<string> PQLEvaluator::getUsedByProcName(string procname)
 }
 
 bool PQLEvaluator::checkUsedByProcName(string procname)
+{
+	return false;
+}
+
+bool PQLEvaluator::checkUsedByProcName(string procname, string ident)
 {
 	return false;
 }

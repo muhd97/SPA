@@ -46,6 +46,10 @@ public:
 		return mUses;
 	}
 
+	int getUsedVariablesSize() {
+		return mUses.size();
+	}
+
 	std::set<std::shared_ptr<PKBVariable>> getModifiedVariables() {
 		return mModifies;
 	}

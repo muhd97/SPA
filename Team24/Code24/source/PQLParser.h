@@ -630,7 +630,8 @@ public:
         return synonymToParentDeclarationMap[s->getValue()];
     }
 
-    inline string getDesignEntityTypeForSynonym(string& s) {
+
+    inline string getDesignEntityTypeBySynonym(string s) {
         if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end()) {
             cout << "Warning: requested synonym of value [" << s << "] is NOT declared in this SelectCl. Null DesignEntityType is returned.\n";
             return "";
@@ -639,7 +640,7 @@ public:
         return synonymToParentDeclarationMap[s]->getDesignEntity()->getEntityTypeName();
     }
 
-    inline string getDesignEntityTypeForSynonym(shared_ptr<Synonym>& s) {
+    inline string getDesignEntityTypeBySynonym(shared_ptr<Synonym>& s) {
         if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end()) {
             cout << "Warning: requested synonym of value [" << s->getValue() << "] is NOT declared in this SelectCl. Null DesignEntityType is returned.\n";
             return "";
@@ -698,10 +699,6 @@ public:
             if (flag) break;
         }
         return flag;
-    }
-
-    string getDesignEntityTypeBySynonym(string s) {
-        return synonymToParentDeclarationMap[s]->getDesignEntity()->getEntityTypeName();
     }
 
 };

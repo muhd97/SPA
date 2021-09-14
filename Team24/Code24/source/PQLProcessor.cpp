@@ -9,7 +9,6 @@ inline bool targetSynonymMatchesType(shared_ptr<SelectCl> selectCl, string targe
     return selectCl->getDesignEntityTypeBySynonym(selectCl->targetSynonym->getValue()) == targetType;
 }
 
-
 /* Method to check if the target synonym in the select statement matches at least one of given targetTypes (string) */
 inline bool targetSynonymMatchesMultipleTypes(shared_ptr<SelectCl> selectCl, initializer_list<string> list) {
     bool flag = false;
@@ -123,6 +122,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         /* Uses(_, x) ERROR cannot have underscore as first arg!! */
         if (leftType == StmtRefType::UNDERSCORE) {
             cout << "TODO: Handle Uses error case\n";
+            return;
         }
 
         /* Uses (1, ?) */
@@ -368,13 +368,70 @@ void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shar
 }
 
 /* PRE-CONDITION: Target synonym of the SelectCl must NOT be inside the SuchThat clause. */
+bool PQLProcessor::verifyUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl)
+{
+    shared_ptr<StmtRef>& leftArg = usesCl->stmtRef;
+    shared_ptr<EntRef>& rightArg = usesCl->entRef;
+    EntRefType rightType = usesCl->entRef->getEntRefType();
+    if (rightType == EntRefType::SYNONYM) {
+        // Check if rightArg is VARIABLE
+        if (selectCl->getDesignEntityTypeBySynonym(rightArg->getStringVal()) != DesignEntity::VARIABLE) {
+            cout << "TODO: Handle Uses error case: Synonym in second arg of Uses() must be declared VARIABLE\n";
+            return false;
+        }
+
+        return evaluator->checkUsed(leftArg->getIntVal());
+    }
+    
+    if (rightType == EntRefType::UNDERSCORE) {
+        return evaluator->checkUsed(leftArg->getIntVal());
+    } 
+
+    if (rightType == EntRefType::IDENT) {
+        return evaluator->checkUsed(leftArg->getIntVal(), rightArg->getStringVal());
+    }
+
+    return false;
+}
+
+/* PRE-CONDITION: Target synonym of the SelectCl must NOT be inside the SuchThat clause. */
+bool PQLProcessor::verifyUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl)
+{
+    return false;
+}
+
+/* PRE-CONDITION: Target synonym of the SelectCl must NOT be inside the SuchThat clause. */
+bool PQLProcessor::verifyUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesCl)
+{
+    return false;
+}
+
+/* PRE-CONDITION: Target synonym of the SelectCl must NOT be inside the SuchThat clause. */
 bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl)
 {
     switch (suchThatCl->relRef->getType())
     {
     case RelRefType::USES_S: /* Uses(s, v) where s is a STATEMENT. */
     {
+        shared_ptr<UsesS> usesCl = static_pointer_cast<UsesS>(suchThatCl->relRef);
+        StmtRefType leftType = usesCl->stmtRef->getStmtRefType();
+        EntRefType rightType = usesCl->entRef->getEntRefType();
+
+        /* Uses (1, ?) */
+        if (leftType == StmtRefType::INTEGER) {
+            return verifyUsesSFirstArgInteger(selectCl, usesCl);
+        }
         
+        /* Uses (syn, ?) */
+        if (leftType == StmtRefType::SYNONYM) {
+            return verifyUsesSFirstArgSyn(selectCl, usesCl);
+        }
+
+        /* Uses (_, ?) ILLEGAL */
+        if (leftType == StmtRefType::UNDERSCORE) {
+            cout << "TODO: Handle Uses error case: First arg of UsesS cannot be an UNDERSCORE\n";
+            return false;
+        }
 
         break;
     }
@@ -417,6 +474,9 @@ bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     return false;
 }
 
+bool PQLProcessor::verifyPatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl) {
+    return true;
+}
 
 
 /*
@@ -427,43 +487,43 @@ YIDA: Can only handle queries that return statement numbers, procedure names and
 vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> selectCl)
 {
 
+    /* Pre-Validate PQLQuery first to catch simple errors like a synonym not being declared first. */
+
+    // TODO @kohyida1997 implement validation.
+
+    // preValidateQuery(selectCl);
+
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses()) {
         return handleNoRelRefOrPatternCase(move(selectCl));
     }
 
     /* Special case 1: Synonym declared does not appear in any RelRef or Pattern clauses */
-    if (!targetSynonymIsInClauses(selectCl)) { // TODO: Yida
+    if (!targetSynonymIsInClauses(selectCl)) { 
         shared_ptr<Synonym> targetSynonym = selectCl->targetSynonym;
         shared_ptr<DesignEntity> de = selectCl
             ->getParentDeclarationForSynonym(targetSynonym)
             ->getDesignEntity();
-        cout << "Todo: target Synonym is not in clauses. DesignEntity: " <<  de->getEntityTypeName() << endl;
+
+        cout << "Special Case: Synonym declared does NOT appear in any RelRef or Pattern clauses. DesignEntity: " <<  de->getEntityTypeName() << endl;
 
         bool suchThatClausesAreSatisfied = !selectCl->hasSuchThatClauses(); /* If there are no such that clauses, we consider them satisfied. */
         bool patternClausesAreSatisfied = !selectCl->hasPatternClauses(); /* If there are no pattern clauses, we consider them satisfied. */
 
+        for (auto& ptr : selectCl->suchThatClauses) {
+            suchThatClausesAreSatisfied = verifySuchThatClause(selectCl, ptr);
+            if (!suchThatClausesAreSatisfied) break;
+        }
 
+        for (auto& ptr : selectCl->patternClauses) {
+            if (!suchThatClausesAreSatisfied) break;
+            patternClausesAreSatisfied = verifyPatternClause(selectCl, ptr);
+            if (!patternClausesAreSatisfied) break;
+        }
 
         if (suchThatClausesAreSatisfied && patternClausesAreSatisfied) {
             return handleNoRelRefOrPatternCase(move(selectCl));
         }
-
-        /*
-        if (suchThatIsSatisfied && patternIsSatisfied) {
-
-            string& targetSynonym = selectCl->targetSynonym;
-            shared_ptr<DesignEntity> de = selectCl
-                ->getParentDeclarationForSynonym(targetSynonym)
-                ->getDesignEntity();
-
-           // evaluator- get all statements that match this DesignEntity
-
-        } else {
-            return vector<Result>(); // empty
-        }
-
-        */
 
         return vector<shared_ptr<Result>>();
 
