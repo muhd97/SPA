@@ -20,7 +20,10 @@ public:
 	// maybe in future we can think about splitting it by PKBDesignEntity, but i dont think a variable
 	// will have so many users that it is necessary.
 	vector<int> getUsers() {
-		return mUsers;
+
+		cout << "PKBVariable mName: " << mName << ", No. Stmts that use this var = " << mUsers.size() << endl;
+
+		return vector<int>(mUsers.begin(), mUsers.end());
 	}
 
 	vector<int> getModifiers() {
@@ -28,7 +31,7 @@ public:
 	}
 
 	void addUserStatement(int userStatementIndex) {
-		mUsers.emplace_back(userStatementIndex);
+		mUsers.insert(userStatementIndex);
 	}
 
 	void addModifierStatement(int userStatementIndex) {
@@ -37,7 +40,7 @@ public:
 
 	string mName;
 	// list of all the statements that use this variable
-	vector<int> mUsers;
+	set<int> mUsers;
 	vector<int> mModifiers;
 
 protected:
