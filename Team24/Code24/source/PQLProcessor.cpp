@@ -6,14 +6,14 @@ string Result::dummy = "BaseResult: getResultAsString()";
 
 /* Method to check if the target synonym in the select statement matches given targetType (string) */
 inline bool targetSynonymMatchesType(shared_ptr<SelectCl> selectCl, string targetType) {
-    return selectCl->getDesignEntityTypeBySynonym(selectCl->targetSynonym) == targetType;
+    return selectCl->getDesignEntityTypeBySynonym(selectCl->targetSynonym->getValue()) == targetType;
 }
 
 
 /* Method to check if the target synonym in the select statement matches at least one of given targetTypes (string) */
 inline bool targetSynonymMatchesMultipleTypes(shared_ptr<SelectCl> selectCl, initializer_list<string> list) {
     bool flag = false;
-    string toMatch = selectCl->getDesignEntityTypeBySynonym(selectCl->targetSynonym);
+    string toMatch = selectCl->getDesignEntityTypeBySynonym(selectCl->targetSynonym->getValue());
     
     for (auto& s : list) {
         flag = toMatch == s;
@@ -24,14 +24,14 @@ inline bool targetSynonymMatchesMultipleTypes(shared_ptr<SelectCl> selectCl, ini
 
 /* Method to check if the target synonym in the select statement is found in its suchThat OR pattern clauses */
 inline bool targetSynonymIsInClauses(shared_ptr<SelectCl> selectCl) {
-    string& targetSynonym = selectCl->targetSynonym;
+    shared_ptr<Synonym> targetSynonym = selectCl->targetSynonym;
     return selectCl->suchThatContainsSynonym(targetSynonym) 
         || selectCl->patternContainsSynonym(targetSynonym);
 }
 
 template <typename Ref>
 inline bool singleRefSynonymMatchesTargetSynonym(shared_ptr<Ref>& refToCheck, shared_ptr<SelectCl>& selectCl) {
-    return refToCheck->getStringVal() == selectCl->targetSynonym;
+    return refToCheck->getStringVal() == selectCl->targetSynonym->getValue();
 }
 
 /* YIDA Note: design entity PROCEDURE and VARIABLE and CONSTANT should not be supported here!! */
@@ -66,7 +66,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<Design
 
 
 vector<shared_ptr<Result>> PQLProcessor::handleNoRelRefOrPatternCase(shared_ptr<SelectCl> selectCl) {
-    string& targetSynonym = selectCl->targetSynonym;
+    shared_ptr<Synonym> targetSynonym = selectCl->targetSynonym;
     shared_ptr<DesignEntity> de = selectCl
         ->getParentDeclarationForSynonym(targetSynonym)
         ->getDesignEntity();
@@ -278,7 +278,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
 
     /* Special case 1: Synonym declared does not appear in any RelRef or Pattern clauses */
     if (!targetSynonymIsInClauses(selectCl)) { // TODO: Yida
-        string& targetSynonym = selectCl->targetSynonym;
+        shared_ptr<Synonym> targetSynonym = selectCl->targetSynonym;
         shared_ptr<DesignEntity> de = selectCl
             ->getParentDeclarationForSynonym(targetSynonym)
             ->getDesignEntity();
