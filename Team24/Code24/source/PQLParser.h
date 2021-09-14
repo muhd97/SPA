@@ -314,9 +314,8 @@ public:
         }
 
         if (entRef->getEntRefType() == EntRefType::SYNONYM) {
-            flag = entRef->getStringVal() == s;
+            flag = flag || (entRef->getStringVal() == s);
         }
-
         return flag;
     }
 
@@ -342,7 +341,7 @@ public:
         }
 
         if (entRef2->getEntRefType() == EntRefType::SYNONYM) {
-            flag = entRef2->getStringVal() == s;
+            flag = flag || (entRef2->getStringVal() == s);
         }
 
         return flag;
