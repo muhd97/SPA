@@ -169,19 +169,23 @@ public:
 	vector<int> getAfterT(PKBDesignEntity beforeType);
 	
 
-	// Uses
+	/* Uses */
 	
 	// Get the names of all variables used by statement indexed {statementIndex}
 	vector<string> getUsed(int statementIndex);
+	bool checkUsed(int statementIndex);
 
 	// Get the names of all variables used by all statements of type {entityType}
 	vector<string> getUsed(PKBDesignEntity entityType);
+	bool checkUsed(PKBDesignEntity entityType);
 
 	// Get the names of all variables used by at least one statement
 	vector<string> getUsed();
+	bool checkUsed();
 
 	// Get the names of all variables used by procedure with name {procname}
 	vector<string> getUsedByProcName(string procname);
+	bool checkUsedByProcName(string procname);
 
 	// Get all statements that use the variable of name {variableName}
 	vector<int> getUsers(string variableName); 
@@ -197,6 +201,7 @@ public:
 	
 	// Get all procedures that use at least one variable
 	vector<string> getProceduresThatUseVars();
+
 
 	// Modifies
 

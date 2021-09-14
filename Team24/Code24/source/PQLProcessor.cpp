@@ -120,7 +120,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         StmtRefType leftType = usesCl->stmtRef->getStmtRefType();
         EntRefType rightType = usesCl->entRef->getEntRefType();
 
-        /* Uses(AllExceptProcedure, x) ERROR cannot have underscore as first arg!! */
+        /* Uses(_, x) ERROR cannot have underscore as first arg!! */
         if (leftType == StmtRefType::UNDERSCORE) {
             cout << "TODO: Handle Uses error case\n";
         }
@@ -263,6 +263,13 @@ void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shar
     }
 }
 
+bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl)
+{
+    return false;
+}
+
+
+
 /*
 
 YIDA: Can only handle queries that return statement numbers, procedure names and variables for now.
@@ -283,6 +290,15 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
             ->getParentDeclarationForSynonym(targetSynonym)
             ->getDesignEntity();
         cout << "Todo: target Synonym is not in clauses. DesignEntity: " <<  de->getEntityTypeName() << endl;
+
+        bool suchThatClausesAreSatisfied = !selectCl->hasSuchThatClauses(); /* If there are no such that clauses, we consider them satisfied. */
+        bool patternClausesAreSatisfied = !selectCl->hasPatternClauses(); /* If there are no pattern clauses, we consider them satisfied. */
+
+
+
+        if (suchThatClausesAreSatisfied && patternClausesAreSatisfied) {
+            return handleNoRelRefOrPatternCase(move(selectCl));
+        }
 
         /*
         if (suchThatIsSatisfied && patternIsSatisfied) {
