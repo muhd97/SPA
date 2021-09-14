@@ -337,7 +337,7 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType)
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 {
 	PKBStatement::SharedPtr stmt = mpPKB->getStatement(afterIndex);
-	PKBStatement::SharedPtr stmtBefore = mpPKB->getStatement(afterIndex - 1);
+	PKBStatement::SharedPtr stmtBefore = getStatementBefore(stmt);
 
 	vector<int> res;
 	// if pass the type check
@@ -348,6 +348,32 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 		}
 	}
 	return res;
+}
+
+PKBStatement::SharedPtr PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr statementAfter) {
+	// todo @nicholas very inefficient bug fix
+// find the statement before in the stmt's group
+	PKBGroup::SharedPtr grp = statementAfter->getGroup();
+	for (auto& member = grp->getMembers(PKBDesignEntity::AllExceptProcedure).begin();
+		member < grp->getMembers(PKBDesignEntity::AllExceptProcedure).end(); member++) {
+		if (statementAfter->getIndex() == *member) {
+			member--;
+			return mpPKB->getStatement(*member);
+		}
+	}
+}
+
+PKBStatement::SharedPtr PQLEvaluator::getStatementAfter(PKBStatement::SharedPtr statementBefore) {
+	// todo @nicholas very inefficient bug fix
+// find the statement before in the stmt's group
+	PKBGroup::SharedPtr grp = statementBefore->getGroup();
+	for (auto& member = grp->getMembers(PKBDesignEntity::AllExceptProcedure).begin();
+		member < grp->getMembers(PKBDesignEntity::AllExceptProcedure).end(); member++) {
+		if (statementBefore->getIndex() == *member) {
+			member++;
+			return mpPKB->getStatement(*member);
+		}
+	}
 }
 
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity afterType)
@@ -361,7 +387,7 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity 
 	// get results manually
 	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(afterType);
 	for (auto& stmt : stmts) {
-		PKBStatement::SharedPtr stmtBefore = mpPKB->getStatement(stmt->getIndex() - 1);
+		PKBStatement::SharedPtr stmtBefore = getStatementBefore(stmt);
 		// if pass the type check
 		if (beforeType == PKBDesignEntity::AllExceptProcedure || stmtBefore->getType() == beforeType) {
 			// and pass the same nesting level check
@@ -384,7 +410,7 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity afterType)
 vector<int> PQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
 {
 	PKBStatement::SharedPtr stmt = mpPKB->getStatement(beforeIndex);
-	PKBStatement::SharedPtr stmtAfter = mpPKB->getStatement(beforeIndex + 1);
+	PKBStatement::SharedPtr stmtAfter = getStatementAfter(stmt);
 
 	vector<int> res;
 	// if pass the type check
@@ -409,7 +435,7 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity a
 	// todo @nicholas: add optimization to go through shorter list of synonym (since both ways cost the same)
 	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(beforeType);
 	for (auto& stmt : stmts) {
-		PKBStatement::SharedPtr stmtAfter = mpPKB->getStatement(stmt->getIndex() + 1);
+		PKBStatement::SharedPtr stmtAfter = getStatementAfter(stmt);
 		// if pass the type check
 		if (afterType == PKBDesignEntity::AllExceptProcedure || stmtAfter->getType() == afterType) {
 			// and pass the same nesting level check
