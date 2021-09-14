@@ -144,9 +144,9 @@ protected:
 
 	void addStatement(PKBStatement::SharedPtr& statement, PKBDesignEntity designEntity);
 	inline void addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable);
-	void addUsedVariable(PKBDesignEntity designEntity, vector<PKBVariable::SharedPtr>& variables);
 	void addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr>& variables);
-	void addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable);
+	inline void addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable);
+	void addModifiedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr>& variables);
 
 	PKBVariable::SharedPtr getVariable(string name);
 

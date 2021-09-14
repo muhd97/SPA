@@ -246,8 +246,20 @@ PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement>& statement
 	addUsedVariable(PKBDesignEntity::If, consequentGroup->getUsedVariables());
 	addUsedVariable(PKBDesignEntity::If, alternativeGroup->getUsedVariables());
 
+	// if statement also uses this variable
+	for (auto& var : res->getUsedVariables()) {
+		var->addUserStatement(res->getIndex());
+	}
+
 	res->addModifiedVariables(consequentGroup->getModifiedVariables());
 	res->addModifiedVariables(alternativeGroup->getModifiedVariables());
+	addModifiedVariable(PKBDesignEntity::If, consequentGroup->getModifiedVariables());
+	addModifiedVariable(PKBDesignEntity::If, alternativeGroup->getModifiedVariables());
+
+	// if statement also modifies this variable
+	for (auto& var : res->getModifiedVariables()) {
+		var->addModifierStatement(res->getIndex());
+	}
 
 	if (consequentGroup->getModifiedVariables().size() > 0 || alternativeGroup->getModifiedVariables().size() > 0) {
 		designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::If].insert(res);
@@ -302,6 +314,15 @@ PKBStatement::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement>& statem
 	addUsedVariable(PKBDesignEntity::While, group->getUsedVariables());
 	res->addModifiedVariables(group->getModifiedVariables());
 
+	// while statement also uses this variable
+	for (auto& var : res->getUsedVariables()) {
+		var->addUserStatement(res->getIndex());
+	}
+	// while statement also modifies this variable
+	for (auto& var : res->getModifiedVariables()) {
+		var->addModifierStatement(res->getIndex());
+	}
+
 	if (group->getModifiedVariables().size() > 0) {
 		//contained statements of the while loop modify variable(s)
 		designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::While].insert(res);
@@ -351,6 +372,15 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 		designEntityToStatementsThatUseVarsMap[PKBDesignEntity::Call].insert(res);
 	}
 
+	// call statement also uses this variable
+	for (auto& var : res->getUsedVariables()) {
+		var->addUserStatement(res->getIndex());
+	}
+	// call statement also modifies this variable
+	for (auto& var : res->getModifiedVariables()) {
+		var->addModifierStatement(res->getIndex());
+	}
+
 	return res;
 }
 
@@ -372,11 +402,6 @@ inline void PKB::addUsedVariable(PKBDesignEntity designEntity, PKBVariable::Shar
 	}
 }
 
-void PKB::addUsedVariable(PKBDesignEntity designEntity, vector<PKBVariable::SharedPtr>& variables)
-{
-	for (auto& v : variables) addUsedVariable(designEntity, v);
-}
-
 void PKB::addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr>& variables)
 {
 	for (auto v : variables) {
@@ -390,6 +415,13 @@ void PKB::addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedP
 	// also put it in the global bucket list
 	if (designEntity != PKBDesignEntity::AllExceptProcedure) {
 		mModifiedVariables[PKBDesignEntity::AllExceptProcedure].insert(variable);
+	}
+}
+
+void PKB::addModifiedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr>& variables)
+{
+	for (auto v : variables) {
+		addModifiedVariable(designEntity, v);
 	}
 }
 
