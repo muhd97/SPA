@@ -171,7 +171,7 @@ shared_ptr<RelRef> PQLParser::parseUses()
     if (peek().type == PQLTokenType::STRING) { /* If first arg of Uses() is a string, it must be a UsesP */
         auto eRef = parseEntRef();
         if (eRef->getEntRefType() == EntRefType::UNDERSCORE) {
-            // TODO: Handle Error. INVALID to have underscore first Uses (AllExceptProcedure, x)
+            // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
         }
 
         eat(PQLTokenType::COMMA);
@@ -182,7 +182,7 @@ shared_ptr<RelRef> PQLParser::parseUses()
     else {
         auto sRef = parseStmtRef();
         if (sRef->getStmtRefType() == StmtRefType::UNDERSCORE) {
-            // TODO: Handle Error. INVALID to have underscore first Uses (AllExceptProcedure, x)
+            // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
         }
 
         eat(PQLTokenType::COMMA);
