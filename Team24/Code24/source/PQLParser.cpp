@@ -356,12 +356,14 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     eat(PQLTokenType::SELECT);
     synonym = parseSynonym();
 
+
+    /* YIDA Note: For iteration 1, multiple such that clauses are NOT allowed */
     while (!tokensAreEmpty()) {
         if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::SUCH_THAT) { 
         //if (peek().type == PQLTokenType::SUCH_THAT) { /* YIDA: Trying out multiple such that to try out joins */
             if (suchThatClauses.size() != 0) {
                 cout << "Duplicate such that clauses are not allowed." << endl;
-                break;
+                //break;
             }
             suchThatClauses.push_back(parseSuchThat());
         }

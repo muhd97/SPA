@@ -1062,9 +1062,6 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> 
             }
 
             newResults.emplace_back(move(toAdd));
-
-
-
         }
     }
 }
@@ -1102,7 +1099,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
         return handleNoRelRefOrPatternCase(move(selectCl));
     }
 
-
     /* Standard case 0: Evaluate the such-that clause first to get the statement numbers out from there. Then evaluate Pattern clauses */
 
     /* Final Results to Return */
@@ -1114,7 +1110,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
 
         /* TODO: @kohyida1997 current order of resolving such-that clauses is in order of their appearance. This needs to change in iteraton 2 and 3 */
         for (int i = 0; i < selectCl->suchThatClauses.size(); i++) {
-            //cout << "int i = " << i << endl;
             if (i == 0) {
                 handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
             }
@@ -1122,7 +1117,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
                 vector<shared_ptr<ResultTuple>> currSuchThatRes;
                 vector<shared_ptr<ResultTuple>> joinedRes;
                 joinedRes.reserve(suchThatReturnTuples.size());
-                string joinKeyV = "v"; /* TODO: @kohyida1997 Joining by "v" is HARDCODE, for testing purposes only. Need to remove! */
+                string joinKeyV = "v"; /* TODO: @kohyida1997 Joining by "v" is HARDCODED, for testing purposes only. Need to remove! */
                 handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
                 joinResultTuples(suchThatReturnTuples, currSuchThatRes, joinKeyV, joinedRes);
                 suchThatReturnTuples = move(joinedRes);
@@ -1139,7 +1134,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
         for (auto& cl : selectCl->patternClauses) handlePatternClause(selectCl, cl, patternReturnTuples);
 
         /* Get the first pattern clause (Iteration 1 only has ONE pattern clause) */
-        shared_ptr<PatternCl> patternCl = selectCl->patternClauses[0];
+        //shared_ptr<PatternCl> patternCl = selectCl->patternClauses[0];
     }
 
     /* STEP 3: If Needed, join SuchThat and PatternResults */
@@ -1180,7 +1175,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     vector<shared_ptr<ResultTuple>>& finalTuples = !selectCl->hasPatternClauses() ? suchThatReturnTuples : patternReturnTuples;
     
     if (!targetSynonymIsInClauses(selectCl)) {
-        return finalTuples.size() <= 0 ? res : handleNoRelRefOrPatternCase(move(selectCl));
+        return finalTuples.size() <= 0 ? move(res) : handleNoRelRefOrPatternCase(move(selectCl));
     }
 
     /* We use a set to help us get rid of duplicates. */
