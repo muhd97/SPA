@@ -1,5 +1,10 @@
 13 - Select p such that Uses(p, v) // Select Procedures that use variable
-procedure k;
-Select k such that Uses(k, v)
-yida1, yida2, yida3
+assign a; print p;
+Select v such that Uses(a, v) such that Uses(p, v)
+x
+25
+14 - Select p such that Uses(p, v) // Select Procedures that use variable
+assign a; call p;
+Select v such that Uses(a, v) such that Uses(p, v)
+x, z, y
 25

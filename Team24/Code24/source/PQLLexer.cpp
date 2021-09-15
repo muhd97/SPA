@@ -16,7 +16,7 @@ inline bool replace(string& str, const string& from, const string& to) {
 }
 
 inline void cleanString(string& program) {
-    replace(program, "such that", "such@that"); // @ not in grammar
+    while (replace(program, "such that", "such@that")); // @ not in grammar
 }
 
 vector<PQLToken> pqlLex(string& program) { // pass by ref

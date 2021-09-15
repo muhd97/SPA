@@ -357,7 +357,8 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     synonym = parseSynonym();
 
     while (!tokensAreEmpty()) {
-        if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::SUCH_THAT) {
+        if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::SUCH_THAT) { 
+        //if (peek().type == PQLTokenType::SUCH_THAT) { /* YIDA: Trying out multiple such that to try out joins */
             if (suchThatClauses.size() != 0) {
                 cout << "Duplicate such that clauses are not allowed." << endl;
                 break;
@@ -372,7 +373,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
             patternClauses.push_back(parsePatternCl());
         }
         else {
-            cout << "Unknown token: " + getPQLTokenLabel(peek()) << endl;
+            cout << "ParseSelectCl Unknown token: " + getPQLTokenLabel(peek()) << endl;
             break;
         }
     }
