@@ -621,6 +621,12 @@ public:
 
         for (auto& d : declarations) {
             for (auto syn : d->synonyms) {
+
+                /* Duplicate declaration is detected. This synonym was previously already encountered in a declaration, but is now encountered again! */
+                if (synonymToParentDeclarationMap.find(syn->getValue()) != synonymToParentDeclarationMap.end()) {
+                    throw std::invalid_argument("Error: Duplicate synonym detected in query!");
+                }
+
                 synonymToParentDeclarationMap[syn->getValue()] = d;
             }
         }
@@ -633,7 +639,7 @@ public:
 
     inline string getDesignEntityTypeBySynonym(string s) {
         if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end()) {
-            cout << "Warning: requested synonym of value [" << s << "] is NOT declared in this SelectCl. Null DesignEntityType is returned.\n";
+            throw "Warning: requested synonym of value [" + s + "] is NOT declared in this SelectCl. Null DesignEntityType is returned.\n";
             return "";
         }
 

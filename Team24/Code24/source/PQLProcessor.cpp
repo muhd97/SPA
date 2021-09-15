@@ -573,6 +573,8 @@ bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         shared_ptr<StmtRef>& stmtRef1 = followsCl->stmtRef1;
         shared_ptr<StmtRef>& stmtRef2 = followsCl->stmtRef2;
 
+        vector<shared_ptr<Result>> toReturn;
+
         /* Follows (1, ?) */
         if (stmtRef1->getStmtRefType() == StmtRefType::INTEGER) {
             
