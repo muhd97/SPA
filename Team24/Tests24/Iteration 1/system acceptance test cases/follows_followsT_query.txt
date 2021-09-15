@@ -4,96 +4,116 @@ Select s such that Follows(1, s)
 2
 5000
 1 - valid query Follows
-stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
-Select a such that Follows(s, a)
-2, 3, 6, 7, 11, 12
+stmt s;
+Select s such that Follows (s, 8)
+4
 5000
-2 - valid query Follows (syn, _)
+2 -  - valid query Follows
 assign a;
 Select a such that Follows(a, _)
 1, 2, 3, 5, 6, 10
 5000
-3 - valid query Follows (stmt, stmt)
+3 - valid query Follows
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select a such that Follows(s, a)
+2, 3, 6, 7, 11, 12
+5000
+4 - valid query Follows (syn, _)
+assign a;
+Select a such that Follows(a, _)
+1, 2, 3, 5, 6, 10
+5000
+5 - valid query Follows (stmt, stmt)
 stmt s1, s2;
 Select s2 such that Follows(s1, s2)
 2, 3, 4, 6, 7, 8, 11, 12
 5000
-4 - valid query Follows (read)
+6 - valid query Follows (read)
 read re;
 Select r such that Follows(re, _)
 none
 5000
-5 - valid query Follows
+7 - valid query Follows
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
 Select s such that Follows(7, s)
 none
 5000
-6 - valid query Follows
+8 - valid query Follows
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
 Select s such that Follows(s, 10) such that Follows(8, s)
 none
 5000
-7 - valid query Follows
+9 - valid query Follows
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
 Select s such that Follows(s, 26)
 none
 5000
-8 - valid query Follows
+10 - valid query Follows
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
 Select s such that Follows(s, 17)
 none
 5000
-9 - valid query Follows (_, 2)
+11 - valid query Follows (_, 2)
 stmt s1;
 Select s such that Follows(_, 2)
 none
 5000
-10 - invalid query Follows (var)
+12 - invalid query Follows (var)
 variable v;
 Select v such that Follows(v, _)
 none
 5000
-11 - invalid query Follows (constant)
+13 - invalid query Follows (constant)
 variable v; constant c;
 Select v such that Follows(v, 6)
 none
 5000
-12 - valid query Follows* (stmt)
+14 - valid query FollowsT 
+stmt s;
+Select s such that FollowsT (4, s)
+none
+5000
+15 - valid query FollowsT
+stmt s;
+Select s such that FollowsT (s, 8)
+none
+5000
+16 - valid query Follows* (stmt)
 stmt s;
 Select s such that Follows*(6, s)
 7
 5000
-13 - valid query Follows*
+17 - valid query Follows*
 stmt s1, s2; 
 Select s1 such that Follows*(s1, s2)
 1, 2, 3, 4, 5, 6, 8, 10
 5000
-14 - valid query Follows* (_)
+18 - valid query Follows* (_)
 stmt s;
 Select s such that Follows*(_, 1)
 none
 5000
-15 - valid query Follows*
+19 - valid query Follows*
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
 Select s such that Follows*(12, s)
 none
 5000
-16 - valid query Follows*
+20 - valid query Follows*
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
 Select s such that Follows*(12, s)
 none
 5000
-17 - valid query Follows*
+21 - valid query Follows*
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
 Select s such that Follows*(s, 17) such that Follows*(9, s)
 none
 5000
-18 - valid query Follows*
+22 - valid query Follows*
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
 Select w such that Follows(s, w) such that Follows*(w, pr)
 none
 5000
-19 - invalid query with Follows* Clause()
+23 - invalid query with Follows* Clause()
 variable v; stmt s;
 Select s such that Follows*(v, s)
 none

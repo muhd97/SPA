@@ -1,0 +1,16 @@
+procedure computeCentroid{
+1.count = 0;
+2.cenX= 0;
+3.cenY= 0;
+4.while ((x != 0) && (y != 0)) {
+5.count = count + 1;
+6.cenX= cenX+ x;
+7.cenY= cenY+ y;
+}
+8.if (count == 0) then {
+9.flag = 1;
+} else {
+10.cenX= cenX/ count;
+11.cenY= cenY/ count;
+}
+12.normSq = cenX* cenX+ cenY* cenY;
