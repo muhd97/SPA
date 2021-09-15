@@ -288,10 +288,11 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
             for (auto& s : statementsFollowedByStmtNo) {
                 toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
             }
+            break;
         }
 
-        /* Follows (syn, ?) or Follows (_, ?) */  
-        else if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM || stmtRef1->getStmtRefType() == StmtRefType::UNDERSCORE) {
+        /* Follows (syn, ?) or Follows (_, ?) -> Select ?*/  
+        else if ((stmtRef1->getStmtRefType() == StmtRefType::SYNONYM || stmtRef1->getStmtRefType() == StmtRefType::UNDERSCORE) && singleRefSynonymMatchesTargetSynonym(stmtRef2, selectCl)) {
             
             shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[stmtRef1->getStringVal()];
             
@@ -306,6 +307,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                 for (auto& s : statementsFollowedBy) {
                     toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
                 } 
+                break;
         } 
         
         /* Follows (?, 1) */
@@ -316,10 +318,11 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
             for (auto& s : statementsFollowedByStmtNo) {
                 toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
             }
+            break;
         }
 
-        /* Follows (?, syn) or Follows (?, _) */
-        else if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM || stmtRef2->getStmtRefType() == StmtRefType::UNDERSCORE) {
+        /* Follows (?, syn) or Follows (?, _) -> Select ? */
+        else if ((stmtRef2->getStmtRefType() == StmtRefType::SYNONYM || stmtRef2->getStmtRefType() == StmtRefType::UNDERSCORE) && singleRefSynonymMatchesTargetSynonym(stmtRef1, selectCl)) {
 
             shared_ptr<Declaration>& parentDecl2 = selectCl->synonymToParentDeclarationMap[stmtRef2->getStringVal()];
 
@@ -334,6 +337,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
             for (auto& s : statementsFollowedBy) {
                 toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
             }
+            break;
         }
 
         /*use get before if the thing u wanna check is on left e.g. Follows(s,1)
@@ -405,9 +409,9 @@ read | print | while | if | assign
         //        }
         //    }
         //}
-        else {}
-
-        break;
+        else {
+            break;
+        }
     }
     case RelRefType::FOLLOWS_T:
     {
