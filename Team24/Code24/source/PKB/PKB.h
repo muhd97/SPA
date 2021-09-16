@@ -62,18 +62,21 @@ public:
 	unordered_map<string, PKBStatement::SharedPtr> procedureNameToProcedureMap;
 
 	// statement number, starting from index 1
-	PKBStatement::SharedPtr getStatement(int stmtNumber) {
-		if (stmtNumber >= (int)mStatements[PKBDesignEntity::AllExceptProcedure].size()) {
-			throw std::invalid_argument("Requested statement number higher than max number of statements");
+	// puts result in stmt and returns true if query is valid
+	// else, returns false
+	bool getStatement(int stmtNumber, PKBStatement::SharedPtr & stmt) {
+		if (stmtNumber < 1 || stmtNumber > (int)mStatements[PKBDesignEntity::AllExceptProcedure].size()) {
+			cout << "getStatement(int): FATAL: INVALID STATEMENT NUMBER QUERIED";
+			return false;
 		}
 		// get the stmt from list of all statements
 		/* YIDA Note: vector<> of statements is 0-based, stmtNumber is 1-based. Need to substract 1. */
 		int targetIndexInMStatementsVector = stmtNumber - 1;
-		PKBStatement::SharedPtr s = mStatements[PKBDesignEntity::AllExceptProcedure][targetIndexInMStatementsVector];
+		stmt = mStatements[PKBDesignEntity::AllExceptProcedure][targetIndexInMStatementsVector];
 
-		cout << "getStatement(int), STMT NUMBER EXTRCTED = " << s->getIndex() << endl;
-		assert(s->getIndex() == stmtNumber);
-		return s;
+		cout << "getStatement(int), STMT NUMBER EXTRCTED = " << stmt->getIndex() << endl;
+		assert(stmt->getIndex() == stmtNumber);
+		return true;
 	}
 
 	// note: position of statement in vector does NOT correspond to statement index except for PKBDesignEntity::AllExceptProcedure
