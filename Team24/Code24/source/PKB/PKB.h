@@ -7,6 +7,7 @@
 #include "PKBDesignEntity.h"
 #include "PKBStatement.h"
 #include "../SimpleAST.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -76,8 +77,6 @@ public:
 		/* YIDA Note: vector<> of statements is 0-based, stmtNumber is 1-based. Need to substract 1. */
 		int targetIndexInMStatementsVector = stmtNumber - 1;
 		stmt = mStatements[PKBDesignEntity::AllExceptProcedure][targetIndexInMStatementsVector];
-
-		cout << "getStatement(int), STMT NUMBER EXTRCTED = " << stmt->getIndex() << endl;
 		cout << "getStatement(int), STMT = " << stmtNumber << endl;
 
 		assert(stmt->getIndex() == stmtNumber);
@@ -155,8 +154,24 @@ public:
 		}
 	}
 
+	bool getCachedSet(Relation rel, PKBDesignEntity a, PKBDesignEntity b, set<pair<int, int>>& res) {
+		try {
+			//todo @nicholas: check if this is desired behavior
+			res = cacheSet.at(rel).at(a).at(b);
+			return true;
+		}
+		catch (std::out_of_range) {
+			// result does not exist in the map, it is not cached
+			return false;
+		}
+	}
+
 	void insertintoCache(Relation rel, PKBDesignEntity a, PKBDesignEntity b, vector<int> &res) {
 		cache[rel][a][b] = res;
+	}
+
+	void insertintoCacheSet(Relation rel, PKBDesignEntity a, PKBDesignEntity b, set<pair<int, int>>& res) {
+		cacheSet[rel][a][b] = res;
 	}
 
 	const unordered_map<string, PKBVariable::SharedPtr>& getAllVariablesMap() const;
@@ -168,6 +183,9 @@ protected:
 	map<Relation, 
 		map<PKBDesignEntity, 
 		map<PKBDesignEntity, vector<int>>>> cache;
+	map<Relation,
+		map<PKBDesignEntity,
+		map<PKBDesignEntity, set<pair<int, int>>>>> cacheSet;
 
 	void addStatement(PKBStatement::SharedPtr& statement, PKBDesignEntity designEntity);
 	inline void addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr& variable);

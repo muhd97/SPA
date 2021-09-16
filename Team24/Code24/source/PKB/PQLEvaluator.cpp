@@ -26,42 +26,39 @@ set<int> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
 set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
 	set<pair<int, int>> res;
-	//vector<int> temp;
 
-	//// if parentType is none of the container types, there are no such children
-	//if (!isContainerType(parentType)) {
-	//	return res;
-	//}
+	// if parentType is none of the container types, there are no such children
+	if (!isContainerType(parentType)) {
+		return res;
+	}
 
-	//// check if res is cached, if so return results
-	//if (mpPKB->getCached(PKB::Relation::Parent, parentType, childType, temp)) {
-	//	res.insert(temp.begin(), temp.end());
-	//	return res;
-	//}
+	// check if res is cached, if so return results
+	if (mpPKB->getCachedSet(PKB::Relation::Parent, parentType, childType, res)) {
+		return res;
+	}
 
-	//// if not cached, we find the res manually and insert it into the cache
-	//vector<PKBStatement::SharedPtr> parentStmts; 
-	//if (parentType == PKBDesignEntity::AllExceptProcedure) {
-	//	addParentStmts(parentStmts);
-	//}
-	//else {
-	//	parentStmts = mpPKB->getStatements(parentType);
-	//}
-	//
-	//for (auto& stmt : parentStmts) {
-	//	vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
-	//	// if this statement's container group contains at least one child of required type, add statement to our results
-	//	for (auto& grp : grps) {
-	//		if (!grp->getMembers(childType).empty()) {
-	//			res.insert(stmt->getIndex());
-	//			break; // this should break out of the inner loop over child groups
-	//		}
-	//	}
-	//}
-	//
-	//// insert into cache for future use
-	//temp.insert(temp.end(), res.begin(), res.end());
-	//mpPKB->insertintoCache(PKB::Relation::Parent, parentType, childType, temp);
+	// if not cached, we find the res manually and insert it into the cache
+	vector<PKBStatement::SharedPtr> parentStmts; 
+	if (parentType == PKBDesignEntity::AllExceptProcedure) {
+		addParentStmts(parentStmts);
+	}
+	else {
+		parentStmts = mpPKB->getStatements(parentType);
+	}
+	
+	for (auto& stmt : parentStmts) {
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		// if this statement's container group contains at least one child of required type, add statement to our results
+		for (auto& grp : grps) {
+			if (!grp->getMembers(childType).empty()) {
+				res.insert(make_pair(stmt->getIndex(), stmt->getIndex()));
+				break; // this should break out of the inner loop over child groups
+			}
+		}
+	}
+	
+	// insert into cache for future use
+	mpPKB->insertintoCacheSet(PKB::Relation::Parent, parentType, childType, res);
 	return res;
 }
 
@@ -493,11 +490,9 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 
 bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, PKBStatement::SharedPtr& result) {
 // find the statement before in the stmt's group
-	cout << "AFTER: " << statementAfter->getIndex() << endl;
 	PKBGroup::SharedPtr grp = statementAfter->getGroup();
 	vector<int>& members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
 	for (int i = 0; i < members.size(); i++) {
-		cout << "member: " << members[i] << endl;
 		if (statementAfter->getIndex() == members[i]) {
 			if (i == 0) {
 				return false;
@@ -510,16 +505,6 @@ bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, P
 		}
 	}
 	return false;
-
-
-	//for (auto& member = members.begin(); member < members.end(); member++) {
-	//	if (statementAfter->getIndex() == *member && member != members.begin()) {
-	//		member--;
-	//		res = mpPKB->getStatement(*member);
-	//		return true;
-	//	}
-	//}
-	//return false;
 }
 
 bool PQLEvaluator::getStatementAfter(PKBStatement::SharedPtr& statementBefore, PKBStatement::SharedPtr& result) {
@@ -680,9 +665,6 @@ vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity
 	vector<PKBStatement::SharedPtr> afterStatements = mpPKB->getStatements(afterType);
 	// keeps track of the furthest statement number seen, so we dont double add users seen b4
 	set<int> tempRes;
-	for (auto& afterStatement : afterStatements) {
-		cout << afterStatement->getIndex();
-	}
 	for (auto& afterStatement : afterStatements) {
 		PKBGroup::SharedPtr grp = afterStatement->getGroup();
 		// get 'before' users of the desired type in the same group as the after statement
