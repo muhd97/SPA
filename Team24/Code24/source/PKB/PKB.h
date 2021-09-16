@@ -118,6 +118,9 @@ public:
 	}
 
 	set<PKBStatement::SharedPtr> getAllModifyingStmts(PKBDesignEntity pkbDe) {
+		if (pkbDe == PKBDesignEntity::AllExceptProcedure) {
+			return getAllModifyingStmts();
+		}
 		return designEntityToStatementsThatModifyVarsMap[pkbDe];
 	}
 
