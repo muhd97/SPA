@@ -544,17 +544,17 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 //        }
     case RelRefType::FOLLOWS_T:
     {
-        
-        shared_ptr<Follows> followsCl = static_pointer_cast<Follows>(suchThatCl->relRef);
 
-        shared_ptr<StmtRef>& stmtRef1 = followsCl->stmtRef1;
-        shared_ptr<StmtRef>& stmtRef2 = followsCl->stmtRef2;
+        shared_ptr<FollowsT> followstCl = static_pointer_cast<FollowsT>(suchThatCl->relRef);
+
+        shared_ptr<StmtRef>& stmtRef1 = followstCl->stmtRef1;
+        shared_ptr<StmtRef>& stmtRef2 = followstCl->stmtRef2;
 
         const string& leftSynonymKey = stmtRef1->getStringVal();
         const string& rightSynonymKey = stmtRef2->getStringVal();
 
 
-        /* Follows (1, ?) */
+        /* FollowsT (1, ?) */
         if (stmtRef1->getStmtRefType() == StmtRefType::INTEGER) {
 
 
@@ -564,9 +564,9 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
             if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
 
 
-                /* Follows (1, syn), syn is NOT a variable */
+                /* FollowsT (1, syn), syn is NOT a variable */
                 //if (selectCl->getDesignEntityTypeBySynonym(stmtRef2->getStringVal()) != VARIABLE) {
-                //    throw "TODO: Handle error case. Follows(1, p), but p is not a variable delcaration.\n";
+                //    throw "TODO: Handle error case. FollowsT(1, p), but p is not a variable delcaration.\n";
                 //}
 
                 for (auto& s : statementsFollowedByStmtNo) {
@@ -585,27 +585,27 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                 //if (evaluator->checkFollowed(stmtRef1->getIntVal())) {
                     /* Create the result tuple */
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                string ident = followsCl->stmtRef2->getStringVal();
+                string ident = followstCl->stmtRef2->getStringVal();
                 tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(stmtRef1->getIntVal()));
                 toReturn.emplace_back(tupleToAdd);
                 //}
             }
         }
 
-        /* Follows (syn, ?) */
+        /* FollowsT (syn, ?) */
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) {
 
-            /* Follows (syn, v) OR Follows(syn, AllExceptProcedure) */
+            /* FollowsT (syn, v) OR FollowsT(syn, AllExceptProcedure) */
 
             assert(stmtRef1->getStmtRefType() == StmtRefType::SYNONYM);
 
-            /* Follows (syn, v) */
+            /* FollowsT (syn, v) */
             if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
 
                 /* TODO: CHECK IF RIGHT SIDE IS NOT VARIABLE, throw error */
 
 
-                /* Follows (syn, v) -> syn is NOT procedure. RETURN 1-TUPLE */
+                /* FollowsT (syn, v) -> syn is NOT procedure. RETURN 1-TUPLE */
                 if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) != DesignEntity::PROCEDURE) {
                     shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[stmtRef1->getStringVal()];
                     PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
@@ -625,7 +625,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                     }
                 }
 
-                /* Follows (syn, v) -> syn is procedure. RETURN 1-TUPLE */
+                /* FollowsT (syn, v) -> syn is procedure. RETURN 1-TUPLE */
                 if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) == DesignEntity::PROCEDURE) {
                     shared_ptr<Declaration>& parentDecl2 = selectCl->synonymToParentDeclarationMap[stmtRef2->getStringVal()];
                     PKBDesignEntity pkbDe2 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl2->getDesignEntity());
@@ -642,10 +642,10 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                 }
             }
 
-            /* Follows (syn, _) */
+            /* FollowsT (syn, _) */
             if (stmtRef2->getStmtRefType() == StmtRefType::UNDERSCORE) {
 
-                /* Follows (syn, _) -> syn is NOT procedure. RETURN 1-TUPLE */
+                /* FollowsT (syn, _) -> syn is NOT procedure. RETURN 1-TUPLE */
                 if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) != DesignEntity::PROCEDURE) {
                     shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[stmtRef1->getStringVal()];
                     PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
@@ -662,7 +662,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                     }
                 }
 
-                /* Follows (syn, _) -> syn is procedure. RETURN 1-TUPLES */
+                /* FollowsT (syn, _) -> syn is procedure. RETURN 1-TUPLES */
                 if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) == DesignEntity::PROCEDURE) {
                     shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[stmtRef1->getStringVal()];
                     PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());

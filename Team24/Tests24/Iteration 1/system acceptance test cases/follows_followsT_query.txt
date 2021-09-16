@@ -78,43 +78,43 @@ stmt s;
 Select s such that FollowsT (s, 8)
 none
 5000
-16 - valid query Follows* (stmt)
+16 - valid query FollowsT (stmt)
 stmt s;
-Select s such that Follows*(6, s)
+Select s such that FollowsT(6, s)
 7
 5000
-17 - valid query Follows*
+17 - valid query FollowsT
 stmt s1, s2; 
-Select s1 such that Follows*(s1, s2)
+Select s1 such that FollowsT(s1, s2)
 1, 2, 3, 4, 5, 6, 8, 10
 5000
-18 - valid query Follows* (_)
+18 - valid query FollowsT (_)
 stmt s;
-Select s such that Follows*(_, 1)
+Select s such that FollowsT(_, 1)
 none
 5000
-19 - valid query Follows*
+19 - valid query FollowsT
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
-Select s such that Follows*(12, s)
+Select s such that FollowsT(12, s)
 none
 5000
-20 - valid query Follows*
+20 - valid query FollowsT
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
-Select s such that Follows*(12, s)
+Select s such that FollowsT(12, s)
 none
 5000
-21 - valid query Follows*
+21 - valid query FollowsT
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
-Select s such that Follows*(s, 17) such that Follows*(9, s)
+Select s such that FollowsT(s, 17) such that FollowsT(9, s)
 none
 5000
-22 - valid query Follows*
+22 - valid query FollowsT
 stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
-Select w such that Follows(s, w) such that Follows*(w, pr)
+Select w such that Follows(s, w) such that FollowsT(w, pr)
 none
 5000
-23 - invalid query with Follows* Clause()
+23 - invalid query with FollowsT Clause()
 variable v; stmt s;
-Select s such that Follows*(v, s)
+Select s such that FollowsT(v, s)
 none
 5000
