@@ -525,6 +525,7 @@ public:
 
 shared_ptr<Program> parseSimpleProgram(vector<SimpleToken> tokens) {
     shared_ptr<SimpleParser> parser = make_shared<SimpleParser>(tokens);
+    statementCounter = 1; // reset statement counter
     return parser->parseProgram();
 }
 

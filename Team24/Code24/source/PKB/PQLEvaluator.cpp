@@ -490,7 +490,7 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity afterType)
 vector<int> PQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
 {
 	vector<int> res;
-	cout << "getAfter(PKBDe, int) \n";
+	//cout << "getAfter(PKBDe, int) \n";
 
 	PKBStatement::SharedPtr stmt;
 	if (!mpPKB->getStatement(beforeIndex, stmt)) {
@@ -498,18 +498,18 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
 	}
 	PKBStatement::SharedPtr stmtAfter;
 
-	cout << "getAfter(PKBDE, int) After extracting stmt\n";
+	//cout << "getAfter(PKBDE, int) After extracting stmt\n";
 	if (!getStatementAfter(stmt, stmtAfter)) {
 		return res;
 	}
-	cout << "getAfter(PKBDE, int) After first if\n";
+	//cout << "getAfter(PKBDE, int) After first if\n";
 	// if pass the type check
 	if (afterType == PKBDesignEntity::AllExceptProcedure || stmtAfter->getType() == afterType) {
 		// and pass the same nesting level check
 		if (stmt->getGroup() == stmtAfter->getGroup()) {
 			res.emplace_back(stmtAfter->getIndex());
 		}
-		cout << "Fail\n";
+		//cout << "Fail\n";
 	}
 	return res;
 }

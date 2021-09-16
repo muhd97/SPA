@@ -13,6 +13,7 @@
 #include <string>
 #include <iostream>
 #include <list>
+#include <algorithm>
 
 // include your other headers here
 #include "../AutoTester/source/AbstractWrapper.h"
@@ -25,12 +26,15 @@ public:
     PKBEvaluatorTester();
 
     // method for parsing the SIMPLE source
-    void runEvaluatorTests();
+    void runTest1();
+    void runTest2();
 
 private:
-    void runFollowsTests();
-    void runParentTests();
-    void printResult(int testIndex, vector<int> res);
+    void runFollowsTests1();
+    void runParentTests1();
+    void runFollowsTests2();
+    void runParentTests2();
+    void checkResult(int testIndex, vector<int> res, vector<int> expected);
     void printResult(int testIndex, vector<string> res);
     shared_ptr<PKB> pkb = nullptr;
     PQLEvaluator::SharedPtr evaluator;

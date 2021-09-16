@@ -7,11 +7,9 @@ PKBEvaluatorTester::PKBEvaluatorTester() {
     // create any objects here as instance variables of this class
     // as well as any initialization required for your spa program
     pkb = make_shared<PKB>();
-    evaluator = PQLEvaluator::create(pkb);
 }
 
-// method for parsing the SIMPLE source
-void PKBEvaluatorTester::runEvaluatorTests() {
+void PKBEvaluatorTester::runTest1() {
 
     string program =  "procedure computeCentroid{"
                                 "   count = 0;"
@@ -31,7 +29,37 @@ void PKBEvaluatorTester::runEvaluatorTests() {
                                 "   }"
                                 "   normSq = cenX * cenX + cenY * cenY;"
                                 "}";
-    string longProgram = " procedure Example {\
+
+    vector<SimpleToken> tokens = simpleLex(program);
+
+    // for debugging
+    printSimpleTokens(tokens);
+
+    shared_ptr<Program> root = parseSimpleProgram(tokens);
+    if (root == NULL) {
+        cout << "Failed to parse program!";
+    }
+    else {
+        // for debugging
+        cout << root->format();
+    }
+
+    // BUILD PKB HERE
+    cout << "\n==== Building PKB ====\n";
+    this->pkb->initialise();
+    this->pkb->extractDesigns(root);
+    cout << "\n==== PKB has been populated. ====\n";
+    evaluator = PQLEvaluator::create(pkb);
+    cout << "\n==== Created PQLEvaluator using PKB ====\n";
+
+    cout << "\n==== Running PQL Tests ====\n";
+    runFollowsTests1();
+    runParentTests1();
+    cout << "\n==== End PQL Tests ====\n";
+}
+
+void PKBEvaluatorTester::runTest2() {
+    string program = " procedure Example {\
                                                     x = 2;\
                                                     z = 3;\
                                                     i = 5;\
@@ -72,11 +100,10 @@ void PKBEvaluatorTester::runEvaluatorTests() {
                                                 }";
 
 
-    vector<SimpleToken> tokens = simpleLex(longProgram);
+    vector<SimpleToken> tokens = simpleLex(program);
 
     // for debugging
     printSimpleTokens(tokens);
-
     shared_ptr<Program> root = parseSimpleProgram(tokens);
     if (root == NULL) {
         cout << "Failed to parse program!";
@@ -91,20 +118,32 @@ void PKBEvaluatorTester::runEvaluatorTests() {
     this->pkb->initialise();
     this->pkb->extractDesigns(root);
     cout << "\n==== PKB has been populated. ====\n";
-
+    evaluator = PQLEvaluator::create(pkb);
     cout << "\n==== Created PQLEvaluator using PKB ====\n";
 
     cout << "\n==== Running PQL Tests ====\n";
-    runFollowsTests();
-    runParentTests();
+    runFollowsTests2();
+    runParentTests2();
     cout << "\n==== End PQL Tests ====\n";
 }
 
-void PKBEvaluatorTester::printResult(int testIndex, vector<int> res) {
-    cout << "RESULT " << testIndex << ": ";
-    for (int i = 0; i < res.size(); i++)
-        std::cout << res.at(i) << ' ';
-    cout << "\n";
+void PKBEvaluatorTester::checkResult(int testIndex, vector<int> res, vector<int> expected) {
+    std::sort(res.begin(), res.end());
+    if (res == expected) {
+        cout << "RESULT " << testIndex << ": OK \n";
+    }
+    else {
+        cout << "RESULT " << testIndex << ": FAIL \n";
+        cout << "Expected: ";
+        for (int i = 0; i < expected.size(); i++)
+            std::cout << expected.at(i) << ' ';
+        cout << "\n";
+
+        cout << "Actual: ";
+        for (int i = 0; i < res.size(); i++)
+            std::cout << res.at(i) << ' ';
+        cout << "\n";
+    }
 }
 
 void PKBEvaluatorTester::printResult(int testIndex, vector<string> res) {
@@ -113,83 +152,151 @@ void PKBEvaluatorTester::printResult(int testIndex, vector<string> res) {
         std::cout << res.at(i) << ' ';
 }
 
-void PKBEvaluatorTester::runFollowsTests() {
+void PKBEvaluatorTester::runFollowsTests1() {
     //0
     vector<int> res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, 1);
-    printResult(0, res);
+    vector<int> expected = {2};
+    checkResult(0, res, expected);
     //1
     res = evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, 8);
-    printResult(1, res);
+    expected = { 4 };
+    checkResult(1, res, expected);
     //2
     res = evaluator->getBefore(PKBDesignEntity::Assign, PKBDesignEntity::AllExceptProcedure);
-    printResult(2, res);
+    expected = { 1, 2, 3, 5, 6, 10 };
+    checkResult(2, res, expected);
     //3
     res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, PKBDesignEntity::Assign);
-    printResult(3, res);
+    expected = { 2, 3, 6, 7, 11, 12 };
+    checkResult(3, res, expected);
     //4
     res = evaluator->getBefore(PKBDesignEntity::Assign, PKBDesignEntity::AllExceptProcedure);
-    printResult(4, res);
+    expected = { 1, 2, 3, 5, 6, 10 };
+    checkResult(4, res, expected);
     //5
     res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, PKBDesignEntity::AllExceptProcedure);
-    printResult(5, res);
+    expected = { 2, 3, 4, 6, 7, 8, 11, 12 };
+    checkResult(5, res, expected);
     //6
     res = evaluator->getBefore(PKBDesignEntity::Read, PKBDesignEntity::AllExceptProcedure);
-    printResult(6, res);
+    expected = { }; 
+    checkResult(6, res, expected);
     //7
     res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, 7);
-    printResult(7, res);
+    expected = { }; 
+    checkResult(7, res, expected);
     //8
     res = evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, 10);
-    printResult(8, res);
+    expected = { }; 
+    checkResult(8, res, expected);
     res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, 8);
-    printResult(8, res);
+    expected = { 12 }; 
+    checkResult(8, res, expected);
     //9
     res = evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, 26);
-    printResult(9, res);
+    expected = { }; 
+    checkResult(9, res, expected);
     //10
     res = evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, 17);
-    printResult(10, res);
+    expected = { }; 
+    checkResult(10, res, expected);
 
     //14
     res = evaluator->getAfterT(PKBDesignEntity::AllExceptProcedure, 4);
-    printResult(14, res);
+    expected = { 8, 12 }; 
+    checkResult(14, res, expected);
     //15
     res = evaluator->getBeforeT(PKBDesignEntity::AllExceptProcedure, 8);
-    printResult(15, res);
+    expected = { 1, 2, 3, 4 };
+    checkResult(15, res, expected);
     //16
     res = evaluator->getAfterT(PKBDesignEntity::AllExceptProcedure, 6);
-    printResult(16, res);
+    expected = { 7 };
+    checkResult(16, res, expected);
     //17
     res = evaluator->getBeforeT(PKBDesignEntity::AllExceptProcedure, PKBDesignEntity::AllExceptProcedure);
-    printResult(17, res);
+    expected = { 1, 2, 3, 4, 5, 6, 8, 10 };
+    checkResult(17, res, expected);
     res = evaluator->getBeforeT(PKBDesignEntity::AllExceptProcedure);
-    printResult(17, res);
+    expected = { 1, 2, 3, 4, 5, 6, 8, 10 };
+    checkResult(17, res, expected);
     //18
     res = evaluator->getBeforeT(PKBDesignEntity::AllExceptProcedure, 1);
-    printResult(18, res);
+    expected = { }; 
+    checkResult(18, res, expected);
     //19
     res = evaluator->getAfterT(PKBDesignEntity::AllExceptProcedure, 12);
-    printResult(19, res);
+    expected = { }; 
+    checkResult(19, res, expected);
     //20
     res = evaluator->getAfterT(PKBDesignEntity::Assign, 12);
-    printResult(20, res);
+    expected = { }; 
+    checkResult(20, res, expected);
     //21
     res = evaluator->getBeforeT(PKBDesignEntity::AllExceptProcedure, 17);
-    printResult(21, res);
+    expected = { }; 
+    checkResult(21, res, expected);
     res = evaluator->getAfterT(PKBDesignEntity::AllExceptProcedure, 9);
-    printResult(21, res);
+    expected = { }; 
+    checkResult(21, res, expected);
     //22
     res = evaluator->getAfterT(PKBDesignEntity::AllExceptProcedure, PKBDesignEntity::While);
-    printResult(22, res);
+    expected = { 4 }; 
+    checkResult(22, res, expected);
     res = evaluator->getBeforeT(PKBDesignEntity::While, PKBDesignEntity::Print);
-    printResult(22, res);
+    expected = { }; 
+    checkResult(22, res, expected);
 }
 
-void PKBEvaluatorTester::runParentTests() {
+void PKBEvaluatorTester::runParentTests1() {
+
+}
+
+void PKBEvaluatorTester::runFollowsTests2() {
+    int testCounter = 0;
+    vector<int> res;
+    vector<int> expected;
+    vector<vector<int>> expectedArray = {
+        { },
+        { 1 },
+        { 2 },
+        { 3 },
+        { },
+        { 5 },
+        { },
+        { },
+        { 6 },
+        { 9 },
+        { 10 },
+        { 4 },
+        { },
+        { },
+        { },
+        { 15 },
+        { 16 },
+        { 14 },
+        { 18 },
+        { },
+        { 13 },
+        { },
+        { },
+        { },
+    };
+    cout << pkb->mStatements.size() << endl;
+    for (auto i = 0; i < pkb->mStatements[PKBDesignEntity::AllExceptProcedure].size(); i++) {
+        res = evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, i+1);
+        expected = expectedArray[i];
+        checkResult(testCounter, res, expected);
+        testCounter++;
+    }
+}
+
+void PKBEvaluatorTester::runParentTests2() {
 
 }
 
 int main() {
     PKBEvaluatorTester tester = PKBEvaluatorTester();
-    tester.runEvaluatorTests();
+    tester.runTest1();
+    tester.runTest2();
 }

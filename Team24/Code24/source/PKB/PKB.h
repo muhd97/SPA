@@ -70,14 +70,14 @@ public:
 	// else, returns false
 	bool getStatement(int stmtNumber, PKBStatement::SharedPtr & stmt) {
 		if (stmtNumber < 1 || stmtNumber > (int)mStatements[PKBDesignEntity::AllExceptProcedure].size()) {
-			cout << "getStatement(int): FATAL: INVALID STATEMENT NUMBER QUERIED";
+			cout << "getStatement(int): FATAL: INVALID STATEMENT NUMBER QUERIED\n";
 			return false;
 		}
 		// get the stmt from list of all statements
 		/* YIDA Note: vector<> of statements is 0-based, stmtNumber is 1-based. Need to substract 1. */
 		int targetIndexInMStatementsVector = stmtNumber - 1;
 		stmt = mStatements[PKBDesignEntity::AllExceptProcedure][targetIndexInMStatementsVector];
-		cout << "getStatement(int), STMT = " << stmtNumber << endl;
+		//cout << "getStatement(int), STMT = " << stmtNumber << endl;
 
 		assert(stmt->getIndex() == stmtNumber);
 		return true;
