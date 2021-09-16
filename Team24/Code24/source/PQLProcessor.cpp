@@ -291,10 +291,22 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
             shared_ptr<StmtRef>& stmtRef1 = followsCl->stmtRef1;
             assert(stmtRef1->getStmtRefType() == StmtRefType::INTEGER);
-            vector<int> statementsFollowedByStmtNo = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, stmtRef1->getIntVal());
+
             shared_ptr<Synonym> targetSynonym = selectCl->targetSynonym;
             if (followsCl->stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
 
+                cout << "1 HELLO ???????????????\n";
+
+                shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[followsCl->stmtRef2->getStringVal()];
+                cout << "oh shit \n";
+
+                PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
+
+                cout << "TYPE: " << parentDecl->getDesignEntity()->getEntityTypeName() << endl;
+
+                cout << "2 HELLO?????????????\n";
+
+                vector<int> statementsFollowedByStmtNo = evaluator->getAfter(pkbDe, stmtRef1->getIntVal());
                 shared_ptr<StmtRef>& stmtRef2 = followsCl->stmtRef2;
                 const string& rightSynonymKey = stmtRef2->getStringVal();
 
@@ -876,6 +888,8 @@ bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     {
 
 
+        cout << "FOLLOWS!!!!!!!!!!!\n";
+
         shared_ptr<Follows> followsCl = static_pointer_cast<Follows>(suchThatCl->relRef);
         shared_ptr<StmtRef>& stmtRef1 = followsCl->stmtRef1;
         shared_ptr<StmtRef>& stmtRef2 = followsCl->stmtRef2;
@@ -885,7 +899,13 @@ bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         /* Follows (1, ?) */
         if (stmtRef1->getStmtRefType() == StmtRefType::INTEGER) {
 
-            vector<int> statementsFollowedByStmtNo = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, stmtRef1->getIntVal());
+            shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef1->getStringVal()];
+            PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
+            
+            cout << "TYPE: " << parentDecl->getDesignEntity() << endl;
+            if (pkbDe == PKBDesignEntity::Assign) cout << "HFDSNJDSNJKFSD\n";
+
+            vector<int> statementsFollowedByStmtNo = evaluator->getAfter(pkbDe, stmtRef1->getIntVal());
 
             for (auto& s : statementsFollowedByStmtNo) {
                 toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
