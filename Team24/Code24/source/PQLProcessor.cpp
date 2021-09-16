@@ -773,10 +773,14 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared
 
         /* Uses (syn, v) -> syn is NOT procedure. RETURN 2-TUPLES */
         if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) != DesignEntity::PROCEDURE) {
+
             shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
             PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
+            
+
             for (auto& s : evaluator->mpPKB->getAllUseStmts(pkbDe)) {
+
                 for (auto& v : s->getUsedVariables()) {
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
