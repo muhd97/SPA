@@ -31,17 +31,17 @@ public:
 	set<PKBVariable::SharedPtr> mUses;
 	set<PKBVariable::SharedPtr> mModifies;
 
-	std::shared_ptr<PKBGroup> getGroup() {
+	PKBGroup::SharedPtr getGroup() {
 		return mBelongsTo;
 	}
 
 	// only for If, While, Procedure statements that are the parent of their group
 	// if statement does not have a container group, will return empty vector
-	vector<std::shared_ptr<PKBGroup>> getContainerGroups() {
+	vector<PKBGroup::SharedPtr> getContainerGroups() {
 		return mContainerGroup;
 	}
 
-	std::set<std::shared_ptr<PKBVariable>> getUsedVariables() {
+	set<PKBVariable::SharedPtr> getUsedVariables() {
 		//cout << mName << " proc | " << "GETUSEDVARIABLES: size = " << mUses.size() << endl;
 		return mUses;
 	}
@@ -50,7 +50,7 @@ public:
 		return mUses.size();
 	}
 
-	std::set<std::shared_ptr<PKBVariable>> getModifiedVariables() {
+	set<PKBVariable::SharedPtr> getModifiedVariables() {
 		return mModifies;
 	}
 
@@ -70,7 +70,7 @@ public:
 		mContainerGroup.emplace_back(containerGroup);
 	}
 
-	void addUsedVariable(PKBVariable::SharedPtr variable) {
+	void addUsedVariable(PKBVariable::SharedPtr& variable) {
 		mUses.insert(variable);
 	}
 
@@ -78,7 +78,7 @@ public:
 		mModifies.insert(variable);
 	}
 
-	void addUsedVariables(set<PKBVariable::SharedPtr> variables) {
+	void addUsedVariables(set<PKBVariable::SharedPtr>& variables) {
 		mUses.insert(variables.begin(), variables.end());
 	}
 

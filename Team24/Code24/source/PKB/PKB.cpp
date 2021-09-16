@@ -202,14 +202,10 @@ PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement>& statement
 	PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
 	shared_ptr<IfStatement> ifStatement = static_pointer_cast<IfStatement>(statement);
 
+	
 	// 2. USE - process the variables mentioned by conditional statement
 	// get all identifiers (string) referenced in the expression
 	vector<string> identifiers = getIdentifiers(ifStatement->getConditional());
-
-	if (identifiers.size() > 0) {
-		mAllUseStmts.insert(res);
-		designEntityToStatementsThatUseVarsMap[PKBDesignEntity::If].insert(res);
-	}
 
 	for (auto& identifier : identifiers) {
 		// for each string, we get the variable
@@ -251,9 +247,20 @@ PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement>& statement
 		alternativeGroup->addModifiedVariables(child->getModifiedVariables());
 	}
 	
+
+	set<PKBVariable::SharedPtr>& consequentGroupVars = consequentGroup->getUsedVariables();
+	set<PKBVariable::SharedPtr>& altGroupVars = alternativeGroup->getUsedVariables();
+
 	// now the original statement inherits from the group
-	res->addUsedVariables(consequentGroup->getUsedVariables());
-	res->addUsedVariables(alternativeGroup->getUsedVariables());
+	res->addUsedVariables(consequentGroupVars);
+	res->addUsedVariables(altGroupVars);
+
+	if (identifiers.size() > 0 || consequentGroupVars.size() > 0 || altGroupVars.size() > 0) {
+		mAllUseStmts.insert(res);
+		designEntityToStatementsThatUseVarsMap[PKBDesignEntity::If].insert(res);
+	}
+
+
 	addUsedVariable(PKBDesignEntity::If, consequentGroup->getUsedVariables());
 	addUsedVariable(PKBDesignEntity::If, alternativeGroup->getUsedVariables());
 
@@ -370,9 +377,10 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 
 	// now the call statement inherits from the procedure
 	res->addUsedVariables(procedureCalled->getUsedVariables());
-
 	addUsedVariable(PKBDesignEntity::Call, procedureCalled->getUsedVariables());
+
 	res->addModifiedVariables(procedureCalled->getModifiedVariables());
+	// addModifiedVariable(PKBDesignEntity::Call, procedureCalled->getModifiedVariables()); ADD THIS LINE?
 
 	if (procedureCalled->getModifiedVariables().size() > 0) {
 		//the procedure call modifies variable(s) within

@@ -114,6 +114,8 @@ public:
 	}
 
 	set<PKBStatement::SharedPtr> getAllUseStmts(PKBDesignEntity pkbde) {
+
+
 		if (pkbde == PKBDesignEntity::AllExceptProcedure) return mAllUseStmts;
 
 		return designEntityToStatementsThatUseVarsMap[pkbde];

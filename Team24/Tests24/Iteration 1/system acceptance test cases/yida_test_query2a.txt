@@ -38,3 +38,8 @@ while ifs; assign v;
 Select v
 3, 4, 9, 12, 14, 17, 19
 25
+9 - Select s // SELECT ALL STMTS that use VAR
+stmt s; variable x;
+Select s such that Uses(s, x)
+1, 2, 3, 4, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
+25
