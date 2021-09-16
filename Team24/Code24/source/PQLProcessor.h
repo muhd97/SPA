@@ -21,7 +21,7 @@ tuples or other data types might be returned as result. As such, it will be usef
 a generic Result class to extend from.
 
 */
-enum class ResultType { StmtLineSingleResult, ProcedureNameSingleResult, VariableNameSingleResult, ConstantValueSingleResult };
+enum class ResultType { StmtLineSingleResult, ProcedureNameSingleResult, VariableNameSingleResult, ConstantValueSingleResult, StringSingleResult };
 
 class Result {
 public:
@@ -36,6 +36,42 @@ public:
     }
 };
 
+class ResultTuple {
+public:
+    static string INTEGER_PLACEHOLDER;
+    static string SYNONYM_PLACEHOLDER;
+    static string UNDERSCORE_PLACEHOLDER;
+    static string IDENT_PLACEHOLDER;
+
+    /* Represents {"synonymKey1" : "val1", "synonymKey2" : "val2", ...} Generally, there are only two keys. */
+    unordered_map<string, string> synonymKeyToValMap; 
+
+    ResultTuple() {
+        synonymKeyToValMap.reserve(2);
+    }
+
+    ResultTuple(int sizeToReserve) {
+        synonymKeyToValMap.reserve(sizeToReserve);
+    }
+
+    inline void insertKeyValuePair(string key, string& value) {
+
+        /* Yida note: Pass by ref argument, please don't use move(value) or else original string becomes empty */
+        synonymKeyToValMap[key] = value;
+    }
+
+    inline string get(string key) {
+        return synonymKeyToValMap[key];
+    }
+
+    inline bool synonymKeyAlreadyExists(string key) {
+        return synonymKeyToValMap.find(key) != synonymKeyToValMap.end();
+    }
+
+    inline const unordered_map<string, string>& getMap() const {
+        return synonymKeyToValMap;
+    }
+};
 
 class VariableNameSingleResult : public Result {
 public:
@@ -69,6 +105,24 @@ public:
 
     const string& getResultAsString() const override {
         return procedureName;
+    }
+
+};
+
+class StringSingleResult : public Result {
+public:
+    string res;
+
+    StringSingleResult(string s) : res(move(s)) {
+
+    }
+
+    ResultType getResultType() {
+        return ResultType::StringSingleResult;
+    }
+
+    const string& getResultAsString() const override {
+        return res;
     }
 
 };
@@ -114,11 +168,12 @@ public:
 
 private:
     vector<shared_ptr<Result>> handleNoRelRefOrPatternCase(shared_ptr<SelectCl> selectCl);
-    void handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl, vector<shared_ptr<Result>>& toReturn);
-    void handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<Result>>& toReturn);
-    void handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<Result>>& toReturn);
-    void handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesCl, vector<shared_ptr<Result>>& toReturn);
+    void handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn);
+    void handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<ResultTuple>>& toReturn);
+    void handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<ResultTuple>>& toReturn);
+    void handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
+    void handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
     bool verifyUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl);
     bool verifyUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl);
@@ -130,6 +185,8 @@ private:
     bool verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl);
     bool verifyPatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl);
 
+    void joinResultTuples(vector<shared_ptr<ResultTuple>> leftResults, vector<shared_ptr<ResultTuple>> rightResults, string& joinKey, vector<shared_ptr<ResultTuple>>& newResults);
+    void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> leftResults, vector<shared_ptr<ResultTuple>> rightResults, vector<shared_ptr<ResultTuple>>& newResults);
 };
 
 /*

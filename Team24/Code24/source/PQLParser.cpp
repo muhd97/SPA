@@ -199,13 +199,22 @@ shared_ptr<RelRef> PQLParser::parseModifies()
     eat(PQLTokenType::LEFT_PAREN);
     if (peek().type != PQLTokenType::STRING) { /* If first arg of Modifies() is a string, it must be a ModifiesP */
         auto sRef11 = parseStmtRef();
+        if (sRef11->getStmtRefType() == StmtRefType::UNDERSCORE) {
+            // TODO: Handle Error. INVALID to have underscore first Modifies (_, x)
+        }
+
         eat(PQLTokenType::COMMA);
         auto eRef12 = parseEntRef();
         eat(PQLTokenType::RIGHT_PAREN);
         return make_shared<ModifiesS>(sRef11, eRef12);
     }
-    else {
+    else { /* If first arg of Modifies() is a string, it must be a ModifiesP */
+
         auto eRef11 = parseEntRef();
+        if (eRef11->getEntRefType() == EntRefType::UNDERSCORE) {
+            // TODO: Handle Error. INVALID to have underscore first Modifies (_, x)
+        }
+
         eat(PQLTokenType::COMMA);
         auto eRef12 = parseEntRef();
         eat(PQLTokenType::RIGHT_PAREN);
@@ -216,6 +225,7 @@ shared_ptr<RelRef> PQLParser::parseModifies()
 
 shared_ptr<SuchThatCl> PQLParser::parseSuchThat() // todo
 {
+
     eat(PQLTokenType::SUCH_THAT);
     auto r = parseRelRef();
     return make_shared<SuchThatCl>(r);
@@ -354,8 +364,11 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     eat(PQLTokenType::SELECT);
     synonym = parseSynonym();
 
+
+    /* YIDA Note: For iteration 1, multiple such that clauses are NOT allowed */
     while (!tokensAreEmpty()) {
-        if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::SUCH_THAT) {
+        if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::SUCH_THAT) { 
+        //if (peek().type == PQLTokenType::SUCH_THAT) { /* YIDA: Trying out multiple such that to try out joins */
             if (suchThatClauses.size() != 0) {
                 cout << "Duplicate such that clauses are not allowed." << endl;
                 break;
@@ -370,7 +383,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
             patternClauses.push_back(parsePatternCl());
         }
         else {
-            cout << "Unknown token: " + getPQLTokenLabel(peek()) << endl;
+            cout << "ParseSelectCl Unknown token: " + getPQLTokenLabel(peek()) << endl;
             break;
         }
     }

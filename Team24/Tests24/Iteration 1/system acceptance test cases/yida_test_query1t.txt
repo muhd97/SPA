@@ -1,0 +1,5 @@
+1 - Select all variables modified by "yida1" (procedure ident)
+variable v;
+Select v such that Uses("yida1", v)
+x, y, z, a
+25

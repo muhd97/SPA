@@ -172,6 +172,7 @@
     </ClCompile>
     <ClCompile Include="TestAST.cpp" />
     <ClCompile Include="TestPQLLexer.cpp" />
+    <ClCompile Include="TestPQLProcessor.cpp" />
     <ClCompile Include="TestPQLParser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
