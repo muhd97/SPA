@@ -195,12 +195,9 @@ shared_ptr<RelRef> PQLParser::parseUses()
 
 shared_ptr<RelRef> PQLParser::parseModifies()
 {
-
     eat(PQLTokenType::MODIFIES);
     eat(PQLTokenType::LEFT_PAREN);
-
-
-    if (peek().type != PQLTokenType::STRING) { /* ModifiesS */
+    if (peek().type != PQLTokenType::STRING) { /* If first arg of Modifies() is a string, it must be a ModifiesP */
         auto sRef11 = parseStmtRef();
         if (sRef11->getStmtRefType() == StmtRefType::UNDERSCORE) {
             // TODO: Handle Error. INVALID to have underscore first Modifies (_, x)

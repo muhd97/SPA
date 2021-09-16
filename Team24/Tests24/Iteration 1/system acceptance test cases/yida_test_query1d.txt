@@ -1,3 +1,8 @@
+38 - Select all Assign - NEGATIVE CASE: Uses(c, v) where c is a CONSTANT synonym. This should not be allowed.
+variable vsew; assign a, b; stmt k; procedure sd; print p; read r; constant z;
+Select k such that Uses(z, vsew)
+
+25
 1 - Select all Assign statements - TargetSynonym Not in Uses(3, _)
 assign a;
 Select a such that Uses(3, _)
@@ -181,10 +186,5 @@ Select k such that Uses("nonExistentProc", "x")
 37 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses ("nonExistentProc", v)
 variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
 Select k such that Uses("nonExistentProc", vsew)
-
-25
-38 - Select all Assign - NEGATIVE CASE: Uses(c, v) where c is a CONSTANT synonym. This should not be allowed.
-variable vsew; assign a, b; stmt k; procedure sd; print p; read r; constant z;
-Select k such that Uses(z, vsew)
 
 25

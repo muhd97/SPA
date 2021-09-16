@@ -1,0 +1,90 @@
+1 - Select all Assign statements - TargetSynonym Not in Uses(3, _)
+assign a;
+Select a such that Uses(3, _)
+3, 4, 9, 12, 14, 17, 19
+25
+2 - Select s Parent(2, s)
+stmt s;
+Select s such that Parent(2, s)
+3, 4
+25
+3 - Select s Parent(2, s)
+stmt s;
+Select s such that Parent(2, s)
+3, 4
+25
+4 - Select s Parent(2, s)- EMPTY
+stmt s;
+Select s such that Parent(5, s)
+
+25
+5 - Select a Parent(2, a)
+stmt s; assign k;
+Select k such that Parent(2, k)
+3, 4
+25
+6 - Select a Parent(2, a) - EMPTY
+stmt s; assign k;
+Select k such that Parent(5, k)
+
+25
+7 - Select all Assign statements - TargetSynonym Not in Parent(16, 17)
+assign a;
+Select a such that Parent(16, 17)
+3, 4, 9, 12, 14, 17, 19
+25
+8 - Select all Assign statements - NEGATIVE CASE: TargetSynonym Not in Parent(15, 16)
+assign a;
+Select a such that Parent(15, 16)
+
+25
+9 - Select all Assign statements - TargetSynonym Not in Parent(10, 13)
+assign a;
+Select a such that Parent(10, 13)
+3, 4, 9, 12, 14, 17, 19
+25
+10 - Select all Assign statements - NEGATIVE CASE: TargetSynonym Not in Parent(10, 14)
+assign a;
+Select a such that Parent(10, 14)
+
+25
+11 - Select all Assign statements - NEGATIVE CASE: TargetSynonym Not in Parent(10, 12)
+assign a;
+Select a such that Parent(10, 12)
+
+25
+12 - SELECT ALL IFS - TargetSynonym Not in Parent(10, 11)
+if ifs;
+Select ifs such that Parent(10, 11)
+1, 2, 5, 10, 16
+25
+13 - SELECT ALL IFS - TargetSynonym Not in Parent(10, 13)
+if ifs;
+Select ifs such that Parent(10, 13)
+1, 2, 5, 10, 16
+25
+14 - Select all Whiles - NEGATIVE CASE: TargetSynonym Not in Parent(11, 12)
+while ifs;
+Select ifs such that Parent(11, 12)
+6, 7, 8, 11, 13, 21
+25
+15 - Select w such that Parent(10, w)
+while w; if ifs;
+Select w such that Parent(10, w)
+13, 11
+25
+16 - Select ifs such that Parent(10, ifs) - NEGATIVE CASE: Empty
+while w; if ifs;
+Select ifs such that Parent(10, ifs)
+
+25
+16 - Select ifs such that Parent(10, ifs) -TargetSynonym Not in Parent(10, ifs)
+while w; if ifs;
+Select ifs such that Parent(10, w)
+1, 2, 5, 10, 16
+25
+17 - Select w such that Parent(10, ifs) - NEGATIVE CASE: TargetSynonym Not in Parent(10, w)
+while w; if ifs;
+Select w such that Parent(10, ifs)
+
+25

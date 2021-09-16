@@ -66,25 +66,27 @@ set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity childType)
 	return getParents(PKBDesignEntity::AllExceptProcedure, childType);
 }
 
+
 set<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex)
 {
 	set<int> res;
-	//PKBStatement::SharedPtr stmt;
-	//if (!mpPKB->getStatement(parentIndex, stmt)) {
-	//	return res;
-	//}
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(parentIndex, stmt)) {
+		return res;
+	}
 
-	//if (!isContainerType(stmt->getType())) {
-	//	return res;
-	//}
-	//else {
-	//	vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
-	//	for (auto& grp : grps) {
-	//		vector<int> grpStatements = grp->getMembers(childType);
-	//		res.insert(grpStatements.begin(), grpStatements.end());
-	//	}
-	//}
-	//
+
+	if (!isContainerType(stmt->getType())) {
+		return res;
+	}
+	else {
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		for (auto& grp : grps) {
+			vector<int> grpStatements = grp->getMembers(childType);
+			res.insert(grpStatements.begin(), grpStatements.end());
+		}
+	}
+	
 	return res;
 }
 
@@ -109,39 +111,48 @@ bool PQLEvaluator::hasChildren(PKBDesignEntity childType, int parentIndex) {
 
 set<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
+
 	set<pair<int, int>> res;
-	//vector<int> temp;
-	//// if parentType is none of the container types, there are no such children
-	//if (!isContainerType(parentType)) {
-	//	return res;
-	//}
+	vector<int> temp;
+	// if parentType is none of the container types, there are no such children
+	if (!isContainerType(parentType)) {
+		return res;
+	}
 
-	//// check if res is cached, if so return results
-	//if (mpPKB->getCached(PKB::Relation::Child, parentType, childType, temp)) {
-	//	res.insert(temp.begin(), temp.end());
-	//	return res;
-	//}
 
-	//// if not cached, we find the res manually and insert it into the cache
-	//vector<PKBStatement::SharedPtr> parentStmts;
-	//if (parentType == PKBDesignEntity::AllExceptProcedure) {
-	//	addParentStmts(parentStmts);
-	//}
-	//else {
-	//	parentStmts = mpPKB->getStatements(parentType);
-	//}
+	// check if res is cached, if so return results
+	/*if (mpPKB->getCached(PKB::Relation::Child, parentType, childType, temp)) {
+		res.insert(temp.begin(), temp.end());
+		return res;
+	}*/
 
-	//for (auto& stmt : parentStmts) {
-	//	vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
-	//	for (auto& grp : grps) {
-	//		vector<int> members = grp->getMembers(childType);
-	//		res.insert(members.begin(), members.end());
-	//	}
-	//}
+	// if not cached, we find the res manually and insert it into the cache
+	vector<PKBStatement::SharedPtr> parentStmts;
+	if (parentType == PKBDesignEntity::AllExceptProcedure) {
+		addParentStmts(parentStmts);
+	}
+	else {
+		parentStmts = mpPKB->getStatements(parentType);
+	}
 
-	//// insert into cache for future use
-	//temp.insert(temp.end(), res.begin(), res.end());
-	//mpPKB->insertintoCache(PKB::Relation::Child, parentType, childType, temp);
+	for (auto& stmt : parentStmts) {
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		for (auto& grp : grps) {
+			vector<int> members = grp->getMembers(childType);
+			for (int& x : members) {
+				pair<int, int> toAdd;
+				toAdd.first = stmt->getIndex();
+				toAdd.second = x;
+				res.insert(toAdd);
+			}
+
+			//res.insert(members.begin(), members.end());
+		}
+	}
+
+	// insert into cache for future use
+	/*temp.insert(temp.end(), res.begin(), res.end());
+	mpPKB->insertintoCache(PKB::Relation::Child, parentType, childType, temp);*/
 	return res;
 }
 
@@ -886,6 +897,84 @@ bool PQLEvaluator::checkAnyProceduresUseVars(string variableName)
 	return mpPKB->variableNameToProceduresThatUseVarMap[variableName].size() > 0;
 }
 
+bool PQLEvaluator::checkModified(int statementIndex)
+{
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(statementIndex, stmt)) {
+		return false;
+	}
+	return stmt->getModifiedVariables().size() > 0;
+}
+
+bool PQLEvaluator::checkModified(int statementIndex, string ident)
+{
+	PKBVariable::SharedPtr targetVar;
+	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr) return false;
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(statementIndex, stmt)) {
+		return false;
+	}
+	
+	set<PKBVariable::SharedPtr>& allVars = stmt->getModifiedVariables();
+	return allVars.find(targetVar) != allVars.end();
+}
+
+
+bool PQLEvaluator::checkModified(PKBDesignEntity entityType)
+{
+	return mpPKB->getModifiedVariables(entityType).size() > 0;
+}
+
+bool PQLEvaluator::checkModified(PKBDesignEntity entityType, string ident)
+{
+	PKBVariable::SharedPtr targetVar;
+	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr) return false;
+	set<PKBVariable::SharedPtr>& allVars = mpPKB->getModifiedVariables(entityType);
+	return allVars.find(targetVar) != allVars.end();
+}
+
+bool PQLEvaluator::checkModified()
+{
+	set<PKBVariable::SharedPtr>& vars = mpPKB->getModifiedVariables(PKBDesignEntity::AllExceptProcedure);
+	return vars.size() > 0;
+}
+
+
+bool PQLEvaluator::checkModifiedByProcName(string procname)
+{
+
+	PKBStatement::SharedPtr procedure;
+	if ((procedure = mpPKB->getProcedureByName(procname)) == nullptr) {
+		return false;
+	}
+	return procedure->getModifiedVariables().size() > 0;
+}
+
+bool PQLEvaluator::checkModifiedByProcName(string procname, string ident)
+{
+	PKBStatement::SharedPtr procedure;
+	if ((procedure = mpPKB->getProcedureByName(procname)) == nullptr) return false;
+
+	PKBVariable::SharedPtr targetVar;
+	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr) return false;
+
+	const set<PKBVariable::SharedPtr>& varsUsed = procedure->getModifiedVariables();
+
+	return varsUsed.find(targetVar) != varsUsed.end();
+}
+
+bool PQLEvaluator::checkAnyProceduresModifyVars()
+{
+	return mpPKB->mProceduresThatModifyVars.size() > 0;
+}
+
+bool PQLEvaluator::checkAnyProceduresModifyVar(string variableName)
+{
+	if (mpPKB->mVariableNameToProceduresThatModifyVarsMap.find(variableName) == mpPKB->mVariableNameToProceduresThatModifyVarsMap.end()) return false;
+
+	return mpPKB->mVariableNameToProceduresThatModifyVarsMap[variableName].size() > 0;
+}
+
 /* Get all variable names modified by the particular statement */
 vector<string> PQLEvaluator::getModified(int statementIndex)
 {
@@ -910,6 +999,49 @@ vector<string> PQLEvaluator::getModified()
 	set<PKBVariable::SharedPtr> vars = mpPKB->getModifiedVariables(PKBDesignEntity::AllExceptProcedure);
 	return varToString(vars);
 }
+
+vector<string> PQLEvaluator::getModifiedByProcName(string procname)
+{
+	if (mpPKB->getProcedureByName(procname) == nullptr) {
+		return vector<string>();
+	}
+
+	PKBStatement::SharedPtr& procedure = mpPKB->getProcedureByName(procname);
+
+	vector<PKBVariable::SharedPtr> vars;
+	const set<PKBVariable::SharedPtr>& varsModified = procedure->getModifiedVariables();
+	vars.reserve(varsModified.size());
+
+	for (auto& v : varsModified) {
+		vars.emplace_back(v);
+	}
+
+	return varToString(move(vars));
+}
+
+
+vector<string> PQLEvaluator::getProceduresThatModifyVars() {
+	return procedureToString(mpPKB->mProceduresThatModifyVars);
+}
+
+vector<string> PQLEvaluator::getProceduresThatModifyVar(string variableName)
+{
+	vector<string> toReturn;
+
+	if (mpPKB->mVariableNameToProceduresThatModifyVarsMap.find(variableName) == mpPKB->mVariableNameToProceduresThatModifyVarsMap.end()) {
+		return move(toReturn);
+	}
+
+	set<PKBStatement::SharedPtr>& procedures = mpPKB->mVariableNameToProceduresThatModifyVarsMap[variableName];
+	toReturn.reserve(procedures.size());
+
+	for (auto& ptr : procedures) {
+		toReturn.emplace_back(ptr->mName);
+	}
+
+	return move(toReturn);
+}
+
 
 vector<int> PQLEvaluator::getModifiers(string variableName)
 {
