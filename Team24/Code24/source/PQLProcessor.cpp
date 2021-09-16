@@ -142,15 +142,15 @@ inline bool targetSynonymIsProcedure(shared_ptr<SelectCl> selectCl) {
 void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn) {  // TODO IMPLEMENT
     switch (suchThatCl->relRef->getType())
     {
-    case RelRefType::USES_S: /* Uses(s, v) where s is a STATEMENT. */
+    case RelRefType::USES_S: /* Uses(s, v) where s MUST be a if/while/assign/stmt/read/print. */
     {
         shared_ptr<UsesS> usesCl = static_pointer_cast<UsesS>(suchThatCl->relRef);
         StmtRefType leftType = usesCl->stmtRef->getStmtRefType();
         EntRefType rightType = usesCl->entRef->getEntRefType();
 
-        /* Uses(_, x) ERROR cannot have underscore as first arg!! */
+        /* Uses(_, ?) ERROR cannot have underscore as first arg!! */
         if (leftType == StmtRefType::UNDERSCORE) {
-            cout << "TODO: Handle Uses error case\n";
+            cout << "TODO: Handle Uses error case. Uses (_, x) cannot have first argument as Underscore. \n";
             return;
         }
 
@@ -162,6 +162,10 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         /* Uses (syn, ?) */
 
         if (leftType == StmtRefType::SYNONYM) {
+            if (selectCl->getDesignEntityTypeBySynonym(usesCl->stmtRef->getStringVal()) == DesignEntity::CONSTANT) {
+               throw "TODO: Handle error case. Uses(syn, ?), but syn is a Constant declaration. This is semantically incorrect.\n";
+            }
+
             handleUsesSFirstArgSyn(selectCl, usesCl, toReturn);
         }
 
@@ -732,7 +736,6 @@ void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, sh
             tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, ident);
             toReturn.emplace_back(tupleToAdd);
         }
-        //cout << "Pre-condition VIOLATED. Target synonym of the SelectCl must be inside the Uses() clause\n";
     }
 
     /* Uses (1, _) */
@@ -765,8 +768,11 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared
 
         /* TODO: @kohyida1997 CHECK IF RIGHT SIDE IS NOT VARIABLE, throw error */
 
-        string rightSynonymKey;
-        rightSynonymKey = entRefRight->getStringVal();
+        string rightSynonymKey = entRefRight->getStringVal();
+
+        if (selectCl->getDesignEntityTypeBySynonym(rightSynonymKey) != DesignEntity::VARIABLE) {
+            throw "TODO: Handle error case. Uses(syn, v), but v is not a variable delcaration.\n";
+        }
 
         /* Uses (syn, v) -> syn is NOT procedure. RETURN 2-TUPLES */
         if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) != DesignEntity::PROCEDURE) {
@@ -1050,14 +1056,25 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
         /* TODO: @kohyida1997 current order of resolving such-that clauses is in order of their appearance. This needs to change in iteraton 2 and 3 */
         for (int i = 0; i < selectCl->suchThatClauses.size(); i++) {
             if (i == 0) {
-                handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
+                try {
+                    handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
+                }
+                catch (exception& ex) {
+                    throw;
+                }
             }
             else {
                 vector<shared_ptr<ResultTuple>> currSuchThatRes;
                 vector<shared_ptr<ResultTuple>> joinedRes;
                 joinedRes.reserve(suchThatReturnTuples.size());
                 string joinKeyV = "v"; /* TODO: @kohyida1997 Joining by "v" is HARDCODED, for testing purposes only. Need to remove! */
-                handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
+
+                try {
+                    handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
+                }
+                catch (exception & ex) {
+                    throw;
+                }
                 joinResultTuples(suchThatReturnTuples, currSuchThatRes, joinKeyV, joinedRes);
                 suchThatReturnTuples = move(joinedRes);
             }
