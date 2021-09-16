@@ -49,7 +49,7 @@ public:
 	// => getChildren( PKBDE::AllExceptProcedure, 14 ) // find children stmts of stmt 14
 	// eg. if ifs; Select ifs such that Parent( 14, ifs ); 
 	// => getChildren( PKBDE::If, 14 ) // find 'if' children stmts of stmt 14 
-	vector<pair<int, int>> getChildren(PKBDesignEntity childType, int parent);
+	unordered_set<int> getChildren(PKBDesignEntity childType, int parent);
 
 	// Get children statements of type {childType} with parent statements of type {parentType} 
 	// eg. if ifs; while w; Select ifs such that Parent( w, ifs ); 

@@ -988,7 +988,7 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl>& selectCl, s
         PKBStatement::SharedPtr stmt = nullptr;
 
         if (evaluator->mpPKB->getStatement(leftArgInteger, stmt)) {
-            if (evaluator->getChildren(PKBDesignEntity::AllExceptProcedure, stmt->getIndex()).size() > (unsigned int) 0) {
+            if (evaluator->getChildren(PKBDesignEntity::AllExceptProcedure, stmt->getIndex()).size() > 0u) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                 /* Map the value returned to this particular synonym. */
                 tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger));
@@ -1006,9 +1006,9 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl>& selectCl, s
         int rightArgInteger = rightArg->getIntVal();
 
         if (evaluator->mpPKB->getStatement(leftArgInteger, stmt)) {
-            vector<int>& childrenIds = evaluator->getChildren(PKBDesignEntity::AllExceptProcedure, stmt->getIndex());
+            unordered_set<int>& childrenIds = evaluator->getChildren(PKBDesignEntity::AllExceptProcedure, stmt->getIndex());
 
-            if (childrenIds.size() > 0 && (find(childrenIds.begin(), childrenIds.end(), rightArgInteger) != childrenIds.end()) ) {
+            if (childrenIds.size() > 0u && (childrenIds.find(rightArgInteger) != childrenIds.end())) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                 /* Map the value returned to this particular synonym. */
                 tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger));
@@ -1051,12 +1051,13 @@ void PQLProcessor::handleParentFirstArgSyn(shared_ptr<SelectCl>& selectCl, share
 
         PKBDesignEntity rightArgType = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSynonym));
 
-        for (auto& i : evaluator->getChildren(leftArgType, rightArgType)) {
+        for (auto& p : evaluator->getChildren(leftArgType, rightArgType)) {
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
 
-            tupleToAdd->insertKeyValuePair(rightSynonym, to_string(i));
+            tupleToAdd->insertKeyValuePair(leftSynonym, to_string(p.first));
+            tupleToAdd->insertKeyValuePair(rightSynonym, to_string(p.second));
             /* Add this tuple into the vector to tuples to return. */
             toReturn.emplace_back(move(tupleToAdd));
         }
