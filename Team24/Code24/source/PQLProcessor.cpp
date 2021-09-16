@@ -182,12 +182,38 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     }
     case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
     {
+        shared_ptr<ModifiesS> modifiesCl = static_pointer_cast<ModifiesS>(suchThatCl->relRef);
+        shared_ptr<StmtRef> stmtRef = modifiesCl->stmtRef;
+        shared_ptr<EntRef> entRef = modifiesCl->entRef;
+        StmtRefType leftType = stmtRef->getStmtRefType();
+        EntRefType rightType = entRef->getEntRefType();
 
         /* ==================================== REMEMBER TO UNCOMMENT ====================================*/
-        shared_ptr<ModifiesS> modifiesCl = static_pointer_cast<ModifiesS>(suchThatCl->relRef);
-        shared_ptr<StmtRef>& stmtRef = modifiesCl->stmtRef;
-        shared_ptr<EntRef>& entRef = modifiesCl->entRef;
-        
+        /* Modifies(_, x) ERROR cannot have underscore as first arg!! */
+        if (stmtRef->getStmtRefType() == StmtRefType::UNDERSCORE) {
+           throw "Modifies clause cannot have '_' as first argument!";
+        }
+        if (stmtRef->getStmtRefType() == StmtRefType::INTEGER) {
+           vector<string> variablesModifiedByStmtNo = evaluator->getModified(stmtRef->getIntVal());
+           if (entRef->getEntRefType() == EntRefType::UNDERSCORE) {
+               for (auto& v : variablesModifiedByStmtNo) {
+                   toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(v)));
+               }
+           }
+           
+           if (entRef->getEntRefType() == EntRefType::SYNONYM) {
+               if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { // Modifies (1, x), x is NOT a variable
+                   throw "Modifies(1, p), but p is not a variable delcaration.\n";
+               } else {
+                   for (auto& s : variablesModifiedByStmtNo) {
+                       toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
+                   }
+               }
+           }
+           if (entRef->getEntRefType() == EntRefType::IDENT) {
+               cout << "This should never reach as it must be handled by target synonym NOT in clauses case.";
+           }
+        }
         if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
             // This is handling for both statement and procedure in Iteration 1. Need to change to make sure procedures are handled in ModifiesP
 
