@@ -66,13 +66,15 @@ public:
 
 	// statement number, starting from index 1
 	PKBStatement::SharedPtr getStatement(int stmtNumber) {
-		if (stmtNumber > (int)mStatements[PKBDesignEntity::AllExceptProcedure].size()) {
+		if (stmtNumber >= (int)mStatements[PKBDesignEntity::AllExceptProcedure].size()) {
 			throw std::invalid_argument("Requested statement number higher than max number of statements");
 		}
 		// get the stmt from list of all statements
 		/* YIDA Note: vector<> of statements is 0-based, stmtNumber is 1-based. Need to substract 1. */
 		int targetIndexInMStatementsVector = stmtNumber - 1;
 		PKBStatement::SharedPtr s = mStatements[PKBDesignEntity::AllExceptProcedure][targetIndexInMStatementsVector];
+
+		cout << "getStatement(int), STMT NUMBER EXTRCTED = " << s->getIndex() << endl;
 		assert(s->getIndex() == stmtNumber);
 		return s;
 	}
