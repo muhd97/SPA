@@ -96,7 +96,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(string s) {
     }
 }
 
-vector<shared_ptr<Result>> PQLProcessor::handleNoRelRefOrPatternCase(shared_ptr<SelectCl> selectCl) {
+vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl) {
     shared_ptr<Synonym> targetSynonym = selectCl->targetSynonym;
     shared_ptr<DesignEntity> de = selectCl
         ->getParentDeclarationForSynonym(targetSynonym)
@@ -109,7 +109,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoRelRefOrPatternCase(shared_ptr<
         return move(toReturn);
     }
 
-    if (de->getEntityTypeName() == VARIABLE) { // Todo: Handle get all variables from PKB
+    if (de->getEntityTypeName() == VARIABLE) {
         const vector<shared_ptr<PKBVariable>>& vars = evaluator
             ->getAllVariables();
         for (auto& ptr : vars) toReturn.emplace_back(make_shared<VariableNameSingleResult>(ptr->getName()));
@@ -139,7 +139,6 @@ inline bool targetSynonymIsProcedure(shared_ptr<SelectCl> selectCl) {
     return targetSynonymMatchesMultipleTypes(selectCl, { DesignEntity::PROCEDURE });
 }
 
-/* PRE-CONDITION: Target synonym of the SelectCl must be inside the SuchThat clause. */
 void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn) {  // TODO IMPLEMENT
     switch (suchThatCl->relRef->getType())
     {
@@ -168,7 +167,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
         break;
     }
-    case RelRefType::USES_P: /* Uses("INDENT", v). */
+    case RelRefType::USES_P: /* Uses("INDENT", v). "IDENT" MUST be a procedure identifier. */
     {
         shared_ptr<UsesP> usesCl = static_pointer_cast<UsesP>(suchThatCl->relRef);
         EntRefType leftType = usesCl->entRef1->getEntRefType();
@@ -691,7 +690,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     return;
 }
 
-/* PRE-CONDITION: Target synonym of the SelectCl must be inside the Uses() clause. */
 void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
 
@@ -707,7 +705,7 @@ void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, sh
         const string& rightSynonymKey = entRef->getStringVal();
 
         /* Uses (1, syn), syn is NOT a variable */
-        if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) {
+        if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != DesignEntity::VARIABLE) {
             throw "TODO: Handle error case. Uses(1, p), but p is not a variable delcaration.\n";
         }
 
@@ -750,7 +748,6 @@ void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, sh
     }
 }
 
-/* PRE-CONDITION: Target synonym of the SelectCl must be inside the Uses() clause. */
 void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     StmtRefType leftType = usesCl->stmtRef->getStmtRefType();
@@ -888,7 +885,6 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared
     }
 }
 
-/* PRE-CONDITION: Target synonym of the SelectCl must be inside the Uses() clause. */
 void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     /* TODO: @kohyida1997 catch error case when v is not a variable synonym. */
@@ -901,6 +897,10 @@ void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shar
     if (usesCl->entRef2->getEntRefType() == EntRefType::SYNONYM) {
 
         /* TODO: @kohyida1997 check if syn v is variable */
+
+        if (selectCl->getDesignEntityTypeBySynonym(usesCl->entRef2->getStringVal()) != DesignEntity::VARIABLE) {
+            throw "TODO: Handle error case. Uses(\"IDENT\", v), but v is not a variable delcaration.\n";
+        }
 
         const string& rightSynonymKey = usesCl->entRef2->getStringVal();
         for (auto& s : evaluator->getUsedByProcName(usesCl->entRef1->getStringVal())) {
@@ -1035,7 +1035,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
 
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses()) {
-        return handleNoRelRefOrPatternCase(move(selectCl));
+        return handleNoSuchThatOrPatternCase(move(selectCl));
     }
 
     /* Standard case 0: Evaluate the such-that clause first to get the statement numbers out from there. Then evaluate Pattern clauses */
@@ -1091,7 +1091,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
         }
 
         if (!targetSynonymIsInClauses(selectCl)) {
-            return combinedTuples.size() <= 0 ? res : handleNoRelRefOrPatternCase(move(selectCl));
+            return combinedTuples.size() <= 0 ? res : handleNoSuchThatOrPatternCase(move(selectCl));
         }
 
         /* STEP 4a: After joining or taking cartesian product, find values for the target synonym and return. */
@@ -1114,7 +1114,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     vector<shared_ptr<ResultTuple>>& finalTuples = !selectCl->hasPatternClauses() ? suchThatReturnTuples : patternReturnTuples;
     
     if (!targetSynonymIsInClauses(selectCl)) {
-        return finalTuples.size() <= 0 ? move(res) : handleNoRelRefOrPatternCase(move(selectCl));
+        return finalTuples.size() <= 0 ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
     }
 
     /* We use a set to help us get rid of duplicates. */
