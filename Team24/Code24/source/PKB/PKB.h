@@ -47,6 +47,9 @@ public:
 	// maps variable name (string) to PKBVariable object
 	unordered_map<string, PKBVariable::SharedPtr> mVariables;
 
+	// set of all constants
+	unordered_set<int> mConstants;
+
 	// maps 
 
 	set<PKBStatement::SharedPtr> mAllUseStmts; // statements that use a variable
@@ -140,6 +143,11 @@ public:
 		}
 
 		return procedureNameToProcedureMap[procname];
+	}
+
+
+	unordered_set<int> getConstants() {
+		return mConstants;
 	}
 
 	bool getCached(Relation rel, PKBDesignEntity a, PKBDesignEntity b, vector<int> &res) {

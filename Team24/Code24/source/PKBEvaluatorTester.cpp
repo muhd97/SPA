@@ -55,6 +55,24 @@ void PKBEvaluatorTester::runTest1() {
     cout << "\n==== Running PQL Tests ====\n";
     runFollowsTests1();
     runParentTests1();
+
+    // constants test
+    cout << "constants test 1" << endl;
+    unordered_set<int> constants = evaluator->getAllConstants();
+    unordered_set<int> expected = { 0, 1 };
+    if (constants != expected) {
+        cout << "FAILED: Actual: ";
+        for (auto& i : constants) {
+            cout << i;
+        }
+        cout << endl;
+        cout << "Expected: ";
+        for (auto& i : expected) {
+            cout << i;
+        }
+        cout << endl;
+    }
+
     cout << "\n==== End PQL Tests ====\n";
 }
 
@@ -124,6 +142,24 @@ void PKBEvaluatorTester::runTest2() {
     cout << "\n==== Running PQL Tests ====\n";
     runFollowsTests2();
     runParentTests2();
+
+    // constants test
+    cout << "constants test 2" << endl;
+    unordered_set<int> constants = evaluator->getAllConstants();
+    unordered_set<int> expected = { 0, 1, 2, 3, 5 };
+    if (constants != expected) {
+        cout << "FAILED: Actual: ";
+        for (auto& i : constants) {
+            cout << i;
+        }
+        cout << endl;
+        cout << "Expected: ";
+        for (auto& i : expected) {
+            cout << i;
+        }
+        cout << endl;
+    }
+
     cout << "\n==== End PQL Tests ====\n";
 }
 
@@ -246,6 +282,7 @@ void PKBEvaluatorTester::runFollowsTests1() {
     res = evaluator->getBeforeT(PKBDesignEntity::While, PKBDesignEntity::Print);
     expected = { }; 
     checkResult(22, res, expected);
+
 }
 
 void PKBEvaluatorTester::runParentTests1() {
@@ -366,6 +403,23 @@ void PKBEvaluatorTester::runPatternTests1()
     res = evaluator->matchPattern("_", "v + x * y + z * t");
     expected = { 6 };
     checkResult(8, res, expected);
+
+    // constants test
+    cout << "constants test pattern" << endl;
+    unordered_set<int> constants = evaluator->getAllConstants();
+    unordered_set<int> expectedd = { 1, 2, 3, 4, 5 };
+    if (constants != expectedd) {
+        cout << "FAILED: Actual: ";
+        for (auto& i : constants) {
+            cout << i;
+        }
+        cout << endl;
+        cout << "Expected: ";
+        for (auto& i : expectedd) {
+            cout << i;
+        }
+        cout << endl;
+    }
 }
 
 void PKBEvaluatorTester::runPatternTests2()

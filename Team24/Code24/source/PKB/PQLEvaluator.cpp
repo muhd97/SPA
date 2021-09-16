@@ -1189,9 +1189,11 @@ vector<PKBVariable::SharedPtr> PQLEvaluator::getAllVariables()
 /* TODO: @nicholasnge Provide function to return all Constants in the program. */
 unordered_set<int> PQLEvaluator::getAllConstants()
 {
-	return unordered_set<int>();
+	return mpPKB->getConstants();
 }
 
+// For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
+// if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern instead 
 vector<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
 	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
 	vector<int> res;
@@ -1220,6 +1222,8 @@ vector<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
 	return res;
 }
 
+// For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
+// if you want to use a("_", _EXPR_) or a(IDENT, _EXPR_), use matchPattern instead
 vector<int> PQLEvaluator::matchExactPattern(string LHS, string RHS) {
 	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
 	vector<int> res;

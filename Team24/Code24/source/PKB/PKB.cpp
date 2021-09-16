@@ -14,6 +14,7 @@ void PKB::initialise() {
 		mUsedVariables[de] = {};
 		mModifiedVariables[de] = {};
 		designEntityToStatementsThatUseVarsMap[de] = {};
+		mConstants = {};
 	}
 	// reset extracted Procedures
 	procedureNameToProcedureMap.clear();
@@ -553,8 +554,11 @@ vector<string> PKB::getIdentifiers(shared_ptr<Expression> expr) {
 		queue.pop_back();
 
 		switch (e->getExpressionType()) {
-		case ExpressionType::CONSTANT:
+		case ExpressionType::CONSTANT: {
+			shared_ptr<Constant> constant = static_pointer_cast<Constant>(e);
+			mConstants.insert(constant->getValue());
 			break;
+		}
 		case ExpressionType::IDENTIFIER: {
 			shared_ptr<Identifier> id = static_pointer_cast<Identifier>(e);
 			res.insert(id->getName());
