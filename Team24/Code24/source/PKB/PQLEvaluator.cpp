@@ -858,15 +858,23 @@ bool PQLEvaluator::checkAnyProceduresUseVars(string variableName)
 
 bool PQLEvaluator::checkModified(int statementIndex)
 {
-	return mpPKB->getStatement(statementIndex)->getModifiedVariables().size() > 0;
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(statementIndex, stmt)) {
+		return false;
+	}
+	return stmt->getModifiedVariables().size() > 0;
 }
 
 bool PQLEvaluator::checkModified(int statementIndex, string ident)
 {
 	PKBVariable::SharedPtr targetVar;
 	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr) return false;
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(statementIndex, stmt)) {
+		return false;
+	}
 	
-	set<PKBVariable::SharedPtr>& allVars = mpPKB->getStatement(statementIndex)->getModifiedVariables();
+	set<PKBVariable::SharedPtr>& allVars = stmt->getModifiedVariables();
 	return allVars.find(targetVar) != allVars.end();
 }
 
