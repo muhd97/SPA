@@ -228,15 +228,41 @@ public:
 	bool checkAnyProceduresUseVars(string variableName);
 
 	// Modifies
-
+	
+	/* Check if the given stmt Index MODIFIES any variables. */
+	bool checkModified(int statementIndex);
+	/* Check if the given stmt Index MODIFIES a specific variable specified by {ident} */
+	bool checkModified(int statementIndex, string ident);
 	// Get the names of all variables modified by statement indexed {statementIndex}
 	vector<string> getModified(int statementIndex);
 
+	/* Check if the given {entityType} modifies any variables */
+	bool checkModified(PKBDesignEntity entityType);
+	/* Check if the given {entityType} modifies a given variable specified by {ident} */
+	bool checkModified(PKBDesignEntity entityType, string ident);
 	// Get the names of all variables modified by all statements of type {entityType}
 	vector<string> getModified(PKBDesignEntity entityType);
 
 	// Get the names of all variables modified by at least one statement
 	vector<string> getModified();
+	/* Check if at least one statement modifies a variable. */
+	bool checkModified();
+
+	// Get the names of all variables modified by procedure with name {procname}
+	vector<string> getModifiedByProcName(string procname);
+	/* Check if given procedure {procname} modifies at least one variable. */
+	bool checkModifiedByProcName(string procname);
+	/* Check if given procedure {procname} modifies the variable specified by {ident}. */
+	bool checkModifiedByProcName(string procname, string ident);
+	/* Check if there are procedures that modify variables */
+	bool checkAnyProceduresModifyVars();
+	/* Check if there are procedures that modify the variable given by {variableName} */
+	bool checkAnyProceduresModifyVar(string variableName);
+
+	/* Get all procedures that modify at least one variable */
+	vector<string> getProceduresThatModifyVars();
+	// Get all procedures that modify the given variable of {variableName}
+	vector<string> getProceduresThatModifyVar(string variableName);
 
 	// Get all statements that modify the variable of name {variableName}
 	vector<int> getModifiers(string variableName);
