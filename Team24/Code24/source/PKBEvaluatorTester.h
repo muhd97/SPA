@@ -9,24 +9,18 @@
 #include "../AutoTester/source/AbstractWrapper.h"
 #include "PKB/PKB.h"
 
-class PKBEvaluatorTester : public AbstractWrapper {
+class PKBEvaluatorTester {
 public:
 
     // default constructor
     PKBEvaluatorTester();
 
-    // destructor
-    ~PKBEvaluatorTester();
-
     // method for parsing the SIMPLE source
-    virtual void parse(std::string filename);
-
-    // method for evaluating a query
-    virtual void evaluate(std::string query, std::list<std::string>& results);
-    void printResult(int testIndex, vector<int> res);
-    void printResult(int testIndex, vector<string> res);
+    void runEvaluatorTests();
 
 private:
+    void printResult(int testIndex, vector<int> res);
+    void printResult(int testIndex, vector<string> res);
     shared_ptr<PKB> pkb = nullptr;
 };
 

@@ -13,7 +13,6 @@
     <ClCompile Include="..\source\PQLParser.cpp" />
     <ClCompile Include="..\source\PQLParserRunner.cpp" />
     <ClCompile Include="..\source\PQLProcessor.cpp" />
-    <ClCompile Include="..\source\PKBEvaluatorTester.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQLLexer.h" />
@@ -28,6 +27,5 @@
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
     <ClInclude Include="..\source\PQLProcessor.h" />
-    <ClInclude Include="..\source\PKBEvaluatorTester.h" />
   </ItemGroup>
 </Project>
