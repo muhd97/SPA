@@ -1,20 +1,10 @@
-1 - Select all variables modified by "yida1" (procedure ident)
-variable v; stmt s; assign a;
-Select s such that Follows(5, s)
-
+0 - Uses(stmt)
+stmt s; variable v;
+Select s such that Uses(s, v)
+1, 4, 5, 7, 8, 9, 10, 13, 14, 17, 18, 19, 21, 22, 23, 24, 25, 26, 29, 31, 32, 33, 34, 35, 36
 5000
-2 - Select all variables modified by "yida1" (procedure ident)
-variable v; stmt s; assign a;
-Select s such that Follows(12, s)
-
-5000
-3 - Select all variables modified by "yida1" (procedure ident)
-variable v; stmt s; assign a;
-Select s such that Follows(1, s)
-
-5000
-4 - Select all variables modified by "yida1" (procedure ident)
-variable v; stmt s; assign a;
-Select s such that Follows(4, s)
+1 - Duplicate 
+stmt s; variable v; assign v;
+Select s such that Uses(s, v)
 
 5000

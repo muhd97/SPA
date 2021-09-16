@@ -183,3 +183,8 @@ variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
 Select k such that Uses("nonExistentProc", vsew)
 
 25
+38 - Select all Assign - NEGATIVE CASE: Uses(c, v) where c is a CONSTANT synonym. This should not be allowed.
+variable vsew; assign a, b; stmt k; procedure sd; print p; read r; constant z;
+Select k such that Uses(z, vsew)
+
+25

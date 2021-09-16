@@ -167,23 +167,13 @@ public:
     vector<shared_ptr<Result>> processPQLQuery(shared_ptr<SelectCl> selectCl);
 
 private:
-    vector<shared_ptr<Result>> handleNoRelRefOrPatternCase(shared_ptr<SelectCl> selectCl);
+    vector<shared_ptr<Result>> handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl);
     void handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn);
     void handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<ResultTuple>>& toReturn);
     void handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl, vector<shared_ptr<ResultTuple>>& toReturn);
     void handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
     void handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl, vector<shared_ptr<ResultTuple>>& toReturn);
-
-    bool verifyUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl);
-    bool verifyUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl);
-    bool verifyUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesCl);
-    bool verifyModifiesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesS>& modifiesCl);
-    bool verifyModifiesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesS>& modifiesCl);
-    bool verifyModifiesPFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesP>& modifiesCl);
-    bool verifyModifiesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesP>& modifiesCl);
-    bool verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl);
-    bool verifyPatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl);
 
     void joinResultTuples(vector<shared_ptr<ResultTuple>> leftResults, vector<shared_ptr<ResultTuple>> rightResults, string& joinKey, vector<shared_ptr<ResultTuple>>& newResults);
     void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> leftResults, vector<shared_ptr<ResultTuple>> rightResults, vector<shared_ptr<ResultTuple>>& newResults);
