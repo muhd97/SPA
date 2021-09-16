@@ -88,6 +88,25 @@ vector<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex
 	return res;
 }
 
+bool PQLEvaluator::hasChildren(PKBDesignEntity childType, int parentIndex) {
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(parentIndex, stmt)) {
+		return false;
+	}
+
+	if (!isContainerType(stmt->getType())) {
+		return false;
+	}
+
+	vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+	for (auto& grp : grps) {
+		if (grp->getMembers(childType).size()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 vector<int> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
 	vector<int> res;
@@ -381,10 +400,15 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 
 bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, PKBStatement::SharedPtr& result) {
 // find the statement before in the stmt's group
+	cout << "AFTER: " << statementAfter->getIndex() << endl;
 	PKBGroup::SharedPtr grp = statementAfter->getGroup();
 	vector<int>& members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
 	for (int i = 0; i < members.size(); i++) {
-		if (statementAfter->getIndex() == members[i] && i != 0) {
+		cout << "member: " << members[i] << endl;
+		if (statementAfter->getIndex() == members[i]) {
+			if (i == 0) {
+				return false;
+			}
 			int idxToCheck = members[--i];
 			if (!mpPKB->getStatement(idxToCheck, result)) {
 				return false;

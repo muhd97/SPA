@@ -1,12 +1,4 @@
 #include "PKBEvaluatorTester.h"
-#include "SimpleAST.h"
-#include "SimpleLexer.h"
-#include "SimpleParser.h" 
-#include "PKB/PKB.h"
-#include "PQLLexer.h"
-#include "PQLParser.h"
-#include "PQLProcessor.h"
-#include <memory>
 
 using namespace std;
 
@@ -15,6 +7,7 @@ PKBEvaluatorTester::PKBEvaluatorTester() {
     // create any objects here as instance variables of this class
     // as well as any initialization required for your spa program
     pkb = make_shared<PKB>();
+    evaluator = PQLEvaluator::create(pkb);
 }
 
 // method for parsing the SIMPLE source
@@ -38,8 +31,48 @@ void PKBEvaluatorTester::runEvaluatorTests() {
                                 "   }"
                                 "   normSq = cenX * cenX + cenY * cenY;"
                                 "}";
+    string longProgram = " procedure Example {\
+                                                    x = 2;\
+                                                    z = 3;\
+                                                    i = 5;\
+                                                    while (i != 0) {\
+                                                        x = x - 1;\
+                                                        if (x == 1) then{\
+                                                            z = x + 1; }\
+                                                        else {\
+                                                            y = z + x;\
+                                                        }\
+                                                        z = z + x + i;\
+                                                        call q;\
+                                                        i = i - 1;\
+                                                    }\
+                                                    call p;\
+                                                }\
+                                                procedure p{\
+                                                    if (x < 0) then {\
+                                                        while (i > 0) {\
+                                                            x = z * 3 + 2 * y;\
+                                                            call q;\
+                                                            i = i - 1;\
+                                                        }\
+                                                        x = x + 1;\
+                                                        z = x + z; \
+                                                    }\
+                                                    else {\
+                                                        z = 1;\
+                                                    }\
+                                                    z = z + x + i; }\
+                                                    \
+                                                procedure q{\
+                                                    if (x == 1) then {\
+                                                        z = x + 1; }\
+                                                    else {\
+                                                        x = z + x;\
+                                                    } \
+                                                }";
 
-    vector<SimpleToken> tokens = simpleLex(program);
+
+    vector<SimpleToken> tokens = simpleLex(longProgram);
 
     // for debugging
     printSimpleTokens(tokens);
@@ -59,11 +92,28 @@ void PKBEvaluatorTester::runEvaluatorTests() {
     this->pkb->extractDesigns(root);
     cout << "\n==== PKB has been populated. ====\n";
 
-    shared_ptr<PQLEvaluator> evaluator = PQLEvaluator::create(this->pkb);
     cout << "\n==== Created PQLEvaluator using PKB ====\n";
 
     cout << "\n==== Running PQL Tests ====\n";
+    runFollowsTests();
+    runParentTests();
+    cout << "\n==== End PQL Tests ====\n";
+}
 
+void PKBEvaluatorTester::printResult(int testIndex, vector<int> res) {
+    cout << "RESULT " << testIndex << ": ";
+    for (int i = 0; i < res.size(); i++)
+        std::cout << res.at(i) << ' ';
+    cout << "\n";
+}
+
+void PKBEvaluatorTester::printResult(int testIndex, vector<string> res) {
+    cout << "RESULT: " << testIndex << ": ";
+    for (int i = 0; i < res.size(); i++)
+        std::cout << res.at(i) << ' ';
+}
+
+void PKBEvaluatorTester::runFollowsTests() {
     //0
     vector<int> res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, 1);
     printResult(0, res);
@@ -133,21 +183,10 @@ void PKBEvaluatorTester::runEvaluatorTests() {
     printResult(22, res);
     res = evaluator->getBeforeT(PKBDesignEntity::While, PKBDesignEntity::Print);
     printResult(22, res);
-
-    cout << "\n==== End PQL Tests ====\n";
 }
 
-void PKBEvaluatorTester::printResult(int testIndex, vector<int> res) {
-    cout << "RESULT " << testIndex << ": ";
-    for (int i = 0; i < res.size(); i++)
-        std::cout << res.at(i) << ' ';
-    cout << "\n";
-}
+void PKBEvaluatorTester::runParentTests() {
 
-void PKBEvaluatorTester::printResult(int testIndex, vector<string> res) {
-    cout << "RESULT: " << testIndex << ": ";
-    for (int i = 0; i < res.size(); i++)
-        std::cout << res.at(i) << ' ';
 }
 
 int main() {

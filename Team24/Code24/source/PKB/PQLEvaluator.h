@@ -60,6 +60,8 @@ public:
 	// => getChildren( PKBDE::While ) // find all children stmts of all while stmts
 	vector<int> getChildren(PKBDesignEntity parentType);
 
+	bool hasChildren(PKBDesignEntity childType, int parentIndex);
+
 	// Parent*
 
 	// Get all direct/indirect parent statements of type {parentType} of child statement indexed {child} 

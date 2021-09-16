@@ -75,6 +75,8 @@ public:
 		stmt = mStatements[PKBDesignEntity::AllExceptProcedure][targetIndexInMStatementsVector];
 
 		cout << "getStatement(int), STMT NUMBER EXTRCTED = " << stmt->getIndex() << endl;
+		cout << "getStatement(int), STMT = " << stmtNumber << endl;
+
 		assert(stmt->getIndex() == stmtNumber);
 		return true;
 	}
