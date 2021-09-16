@@ -256,6 +256,10 @@ public:
 	// General: Access PKB's unordered_map<string, PKBVariable::SharedPtr> mVariables;
 	vector<PKBVariable::SharedPtr> getAllVariables();
 
+	/* TODO: @nicholasnge Provide function to return all Constants in the program. */
+	unordered_set<int> getAllConstants();
+
+
 protected:
 	PQLEvaluator(PKB::SharedPtr pPKB) {
 		mpPKB = pPKB;

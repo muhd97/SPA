@@ -377,9 +377,10 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 
 	// now the call statement inherits from the procedure
 	res->addUsedVariables(procedureCalled->getUsedVariables());
-
 	addUsedVariable(PKBDesignEntity::Call, procedureCalled->getUsedVariables());
+
 	res->addModifiedVariables(procedureCalled->getModifiedVariables());
+	// addModifiedVariable(PKBDesignEntity::Call, procedureCalled->getModifiedVariables()); ADD THIS LINE?
 
 	if (procedureCalled->getModifiedVariables().size() > 0) {
 		//the procedure call modifies variable(s) within

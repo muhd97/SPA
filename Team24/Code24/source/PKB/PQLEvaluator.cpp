@@ -916,3 +916,9 @@ vector<PKBVariable::SharedPtr> PQLEvaluator::getAllVariables()
 
 	return move(vars);
 }
+
+/* TODO: @nicholasnge Provide function to return all Constants in the program. */
+unordered_set<int> PQLEvaluator::getAllConstants()
+{
+	return unordered_set<int>();
+}
