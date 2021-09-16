@@ -66,7 +66,7 @@ public:
 
 	// statement number, starting from index 1
 	PKBStatement::SharedPtr getStatement(int stmtNumber) {
-		if (stmtNumber >= (int)mStatements[PKBDesignEntity::AllExceptProcedure].size()) {
+		if (stmtNumber > (int)mStatements[PKBDesignEntity::AllExceptProcedure].size()) {
 			throw std::invalid_argument("Requested statement number higher than max number of statements");
 		}
 		// get the stmt from list of all statements

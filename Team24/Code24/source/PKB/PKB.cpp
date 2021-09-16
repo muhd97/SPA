@@ -386,6 +386,7 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 
 	addUsedVariable(PKBDesignEntity::Call, procedureCalled->getUsedVariables());
 	res->addModifiedVariables(procedureCalled->getModifiedVariables());
+	addModifiedVariable(PKBDesignEntity::Call, procedureCalled->getModifiedVariables());
 
 	if (procedureCalled->getModifiedVariables().size() > 0) {
 		//the procedure call modifies variable(s) within
