@@ -2,29 +2,29 @@
 
 
 
-vector<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
+set<int> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
 {
-	vector<pair<int, int>> res;
-	//PKBStatement::SharedPtr stmt;
-	//if (!mpPKB->getStatement(childIndex, stmt)) {
-	//	return res;
-	//}
+	set<int> res;
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(childIndex, stmt)) {
+		return res;
+	}
 
-	//PKBGroup::SharedPtr grp = stmt->getGroup();
-	//PKBStatement::SharedPtr parent;
-	//if (!mpPKB->getStatement(grp->getOwner(), parent)) {
-	//	return res;
-	//}
-	//
-	//if (parentType == PKBDesignEntity::AllExceptProcedure || parentType == parent->getType()) {
-	//	res.insert(parent->getIndex());
-	//}
+	PKBGroup::SharedPtr grp = stmt->getGroup();
+	PKBStatement::SharedPtr parent;
+	if (!mpPKB->getStatement(grp->getOwner(), parent)) {
+		return res;
+	}
+	
+	if (parentType == PKBDesignEntity::AllExceptProcedure || parentType == parent->getType()) {
+		res.insert(parent->getIndex());
+	}
 	return res;
 }
 
-vector<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity childType)
+set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	vector<pair<int, int>> res;
+	set<pair<int, int>> res;
 	//vector<int> temp;
 
 	//// if parentType is none of the container types, there are no such children
@@ -64,18 +64,20 @@ vector<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBD
 	return res;
 }
 
-vector<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity childType)
+set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity childType)
 {
 	return getParents(PKBDesignEntity::AllExceptProcedure, childType);
 }
 
-unordered_set<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex)
+
+set<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex)
 {
-	unordered_set<int> res;
+	set<int> res;
 	PKBStatement::SharedPtr stmt;
 	if (!mpPKB->getStatement(parentIndex, stmt)) {
 		return res;
 	}
+
 
 	if (!isContainerType(stmt->getType())) {
 		return res;
@@ -110,14 +112,16 @@ bool PQLEvaluator::hasChildren(PKBDesignEntity childType, int parentIndex) {
 	return false;
 }
 
-vector<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntity childType)
+set<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	vector<pair<int, int>> res;
+
+	set<pair<int, int>> res;
 	vector<int> temp;
 	// if parentType is none of the container types, there are no such children
 	if (!isContainerType(parentType)) {
 		return res;
 	}
+
 
 	// check if res is cached, if so return results
 	/*if (mpPKB->getCached(PKB::Relation::Child, parentType, childType, temp)) {
@@ -142,7 +146,7 @@ vector<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKB
 				pair<int, int> toAdd;
 				toAdd.first = stmt->getIndex();
 				toAdd.second = x;
-				res.emplace_back(toAdd);
+				res.insert(toAdd);
 			}
 
 			//res.insert(members.begin(), members.end());
@@ -155,14 +159,14 @@ vector<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKB
 	return res;
 }
 
-vector<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType)
+set<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType)
 {
 	return getChildren(PKBDesignEntity::AllExceptProcedure, parentType);
 }
 
-vector<pair<int, int>> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex)
+set<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex)
 {
-	vector<pair<int, int>> res;
+	set<int> res;
 
 	//// if parentType is none of the container types, there are no such parents
 	//if (!isContainerType(parentType)) {
@@ -190,9 +194,9 @@ vector<pair<int, int>> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int
 	return res;
 }
 
-vector<pair<int, int>> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType)
+set<pair<int, int>> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	vector<pair<int, int>> res;
+	set<pair<int, int>> res;
 	//vector<int> temp;
 
 	//// if parentType is none of the container types, there are no such parents
@@ -271,9 +275,9 @@ bool PQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignE
 	return false;
 }
 
-vector<pair<int, int>> PQLEvaluator::getParentsT(PKBDesignEntity childType)
+set<pair<int, int>> PQLEvaluator::getParentsT(PKBDesignEntity childType)
 {
-	vector<pair<int, int>> res;
+	set<pair<int, int>> res;
 
 	////todo @nicholas can optimise this ALOT, but not urgent for now (specifically, can optimise for procedure and AllExceptProcedure)
 	//unordered_set<int> ifRes = getParentsT(PKBDesignEntity::If, childType);
@@ -286,9 +290,9 @@ vector<pair<int, int>> PQLEvaluator::getParentsT(PKBDesignEntity childType)
 	return res;
 }
 
-vector<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentIndex)
+set<int> PQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentIndex)
 {
-	vector<pair<int, int>> res;
+	set<int> res;
 	//PKBStatement::SharedPtr parent;
 	//if (!mpPKB->getStatement(parentIndex, parent)) {
 	//	return res;
@@ -321,9 +325,9 @@ vector<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity childType, int
 }
 
 // todo @nicholas probably missing some edge case testing
-vector<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType)
+set<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	vector<pair<int, int>> res;
+	set<pair<int, int>> res;
 	//vector<int> temp;
 
 	//// if parentType is none of the container types, there are no such children
@@ -386,7 +390,7 @@ vector<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PK
 	return res;
 }
 
-vector<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity parentType)
+set<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity parentType)
 {
 	return getChildrenT(parentType, PKBDesignEntity::AllExceptProcedure);
 }

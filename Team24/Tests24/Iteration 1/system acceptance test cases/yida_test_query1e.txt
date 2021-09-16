@@ -1,5 +1,0 @@
-1 - Select all Assign statements - TargetSynonym Not in Uses(3, _)
-assign a;
-Select a such that Uses(3, _)
-1, 2, 3, 6, 7, 8
-25

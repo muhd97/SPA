@@ -287,6 +287,27 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     }
     case RelRefType::PARENT:
     {
+        shared_ptr<Parent> parentCl = static_pointer_cast<Parent>(suchThatCl->relRef);
+        StmtRefType leftType = parentCl->stmtRef1->getStmtRefType();
+        StmtRefType rightType = parentCl->stmtRef2->getStmtRefType();
+
+        /* Parent (_, ?) 
+        if (leftType == StmtRefType::UNDERSCORE) {
+
+        }
+
+        /* Parent (1, ?) */
+        if (leftType == StmtRefType::INTEGER) {
+            handleParentFirstArgInteger(selectCl, parentCl, toReturn);
+            break;
+        }
+
+        /* Parent (syn, ?) */
+
+        if (leftType == StmtRefType::SYNONYM) {
+
+        }
+
         break;
     }
     case RelRefType::PARENT_T:
@@ -963,6 +984,8 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl>& selectCl, s
     /* Parent(1, s) where s MUST be a synonym for a statement NOTE: Stmt/Read/Print/Call/While/If/Assign. Cannot be Procedure/Constant/Variable */
     if (rightArg->getStmtRefType() == StmtRefType::SYNONYM) {
 
+        cout << "HELoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n";
+
         const string& rightSynonym = rightArg->getStringVal();
         
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym, { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE })) {
@@ -1006,7 +1029,7 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl>& selectCl, s
         int rightArgInteger = rightArg->getIntVal();
 
         if (evaluator->mpPKB->getStatement(leftArgInteger, stmt)) {
-            unordered_set<int>& childrenIds = evaluator->getChildren(PKBDesignEntity::AllExceptProcedure, stmt->getIndex());
+            set<int>& childrenIds = evaluator->getChildren(PKBDesignEntity::AllExceptProcedure, stmt->getIndex());
 
             if (childrenIds.size() > 0u && (childrenIds.find(rightArgInteger) != childrenIds.end())) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -1032,7 +1055,7 @@ void PQLProcessor::handleParentFirstArgSyn(shared_ptr<SelectCl>& selectCl, share
     const string& leftSynonym = leftArg->getStringVal();
     
     /* Validate. Parent(syn, ?) where syn MUST not be a Procedure/Constant/Variable */
-    if (!givenSynonymMatchesMultipleTypes(selectCl, leftSynonym, { DesignEntity::IF, DesignEntity::WHILE, DesignEntity::CALL })) {
+    if (!givenSynonymMatchesMultipleTypes(selectCl, leftSynonym, { DesignEntity::IF, DesignEntity::WHILE})) {
         cout << "Special case. Parent(syn, ?), but syn is not a container type, thus it must have no children.\n";
         return;
     }
