@@ -4,11 +4,18 @@
 
 vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
 {
-	PKBStatement::SharedPtr stmt = mpPKB->getStatement(childIndex);
-	PKBGroup::SharedPtr grp = stmt->getGroup();
-	PKBStatement::SharedPtr parent = mpPKB->getStatement(grp->getOwner());
-	
 	vector<int> res;
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(childIndex, stmt)) {
+		return res;
+	}
+
+	PKBGroup::SharedPtr grp = stmt->getGroup();
+	PKBStatement::SharedPtr parent;
+	if (!mpPKB->getStatement(grp->getOwner(), parent)) {
+		return res;
+	}
+	
 	if (parentType == PKBDesignEntity::AllExceptProcedure || parentType == parent->getType()) {
 		res.emplace_back(parent->getIndex());
 	}
@@ -62,7 +69,11 @@ vector<int> PQLEvaluator::getParents(PKBDesignEntity childType)
 vector<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex)
 {
 	vector<int> res;
-	PKBStatement::SharedPtr stmt = mpPKB->getStatement(parentIndex);
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(parentIndex, stmt)) {
+		return res;
+	}
+
 	if (!isContainerType(stmt->getType())) {
 		return res;
 	}
@@ -127,12 +138,17 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex
 		return res;
 	}
 
-	PKBStatement::SharedPtr currentStatement = mpPKB->getStatement(childIndex);
+	PKBStatement::SharedPtr currentStatement;
+	if (!mpPKB->getStatement(childIndex, currentStatement)) {
+		return res;
+	}
 	do {
 		// recurse up the parent tree
 		// replace current statement with parent statement
-		int parentStatementIndex = currentStatement->getGroup()->getOwner(); 
-		currentStatement = mpPKB->getStatement(parentStatementIndex);
+		int parentStatementIndex = currentStatement->getGroup()->getOwner();
+		if (!mpPKB->getStatement(parentStatementIndex, currentStatement)) {
+			return res;
+		}
 		// if current statement type is the desired type, add it to the results list
 		if (currentStatement->getType() == parentType) {
 			res.emplace_back(parentStatementIndex);
@@ -206,7 +222,10 @@ bool PQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignE
 		// recursive step: on the childGroups of grp
 		if (hasEligibleChildRecursive(childGroup, parentType, childType, setResult)) {
 			// if one of grp's childGrps does have a child of desired type:
-			PKBStatement::SharedPtr childGroupOwner = mpPKB->getStatement(childGroup->getOwner());
+			PKBStatement::SharedPtr childGroupOwner;
+			if (!mpPKB->getStatement(childGroup->getOwner(), childGroupOwner)) {
+				return false;
+			}
 			// add the grp's childGrp if it also qualifies as a parent
 			if (childGroupOwner->getType() == parentType) {
 				setResult.insert(childGroupOwner->getIndex());
@@ -236,7 +255,10 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity childType)
 vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentIndex)
 {
 	vector<int> res;
-	PKBStatement::SharedPtr parent = mpPKB->getStatement(parentIndex);
+	PKBStatement::SharedPtr parent;
+	if (!mpPKB->getStatement(parentIndex, parent)) {
+		return res;
+	}
 
 	// if childType is procedure or parent is not even a container type, there are no such children
 	if (childType == PKBDesignEntity::Procedure || !isContainerType(parent->getType())) {
@@ -337,7 +359,11 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType)
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 {
 	vector<int> res;
-	PKBStatement::SharedPtr stmt = mpPKB->getStatement(afterIndex);
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(afterIndex, stmt)) {
+		return res;
+	}
+
 	PKBStatement::SharedPtr stmtBefore;
 	if (!getStatementBefore(stmt, stmtBefore)) {
 		return res;
@@ -360,7 +386,9 @@ bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, P
 	for (int i = 0; i < members.size(); i++) {
 		if (statementAfter->getIndex() == members[i] && i != 0) {
 			int idxToCheck = members[--i];
-			result = mpPKB->getStatement(idxToCheck);
+			if (!mpPKB->getStatement(idxToCheck, result)) {
+				return false;
+			}
 			return true;
 		}
 	}
@@ -384,7 +412,9 @@ bool PQLEvaluator::getStatementAfter(PKBStatement::SharedPtr& statementBefore, P
 	for (int i = 0; i < members.size(); i++) {
 		if (statementBefore->getIndex() == members[i] && i != members.size() - 1) {
 			int idxToCheck = members[++i];
-			result = mpPKB->getStatement(idxToCheck);
+			if (!mpPKB->getStatement(idxToCheck, result)) {
+				return false;
+			}			
 			return true;
 		}
 	}
@@ -433,7 +463,10 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
 	vector<int> res;
 	cout << "getAfter(PKBDe, int) \n";
 
-	PKBStatement::SharedPtr stmt = mpPKB->getStatement(beforeIndex);
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(beforeIndex, stmt)) {
+		return res;
+	}
 	PKBStatement::SharedPtr stmtAfter;
 
 	cout << "getAfter(PKBDE, int) After extracting stmt\n";
@@ -491,11 +524,14 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType)
 
 vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, int afterIndex)
 {
-	PKBStatement::SharedPtr statement = mpPKB->getStatement(afterIndex);
+	vector<int> res;
+	PKBStatement::SharedPtr statement;
+	if (!mpPKB->getStatement(afterIndex, statement)) {
+		return res;
+	}
 	PKBGroup::SharedPtr grp = statement->getGroup();
 	vector<int> grpStatements = grp->getMembers(beforeType);
 
-	vector<int> res;
 	// assume ascending order of line numbers
 	for (int statementIndex : grpStatements) {
 		// we've seen past ourself, we can stop now (we could search past since we are searching specific type only)
@@ -512,12 +548,9 @@ vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity
 {
 	vector<int> res;
 
-	// if before type is a container, it can never be in the same nesting level
-	if (beforeType == PKBDesignEntity::If 
-		|| beforeType == PKBDesignEntity::While 
-		|| beforeType == PKBDesignEntity::Procedure 
-		|| afterType == PKBDesignEntity::Procedure) {
-		return res;
+	// if before type is a procedure, it can never be in the same nesting level
+	if (beforeType == PKBDesignEntity::Procedure) {
+		return vector<int>();
 	}
 
 	// check if result is cached, if so return results
@@ -529,7 +562,10 @@ vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity
 	// get all the 'after' users first
 	vector<PKBStatement::SharedPtr> afterStatements = mpPKB->getStatements(afterType);
 	// keeps track of the furthest statement number seen, so we dont double add users seen b4
-	int furthestIndexSeen = 0; 
+	set<int> tempRes;
+	for (auto& afterStatement : afterStatements) {
+		cout << afterStatement->getIndex();
+	}
 	for (auto& afterStatement : afterStatements) {
 		PKBGroup::SharedPtr grp = afterStatement->getGroup();
 		// get 'before' users of the desired type in the same group as the after statement
@@ -539,14 +575,10 @@ vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity
 			if (beforeStatement >= afterStatement->getIndex()) {
 				break; // this should break back into the outer loop and move the statement index
 			}
-			// if we havent seen this before, add it to result (again, possible because ascending line numbers)
-			else if (beforeStatement > furthestIndexSeen) {
-				res.emplace_back(beforeStatement);
-				furthestIndexSeen = beforeStatement;
-			}
+			tempRes.insert(beforeStatement);
 		}
 	}
-
+	res = vector<int>(tempRes.begin(), tempRes.end());
 	//insert result into cache
 	mpPKB->insertintoCache(PKB::Relation::BeforeT, beforeType, afterType, res);
 	return res;
@@ -559,11 +591,14 @@ vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity afterType)
 
 vector<int> PQLEvaluator::getAfterT(PKBDesignEntity afterType, int beforeIndex)
 {
-	PKBStatement::SharedPtr statement = mpPKB->getStatement(beforeIndex);
+	vector<int> res;
+	PKBStatement::SharedPtr statement;
+	if (!mpPKB->getStatement(beforeIndex, statement)) {
+		return res;
+	}
 	PKBGroup::SharedPtr grp = statement->getGroup();
 	vector<int> grpMembers = grp->getMembers(afterType);
 
-	vector<int> res;
 	// this loops from the back, r stands for reverse
 	// todo @nicholas possible bug place, may be using rbegin wrong
 	for (auto& afterIndex = grpMembers.rbegin(); afterIndex != grpMembers.rend(); ++afterIndex) {
@@ -597,10 +632,7 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 	// get results manually
 	// get all the 'before' users first
 	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(beforeType);
-
-	// keeps track of the earliest statement number we've seen, so we dont double add users seen b4
-	int earliestIndexSeen = INT_MAX;
-
+	set<int> tempRes;
 	//count from the back, using rbegin and rend
 	for (auto& beforeStatement = beforeStatements.rbegin(); beforeStatement != beforeStatements.rend(); ++beforeStatement) {
 		PKBGroup::SharedPtr grp = (*beforeStatement)->getGroup();
@@ -610,15 +642,12 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 			if (*afterStatement <= (*beforeStatement)->getIndex()) {
 				break; // this should break back into the outer loop
 			}
-			// if we havent seen this before, add it to result (count from the back again)
-			else if (*afterStatement < earliestIndexSeen) {
-				res.emplace_back(*afterStatement);
-				earliestIndexSeen = *afterStatement;
-			}
+			tempRes.insert(*afterStatement);	
 		}
 	}
 
 	//insert result into cache
+	res = vector<int>(tempRes.begin(), tempRes.end());
 	mpPKB->insertintoCache(PKB::Relation::AfterT, beforeType, afterType, res);
 	return res;
 }
@@ -630,22 +659,33 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType)
 
 vector<string> PQLEvaluator::getUsed(int statementIndex)
 {
-	PKBStatement::SharedPtr stmt = mpPKB->getStatement(statementIndex);
-	set<PKBVariable::SharedPtr> vars = stmt->getUsedVariables();
-	return varToString(move(vars));
+	set<PKBVariable::SharedPtr> res;
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(statementIndex, stmt)) {
+		return varToString(move(res));
+	}
+	res = stmt->getUsedVariables();
+	return varToString(move(res));
 }
 
 bool PQLEvaluator::checkUsed(int statementIndex)
 {
-	return mpPKB->getStatement(statementIndex)->getUsedVariablesSize() > 0;
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(statementIndex, stmt)) {
+		return false;
+	}
+	return (stmt->getUsedVariablesSize() > 0);
 }
 
 bool PQLEvaluator::checkUsed(int statementIndex, string ident)
 {
 	PKBVariable::SharedPtr targetVar;
 	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr) return false;
-	
-	set<PKBVariable::SharedPtr>& allVars = mpPKB->getStatement(statementIndex)->getUsedVariables();
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(statementIndex, stmt)) {
+		return false;
+	}
+	set<PKBVariable::SharedPtr>& allVars = stmt->getUsedVariables();
 	return allVars.find(targetVar) != allVars.end();
 }
 
@@ -747,7 +787,10 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName
 
 	// filter only the desired type
 	for (int userIndex : users) {
-		PKBStatement::SharedPtr userStatement = mpPKB->getStatement(userIndex);
+		PKBStatement::SharedPtr userStatement;
+		if (!mpPKB->getStatement(userIndex, userStatement)) {
+			return res;
+		}
 		if (userStatement->getType() == userType) {
 			res.emplace_back(userIndex);
 		}
@@ -886,7 +929,10 @@ bool PQLEvaluator::checkAnyProceduresModifyVar(string variableName)
 /* Get all variable names modified by the particular statement */
 vector<string> PQLEvaluator::getModified(int statementIndex)
 {
-	PKBStatement::SharedPtr stmt = mpPKB->getStatement(statementIndex);
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(statementIndex, stmt)) {
+		return vector<string>();
+	}
 	set<PKBVariable::SharedPtr> vars = stmt->getModifiedVariables();
 	return varToString(vars);
 }
@@ -967,7 +1013,10 @@ vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string vari
 
 	// filter only the desired type
 	for (int modifierIndex : modifiers) {
-		PKBStatement::SharedPtr modifierStatement = mpPKB->getStatement(modifierIndex);
+		PKBStatement::SharedPtr modifierStatement;
+		if (!mpPKB->getStatement(modifierIndex, modifierStatement)) {
+			return res;
+		}
 		if (modifierStatement->getType() == modifierType) {
 			res.emplace_back(modifierIndex);
 		}
