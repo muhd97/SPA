@@ -417,11 +417,9 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 
 bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, PKBStatement::SharedPtr& result) {
 // find the statement before in the stmt's group
-	cout << "AFTER: " << statementAfter->getIndex() << endl;
 	PKBGroup::SharedPtr grp = statementAfter->getGroup();
 	vector<int>& members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
 	for (int i = 0; i < members.size(); i++) {
-		cout << "member: " << members[i] << endl;
 		if (statementAfter->getIndex() == members[i]) {
 			if (i == 0) {
 				return false;
@@ -434,16 +432,6 @@ bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, P
 		}
 	}
 	return false;
-
-
-	//for (auto& member = members.begin(); member < members.end(); member++) {
-	//	if (statementAfter->getIndex() == *member && member != members.begin()) {
-	//		member--;
-	//		res = mpPKB->getStatement(*member);
-	//		return true;
-	//	}
-	//}
-	//return false;
 }
 
 bool PQLEvaluator::getStatementAfter(PKBStatement::SharedPtr& statementBefore, PKBStatement::SharedPtr& result) {
@@ -604,9 +592,6 @@ vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity
 	vector<PKBStatement::SharedPtr> afterStatements = mpPKB->getStatements(afterType);
 	// keeps track of the furthest statement number seen, so we dont double add users seen b4
 	set<int> tempRes;
-	for (auto& afterStatement : afterStatements) {
-		cout << afterStatement->getIndex();
-	}
 	for (auto& afterStatement : afterStatements) {
 		PKBGroup::SharedPtr grp = afterStatement->getGroup();
 		// get 'before' users of the desired type in the same group as the after statement

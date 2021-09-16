@@ -7,6 +7,7 @@
 #include "PKBDesignEntity.h"
 #include "PKBStatement.h"
 #include "../SimpleAST.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -76,8 +77,6 @@ public:
 		/* YIDA Note: vector<> of statements is 0-based, stmtNumber is 1-based. Need to substract 1. */
 		int targetIndexInMStatementsVector = stmtNumber - 1;
 		stmt = mStatements[PKBDesignEntity::AllExceptProcedure][targetIndexInMStatementsVector];
-
-		cout << "getStatement(int), STMT NUMBER EXTRCTED = " << stmt->getIndex() << endl;
 		cout << "getStatement(int), STMT = " << stmtNumber << endl;
 
 		assert(stmt->getIndex() == stmtNumber);

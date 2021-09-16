@@ -30,6 +30,11 @@ void PKB::extractDesigns(shared_ptr<Program> program) {
 			extractProcedure(procedure);
 		}
 	}
+
+	std::sort(mStatements[PKBDesignEntity::AllExceptProcedure].begin(), mStatements[PKBDesignEntity::AllExceptProcedure].end(), 
+		[](const PKBStatement::SharedPtr& a, const PKBStatement::SharedPtr& b) -> bool{
+			return a->getIndex() < b->getIndex();
+		});
 }
 
 PKBStatement::SharedPtr PKB::extractStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& group) {
