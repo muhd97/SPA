@@ -97,12 +97,25 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure>& procedureSi
 		}
 	}
 	
+	set<PKBVariable::SharedPtr> varsModifiedByGroup = group->getModifiedVariables();
+	for (auto& ptr : varsModifiedByGroup) {
+		if (mVariableNameToProceduresThatModifyVarsMap.find(ptr->getName()) == mVariableNameToProceduresThatModifyVarsMap.end()) {
+			mVariableNameToProceduresThatModifyVarsMap[ptr->getName()] = {res};
+		} else {
+			mVariableNameToProceduresThatModifyVarsMap[ptr->getName()].insert(res);
+		}
+	}
+
 	// now the original statement inherits from the group
 	res->addUsedVariables(move(varsUsedByGroup));
 	res->addModifiedVariables(group->getModifiedVariables());
 
 	if (res->getUsedVariables().size() > 0) {
 		setOfProceduresThatUseVars.insert(res);
+	}
+
+	if (res->getModifiedVariables().size() > 0) {
+		mProceduresThatModifyVars.insert(res);
 	}
 
 	return res;
@@ -376,9 +389,10 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement>& stateme
 
 	if (procedureCalled->getModifiedVariables().size() > 0) {
 		//the procedure call modifies variable(s) within
-		designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::If].insert(res);
+		designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::Call].insert(res);
 		mAllModifyStmts.insert(res);
 	}
+	
 	if (res->getUsedVariables().size() > 0) {
 		mAllUseStmts.insert(res);
 		designEntityToStatementsThatUseVarsMap[PKBDesignEntity::Call].insert(res);

@@ -123,6 +123,10 @@ private:
     bool verifyUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl);
     bool verifyUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl);
     bool verifyUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesCl);
+    bool verifyModifiesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesS>& modifiesCl);
+    bool verifyModifiesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesS>& modifiesCl);
+    bool verifyModifiesPFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesP>& modifiesCl);
+    bool verifyModifiesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesP>& modifiesCl);
     bool verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl);
     bool verifyPatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl);
 

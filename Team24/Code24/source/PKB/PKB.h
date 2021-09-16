@@ -57,6 +57,9 @@ public:
 	set<PKBStatement::SharedPtr> mAllModifyStmts; // statements that modify a variable
 	unordered_map<PKBDesignEntity, set<PKBStatement::SharedPtr>> designEntityToStatementsThatModifyVarsMap;
 
+	set<PKBStatement::SharedPtr> mProceduresThatModifyVars; //procedures that modify at least one variable
+	unordered_map<string, set<PKBStatement::SharedPtr>> mVariableNameToProceduresThatModifyVarsMap;
+
 	// YIDA: map used to keep track of extracted Procedures during DesignExtraction, will need it after design extraction to easily access Procedures
 	// if a procedure has been extracted, it will be present in this map, else it has not been extracted
 	unordered_map<string, PKBStatement::SharedPtr> procedureNameToProcedureMap;

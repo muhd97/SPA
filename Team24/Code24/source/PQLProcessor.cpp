@@ -212,57 +212,82 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         }
 
         if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
-            if (selectCl->getDesignEntityTypeBySynonym(stmtRef->getStringVal()) != STMT) { // Modifies (1, x), x is NOT a variable
-                throw "Must not enter ModifiesS if the first argument is not a statement";
-            }
+            // This is handling for both statement and procedure in Iteration 1. Need to change to make sure procedures are handled in ModifiesP
 
             if (entRef->getEntRefType() == EntRefType::IDENT) {
+                shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
+                PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
+                string identVarName = entRef->getStringVal();
 
-            }
-
-            if (entRef->getEntRefType() == EntRefType::SYNONYM) {
-                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { // Modifies (1, x), x is NOT a variable
-                    throw "Modifies(1, p), but p is not a variable delcaration.\n";
-                } else {
-                    if (singleRefSynonymMatchesTargetSynonym(stmtRef, selectCl) && !targetSynonymMatchesMultipleTypes(selectCl, {PROCEDURE, CALL})) { //Select s such that Modifies (s, v)
-                        shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
-                        PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-
-                        for (auto& s : evaluator->getModifiers(pkbDe)) {
-                            toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
-                        }
+                /* Uses (syn, "IDENT") -> syn is a procedure. */
+                if (targetSynonymIsProcedure(selectCl)) {
+                    for (auto& p : evaluator->getProceduresThatModifyVar(identVarName)) {
+                        toReturn.emplace_back(make_shared<ProcedureNameSingleResult>(move(p)));
                     }
-
-                    if (singleRefSynonymMatchesTargetSynonym(entRef, selectCl)) { //Select v such that Modifies (s, v)
-                        shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
-                        PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-
-                        for (auto& v : evaluator->getModified(pkbDe)) {
-                            toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(v)));
-                        }
+                } else {
+                    for (auto& s : evaluator->getModifiers(pkbDe, move(identVarName))) {
+                        toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
                     }
                 }
             }
 
-            if (entRef->getEntRefType() == EntRefType::UNDERSCORE) { //Modifies(s,_)
-                //Must mean that the stmtRef's synonym matches the target synonym of the select clause
-                if (singleRefSynonymMatchesTargetSynonym(stmtRef, selectCl)) {
+            if (entRef->getEntRefType() == EntRefType::SYNONYM || entRef->getEntRefType() == EntRefType::UNDERSCORE) {
+                if (entRef->getEntRefType() == EntRefType::SYNONYM && selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { // Modifies (s, x), x is NOT a variable
+                    throw "Modifies(s, p), but p is not a variable delcaration.\n";
+                }            
+                if (singleRefSynonymMatchesTargetSynonym(entRef, selectCl)) { //Select v such that Modifies (s, v)
                     shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
                     PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
-                    for (auto& s : evaluator->getModifiers()) {
+                    for (auto& v : evaluator->getModified(pkbDe)) {
+                        toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(v)));
+                    }
+                }
+
+                if (singleRefSynonymMatchesTargetSynonym(stmtRef, selectCl) && !targetSynonymMatchesMultipleTypes(selectCl, {PROCEDURE, CALL})) { //Select s such that Modifies (s, v)
+                    shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
+                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
+
+                    for (auto& s : evaluator->getModifiers(pkbDe)) {
                         toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
                     }
-                } else {
-                    throw "This line should have never reached! The target synonym must match the stmtRef synonym in this case.";
+                }
+
+                /* Modifies (syn, v) -> Select syn (only select statements of type syn that use a variable) syn = PROCEDURE */
+                if (singleRefSynonymMatchesTargetSynonym(stmtRef, selectCl) && targetSynonymIsProcedure(selectCl)) {
+                    shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
+                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
+
+                    for (auto& s : evaluator->getProceduresThatModifyVars()) {
+                        toReturn.emplace_back(make_shared<ProcedureNameSingleResult>(move(s)));
+                    }
                 }
             }
         }
 
         break;
     }
-    case RelRefType::MODIFIES_P: /* Modifies("IDENT", v) where v must be a variable. */
+    case RelRefType::MODIFIES_P: /* Modifies("IDENT", ...) where IDENT must be a procedure */
     {
+        shared_ptr<ModifiesP> modifiesCl = static_pointer_cast<ModifiesP>(suchThatCl->relRef);
+        shared_ptr<EntRef>& entRefLeft = modifiesCl->entRef1;
+        shared_ptr<EntRef>& entRefRight = modifiesCl->entRef2;
+        EntRefType leftType = entRefLeft->getEntRefType();
+        EntRefType rightType = entRefRight->getEntRefType();
+
+        assert(leftType == EntRefType::IDENT);
+
+        if (rightType == EntRefType::SYNONYM) {
+            /* Uses ("PROC_IDENTIFER", v) Select variable v. */
+            if (targetSynonymMatchesMultipleTypes(selectCl, { DesignEntity::VARIABLE })) {
+                for (auto& s : evaluator->getModifiedByProcName(modifiesCl->entRef1->getStringVal())) {
+                    toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
+                }
+            }
+        } else {
+            throw "Implementation Error: Should not come here. This case should have been handled by no target synonym.";
+        }
+
         break;
     }
     case RelRefType::PARENT:
@@ -647,6 +672,108 @@ bool PQLProcessor::verifyUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shar
     return false;
 }
 
+/* PRE-CONDITION: Target synonym of the SelectCl must NOT be isnide the SuchThat clause. */
+bool PQLProcessor::verifyModifiesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesS>& modifiesCl)
+{
+    shared_ptr<StmtRef>& leftArg = modifiesCl->stmtRef;
+    shared_ptr<EntRef>& rightArg = modifiesCl->entRef;
+    EntRefType rightType = modifiesCl->entRef->getEntRefType();
+
+    assert(leftArg->getStmtRefType() == StmtRefType::SYNONYM);
+
+    if (rightType == EntRefType::SYNONYM) {
+        // Check if rightArg is VARIABLE
+        if (selectCl->getDesignEntityTypeBySynonym(rightArg->getStringVal()) != DesignEntity::VARIABLE) {
+            cout << "A synonym used in the second argument of Modifies clause must be a variable!";
+            return false;
+        }
+
+        return evaluator->checkModified(leftArg->getIntVal());
+    }
+    
+    if (rightType == EntRefType::UNDERSCORE) {
+        return evaluator->checkModified(leftArg->getIntVal());
+    } 
+
+    if (rightType == EntRefType::IDENT) {
+        return evaluator->checkModified(leftArg->getIntVal(), rightArg->getStringVal());
+    }
+}
+
+
+/* PRE-CONDITION: Target synonym of the SelectCl must NOT be inside the SuchThat clause. */
+/* This is to verify for both ModifiesS and ModifiesP where the first argument is a synonym  */
+bool PQLProcessor::verifyModifiesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesS>& modifiesCl)
+{
+    shared_ptr<StmtRef>& leftArg = modifiesCl->stmtRef;
+    shared_ptr<EntRef>& rightArg = modifiesCl->entRef;
+    EntRefType rightType = modifiesCl->entRef->getEntRefType();
+    string& leftType = selectCl->getDesignEntityTypeBySynonym(leftArg->getStringVal());
+
+    assert(leftArg->getStmtRefType() == StmtRefType::SYNONYM);
+
+    //check if the right arg that is a synonym is a variable
+    if (rightType == EntRefType::SYNONYM && selectCl->getDesignEntityTypeBySynonym(rightArg->getStringVal()) != DesignEntity::VARIABLE) {
+        cout << "TODO: Handle Modifies error case: Synonym in second arg of Modifies() must be declared VARIABLE\n";
+        return false;
+    }
+
+    if (rightType == EntRefType::SYNONYM || rightType == EntRefType::UNDERSCORE) {
+        if (leftType != DesignEntity::PROCEDURE) {
+            return evaluator->checkModified(resolvePQLDesignEntityToPKBDesignEntity(leftType));
+        }
+
+        if (leftType == DesignEntity::PROCEDURE) {
+            return evaluator->checkAnyProceduresModifyVars();
+        }
+    }
+
+    if (rightType == EntRefType::IDENT) {
+        if (leftType != DesignEntity::PROCEDURE) {
+            return evaluator->checkModified(resolvePQLDesignEntityToPKBDesignEntity(leftType), rightArg->getStringVal());
+        }
+
+        if (leftType == DesignEntity::PROCEDURE) {
+            return evaluator->checkAnyProceduresModifyVar(rightArg->getStringVal());
+        }
+    }
+
+    return false;
+}
+
+/* PRE-CONDITION: Target synonym of the SelectCl must NOT be inside the SuchThat clause. */
+bool PQLProcessor::verifyModifiesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shared_ptr<ModifiesP>& modifiesCl)
+{
+
+    shared_ptr<EntRef>& leftArg = modifiesCl->entRef1;
+    shared_ptr<EntRef>& rightArg = modifiesCl->entRef2;
+
+    assert(leftArg->getEntRefType() == EntRefType::IDENT);    
+
+    EntRefType rightType = modifiesCl->entRef2->getEntRefType();
+    string identName = leftArg->getStringVal();
+
+
+    if (rightType == EntRefType::SYNONYM) {
+        // Check if rightArg is VARIABLE
+        if (selectCl->getDesignEntityTypeBySynonym(rightArg->getStringVal()) != DesignEntity::VARIABLE) {
+            cout << "TODO: Handle Modifies error case: Synonym in second arg of Modifies() must be declared VARIABLE\n";
+            return false;
+        }
+        return evaluator->checkModifiedByProcName(identName);
+    }
+
+    if (rightType == EntRefType::UNDERSCORE) {
+        return evaluator->checkModifiedByProcName(identName);
+    }
+
+    if (rightType == EntRefType::IDENT) {
+        return evaluator->checkModifiedByProcName(identName, rightArg->getStringVal());
+    }
+
+    return false;
+}
+
 /* PRE-CONDITION: Target synonym of the SelectCl must NOT be inside the SuchThat clause. */
 bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl)
 {
@@ -681,13 +808,34 @@ bool PQLProcessor::verifySuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         shared_ptr<UsesP> usesCl = static_pointer_cast<UsesP>(suchThatCl->relRef);
         return verifyUsesPFirstArgIdent(selectCl, usesCl);
     }
-    case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
+    case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT or where s is a PROCEDURE by synonym. */
     {
-       
+        shared_ptr<ModifiesS> modifiesCl = static_pointer_cast<ModifiesS>(suchThatCl->relRef);
+        StmtRefType leftType = modifiesCl->stmtRef->getStmtRefType();
+        EntRefType rightType = modifiesCl->entRef->getEntRefType();
+
+        /* Modifies (1, ?) */
+        if (leftType == StmtRefType::INTEGER) {
+            return verifyModifiesSFirstArgInteger(selectCl, modifiesCl);
+        }
+        
+        /* Uses (syn, ?) */
+        if (leftType == StmtRefType::SYNONYM) {
+            return verifyModifiesSFirstArgSyn(selectCl, modifiesCl);
+        }
+
+        /* Uses (_, ?) ILLEGAL */
+        if (leftType == StmtRefType::UNDERSCORE) {
+            cout << "TODO: Handle Modifies error case: First arg of ModifiesS cannot be an UNDERSCORE\n";
+            return false;
+        }
+
         break;
     }
     case RelRefType::MODIFIES_P: /* Modifies("IDENT", v) where v must be a variable. */
     {
+        shared_ptr<ModifiesP> modifiesCl = static_pointer_cast<ModifiesP>(suchThatCl->relRef);
+        return verifyModifiesPFirstArgIdent(selectCl, modifiesCl);
         break;
     }
     case RelRefType::PARENT:
