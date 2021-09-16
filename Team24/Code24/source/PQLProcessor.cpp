@@ -281,22 +281,49 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     }
     case RelRefType::FOLLOWS:
     {
-        /* ==================================== REMEMBER TO UNCOMMENT UNTIL BREAK ====================================*/
+        shared_ptr<Follows> followsCl = static_pointer_cast<Follows>(suchThatCl->relRef);
+        
+        StmtRefType stmtRef1 = followsCl->stmtRef1->getStmtRefType();
+        StmtRefType stmtRef2 = followsCl->stmtRef2->getStmtRefType();
 
-//        shared_ptr<Follows> followsCl = static_pointer_cast<Follows>(suchThatCl->relRef);
-//        shared_ptr<StmtRef>& stmtRef1 = followsCl->stmtRef1;
-//        shared_ptr<StmtRef>& stmtRef2 = followsCl->stmtRef2;
-//
-//        /* Follows (1, ?) */
-//        if (stmtRef1->getStmtRefType() == StmtRefType::INTEGER) {
-//            
-//            vector<int> statementsFollowedByStmtNo = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, stmtRef1->getIntVal());
-//            
-//            for (auto& s : statementsFollowedByStmtNo) {
-//                toReturn.emplace_back(make_shared<StmtLineSingleResult>(move(s)));
-//            }
-//            break;
-//        }
+        /* Follows (1, ?) */
+        if (stmtRef1 == StmtRefType::INTEGER) {
+
+            shared_ptr<StmtRef>& stmtRef1 = followsCl->stmtRef1;
+            assert(stmtRef1->getStmtRefType() == StmtRefType::INTEGER);
+            vector<int> statementsFollowedByStmtNo = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, stmtRef1->getIntVal());
+            shared_ptr<Synonym> targetSynonym = selectCl->targetSynonym;
+            if (followsCl->stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) {
+
+                shared_ptr<StmtRef>& stmtRef2 = followsCl->stmtRef2;
+                const string& rightSynonymKey = stmtRef2->getStringVal();
+
+                for (auto& s : statementsFollowedByStmtNo) {
+
+                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                    /* Map the value returned to this particular synonym. */
+                    tupleToAdd->insertKeyValuePair(rightSynonymKey, to_string(s));
+
+                    /* Add this tuple into the vector to tuples to return. */
+                    toReturn.emplace_back(move(tupleToAdd));
+                }
+                break;
+            }
+
+            if (followsCl->stmtRef2->getStmtRefType() == StmtRefType::UNDERSCORE) {
+                
+                    /* Create the result tuple */
+                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                    string ident = followsCl->stmtRef2->getStringVal();
+                    tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(stmtRef1->getIntVal()));
+                    toReturn.emplace_back(tupleToAdd);                
+            }
+        }
+        /*if (stmtRef1 == StmtRefType::SYNONYM) {
+            break;
+        }*/
+
 //
 //        /* Follows (syn, ?) or Follows (_, ?) -> Select ?*/  
 //        else if ((stmtRef1->getStmtRefType() == StmtRefType::SYNONYM || stmtRef1->getStmtRefType() == StmtRefType::UNDERSCORE) && singleRefSynonymMatchesTargetSynonym(stmtRef2, selectCl)) {
