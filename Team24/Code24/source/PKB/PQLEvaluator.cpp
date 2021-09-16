@@ -2,9 +2,9 @@
 
 
 
-vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
+unordered_set<int> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
 {
-	vector<int> res;
+	unordered_set<int> res;
 	PKBStatement::SharedPtr stmt;
 	if (!mpPKB->getStatement(childIndex, stmt)) {
 		return res;
@@ -17,26 +17,28 @@ vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
 	}
 	
 	if (parentType == PKBDesignEntity::AllExceptProcedure || parentType == parent->getType()) {
-		res.emplace_back(parent->getIndex());
+		res.insert(parent->getIndex());
 	}
 	return res;
 }
 
-vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity childType)
+unordered_set<int> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	vector<int> res;
+	unordered_set<int> res;
+	vector<int> temp;
 
 	// if parentType is none of the container types, there are no such children
 	if (!isContainerType(parentType)) {
 		return res;
 	}
 
-	// check if result is cached, if so return results
-	if (mpPKB->getCached(PKB::Relation::Parent, parentType, childType, res)) {
+	// check if res is cached, if so return results
+	if (mpPKB->getCached(PKB::Relation::Parent, parentType, childType, temp)) {
+		res.insert(temp.begin(), temp.end());
 		return res;
 	}
 
-	// if not cached, we find the result manually and insert it into the cache
+	// if not cached, we find the res manually and insert it into the cache
 	vector<PKBStatement::SharedPtr> parentStmts; 
 	if (parentType == PKBDesignEntity::AllExceptProcedure) {
 		addParentStmts(parentStmts);
@@ -50,25 +52,26 @@ vector<int> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity
 		// if this statement's container group contains at least one child of required type, add statement to our results
 		for (auto& grp : grps) {
 			if (!grp->getMembers(childType).empty()) {
-				res.emplace_back(stmt->getIndex());
+				res.insert(stmt->getIndex());
 				break; // this should break out of the inner loop over child groups
 			}
 		}
 	}
 	
 	// insert into cache for future use
-	mpPKB->insertintoCache(PKB::Relation::Parent, parentType, childType, res);
+	temp.insert(temp.end(), res.begin(), res.end());
+	mpPKB->insertintoCache(PKB::Relation::Parent, parentType, childType, temp);
 	return res;
 }
 
-vector<int> PQLEvaluator::getParents(PKBDesignEntity childType)
+unordered_set<int> PQLEvaluator::getParents(PKBDesignEntity childType)
 {
 	return getParents(PKBDesignEntity::AllExceptProcedure, childType);
 }
 
-vector<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex)
+unordered_set<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex)
 {
-	vector<int> res;
+	unordered_set<int> res;
 	PKBStatement::SharedPtr stmt;
 	if (!mpPKB->getStatement(parentIndex, stmt)) {
 		return res;
@@ -81,28 +84,48 @@ vector<int> PQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex
 		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
 		for (auto& grp : grps) {
 			vector<int> grpStatements = grp->getMembers(childType);
-			res.insert(res.begin(), grpStatements.begin(), grpStatements.end());
+			res.insert(grpStatements.begin(), grpStatements.end());
 		}
 	}
 	
 	return res;
 }
 
-vector<int> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntity childType)
-{
-	vector<int> res;
+bool PQLEvaluator::hasChildren(PKBDesignEntity childType, int parentIndex) {
+	PKBStatement::SharedPtr stmt;
+	if (!mpPKB->getStatement(parentIndex, stmt)) {
+		return false;
+	}
 
+	if (!isContainerType(stmt->getType())) {
+		return false;
+	}
+
+	vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+	for (auto& grp : grps) {
+		if (!grp->getMembers(childType).empty()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+unordered_set<int> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntity childType)
+{
+	unordered_set<int> res;
+	vector<int> temp;
 	// if parentType is none of the container types, there are no such children
 	if (!isContainerType(parentType)) {
 		return res;
 	}
 
-	// check if result is cached, if so return results
-	if (mpPKB->getCached(PKB::Relation::Child, parentType, childType, res)) {
+	// check if res is cached, if so return results
+	if (mpPKB->getCached(PKB::Relation::Child, parentType, childType, temp)) {
+		res.insert(temp.begin(), temp.end());
 		return res;
 	}
 
-	// if not cached, we find the result manually and insert it into the cache
+	// if not cached, we find the res manually and insert it into the cache
 	vector<PKBStatement::SharedPtr> parentStmts;
 	if (parentType == PKBDesignEntity::AllExceptProcedure) {
 		addParentStmts(parentStmts);
@@ -115,23 +138,24 @@ vector<int> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntit
 		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
 		for (auto& grp : grps) {
 			vector<int> members = grp->getMembers(childType);
-			res.insert(res.end(), members.begin(), members.end());
+			res.insert(members.begin(), members.end());
 		}
 	}
 
 	// insert into cache for future use
-	mpPKB->insertintoCache(PKB::Relation::Child, parentType, childType, res);
+	temp.insert(temp.end(), res.begin(), res.end());
+	mpPKB->insertintoCache(PKB::Relation::Child, parentType, childType, temp);
 	return res;
 }
 
-vector<int> PQLEvaluator::getChildren(PKBDesignEntity parentType)
+unordered_set<int> PQLEvaluator::getChildren(PKBDesignEntity parentType)
 {
 	return getChildren(PKBDesignEntity::AllExceptProcedure, parentType);
 }
 
-vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex)
+unordered_set<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex)
 {
-	vector<int> res;
+	unordered_set<int> res;
 
 	// if parentType is none of the container types, there are no such parents
 	if (!isContainerType(parentType)) {
@@ -151,7 +175,7 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex
 		}
 		// if current statement type is the desired type, add it to the results list
 		if (currentStatement->getType() == parentType) {
-			res.emplace_back(parentStatementIndex);
+			res.insert(parentStatementIndex);
 		}
 	} while (currentStatement->getType() != PKBDesignEntity::Procedure); 
 	// we recurse until our 'statement' is actually a Procedure, then we cant go further up no more
@@ -159,18 +183,20 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex
 	return res;
 }
 
-vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType)
+unordered_set<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	vector<int> result;
+	unordered_set<int> res;
+	vector<int> temp;
 
 	// if parentType is none of the container types, there are no such parents
 	if (!isContainerType(parentType)) {
-		return result;
+		return res;
 	}
 
-	// check if result is cached, if so return results
-	if (mpPKB->getCached(PKB::Relation::ParentT, parentType, childType, result)) {
-		return result;
+	// check if res is cached, if so return results
+	if (mpPKB->getCached(PKB::Relation::ParentT, parentType, childType, temp)) {
+		res.insert(temp.begin(), temp.end());
+		return res;
 	}
 
 	// if parentType is PKBDesignEntity::AllExceptProcedure call the other function instead (temporarily doing this because im scared of bugs)
@@ -178,7 +204,7 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntit
 		return getParentsT(childType);
 	}
 
-	// if not cached, we find the result manually and insert it into the cache
+	// if not cached, we find the res manually and insert it into the cache
 	vector<PKBStatement::SharedPtr> parentStmts;
 	if (parentType == PKBDesignEntity::AllExceptProcedure) {
 		addParentStmts(parentStmts);
@@ -188,31 +214,30 @@ vector<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntit
 		parentStmts = mpPKB->getStatements(parentType);
 	}
 
-	set<int> setResult;
 	// recursive check on children
 	for (auto& stmt : parentStmts) {
-		// if this statement has already been added in our result set, skip it
-		if (setResult.count(stmt->getIndex())) {
+		// if this statement has already been added in our res set, skip it
+		if (res.count(stmt->getIndex())) {
 			continue;
 		}
 		// check for children in the groups that this statement owns
 		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
 		for (auto& grp : grps) {
-			if (hasEligibleChildRecursive(grp, parentType, childType, setResult)) {
-				setResult.insert(stmt->getIndex());
+			if (hasEligibleChildRecursive(grp, parentType, childType, res)) {
+				res.insert(stmt->getIndex());
 				break;
 			}
 		}
 	}
 	// add results from set to vector which we are returning
-	result.insert(result.begin(), setResult.begin(), setResult.end());
+	temp.insert(temp.end(), res.begin(), res.end());
 	// insert into cache for future use
-	mpPKB->insertintoCache(PKB::Relation::ParentT, parentType, childType, result);
-	return result;
+	mpPKB->insertintoCache(PKB::Relation::ParentT, parentType, childType, temp);
+	return res;
 }
 
 // todo @nicholas: this function confirm will have bugs, dont need to say
-bool PQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, set<int>& setResult) {
+bool PQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, unordered_set<int>& setResult) {
 	// if we have at least one child that is the desired childType
 	if (!grp->getMembers(childType).empty()) {
 		return true;
@@ -239,22 +264,22 @@ bool PQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignE
 	return false;
 }
 
-vector<int> PQLEvaluator::getParentsT(PKBDesignEntity childType)
+unordered_set<int> PQLEvaluator::getParentsT(PKBDesignEntity childType)
 {
 	//todo @nicholas can optimise this ALOT, but not urgent for now (specifically, can optimise for procedure and AllExceptProcedure)
-	vector<int> ifRes = getParentsT(PKBDesignEntity::If, childType);
-	vector<int> whileRes = getParentsT(PKBDesignEntity::While, childType);
-	vector<int> procedureRes = getParentsT(PKBDesignEntity::Procedure, childType);
-	vector<int> res;
-	res.insert(res.end(), ifRes.begin(), ifRes.end());
-	res.insert(res.end(), whileRes.begin(), whileRes.end());
-	res.insert(res.end(), procedureRes.begin(), procedureRes.end());
+	unordered_set<int> ifRes = getParentsT(PKBDesignEntity::If, childType);
+	unordered_set<int> whileRes = getParentsT(PKBDesignEntity::While, childType);
+	unordered_set<int> procedureRes = getParentsT(PKBDesignEntity::Procedure, childType);
+	unordered_set<int> res;
+	res.insert(ifRes.begin(), ifRes.end());
+	res.insert(whileRes.begin(), whileRes.end());
+	res.insert(procedureRes.begin(), procedureRes.end());
 	return res;
 }
 
-vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentIndex)
+unordered_set<int> PQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentIndex)
 {
-	vector<int> res;
+	unordered_set<int> res;
 	PKBStatement::SharedPtr parent;
 	if (!mpPKB->getStatement(parentIndex, parent)) {
 		return res;
@@ -280,25 +305,27 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentInde
 
 		// then we add current group's children members of the desired type
 		vector<int> curGroupMembers = curGroup->getMembers(childType);
-		res.insert(res.end(), curGroupMembers.begin(), curGroupMembers.end());
+		res.insert(curGroupMembers.begin(), curGroupMembers.end());
 	}
 
 	return res;
 }
 
 // todo @nicholas probably missing some edge case testing
-vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType)
+unordered_set<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	vector<int> result;
+	unordered_set<int> res;
+	vector<int> temp;
 
 	// if parentType is none of the container types, there are no such children
 	if (!isContainerType(parentType)) {
-		return result;
+		return res;
 	}
 
-	// check if result is cached, if so return results
-	if (mpPKB->getCached(PKB::Relation::ChildT, parentType, childType, result)) {
-		return result;
+	// check if res is cached, if so return results
+	if (mpPKB->getCached(PKB::Relation::ChildT, parentType, childType, temp)) {
+		res.insert(temp.begin(), temp.end());
+		return res;
 	}
 
 	// if parentType is PKBDesignEntity::AllExceptProcedure call the other function instead (temporarily doing this because im scared of bugs)
@@ -306,7 +333,7 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEnti
 		return getChildrenT(childType);
 	}
 
-	// if not cached, we find the result manually and insert it into the cache
+	// if not cached, we find the res manually and insert it into the cache
 	// note: even though we are finding children this time, it is still easier to traverse the parents instead
 	vector<PKBStatement::SharedPtr> parentStmts;
 	if (parentType == PKBDesignEntity::AllExceptProcedure) {
@@ -317,7 +344,6 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEnti
 		parentStmts = mpPKB->getStatements(parentType);
 	}
 
-	set<int> setResult;
 	// Iterative implementation of recursive concept
 	// 1. store a vector of groups we need to go through
 	vector<PKBGroup::SharedPtr> toTraverse;
@@ -334,9 +360,9 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEnti
 		PKBGroup::SharedPtr grp = toTraverse.back();
 		toTraverse.pop_back();
 
-		// add all desired children of that group to the result set
+		// add all desired children of that group to the res set
 		vector<int>& desiredChildren = grp->getMembers(childType);
-		setResult.insert(desiredChildren.begin(), desiredChildren.end());
+		res.insert(desiredChildren.begin(), desiredChildren.end());
 
 		// add all childGroups of grp to our toTraverse list (hence, list grows too)
 		for (PKBGroup::SharedPtr& childGroup : grp->getChildGroups()) {
@@ -345,13 +371,13 @@ vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEnti
 	}
 
 	// add results from set to vector which we are returning
-	result.insert(result.begin(), setResult.begin(), setResult.end());
+	temp.insert(temp.end(), res.begin(), res.end());
 	// insert into cache for future use
-	mpPKB->insertintoCache(PKB::Relation::ChildT, parentType, childType, result);
-	return result;
+	mpPKB->insertintoCache(PKB::Relation::ChildT, parentType, childType, temp);
+	return res;
 }
 
-vector<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType)
+unordered_set<int> PQLEvaluator::getChildrenT(PKBDesignEntity parentType)
 {
 	return getChildrenT(parentType, PKBDesignEntity::AllExceptProcedure);
 }
@@ -381,10 +407,15 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 
 bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, PKBStatement::SharedPtr& result) {
 // find the statement before in the stmt's group
+	cout << "AFTER: " << statementAfter->getIndex() << endl;
 	PKBGroup::SharedPtr grp = statementAfter->getGroup();
 	vector<int>& members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
 	for (int i = 0; i < members.size(); i++) {
-		if (statementAfter->getIndex() == members[i] && i != 0) {
+		cout << "member: " << members[i] << endl;
+		if (statementAfter->getIndex() == members[i]) {
+			if (i == 0) {
+				return false;
+			}
 			int idxToCheck = members[--i];
 			if (!mpPKB->getStatement(idxToCheck, result)) {
 				return false;
@@ -398,7 +429,7 @@ bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, P
 	//for (auto& member = members.begin(); member < members.end(); member++) {
 	//	if (statementAfter->getIndex() == *member && member != members.begin()) {
 	//		member--;
-	//		result = mpPKB->getStatement(*member);
+	//		res = mpPKB->getStatement(*member);
 	//		return true;
 	//	}
 	//}
@@ -425,7 +456,7 @@ bool PQLEvaluator::getStatementAfter(PKBStatement::SharedPtr& statementBefore, P
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
 	vector<int> res;
-	// check if result is cached, if so return results
+	// check if res is cached, if so return results
 	if (mpPKB->getCached(PKB::Relation::Before, beforeType, afterType, res)) {
 		return res;
 	}
@@ -448,7 +479,7 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity 
 		}
 	}
 
-	//insert result into cache
+	//insert res into cache
 	mpPKB->insertintoCache(PKB::Relation::Before, beforeType, afterType, res);
 	return res;
 }
@@ -488,7 +519,7 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
 vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
 	vector<int> res;
-	// check if result is cached, if so return results
+	// check if res is cached, if so return results
 	if (mpPKB->getCached(PKB::Relation::After, beforeType, afterType, res)) {
 		return res;
 	}
@@ -512,7 +543,7 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity a
 		}
 	}
 
-	//insert result into cache
+	//insert res into cache
 	mpPKB->insertintoCache(PKB::Relation::After, beforeType, afterType, res);
 	return res;
 }
@@ -553,7 +584,7 @@ vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity
 		return vector<int>();
 	}
 
-	// check if result is cached, if so return results
+	// check if res is cached, if so return results
 	if (mpPKB->getCached(PKB::Relation::BeforeT, beforeType, afterType, res)) {
 		return res;
 	}
@@ -579,7 +610,7 @@ vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity
 		}
 	}
 	res = vector<int>(tempRes.begin(), tempRes.end());
-	//insert result into cache
+	//insert res into cache
 	mpPKB->insertintoCache(PKB::Relation::BeforeT, beforeType, afterType, res);
 	return res;
 }
@@ -624,7 +655,7 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 		return res;
 	}
 
-	// check if result is cached, if so return results
+	// check if res is cached, if so return results
 	if (mpPKB->getCached(PKB::Relation::AfterT, beforeType, afterType, res)) {
 		return res;
 	}
@@ -646,7 +677,7 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 		}
 	}
 
-	//insert result into cache
+	//insert res into cache
 	res = vector<int>(tempRes.begin(), tempRes.end());
 	mpPKB->insertintoCache(PKB::Relation::AfterT, beforeType, afterType, res);
 	return res;

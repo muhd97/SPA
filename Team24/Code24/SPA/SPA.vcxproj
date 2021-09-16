@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\source\PKBEvaluatorTester.cpp" />
     <ClCompile Include="..\source\SimpleAST.cpp" />
     <ClCompile Include="..\source\SimpleLexer.cpp" />
     <ClCompile Include="..\source\SimpleParser.cpp" />
@@ -26,7 +25,6 @@
     <ClCompile Include="..\source\PQLProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\source\PKBEvaluatorTester.h" />
     <ClInclude Include="..\source\PQLLexer.h" />
     <ClInclude Include="..\source\PQLParser.h" />
     <ClInclude Include="..\source\SimpleAST.h" />

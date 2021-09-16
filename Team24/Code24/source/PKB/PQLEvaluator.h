@@ -31,34 +31,36 @@ public:
 	// => getParents( PKBDE::AllExceptProcedure, 14 ) // find parent stmt of stmt 14
 	// eg. if ifs; Select ifs such that Parent( ifs, 14 ); 
 	// => getParents( PKBDE::If, 14 ) // find parent stmt of stmt 14 if parent is an 'if' stmt
-	vector<int> getParents(PKBDesignEntity parentType, int child);
+	unordered_set<int> getParents(PKBDesignEntity parentType, int child);
 
 	// Get parent statements of type {parentType} of child statements of type {childType} 
 	// eg. if ifs; while w; Select ifs such that Parent( ifs, w ); 
 	// => getParents( PKBDE::If, PKBDE::While ) // find 'if' stmts who are parents of 'while' stmts
-	vector<int> getParents(PKBDesignEntity parentType, PKBDesignEntity childType);
+	unordered_set<int> getParents(PKBDesignEntity parentType, PKBDesignEntity childType);
 	
 	// Get all parent statements of child statements of type {childType} 
 	// eg. stmt s; assign a; Select s such that Parent( s, a ); 
 	// => getParents( PKBDE::Assign ) // find all parent stmts of all 'assign' stmts
-	vector<int> getParents(PKBDesignEntity childType);
+	unordered_set<int> getParents(PKBDesignEntity childType);
 
 	// Get all children statements of type {childType} of parent statement indexed {parent} 
 	// eg. stmt s; Select s such that Parent( 14, s ); 
 	// => getChildren( PKBDE::AllExceptProcedure, 14 ) // find children stmts of stmt 14
 	// eg. if ifs; Select ifs such that Parent( 14, ifs ); 
 	// => getChildren( PKBDE::If, 14 ) // find 'if' children stmts of stmt 14 
-	vector<int> getChildren(PKBDesignEntity childType, int parent);
+	unordered_set<int> getChildren(PKBDesignEntity childType, int parent);
 
 	// Get children statements of type {childType} with parent statements of type {parentType} 
 	// eg. if ifs; while w; Select ifs such that Parent( w, ifs ); 
 	// => getChildren( PKBDE::While, PKBDE::If ) // find 'if' stmts who are children of 'while' stmts
-	vector<int> getChildren(PKBDesignEntity parentType, PKBDesignEntity childType);
+	unordered_set<int> getChildren(PKBDesignEntity parentType, PKBDesignEntity childType);
 
 	// Get all children statements with parent statements of type {parentType} 
 	// eg. stmt s; while w; Select s such that Parent( w, s ); 
 	// => getChildren( PKBDE::While ) // find all children stmts of all while stmts
-	vector<int> getChildren(PKBDesignEntity parentType);
+	unordered_set<int> getChildren(PKBDesignEntity parentType);
+
+	bool hasChildren(PKBDesignEntity childType, int parentIndex);
 
 	// Parent*
 
@@ -67,34 +69,34 @@ public:
 	// => getParentsT( PKBDE::AllExceptProcedure, 14 ) // find all direct/indirect parent stmts of stmt 14
 	// eg. if ifs; Select ifs such that ParentT( ifs, 14 ); 
 	// => getParentsT( PKBDE::If, 14 ) // find all direct/indirect 'if' parent stmts of stmt 14
-	vector<int> getParentsT(PKBDesignEntity parentType, int child);
+	unordered_set<int> getParentsT(PKBDesignEntity parentType, int child);
 
 	// Get all direct/indirect parent statements of type {parentType} of child statements of type {childType} 
 	// eg. if ifs; while w; Select ifs such that ParentT( ifs, w ); 
 	// => getParentsT( PKBDE::If, PKBDE::While ) // find all direct/indirect 'if' parent stmts of all 'while' stmts
-	vector<int> getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType);
+	unordered_set<int> getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType);
 
 	// Get all direct/indirect parent statements of child statements of type {childType} 
 	// eg. stmt s; assign a; Select s such that ParentT( s, a ); 
 	// => getParentsT( PKBDE::Assign ) // find all direct/indirect parent stmts of all 'assign' stmts
-	vector<int> getParentsT(PKBDesignEntity childType);
+	unordered_set<int> getParentsT(PKBDesignEntity childType);
 	
 	// Get all direct/indirect children statements of type {childType} with parent statement indexed {parent} 
 	// eg. stmt s; Select s such that ParentT( 14, s ); 
 	// => getChildrenT( PKBDE::AllExceptProcedure, 14 ) // find all direct/indirect children stmts of stmt 14
 	// eg. if ifs; Select ifs such that ParentT( 14, ifs ); 
 	// => getChildrenT( PKBDE::If, 14 ) // find all direct/indirect 'if' children stmts of stmt 14 
-	vector<int> getChildrenT(PKBDesignEntity child, int parent);
+	unordered_set<int> getChildrenT(PKBDesignEntity child, int parent);
 
 	// Get all direct/indirect children statements of type {childType} with parent statements of type {parentType} 
 	// eg. if ifs; while w; Select ifs such that ParentT( w, ifs ); 
 	// => getChildrenT( PKBDE::While, PKBDE::If ) // find all direct/indirect 'if' children stmts of all 'while' stmts
-	vector<int> getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType);
+	unordered_set<int> getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType);
 
 	// Get all direct/indirect children statements with parent statements of type {parentType} 
 	// eg. stmt s; while w; Select s such that Parent( w, s ); 
 	// => getChildrenT( PKBDE::While ) // find all children stmts of all while stmts
-	vector<int> getChildrenT(PKBDesignEntity parentType);
+	unordered_set<int> getChildrenT(PKBDesignEntity parentType);
 
 	// Follow
 
@@ -329,5 +331,5 @@ protected:
 	}
 
 	// helper function for ParentT (getParentsT)
-	bool hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, set<int>& setResult);
+	bool hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, unordered_set<int>& setResult);
 };
