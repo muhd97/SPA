@@ -1126,12 +1126,11 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl>& selectCl, s
     /* Parent(1, s) where s MUST be a synonym for a statement NOTE: Stmt/Read/Print/Call/While/If/Assign. Cannot be Procedure/Constant/Variable */
     if (rightArg->getStmtRefType() == StmtRefType::SYNONYM) {
 
-        cout << "HELoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n";
-
         const string& rightSynonym = rightArg->getStringVal();
         
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym, { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE })) {
             cout << "TODO: Handle error case. Parent(INTEGER, syn), but syn is declared as Procedure, Constant or Variable. These DesignEntity types are not allowed.\n";
+            return;
         }        
 
         PKBDesignEntity rightArgType = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSynonym));
@@ -1283,7 +1282,6 @@ void PQLProcessor::handleParentFirstArgUnderscore(shared_ptr<SelectCl>& selectCl
         }
     }
 
-
     /* Parent(_, Syn) */
     if (rightArg->getStmtRefType() == StmtRefType::SYNONYM) {
         const string& rightSynonym = rightArg->getStringVal();
@@ -1306,7 +1304,6 @@ void PQLProcessor::handleParentFirstArgUnderscore(shared_ptr<SelectCl>& selectCl
 
 
     }
-
 
     /* Parent(_, _) */
     if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE) {
