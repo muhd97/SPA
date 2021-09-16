@@ -194,14 +194,14 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
            throw "Modifies clause cannot have '_' as first argument!";
         }
         if (stmtRef->getStmtRefType() == StmtRefType::INTEGER) {
-           vector<string> variablesModifiedByStmtNo = evaluator->getModified(stmtRef->getIntVal());
-           if (entRef->getEntRefType() == EntRefType::SYNONYM) {
-               if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { // Modifies (1, x), x is NOT a variable
-                   throw "Modifies(1, p), but p is not a variable delcaration.\n";
-               } else {
-                   const string& rightSynonymKey = entRef->getStringVal();
-                   for (auto& s : variablesModifiedByStmtNo) {
-                       /* Create the result tuple */
+            vector<string> variablesModifiedByStmtNo = evaluator->getModified(stmtRef->getIntVal());
+            if (entRef->getEntRefType() == EntRefType::SYNONYM) {
+                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { // Modifies (1, x), x is NOT a variable
+                    throw "Modifies(1, p), but p is not a variable delcaration.\n";
+                } else {
+                    const string& rightSynonymKey = entRef->getStringVal();
+                    for (auto& s : variablesModifiedByStmtNo) {
+                        /* Create the result tuple */
                         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
                         /* Map the value returned to this particular synonym. */
@@ -210,9 +210,9 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                         /* Add this tuple into the vector to tuples to return. */
                         toReturn.emplace_back(move(tupleToAdd));
                         //toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
-                   }
-               }
-           }
+                    }
+                }
+            }
 
             // /* Modifies (1, "x") */
             /* SPECIAL CASE */
