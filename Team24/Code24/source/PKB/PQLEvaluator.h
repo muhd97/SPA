@@ -44,6 +44,10 @@ public:
 	// => getParents( PKBDE::Assign ) // find all parent stmts of all 'assign' stmts
 	set<pair<int, int>> getParents(PKBDesignEntity childType);
 
+
+	set<int> getParentsSynUnderscore(PKBDesignEntity parentType);
+
+
 	// Get all children statements of type {childType} of parent statement indexed {parent} 
 	// eg. stmt s; Select s such that Parent( 14, s ); 
 	// => getChildren( PKBDE::AllExceptProcedure, 14 ) // find children stmts of stmt 14
@@ -61,6 +65,10 @@ public:
 	// eg. stmt s; while w; Select s such that Parent( w, s ); 
 	// => getChildren( PKBDE::While ) // find all children stmts of all while stmts
 	set<pair<int, int>> getChildren(PKBDesignEntity parentType);
+
+	set<int> getChildrenUnderscoreSyn(PKBDesignEntity rightArg);
+
+	bool getParentsUnderscoreUnderscore();
 
 	bool hasChildren(PKBDesignEntity childType, int parentIndex);
 
@@ -352,10 +360,16 @@ protected:
 		// not sure if its faster, but we dont want to iterate over all types, just If, While, Procedure(the container types)
 		vector<PKBStatement::SharedPtr> ifStmts = mpPKB->getStatements(PKBDesignEntity::If);
 		vector<PKBStatement::SharedPtr> whileStmts = mpPKB->getStatements(PKBDesignEntity::While);
-		vector<PKBStatement::SharedPtr> procedures = mpPKB->getStatements(PKBDesignEntity::Procedure);
+		
+		/* YIDA NOTE: PARENT IS NOT DEFINED FOR Procedures. A Procedure CANNOT be a parent of another statement. */
+
+		//vector<PKBStatement::SharedPtr> procedures = mpPKB->getStatements(PKBDesignEntity::Procedure);
+
 		stmts.insert(stmts.end(), ifStmts.begin(), ifStmts.end());
 		stmts.insert(stmts.end(), whileStmts.begin(), whileStmts.end());
-		stmts.insert(stmts.end(), procedures.begin(), procedures.end());
+
+		
+		//stmts.insert(stmts.end(), procedures.begin(), procedures.end());
 	}
 
 	// helper function for ParentT (getParentsT)

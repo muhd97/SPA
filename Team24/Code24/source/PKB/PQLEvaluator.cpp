@@ -22,6 +22,7 @@ set<int> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
 	return res;
 }
 
+
 set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
 	set<pair<int, int>> res;
@@ -67,6 +68,36 @@ set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesi
 set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity childType)
 {
 	return getParents(PKBDesignEntity::AllExceptProcedure, childType);
+}
+
+set<int> PQLEvaluator::getParentsSynUnderscore(PKBDesignEntity parentType)
+{
+	set<int> toReturn;
+
+	vector<PKBStatement::SharedPtr> parentStmts;
+	if (parentType == PKBDesignEntity::AllExceptProcedure) {
+		addParentStmts(parentStmts);
+	}
+	else {
+		parentStmts = mpPKB->getStatements(parentType);
+	}
+
+	cout << "PARENT STMTS SIZE: " << parentStmts.size() << endl;
+
+	for (auto& stmt : parentStmts) {
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		// if this statement's container group contains at least one child of required type, add statement to our results
+		for (auto& grp : grps) {
+			if (!grp->getMembers(PKBDesignEntity::AllExceptProcedure).empty()) {
+
+				cout << "BREAK????? \n";
+				toReturn.insert(stmt->getIndex());
+				break;
+			}
+		}
+	}
+
+	return toReturn;
 }
 
 
@@ -153,6 +184,8 @@ set<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDes
 		}
 	}
 
+
+
 	// insert into cache for future use
 	/*temp.insert(temp.end(), res.begin(), res.end());
 	mpPKB->insertintoCache(PKB::Relation::Child, parentType, childType, temp);*/
@@ -162,6 +195,46 @@ set<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDes
 set<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType)
 {
 	return getChildren(PKBDesignEntity::AllExceptProcedure, parentType);
+}
+
+set<int> PQLEvaluator::getChildrenUnderscoreSyn(PKBDesignEntity childType)
+{
+	set<int> toReturn;
+
+	vector<PKBStatement::SharedPtr> parentStmts;
+	addParentStmts(parentStmts);
+
+	cout << "------------- parent stmts size = " << parentStmts.size();
+
+	for (auto& stmt : parentStmts) {
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		for (auto& grp : grps) {
+			vector<int> members = grp->getMembers(childType);
+			for (int& x : members) {
+				toReturn.insert(x);
+			}
+
+			//res.insert(members.begin(), members.end());
+		}
+	}
+
+	return move(toReturn);
+}
+
+bool PQLEvaluator::getParentsUnderscoreUnderscore()
+{
+	vector<PKBStatement::SharedPtr> parentStmts;
+	addParentStmts(parentStmts);
+	for (auto& stmt : parentStmts) {
+		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
+		for (auto& grp : grps) {
+			vector<int> members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
+			if (!members.empty()) return true;
+		}
+	}
+
+	return false;
+
 }
 
 set<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex)
