@@ -252,6 +252,10 @@ void PKBEvaluatorTester::runParentTests1() {
 
 }
 
+void PKBEvaluatorTester::runParentTests2()
+{
+}
+
 void PKBEvaluatorTester::runFollowsTests2() {
     int testCounter = 0;
     vector<int> res;
@@ -291,12 +295,86 @@ void PKBEvaluatorTester::runFollowsTests2() {
     }
 }
 
-void PKBEvaluatorTester::runParentTests2() {
+void PKBEvaluatorTester::runPatternTests1()
+{
+    string program = " procedure Example {\
+                                                    x = 1;\
+                                                    v = 2;\
+                                                    y = 3;\
+                                                    z = 4;\
+                                                    t = 5;\
+                                                    x = v + x * y + z * t;\
+                                                }";
 
+
+    vector<SimpleToken> tokens = simpleLex(program);
+
+    // for debugging
+    printSimpleTokens(tokens);
+    shared_ptr<Program> root = parseSimpleProgram(tokens);
+    if (root == NULL) {
+        cout << "Failed to parse program!";
+    }
+    else {
+        // for debugging
+        cout << root->format();
+    }
+
+    // BUILD PKB HERE
+    cout << "\n==== Building PKB ====\n";
+    this->pkb->initialise();
+    this->pkb->extractDesigns(root);
+    cout << "\n==== PKB has been populated. ====\n";
+    evaluator = PQLEvaluator::create(pkb);
+    cout << "\n==== Created PQLEvaluator using PKB ====\n";
+
+    cout << "\n==== Running PQL Tests ====\n";
+
+    //0
+    vector<int> res = evaluator->matchExactPattern("x", "v + x * y + z * t");
+    vector<int> expected = { 6 };
+    checkResult(0, res, expected);
+    //1
+    res = evaluator->matchExactPattern("x", "v");
+    expected = { };
+    checkResult(1, res, expected);
+    //2
+    res = evaluator->matchPattern("_", "v");
+    expected = { 6 };
+    checkResult(2, res, expected);
+    //3
+    res = evaluator->matchPattern("_", "x*y");
+    expected = { 6 };
+    checkResult(3, res, expected);
+    //4
+    res = evaluator->matchPattern("_", "v+x");
+    expected = { };
+    checkResult(4, res, expected);
+    //5
+    res = evaluator->matchPattern("_", "v+x*y");
+    expected = { 6 };
+    checkResult(5, res, expected);
+    //6
+    res = evaluator->matchPattern("_", "y+z*t");
+    expected = { };
+    checkResult(6, res, expected);
+    //7
+    res = evaluator->matchPattern("_", "x * y + z * t");
+    expected = { };
+    checkResult(7, res, expected);
+    //8
+    res = evaluator->matchPattern("_", "v + x * y + z * t");
+    expected = { 6 };
+    checkResult(8, res, expected);
+}
+
+void PKBEvaluatorTester::runPatternTests2()
+{
 }
 
 int main() {
     PKBEvaluatorTester tester = PKBEvaluatorTester();
     tester.runTest1();
     tester.runTest2();
+    tester.runPatternTests1();
 }

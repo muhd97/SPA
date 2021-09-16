@@ -1192,14 +1192,14 @@ unordered_set<int> PQLEvaluator::getAllConstants()
 	return unordered_set<int>();
 }
 
-set<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
+vector<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
 	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
-	set<int> res;
+	vector<int> res;
 	// lex and parse RHS
 	vector<SimpleToken> tokens = simpleLex(RHS);
-	printSimpleTokens(tokens);
+	//printSimpleTokens(tokens);
 	shared_ptr<Expression> expr = parseSimpleExpression(tokens);
-	cout << expr->format(0);
+	//cout << expr->format(0);
 
 	//inorder and preorder traversals of RHS
 	vector<string> queryInOrder = inOrderTraversalHelper(expr);
@@ -1214,7 +1214,35 @@ set<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
 		vector<string> assignInOrder = inOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
 		vector<string> assignPreOrder = preOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
 		if (checkForSubTree(queryInOrder, assignInOrder) && checkForSubTree(queryPreOrder, assignPreOrder)) {
-			res.insert(assignStmt->getIndex());
+			res.emplace_back(assignStmt->getIndex());
+		}
+	}
+	return res;
+}
+
+vector<int> PQLEvaluator::matchExactPattern(string LHS, string RHS) {
+	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
+	vector<int> res;
+	// lex and parse RHS
+	vector<SimpleToken> tokens = simpleLex(RHS);
+	//printSimpleTokens(tokens);
+	shared_ptr<Expression> expr = parseSimpleExpression(tokens);
+	//cout << expr->format(0);
+
+	//inorder and preorder traversals of RHS
+	vector<string> queryInOrder = inOrderTraversalHelper(expr);
+	vector<string> queryPreOrder = preOrderTraversalHelper(expr);
+
+	for (auto& assignStmt : assignStmts) {
+		// check LHS
+		if (LHS != assignStmt->simpleAssignStatement->getId()->getName() && LHS != "_") {
+			continue;
+		}
+		// check RHS
+		vector<string> assignInOrder = inOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
+		vector<string> assignPreOrder = preOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
+		if (checkForExactTree(queryInOrder, assignInOrder) && checkForExactTree(queryPreOrder, assignPreOrder)) {
+			res.emplace_back(assignStmt->getIndex());
 		}
 	}
 	return res;

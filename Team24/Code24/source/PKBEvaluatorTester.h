@@ -28,12 +28,20 @@ public:
     // method for parsing the SIMPLE source
     void runTest1();
     void runTest2();
+    void runPatternTests1();
 
 private:
+    // FOLLOW
     void runFollowsTests1();
-    void runParentTests1();
     void runFollowsTests2();
+    
+    // PARENT
+    void runParentTests1();
     void runParentTests2();
+
+    // PATTERN
+    void runPatternTests2();
+    
     void checkResult(int testIndex, vector<int> res, vector<int> expected);
     void printResult(int testIndex, vector<string> res);
     shared_ptr<PKB> pkb = nullptr;
