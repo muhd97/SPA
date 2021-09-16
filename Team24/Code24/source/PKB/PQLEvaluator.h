@@ -11,6 +11,10 @@
 #include "PKB.h"
 #include "PKBVariable.h"
 
+// for pattern
+#include "../SimpleParser.h"
+#include "../SimpleLexer.h"
+
 using namespace std;
 
 class PQLEvaluator {
@@ -297,6 +301,7 @@ public:
 	/* TODO: @nicholasnge Provide function to return all Constants in the program. */
 	unordered_set<int> getAllConstants();
 
+	set<int> PQLEvaluator::matchPattern(string LHS, string RHS);
 
 protected:
 	PQLEvaluator(PKB::SharedPtr pPKB) {
@@ -374,4 +379,10 @@ protected:
 
 	// helper function for ParentT (getParentsT)
 	bool hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType, unordered_set<int>& setResult);
+
+	// helpers for pattern
+	vector<string> PQLEvaluator::inOrderTraversalHelper(shared_ptr<Expression> expr);
+	vector<string> PQLEvaluator::preOrderTraversalHelper(shared_ptr<Expression> expr);
+	bool PQLEvaluator::checkForSubTree(vector<string>& queryInOrder, vector<string>& assignInOrder);
+	bool PQLEvaluator::checkForExactTree(vector<string>& queryInOrder, vector<string>& assignInOrder);
 };

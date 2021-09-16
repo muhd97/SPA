@@ -1191,3 +1191,170 @@ unordered_set<int> PQLEvaluator::getAllConstants()
 {
 	return unordered_set<int>();
 }
+
+set<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
+	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
+	set<int> res;
+	// lex and parse RHS
+	vector<SimpleToken> tokens = simpleLex(RHS);
+	printSimpleTokens(tokens);
+	shared_ptr<Expression> expr = parseSimpleExpression(tokens);
+	cout << expr->format(0);
+
+	//inorder and preorder traversals of RHS
+	vector<string> queryInOrder = inOrderTraversalHelper(expr);
+	vector<string> queryPreOrder = preOrderTraversalHelper(expr);
+
+	for (auto& assignStmt : assignStmts) {
+		// check LHS
+		if (LHS != assignStmt->simpleAssignStatement->getId()->getName() && LHS != "_") {
+			continue;
+		}
+		// check RHS
+		vector<string> assignInOrder = inOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
+		vector<string> assignPreOrder = preOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
+		if (checkForSubTree(queryInOrder, assignInOrder) && checkForSubTree(queryPreOrder, assignPreOrder)) {
+			res.insert(assignStmt->getIndex());
+		}
+	}
+	return res;
+}
+
+vector<string> PQLEvaluator::inOrderTraversalHelper(shared_ptr<Expression> expr) {
+	vector<string> res; // using a set to prevent duplicates
+	vector<shared_ptr<Expression>> queue = { expr };
+
+	// comb through the expression and pick out all identifiers' names
+	while (!queue.empty()) {
+
+		// pop the last element
+		shared_ptr<Expression> e = queue.back();
+		queue.pop_back();
+
+		switch (e->getExpressionType()) {
+		case ExpressionType::CONSTANT: {
+			shared_ptr<Constant> constant = static_pointer_cast<Constant>(e);
+			res.emplace_back(to_string(constant->getValue()));
+			break;
+		}		
+		case ExpressionType::IDENTIFIER: {
+			shared_ptr<Identifier> id = static_pointer_cast<Identifier>(e);
+			res.emplace_back(id->getName());
+			break;
+		}
+		case ExpressionType::COMBINATION: {
+			shared_ptr<CombinationExpression> cmb = static_pointer_cast<CombinationExpression>(e);
+			shared_ptr<Identifier> id;
+			switch (cmb->getOp()) {
+			case Bop::PLUS:
+				id = make_shared<Identifier>("+");
+				break;
+			case Bop::MINUS:
+				id = make_shared<Identifier>("-");
+				break;
+			case Bop::MULTIPLY:
+				id = make_shared<Identifier>("*");
+				break;
+			case Bop::DIVIDE:
+				id = make_shared<Identifier>("/");
+				break;
+			case Bop::MOD:
+				id = make_shared<Identifier>("%");
+				break;				
+			}
+			queue.emplace_back(cmb->getLHS());
+			queue.emplace_back(id);
+			queue.emplace_back(cmb->getRHS());
+			break;
+		}
+		default:
+			throw("I dont recognise this Expression Type, sergeant");
+		}
+	}
+	return res;
+}
+
+vector<string> PQLEvaluator::preOrderTraversalHelper(shared_ptr<Expression> expr) {
+	vector<string> res; // using a set to prevent duplicates
+	vector<shared_ptr<Expression>> queue = { expr };
+
+	// comb through the expression and pick out all identifiers' names
+	while (!queue.empty()) {
+
+		// pop the last element
+		shared_ptr<Expression> e = queue.back();
+		queue.pop_back();
+
+		switch (e->getExpressionType()) {
+		case ExpressionType::CONSTANT: {
+			shared_ptr<Constant> constant = static_pointer_cast<Constant>(e);
+			res.emplace_back(to_string(constant->getValue()));
+			break;
+		}
+		case ExpressionType::IDENTIFIER: {
+			shared_ptr<Identifier> id = static_pointer_cast<Identifier>(e);
+			res.emplace_back(id->getName());
+			break;
+		}
+		case ExpressionType::COMBINATION: {
+			shared_ptr<CombinationExpression> cmb = static_pointer_cast<CombinationExpression>(e);
+			switch (cmb->getOp()) {
+			case Bop::PLUS:
+				res.emplace_back("+");
+				break;
+			case Bop::MINUS:
+				res.emplace_back("-");
+				break;
+			case Bop::MULTIPLY:
+				res.emplace_back("*");
+				break;
+			case Bop::DIVIDE:
+				res.emplace_back("/");
+				break;
+			case Bop::MOD:
+				res.emplace_back("%");
+				break;
+			}
+			queue.emplace_back(cmb->getLHS());
+			queue.emplace_back(cmb->getRHS());
+			break;
+		}
+		default:
+			throw("I dont recognise this Expression Type, sergeant");
+		}
+	}
+	return res;
+}
+
+bool PQLEvaluator::checkForSubTree(vector<string>& queryInOrder, vector<string>& assignInOrder) {
+	for (int assignPointer = 0; assignPointer < assignInOrder.size(); assignPointer++) {
+		// early termination, assignInOrder too small already
+		if (assignInOrder.size() - assignPointer < queryInOrder.size()) {
+			return false;
+		}
+		for (int queryPointer = 0; queryPointer < queryInOrder.size(); queryPointer++) {
+			if (queryInOrder[queryPointer] != assignInOrder[assignPointer + queryPointer]) {
+				break;
+			}
+			// valid matching subtree, this is correct, add to result
+			else if (queryPointer == queryInOrder.size() - 1) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool PQLEvaluator::checkForExactTree(vector<string>& queryInOrder, vector<string>& assignInOrder) {
+	if (queryInOrder.size() != assignInOrder.size()) {
+		return false;
+	}
+
+	for (int pointer = 0; pointer < queryInOrder.size(); pointer++) {
+		if (queryInOrder[pointer] != assignInOrder[pointer]) {
+			return false;
+		}
+	}
+	return true;
+}
+

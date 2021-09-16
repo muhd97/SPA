@@ -4,6 +4,7 @@
 #include "PKBDesignEntity.h"
 #include "PKBGroup.h"
 #include "PKBDesignEntity.h"
+#include "../SimpleAST.h"
 
 using namespace std;
 
@@ -30,6 +31,9 @@ public:
 	vector<PKBGroup::SharedPtr> mContainerGroup;
 	set<PKBVariable::SharedPtr> mUses;
 	set<PKBVariable::SharedPtr> mModifies;
+
+	// for pattern
+	shared_ptr<AssignStatement> simpleAssignStatement;
 
 	PKBGroup::SharedPtr getGroup() {
 		return mBelongsTo;

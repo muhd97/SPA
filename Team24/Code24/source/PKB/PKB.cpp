@@ -167,6 +167,9 @@ PKBStatement::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement>& state
 		addUsedVariable(PKBDesignEntity::Assign, var);
 	}
 
+	// 4. link simple assign node for pattern matching
+	res->simpleAssignStatement = assignStatement;
+
 	return res;
 }
 
