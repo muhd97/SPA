@@ -68,14 +68,14 @@ variable v; constant c;
 Select v such that Follows(v, 6)
 none
 5000
-14 - valid query FollowsT 
+14 - valid query Follows* 
 stmt s;
-Select s such that FollowsT (4, s)
+Select s such that Follows* (4, s)
 none
 5000
-15 - valid query FollowsT
+15 - valid query Follows*
 stmt s;
-Select s such that FollowsT (s, 8)
+Select s such that Follows* (s, 8)
 none
 5000
 16 - valid query Follows* (stmt)
