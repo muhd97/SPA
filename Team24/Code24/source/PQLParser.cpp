@@ -195,9 +195,9 @@ shared_ptr<RelRef> PQLParser::parseUses()
 
 shared_ptr<RelRef> PQLParser::parseModifies()
 {
+    eat(PQLTokenType::MODIFIES);
+    eat(PQLTokenType::LEFT_PAREN);
     if (peek().type != PQLTokenType::STRING) { /* If first arg of Modifies() is a string, it must be a ModifiesP */
-        eat(PQLTokenType::MODIFIES);
-        eat(PQLTokenType::LEFT_PAREN);
         auto sRef11 = parseStmtRef();
         eat(PQLTokenType::COMMA);
         auto eRef12 = parseEntRef();
@@ -205,8 +205,6 @@ shared_ptr<RelRef> PQLParser::parseModifies()
         return make_shared<ModifiesS>(sRef11, eRef12);
     }
     else {
-        eat(PQLTokenType::MODIFIES);
-        eat(PQLTokenType::LEFT_PAREN);
         auto eRef11 = parseEntRef();
         eat(PQLTokenType::COMMA);
         auto eRef12 = parseEntRef();
