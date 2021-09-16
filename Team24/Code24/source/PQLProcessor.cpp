@@ -454,6 +454,30 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     }
     case RelRefType::PARENT_T:
     {
+        shared_ptr<Parent> parentCl = static_pointer_cast<Parent>(suchThatCl->relRef);
+        StmtRefType leftType = parentCl->stmtRef1->getStmtRefType();
+        StmtRefType rightType = parentCl->stmtRef2->getStmtRefType();
+
+        ///* Parent (_, ?) */
+        //if (leftType == StmtRefType::UNDERSCORE) {
+        //    handleParentFirstArgUnderscore(selectCl, parentCl, toReturn);
+        //    break;
+        //}
+
+        ///* Parent (1, ?) */
+        //if (leftType == StmtRefType::INTEGER) {
+        //    handleParentFirstArgInteger(selectCl, parentCl, toReturn);
+        //    break;
+        //}
+
+        ///* Parent (syn, ?) */
+
+        //if (leftType == StmtRefType::SYNONYM) {
+        //    handleParentFirstArgSyn(selectCl, parentCl, toReturn);
+        //}
+
+        break;
+
         break;
     }
     case RelRefType::FOLLOWS:
