@@ -9,9 +9,9 @@ Select s such that Parent(2, s)
 3, 4
 25
 3 - Select s Parent(2, s)
-stmt s;
-Select s such that Parent(2, s)
-3, 4
+stmt s; call c;
+Select s such that Parent(3, c)
+
 25
 4 - Select s Parent(2, s)- EMPTY
 stmt s;
@@ -113,7 +113,7 @@ while w; if ifs; stmt s;
 Select s such that Parent(_, s)
 3, 4, 9, 11, 12, 13, 14, 17, 18, 19, 20, 22
 50
-23 - Select s such that Parent(_,_)
+23 - Select a such that Parent(_,_)
 assign a;
 Select a such that Parent(_, _)
 3, 4, 9, 12, 14, 17, 19
@@ -313,3 +313,48 @@ while w; if ifs; stmt s; assign a;
 Select s such that Parent*(s, 1)
 
 50
+63 - Select a such that Parent*(_,_)
+assign a;
+Select a such that Parent*(_, _)
+3, 4, 9, 12, 14, 17, 19
+25
+64 - Select a such that Parent*(_,_)
+assign a;
+Select a such that Parent*(_, _)
+3, 4, 9, 12, 14, 17, 19
+25
+65 - Select s such that Parent*(_, a)
+while w; if ifs; stmt s; assign a;
+Select a such that Parent*(_, a)
+3, 4, 9, 12, 14, 17, 19
+25
+66 - Select w such that Parent*(_, w)
+while w; if ifs; stmt s; assign a;
+Select w such that Parent*(_, w)
+13, 11
+25
+67 - Select ca such that Parent*(_, ca)
+while w; if ifs; stmt s; assign a; call ca;
+Select ca such that Parent*(_, ca)
+18, 20, 22
+25
+68 - Select w such that Parent*(_, ca) - TargetSynonym Not in Parent(_, ca)
+while w; if ifs; stmt s; assign a; call ca;
+Select w such that Parent*(_, ca)
+6, 7, 8, 11, 13, 21
+25
+69 - Select w such that Parent*(_, 1) - NEGATIVE CASE: TargetSynonym Not in Parent(_, 1)
+while w; if ifs; stmt s; assign a; call ca;
+Select w such that Parent*(_, 1)
+
+25
+70 - Select w such that Parent*(_, 1) - TargetSynonym Not in Parent(_, 12)
+while w; if ifs; stmt s; assign a; call ca;
+Select w such that Parent*(_, 12)
+6, 7, 8, 11, 13, 21
+25
+71 - Select ca such that Parent*(_, 19) - TargetSynonym Not in Parent(_, 19)
+stmt s; variable x; call ca;
+Select ca such that Parent*(_, 19)
+20, 22, 18, 15
+25

@@ -79,15 +79,12 @@ set<int> PQLEvaluator::getParentsSynUnderscore(PKBDesignEntity parentType)
 		parentStmts = mpPKB->getStatements(parentType);
 	}
 
-	cout << "PARENT STMTS SIZE: " << parentStmts.size() << endl;
-
 	for (auto& stmt : parentStmts) {
 		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
 		// if this statement's container group contains at least one child of required type, add statement to our results
 		for (auto& grp : grps) {
 			if (!grp->getMembers(PKBDesignEntity::AllExceptProcedure).empty()) {
 
-				cout << "BREAK????? \n";
 				toReturn.insert(stmt->getIndex());
 				break;
 			}
@@ -433,7 +430,7 @@ set<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDe
 		//vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
 		//toTraverse.insert(toTraverse.end(), grps.begin(), grps.end());
 
-		for (const int& x : getAllChildAndSubChildren(stmt, childType)) {
+		for (const int& x : getAllChildAndSubChildrenOfGivenType(stmt, childType)) {
 			pair<int, int> toAdd;
 			toAdd.first = stmt->getIndex();
 			toAdd.second = x;
@@ -477,7 +474,7 @@ set<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity parentType)
 	return getChildrenT(parentType, PKBDesignEntity::AllExceptProcedure);
 }
 
-unordered_set<int> PQLEvaluator::getAllChildAndSubChildren(PKBStatement::SharedPtr targetParent, PKBDesignEntity targetChildrenType)
+unordered_set<int> PQLEvaluator::getAllChildAndSubChildrenOfGivenType(PKBStatement::SharedPtr targetParent, PKBDesignEntity targetChildrenType)
 {
 	unordered_set<int> toReturn;
 	queue<PKBGroup::SharedPtr> qOfGroups;
@@ -616,6 +613,68 @@ unordered_set<int> PQLEvaluator::getParentTSynInt(PKBDesignEntity targetParentTy
 
 	return move(toReturn);
 
+}
+
+set<pair<int, int>> PQLEvaluator::getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType)
+{
+	set<pair<int, int>> res;
+
+	if (!isContainerType(parentType)) {
+		return res;
+	}
+
+	vector<PKBStatement::SharedPtr> parentStmts;
+	if (parentType == PKBDesignEntity::AllExceptProcedure) {
+		addParentStmts(parentStmts);
+	}
+	else {
+		// check these 'possible' parent statements
+		parentStmts = mpPKB->getStatements(parentType);
+	}
+
+	for (auto& stmt : parentStmts) {
+		for (const int& x : getAllChildAndSubChildrenOfGivenType(stmt, childType)) {
+			pair<int, int> toAdd;
+			toAdd.first = stmt->getIndex();
+			toAdd.second = x;
+			res.insert(move(toAdd));
+		}
+	}
+
+	return move(res);
+}
+
+bool PQLEvaluator::getParentTUnderscoreInt(int childStatementNo)
+{
+	vector<PKBStatement::SharedPtr> parentStmts;
+	addParentStmts(parentStmts);
+
+	for (auto& stmt : parentStmts) {
+		if (getParentTIntInt(stmt->getIndex(), childStatementNo)) return true;
+	}
+	
+	return false;
+}
+
+unordered_set<int> PQLEvaluator::getParentTUnderscoreSyn(PKBDesignEntity targetChildType)
+{
+	unordered_set<int> toReturn;
+
+	vector<PKBStatement::SharedPtr> parentStmts;
+	addParentStmts(parentStmts);
+
+	for (const auto& stmt : parentStmts) {
+		for (const int& i : getAllChildAndSubChildrenOfGivenType(stmt, targetChildType)) {
+			toReturn.insert(i);
+		}
+	}
+
+	return move(toReturn);
+}
+
+bool PQLEvaluator::getParentTUnderscoreUnderscore()
+{
+	return getParentsUnderscoreUnderscore();
 }
 
 
