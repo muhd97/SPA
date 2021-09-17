@@ -116,7 +116,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
     vector<shared_ptr<Result>> toReturn;
 
     if (de->getEntityTypeName() == CONSTANT) {
-        for (const int& x : evaluator->getAllConstants()) toReturn.emplace_back(make_shared<StringSingleResult>(to_string(x)));
+        for (const string& x : evaluator->getAllConstants()) toReturn.emplace_back(make_shared<StringSingleResult>(x));
         return move(toReturn);
     }
 
