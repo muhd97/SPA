@@ -701,6 +701,16 @@ public:
             || (entRef->getEntRefType() == EntRefType::SYNONYM 
                 && entRef->getStringVal() == s->getValue());
     }
+
+    inline vector<string> getAllSynonymsAsString() {
+        vector<string> toReturn;
+        toReturn.push_back(synonym->getValue());
+        if (entRef->getEntRefType() == EntRefType::SYNONYM) {
+            toReturn.emplace_back(entRef->getStringVal());
+        }
+
+        return move(toReturn);
+    }
 };
 
 class SelectCl {

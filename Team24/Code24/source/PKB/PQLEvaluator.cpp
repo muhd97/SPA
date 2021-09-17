@@ -1412,11 +1412,17 @@ vector<string> PQLEvaluator::getProceduresThatModifyVar(string variableName)
 vector<int> PQLEvaluator::getModifiers(string variableName)
 {
 	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
+	
+	if (v == nullptr) {
+		return vector<int>();
+	}
+
 	return v->getModifiers();
 }
 
 vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string variableName)
 {
+	
 	// if we are looking for ALL users using the variable, call the other function
 	if (modifierType == PKBDesignEntity::AllExceptProcedure) {
 		return getModifiers(variableName);
@@ -1436,6 +1442,7 @@ vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string vari
 			res.emplace_back(modifierIndex);
 		}
 	}
+
 
 	return res;
 }
