@@ -165,7 +165,7 @@ none
 5000
 34 - Pattern clause(exact LHS and inexact RHS)
 assign a;
-Select a pattern a("SHAG", _"y"_)
+Select a pattern a("SHAG", _"2103"_)
 none
 5000
 35 - Pattern clause(undeclared LHS)

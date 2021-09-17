@@ -1670,36 +1670,51 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
     vector<int> assignStmts;
     string LHS;
     string RHS;
+    cout << "entRef string val: " << entRef->getStringVal() << endl;
     switch (entRef->getEntRefType()) {
     case EntRefType::SYNONYM: {
-        // invalid query    
-        return;
+        if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != DesignEntity::VARIABLE) {
+            cout << "terminated" << endl;
+            // invalid query
+            return;
+        }
+        cout << "not terminated: variable";
+        LHS = "_";
+        break;
     }
     case EntRefType::UNDERSCORE: {
         LHS = "_";
+        break;
     }
     case EntRefType::IDENT: {
         LHS = entRef->getStringVal();
+        break;
     }
     }
     // RHS
     shared_ptr<ExpressionSpec> exprSpec = patternCl->exprSpec;
     if (exprSpec->isAnything) {
+        cout << "is ANything"<< endl;
         assignStmts = evaluator->matchAnyPattern(LHS);
     }
     else if (exprSpec->isPartialMatch) {
+        cout << "partial match" << endl;
         assignStmts = evaluator->matchPartialPattern(LHS, exprSpec->expression);
     }
     else {
+        cout << "exactpaterrn" << endl;
         assignStmts = evaluator->matchExactPattern(LHS, exprSpec->expression);
     }
     for (auto& i : assignStmts) {
+        cout << "assign found key: " << patternCl->synonym->getValue() << endl;
+        cout << "assign found value: " << to_string(i) << endl;
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         /* Map the value returned to this particular synonym. */
         tupleToAdd->insertKeyValuePair(patternCl->synonym->getValue(), to_string(i));
         /* Add this tuple into the vector to tuples to return. */
         toReturn.emplace_back(move(tupleToAdd));
     }
+    cout << "toreturn size: " << toReturn.size() << endl;
 }
 
 void PQLProcessor::joinResultTuples(vector<shared_ptr<ResultTuple>> leftResults, vector<shared_ptr<ResultTuple>> rightResults, string& joinKey, vector<shared_ptr<ResultTuple>>& newResults)
