@@ -12,6 +12,27 @@ const bool DESTRUCTOR_MESSAGE_ENABLED = false;
 
 using namespace std;
 
+const string PQL_PROCEDURE = "procedure";
+const string PQL_READ = "read";
+const string PQL_PRINT = "print";
+const string PQL_CALL = "call";
+const string PQL_WHILE = "while";
+const string PQL_IF = "if";
+const string PQL_ASSIGN = "assign";
+const string PQL_VARIABLE = "variable";
+const string PQL_CONSTANT = "constant";
+const string PQL_STMT = "stmt";
+const string PQL_SELECT = "Select";
+const string PQL_FOLLOWS = "Follows";
+const string PQL_FOLLOWS_T = "Follows*";
+const string PQL_PARENT = "Parent";
+const string PQL_PARENT_T = "Parent*";
+const string PQL_USES = "Uses";
+const string PQL_MODIFIES = "Modifies";
+const string PQL_PATTERN = "pattern";
+const string PQL_SUCH = "such";
+const string PQL_THAT = "that";
+
 class Synonym {
 private:
     string value;
@@ -731,6 +752,7 @@ public:
     void advance();
     bool tokensAreEmpty();
     PQLToken eat(PQLTokenType exepctedType);
+    PQLToken eatKeyword(string keyword);
     shared_ptr<Declaration> parseDeclaration();
     shared_ptr<DesignEntity> parseDesignEntity();
     shared_ptr<SuchThatCl> parseSuchThat();

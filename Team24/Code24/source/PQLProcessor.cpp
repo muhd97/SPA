@@ -52,26 +52,26 @@ inline bool givenSynonymMatchesMultipleTypes(shared_ptr<SelectCl> selectCl, stri
 /* YIDA Note: design entity PROCEDURE and VARIABLE and CONSTANT should not be supported here!! */
 inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<DesignEntity> de) {
     string s = de->getEntityTypeName();
-    if (s == ASSIGN) {
+    if (s == PQL_ASSIGN) {
         return PKBDesignEntity::Assign;
     }
-    else if (s == STMT) {
+    else if (s == PQL_STMT) {
 
         return PKBDesignEntity::AllExceptProcedure; // ALL STATEMENTS
     }
-    else if (s == READ) {
+    else if (s == PQL_READ) {
         return PKBDesignEntity::Read;
     }
-    else if (s == CALL) {
+    else if (s == PQL_CALL) {
         return PKBDesignEntity::Call;
     }
-    else if (s == WHILE) {
+    else if (s == PQL_WHILE) {
         return PKBDesignEntity::While;
     }
-    else if (s == IF) {
+    else if (s == PQL_IF) {
         return PKBDesignEntity::If;
     }
-    else if (s == PRINT) {
+    else if (s == PQL_PRINT) {
         return PKBDesignEntity::Print;
     }
     else { // s == PROCEDURE
@@ -80,26 +80,26 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<Design
 }
 
 inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(string s) {
-    if (s == ASSIGN) {
+    if (s == PQL_ASSIGN) {
         return PKBDesignEntity::Assign;
     }
-    else if (s == STMT) {
+    else if (s == PQL_STMT) {
 
         return PKBDesignEntity::AllExceptProcedure; // ALL STATEMENTS
     }
-    else if (s == READ) {
+    else if (s == PQL_READ) {
         return PKBDesignEntity::Read;
     }
-    else if (s == CALL) {
+    else if (s == PQL_CALL) {
         return PKBDesignEntity::Call;
     }
-    else if (s == WHILE) {
+    else if (s == PQL_WHILE) {
         return PKBDesignEntity::While;
     }
-    else if (s == IF) {
+    else if (s == PQL_IF) {
         return PKBDesignEntity::If;
     }
-    else if (s == PRINT) {
+    else if (s == PQL_PRINT) {
         return PKBDesignEntity::Print;
     }
     else { // s == PROCEDURE
@@ -115,19 +115,19 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
 
     vector<shared_ptr<Result>> toReturn;
 
-    if (de->getEntityTypeName() == CONSTANT) {
+    if (de->getEntityTypeName() == PQL_CONSTANT) {
         for (const string& x : evaluator->getAllConstants()) toReturn.emplace_back(make_shared<StringSingleResult>(x));
         return move(toReturn);
     }
 
-    if (de->getEntityTypeName() == VARIABLE) {
+    if (de->getEntityTypeName() == PQL_VARIABLE) {
         const vector<shared_ptr<PKBVariable>>& vars = evaluator
             ->getAllVariables();
         for (auto& ptr : vars) toReturn.emplace_back(make_shared<VariableNameSingleResult>(ptr->getName()));
         return move(toReturn);
     }
 
-    if (de->getEntityTypeName() == PROCEDURE) {
+    if (de->getEntityTypeName() == PQL_PROCEDURE) {
         const vector<shared_ptr<PKBStatement>>& stmts = evaluator
             ->getStatementsByPKBDesignEntity(PKBDesignEntity::Procedure);
         for (auto& ptr : stmts) toReturn.emplace_back(make_shared<ProcedureNameSingleResult>(ptr->mName));
@@ -210,7 +210,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         if (stmtRef->getStmtRefType() == StmtRefType::INTEGER) {
             vector<string> variablesModifiedByStmtNo = evaluator->getModified(stmtRef->getIntVal());
             if (entRef->getEntRefType() == EntRefType::SYNONYM) {
-                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { // Modifies (1, x), x is NOT a variable
+                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != PQL_VARIABLE) { // Modifies (1, x), x is NOT a variable
                     throw "Modifies(1, p), but p is not a variable delcaration.\n";
                 } else {
                     const string& rightSynonymKey = entRef->getStringVal();
@@ -260,7 +260,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
             /* Modifies (syn, v) */
             if (rightType == EntRefType::SYNONYM) {
-                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != VARIABLE) { // Modifies (s, x), x is NOT a variable
+                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != PQL_VARIABLE) { // Modifies (s, x), x is NOT a variable
                     throw "Modifies(s, p), but p is not a variable delcaration.\n";
                 }  
                 string rightSynonymKey;
@@ -390,7 +390,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
         /* Modifies ("PROC_IDENTIFER", v) Select variable v. */
         if (rightType == EntRefType::SYNONYM) {
-            if (selectCl->getDesignEntityTypeBySynonym(entRefRight->getStringVal()) != VARIABLE) { // Modifies (s, x), x is NOT a variable
+            if (selectCl->getDesignEntityTypeBySynonym(entRefRight->getStringVal()) != PQL_VARIABLE) { // Modifies (s, x), x is NOT a variable
                 throw "Trying Modifies(p, v), but v is not a variable delcaration.\n";
             }
 
