@@ -1695,7 +1695,7 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
     // RHS
     shared_ptr<ExpressionSpec> exprSpec = patternCl->exprSpec;
     if (exprSpec->isAnything) {
-        cout << "is ANything"<< endl;
+        //cout << "is anything"<< endl;
         pairsStmtIndexAndVariables = evaluator->matchAnyPattern(LHS);
     }
     else if (exprSpec->isPartialMatch) {
@@ -1714,10 +1714,13 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
         tupleToAdd->insertKeyValuePair(patternCl->synonym->getValue(), to_string(pair.first));
         if (entRef->getEntRefType() == EntRefType::SYNONYM) {
             tupleToAdd->insertKeyValuePair(entRef->getStringVal(), pair.second);
+            cout << "variable found key: " << entRef->getStringVal() << endl;
         }
         else {
             tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, pair.second);
+            cout << "variable found key: IDENT PLACEHODLER" << endl;
         }
+        cout << "variable found value: " << pair.second << endl;
         /* Add this tuple into the vector to tuples to return. */
         toReturn.emplace_back(move(tupleToAdd));
     }
