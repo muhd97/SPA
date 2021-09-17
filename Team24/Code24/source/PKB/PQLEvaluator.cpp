@@ -1407,18 +1407,27 @@ unordered_set<string> PQLEvaluator::getAllConstants()
 
 // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 // if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern instead 
-vector<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
+vector<int> PQLEvaluator::matchAnyPattern(string& LHS) {
 	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
 	vector<int> res;
-	// lex and parse RHS
-	vector<SimpleToken> tokens = simpleLex(RHS);
-	//printSimpleTokens(tokens);
-	shared_ptr<Expression> expr = parseSimpleExpression(tokens);
-	//cout << expr->format(0);
+	for (auto& assignStmt : assignStmts) {
+		// check LHS
+		if (LHS == assignStmt->simpleAssignStatement->getId()->getName() || LHS == "_") {
+			res.emplace_back(assignStmt->getIndex());
+		}
+	}
+	return res;
+}
+
+// For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
+// if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern instead 
+vector<int> PQLEvaluator::matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS) {
+	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
+	vector<int> res;
 
 	//inorder and preorder traversals of RHS
-	vector<string> queryInOrder = inOrderTraversalHelper(expr);
-	vector<string> queryPreOrder = preOrderTraversalHelper(expr);
+	vector<string> queryInOrder = inOrderTraversalHelper(RHS);
+	vector<string> queryPreOrder = preOrderTraversalHelper(RHS);
 
 	for (auto& assignStmt : assignStmts) {
 		// check LHS
@@ -1437,18 +1446,13 @@ vector<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
 
 // For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
 // if you want to use a("_", _EXPR_) or a(IDENT, _EXPR_), use matchPattern instead
-vector<int> PQLEvaluator::matchExactPattern(string LHS, string RHS) {
+vector<int> PQLEvaluator::matchExactPattern(string& LHS, shared_ptr<Expression>& RHS) {
 	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
 	vector<int> res;
-	// lex and parse RHS
-	vector<SimpleToken> tokens = simpleLex(RHS);
-	//printSimpleTokens(tokens);
-	shared_ptr<Expression> expr = parseSimpleExpression(tokens);
-	//cout << expr->format(0);
-
+	
 	//inorder and preorder traversals of RHS
-	vector<string> queryInOrder = inOrderTraversalHelper(expr);
-	vector<string> queryPreOrder = preOrderTraversalHelper(expr);
+	vector<string> queryInOrder = inOrderTraversalHelper(RHS);
+	vector<string> queryPreOrder = preOrderTraversalHelper(RHS);
 
 	for (auto& assignStmt : assignStmts) {
 		// check LHS

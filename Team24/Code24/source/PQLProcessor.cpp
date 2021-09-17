@@ -1536,9 +1536,44 @@ void PQLProcessor::handleParentTFirstArgUnderscore(shared_ptr<SelectCl>& selectC
 
 }
 
+// currently for assign statements only
 void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
-
+    // LHS
+    shared_ptr<EntRef> entRef = patternCl->entRef;
+    vector<int> assignStmts;
+    string LHS;
+    string RHS;
+    switch (entRef->getEntRefType()) {
+    case EntRefType::SYNONYM: {
+        // invalid query    
+        return;
+    }
+    case EntRefType::UNDERSCORE: {
+        LHS = "_";
+    }
+    case EntRefType::IDENT: {
+        LHS = entRef->getStringVal();
+    }
+    }
+    // RHS
+    shared_ptr<ExpressionSpec> exprSpec = patternCl->exprSpec;
+    if (exprSpec->isAnything) {
+        assignStmts = evaluator->matchAnyPattern(LHS);
+    }
+    else if (exprSpec->isPartialMatch) {
+        assignStmts = evaluator->matchPartialPattern(LHS, exprSpec->expression);
+    }
+    else {
+        assignStmts = evaluator->matchExactPattern(LHS, exprSpec->expression);
+    }
+    for (auto& i : assignStmts) {
+        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+        /* Map the value returned to this particular synonym. */
+        tupleToAdd->insertKeyValuePair(patternCl->synonym->getValue(), to_string(i));
+        /* Add this tuple into the vector to tuples to return. */
+        toReturn.emplace_back(move(tupleToAdd));
+    }
 }
 
 void PQLProcessor::joinResultTuples(vector<shared_ptr<ResultTuple>> leftResults, vector<shared_ptr<ResultTuple>> rightResults, string& joinKey, vector<shared_ptr<ResultTuple>>& newResults)

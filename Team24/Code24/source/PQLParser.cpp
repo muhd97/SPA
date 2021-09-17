@@ -372,7 +372,7 @@ inline bool tokenIsDesignEntity(PQLToken tk) {
         || tk.stringValue == PQL_VARIABLE
         || tk.stringValue == PQL_CONSTANT
         || tk.stringValue == PQL_PROCEDURE);
-}
+} 
 
 shared_ptr<SelectCl> PQLParser::parseSelectCl()
 {

@@ -330,10 +330,12 @@ public:
 	/* TODO: @nicholasnge Provide function to return all Constants in the program. */
 	unordered_set<string> getAllConstants();
 
+	// For pattern a("_", "_") or pattern a(IDENT, "_")
+	vector<int> matchAnyPattern(string& LHS);
 	// For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
-	vector<int> matchPattern(string LHS, string RHS);
+	vector<int> matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS);
 	// For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
-	vector<int> matchExactPattern(string LHS, string RHS);
+	vector<int> matchExactPattern(string& LHS, shared_ptr<Expression>& RHS);
 
 protected:
 	PQLEvaluator(PKB::SharedPtr pPKB) {
