@@ -633,6 +633,9 @@ public:
     }
 
     shared_ptr<Declaration>& getParentDeclarationForSynonym(shared_ptr<Synonym> s) {
+        if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end()) {
+            throw "Warning: requested synonym of value [" + s->getValue() + "] is NOT declared in this SelectCl. Null DesignEntityType is returned.\n";
+        }
         return synonymToParentDeclarationMap[s->getValue()];
     }
 
