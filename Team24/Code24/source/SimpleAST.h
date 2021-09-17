@@ -25,11 +25,6 @@ enum class ExpressionType {
 
 class Expression : public Node {
 public:
-    // Stores the set of all sub expressions
-    virtual unordered_set<string> getSubExpressions() {
-        return unordered_set<string> {};
-    }
-
     virtual ExpressionType getExpressionType() {
         return ExpressionType::NONE;
     }
@@ -48,7 +43,6 @@ public:
     }
 
     string format(int _);
-    unordered_set<string> getSubExpressions() override;
     ExpressionType getExpressionType();
 };
 
@@ -95,7 +89,6 @@ public:
     }
 
     string format(int level);
-    unordered_set<string> getSubExpressions() override;
     ExpressionType getExpressionType();
 };
 
@@ -271,7 +264,6 @@ public:
     }
 
     string format(int _);
-    unordered_set<string> getSubExpressions() override;
     ExpressionType getExpressionType();
 };
 
