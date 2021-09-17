@@ -492,7 +492,7 @@ bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, P
 // find the statement before in the stmt's group
 	PKBGroup::SharedPtr grp = statementAfter->getGroup();
 	vector<int>& members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
-	for (int i = 0; i < members.size(); i++) {
+	for (size_t i = 0; i < members.size(); i++) {
 		if (statementAfter->getIndex() == members[i]) {
 			if (i == 0) {
 				return false;
@@ -511,7 +511,7 @@ bool PQLEvaluator::getStatementAfter(PKBStatement::SharedPtr& statementBefore, P
 // find the statement before in the stmt's group
 	PKBGroup::SharedPtr grp = statementBefore->getGroup();
 	vector<int>& members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
-	for (int i = 0; i < members.size(); i++) {
+	for (size_t i = 0; i < members.size(); i++) {
 		if (statementBefore->getIndex() == members[i] && i != members.size() - 1) {
 			int idxToCheck = members[++i];
 			if (!mpPKB->getStatement(idxToCheck, result)) {
@@ -1359,12 +1359,12 @@ vector<string> PQLEvaluator::preOrderTraversalHelper(shared_ptr<Expression> expr
 }
 
 bool PQLEvaluator::checkForSubTree(vector<string>& queryInOrder, vector<string>& assignInOrder) {
-	for (int assignPointer = 0; assignPointer < assignInOrder.size(); assignPointer++) {
+	for (size_t assignPointer = 0; assignPointer < assignInOrder.size(); assignPointer++) {
 		// early termination, assignInOrder too small already
 		if (assignInOrder.size() - assignPointer < queryInOrder.size()) {
 			return false;
 		}
-		for (int queryPointer = 0; queryPointer < queryInOrder.size(); queryPointer++) {
+		for (size_t queryPointer = 0; queryPointer < queryInOrder.size(); queryPointer++) {
 			if (queryInOrder[queryPointer] != assignInOrder[assignPointer + queryPointer]) {
 				break;
 			}
@@ -1382,7 +1382,7 @@ bool PQLEvaluator::checkForExactTree(vector<string>& queryInOrder, vector<string
 		return false;
 	}
 
-	for (int pointer = 0; pointer < queryInOrder.size(); pointer++) {
+	for (size_t pointer = 0; pointer < queryInOrder.size(); pointer++) {
 		if (queryInOrder[pointer] != assignInOrder[pointer]) {
 			return false;
 		}
