@@ -28,14 +28,14 @@ TestWrapper::TestWrapper() {
 
 // method for parsing the SIMPLE source
 void TestWrapper::parse(std::string filename) {
-   
+
     string program;
     string currentLine;
     ifstream program_file(filename);
 
     while (getline(program_file, currentLine))
     {
-        program += currentLine;
+        program += currentLine + "\n";
     }
 
     vector<SimpleToken> tokens = simpleLex(program);
@@ -57,11 +57,6 @@ void TestWrapper::parse(std::string filename) {
 
     this->pkb->initialise();
     this->pkb->extractDesigns(root);
-
-    cout << "NUM VARIABLE USED BY ASSIGN: " << this->pkb->mUsedVariables[PKBDesignEntity::Assign].size() << endl;
-    for (auto& v : this->pkb->mUsedVariables[PKBDesignEntity::Assign]) {
-        cout << "VARIABLE USED BY ASSIGN: " << v->getName() << endl;
-    }
 
     cout << "\n==== PKB has been populated. ====\n";
 

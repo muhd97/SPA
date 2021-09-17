@@ -12,6 +12,27 @@ const bool DESTRUCTOR_MESSAGE_ENABLED = false;
 
 using namespace std;
 
+const string PQL_PROCEDURE = "procedure";
+const string PQL_READ = "read";
+const string PQL_PRINT = "print";
+const string PQL_CALL = "call";
+const string PQL_WHILE = "while";
+const string PQL_IF = "if";
+const string PQL_ASSIGN = "assign";
+const string PQL_VARIABLE = "variable";
+const string PQL_CONSTANT = "constant";
+const string PQL_STMT = "stmt";
+const string PQL_SELECT = "Select";
+const string PQL_FOLLOWS = "Follows";
+const string PQL_FOLLOWS_T = "Follows*";
+const string PQL_PARENT = "Parent";
+const string PQL_PARENT_T = "Parent*";
+const string PQL_USES = "Uses";
+const string PQL_MODIFIES = "Modifies";
+const string PQL_PATTERN = "pattern";
+const string PQL_SUCH = "such";
+const string PQL_THAT = "that";
+
 class Synonym {
 private:
     string value;
@@ -228,6 +249,8 @@ public:
     virtual inline bool containsSynonym(shared_ptr<Synonym> s) = 0;
 
     virtual inline RelRefType getType() = 0;
+
+    virtual vector<string> getAllSynonymsAsString() = 0;
 };
 
 class UsesS : public RelRef {
@@ -267,6 +290,15 @@ public:
     inline RelRefType getType() {
         return RelRefType::USES_S;
     }
+
+    vector<string> getAllSynonymsAsString() {
+        vector<string> toReturn;
+        
+        if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM) toReturn.emplace_back(stmtRef->getStringVal());
+        if (entRef->getEntRefType() == EntRefType::SYNONYM) toReturn.emplace_back(entRef->getStringVal());
+
+        return move(toReturn);
+    }
 };
 
 class UsesP : public RelRef {
@@ -298,6 +330,15 @@ public:
 
     inline RelRefType getType() {
         return RelRefType::USES_P;
+    }
+
+    vector<string> getAllSynonymsAsString() {
+        vector<string> toReturn;
+
+        if (entRef1->getEntRefType() == EntRefType::SYNONYM) toReturn.emplace_back(entRef1->getStringVal());
+        if (entRef2->getEntRefType() == EntRefType::SYNONYM) toReturn.emplace_back(entRef2->getStringVal());
+
+        return move(toReturn);
     }
 };
 
@@ -336,6 +377,15 @@ public:
         return RelRefType::MODIFIES_S;
     }
 
+    vector<string> getAllSynonymsAsString() {
+        vector<string> toReturn;
+
+        if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM) toReturn.emplace_back(stmtRef->getStringVal());
+        if (entRef->getEntRefType() == EntRefType::SYNONYM) toReturn.emplace_back(entRef->getStringVal());
+
+        return move(toReturn);
+    }
+
 };
 
 class ModifiesP : public RelRef {
@@ -366,6 +416,15 @@ public:
 
     string format() override {
         return "ModifiesP(" + entRef1->getEntRefTypeName() + ", " + entRef2->getEntRefTypeName() + ")";
+    }
+
+    vector<string> getAllSynonymsAsString() {
+        vector<string> toReturn;
+
+        if (entRef1->getEntRefType() == EntRefType::SYNONYM) toReturn.emplace_back(entRef1->getStringVal());
+        if (entRef2->getEntRefType() == EntRefType::SYNONYM) toReturn.emplace_back(entRef2->getStringVal());
+
+        return move(toReturn);
     }
 };
 
@@ -406,6 +465,15 @@ public:
     inline RelRefType getType() {
         return RelRefType::PARENT;
     }
+
+    vector<string> getAllSynonymsAsString() {
+        vector<string> toReturn;
+
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) toReturn.emplace_back(stmtRef1->getStringVal());
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) toReturn.emplace_back(stmtRef2->getStringVal());
+
+        return move(toReturn);
+    }
 };
 
 class ParentT : public RelRef {
@@ -443,6 +511,15 @@ public:
 
     inline RelRefType getType() {
         return RelRefType::PARENT_T;
+    }
+
+    vector<string> getAllSynonymsAsString() {
+        vector<string> toReturn;
+
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) toReturn.emplace_back(stmtRef1->getStringVal());
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) toReturn.emplace_back(stmtRef2->getStringVal());
+
+        return move(toReturn);
     }
 };
 
@@ -483,6 +560,15 @@ public:
     inline RelRefType getType() {
         return RelRefType::FOLLOWS;
     }
+
+    vector<string> getAllSynonymsAsString() {
+        vector<string> toReturn;
+
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) toReturn.emplace_back(stmtRef1->getStringVal());
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) toReturn.emplace_back(stmtRef2->getStringVal());
+
+        return move(toReturn);
+    }
 };
 
 class FollowsT : public RelRef {
@@ -521,6 +607,15 @@ public:
 
     inline RelRefType getType() {
         return RelRefType::FOLLOWS_T;
+    }
+
+    vector<string> getAllSynonymsAsString() {
+        vector<string> toReturn;
+
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM) toReturn.emplace_back(stmtRef1->getStringVal());
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM) toReturn.emplace_back(stmtRef2->getStringVal());
+
+        return move(toReturn);
     }
 };
 
@@ -639,11 +734,14 @@ public:
         return synonymToParentDeclarationMap[s->getValue()];
     }
 
+    inline bool isSynonymDeclared(string toTest) {
+        return synonymToParentDeclarationMap.find(toTest) != synonymToParentDeclarationMap.end();
+    }
 
     inline string getDesignEntityTypeBySynonym(string s) {
         if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end()) {
-            throw "Warning: requested synonym of value [" + s + "] is NOT declared in this SelectCl. Null DesignEntityType is returned.\n";
-            return "";
+            string toThrow = "Warning: requested synonym of value [" + s + "] is NOT declared in this SelectCl. Null DesignEntityType is returned.\n";
+            throw toThrow;
         }
 
         return synonymToParentDeclarationMap[s]->getDesignEntity()->getEntityTypeName();
@@ -701,7 +799,6 @@ public:
     }
 
     inline bool patternContainsSynonym(shared_ptr<Synonym> s) {
-        cout << "PATTERN contains synonym? \n";
         bool flag = false;
         for (auto& st : this->suchThatClauses) {
             flag = st->containsSynonym(s);
@@ -734,6 +831,7 @@ public:
     void advance();
     bool tokensAreEmpty();
     PQLToken eat(PQLTokenType exepctedType);
+    PQLToken eatKeyword(string keyword);
     shared_ptr<Declaration> parseDeclaration();
     shared_ptr<DesignEntity> parseDesignEntity();
     shared_ptr<SuchThatCl> parseSuchThat();

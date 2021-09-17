@@ -178,6 +178,10 @@ private:
     void handleParentFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<Parent>& parentCl, vector<shared_ptr<ResultTuple>>& toReturn);
     void handleParentFirstArgUnderscore(shared_ptr<SelectCl>& selectCl, shared_ptr<Parent>& parentCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
+    void handleParentTFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<ParentT>& parentCl, vector<shared_ptr<ResultTuple>>& toReturn);
+    void handleParentTFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<ParentT>& parentCl, vector<shared_ptr<ResultTuple>>& toReturn);
+    void handleParentTFirstArgUnderscore(shared_ptr<SelectCl>& selectCl, shared_ptr<ParentT>& parentCl, vector<shared_ptr<ResultTuple>>& toReturn);
+
     void handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
     void joinResultTuples(vector<shared_ptr<ResultTuple>> leftResults, vector<shared_ptr<ResultTuple>> rightResults, string& joinKey, vector<shared_ptr<ResultTuple>>& newResults);

@@ -21,12 +21,21 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PKBEvaluatorTester.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestFrontEnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestPQLParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestPKBEvaluator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

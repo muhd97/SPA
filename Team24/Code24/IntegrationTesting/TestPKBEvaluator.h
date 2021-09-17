@@ -1,6 +1,7 @@
 #ifndef EVALUATOR_TESTER_H
 #define EVALUATOR_TESTER_H
 
+#include "stdafx.h"
 #include "SimpleAST.h"
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 
@@ -19,11 +20,11 @@
 #include "../AutoTester/source/AbstractWrapper.h"
 #include "PKB/PKB.h"
 
-class PKBEvaluatorTester {
+class TestPKBEvaluator {
 public:
 
     // default constructor
-    PKBEvaluatorTester();
+    TestPKBEvaluator();
 
     // method for parsing the SIMPLE source
     void runTest1();

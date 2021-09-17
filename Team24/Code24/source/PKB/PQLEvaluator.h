@@ -115,6 +115,35 @@ public:
 	// => getChildrenT( PKBDE::While ) // find all children stmts of all while stmts
 	set<pair<int, int>> getChildrenT(PKBDesignEntity parentType);
 
+	unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStatement::SharedPtr targetParent, PKBDesignEntity targetChildrenType);
+
+	/* Use for Parent*(INT, synonym) */
+	unordered_set<int> getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
+
+	/* Use for Parent*(INT, _) */
+	bool getParentTIntUnderscore(int statementNo);
+	
+	/* Use for Parent*(INT, INT) */
+	bool getParentTIntInt(int parentStatementNo, int childStatementNo);
+
+	/* Use for Parent*(synonym, _) */
+	unordered_set<int> getParentTSynUnderscore(PKBDesignEntity targetParentType);
+
+	/* Use for Parent*(synonym, INT) */
+	unordered_set<int> getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
+	
+	/* Use for Parent*(synonym1, synonym2) */
+	set<pair<int, int>> getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType);
+
+	/* Use for Parent*(_, INT) */
+	bool getParentTUnderscoreInt(int childStatementNo);
+
+	/* Use for Parent*(_, synonym) */
+	unordered_set<int> getParentTUnderscoreSyn(PKBDesignEntity targetChildType);
+
+	/* Use for Parent*(_, _) */
+	bool getParentTUnderscoreUnderscore();
+
 	// Follow
 
 	// Get statement if it is of type {beforeType} and followed by statement indexed {after} 
@@ -322,7 +351,7 @@ public:
 	vector<PKBVariable::SharedPtr> getAllVariables();
 
 	/* TODO: @nicholasnge Provide function to return all Constants in the program. */
-	unordered_set<int> getAllConstants();
+	unordered_set<string> getAllConstants();
 
 	// For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 	vector<int> matchPattern(string LHS, string RHS);

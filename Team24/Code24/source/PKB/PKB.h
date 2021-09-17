@@ -48,7 +48,7 @@ public:
 	unordered_map<string, PKBVariable::SharedPtr> mVariables;
 
 	// set of all constants
-	unordered_set<int> mConstants;
+	unordered_set<string> mConstants;
 
 	// maps 
 
@@ -146,7 +146,7 @@ public:
 	}
 
 
-	unordered_set<int> getConstants() {
+	unordered_set<string> getConstants() {
 		return mConstants;
 	}
 

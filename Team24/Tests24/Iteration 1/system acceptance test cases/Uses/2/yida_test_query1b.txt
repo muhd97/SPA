@@ -24,12 +24,12 @@ Select v such that Uses(printt, v)
 q, b
 25
 6 - Select a such that Uses(a, v) // Select Assigns that use a variable
-assign a; variable k;
+assign a; variable v;
 Select a such that Uses(a, v)
 3, 8
 25
 7 - Select a such that Uses(pr, v) // Select Prints that use a variable
-assign a; variable k; print pr, rp, rr, pp;
+assign a; variable v; print pr, rp, rr, pp;
 Select pp such that Uses(pp, v)
 9, 5
 25
@@ -54,13 +54,13 @@ Select yida4 such that Uses("yida4", yida4)
 
 25
 12 - Select v such that Uses(c, v) // Select Calls that use variable
-call k;
+call k; variable v;
 Select k such that Uses(k, v)
 11, 12
 25
 13 - Select p such that Uses(p, v) // Select Procedures that use variable
-procedure k;
-Select k such that Uses(k, v)
+procedure k; variable posiadadasdhsdasjdnmassmaasjndjadsad;
+Select k such that Uses(k, posiadadasdhsdasjdnmassmaasjndjadsad)
 yida1, yida2, yida3
 25
 14 - Select stmt such that Uses(stmt, v) // Return only assign/if/while/print/call

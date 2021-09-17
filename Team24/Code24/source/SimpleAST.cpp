@@ -71,8 +71,8 @@ StatementType ReadStatement::getStatementType() {
     return StatementType::READ;
 }
 
-string Constant::format(int level) {
-    return to_string(value);
+string Constant::format(int _) {
+    return value;
 }
 
 unordered_set<string> Constant::getSubExpressions() {
