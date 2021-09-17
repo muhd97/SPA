@@ -162,7 +162,7 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="PKBEvaluatorTester.h" />
+    <ClInclude Include="TestPKBEvaluator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -173,7 +173,7 @@
     </ClCompile>
     <ClCompile Include="TestFrontEnd.cpp" />
     <ClCompile Include="TestPQLParser.cpp" />
-    <ClCompile Include="PKBEvaluatorTester.cpp" />
+    <ClCompile Include="TestPKBEvaluator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

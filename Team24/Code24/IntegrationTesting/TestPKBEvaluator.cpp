@@ -1,4 +1,5 @@
 #include "TestPKBEvaluator.h"
+#include "stdafx.h"
 
 using namespace std;
 

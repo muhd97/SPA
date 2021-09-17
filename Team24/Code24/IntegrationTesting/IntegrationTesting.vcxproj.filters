@@ -35,7 +35,7 @@
     <ClCompile Include="TestPQLParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PKBEvaluatorTester.cpp">
+    <ClCompile Include="TestPKBEvaluator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

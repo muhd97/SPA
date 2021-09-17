@@ -1,6 +1,7 @@
 #ifndef EVALUATOR_TESTER_H
 #define EVALUATOR_TESTER_H
 
+#include "stdafx.h"
 #include "SimpleAST.h"
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 

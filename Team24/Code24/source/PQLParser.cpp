@@ -54,6 +54,23 @@ inline PQLToken PQLParser::eat(PQLTokenType exepctedType)
     return tok;
 }
 
+inline PQLToken PQLParser::eatKeyword(string keyword)
+{
+    PQLToken tok = peek();
+    if (tok.type == PQLTokenType::NAME && tok.stringValue == keyword) {
+        advance();
+    }
+    else {
+        cout << "Expected: " << keyword << " but got: " << getPQLTokenLabel(tok) << " instead\n";
+        throw std::invalid_argument("Error parsing PQL Query!!");
+    }
+    return tok;
+}
+
+inline bool isKeyword(PQLToken token, string keyword) {
+    return token.type == PQLTokenType::NAME && token.stringValue == keyword;
+}
+
 shared_ptr<Declaration> PQLParser::parseDeclaration()
 {
     vector<shared_ptr<Synonym>> synonyms;
@@ -75,42 +92,47 @@ shared_ptr<Declaration> PQLParser::parseDeclaration()
 shared_ptr<DesignEntity> PQLParser::parseDesignEntity()
 {
     PQLToken curr = peek();
-    switch (curr.type) {
-    case PQLTokenType::STMT:
-        eat(PQLTokenType::STMT);
-        break;
-    case PQLTokenType::READ:
-        eat(PQLTokenType::READ);
-        break;
-    case PQLTokenType::PRINT:
-        eat(PQLTokenType::PRINT);
-        break;
-    case PQLTokenType::CALL:
-        eat(PQLTokenType::CALL);
-        break;
-    case PQLTokenType::WHILE:
-        eat(PQLTokenType::WHILE);
-        break;
-    case PQLTokenType::IF:
-        eat(PQLTokenType::IF);
-        break;
-    case PQLTokenType::ASSIGN:
-        eat(PQLTokenType::ASSIGN);
-        break;
-    case PQLTokenType::VARIABLE:
-        eat(PQLTokenType::VARIABLE);
-        break;
-    case PQLTokenType::CONSTANT:
-        eat(PQLTokenType::CONSTANT);
-        break;
-    case PQLTokenType::PROCEDURE:
-        eat(PQLTokenType::PROCEDURE);
-        break;
-    default:
-        cout << "WARNING: Unrecognized Design Entity!\n";
-    }
+    if (peek().type == PQLTokenType::NAME) {
+        if (curr.stringValue == PQL_STMT) {
+            eatKeyword(PQL_STMT);
+        } 
+        else if (curr.stringValue == PQL_READ) {
+            eatKeyword(PQL_READ);
+        }
+        else if (curr.stringValue == PQL_PRINT) {
+            eatKeyword(PQL_PRINT);
+        }
+        else if (curr.stringValue == PQL_CALL) {
+            eatKeyword(PQL_CALL);
+        }
+        else if (curr.stringValue == PQL_WHILE) {
+            eatKeyword(PQL_WHILE);
+        }
+        else if (curr.stringValue == PQL_IF) {
+            eatKeyword(PQL_IF);
+        }
+        else if (curr.stringValue == PQL_ASSIGN) {
+            eatKeyword(PQL_ASSIGN);
+        }
+        else if (curr.stringValue == PQL_VARIABLE) {
+            eatKeyword(PQL_VARIABLE);
+        }
+        else if (curr.stringValue == PQL_CONSTANT) {
+            eatKeyword(PQL_CONSTANT);
+        }
+        else if (curr.stringValue == PQL_PROCEDURE) {
+            eatKeyword(PQL_PROCEDURE);
+        }
+        else {
+            cout << "ERROR: Unrecognized Design Entity!\n" << curr.stringValue;
+        }
 
-    return make_shared<DesignEntity>(getPQLTokenLabel(curr));
+        return make_shared<DesignEntity>(curr.stringValue);
+    }
+    else {
+        cout << "Expected stmt, read, print... but got: " << getPQLTokenLabel(curr) << " instead\n";
+        throw std::invalid_argument("Error parsing PQL Query!!");
+    }
 }
 
 
@@ -165,7 +187,7 @@ shared_ptr<EntRef> PQLParser::parseEntRef()
 
 shared_ptr<RelRef> PQLParser::parseUses()
 {
-    eat(PQLTokenType::USES);
+    eatKeyword(PQL_USES);
     eat(PQLTokenType::LEFT_PAREN);
 
     if (peek().type == PQLTokenType::STRING) { /* If first arg of Uses() is a string, it must be a UsesP */
@@ -195,7 +217,7 @@ shared_ptr<RelRef> PQLParser::parseUses()
 
 shared_ptr<RelRef> PQLParser::parseModifies()
 {
-    eat(PQLTokenType::MODIFIES);
+    eatKeyword(PQL_MODIFIES);
     eat(PQLTokenType::LEFT_PAREN);
     if (peek().type != PQLTokenType::STRING) { /* If first arg of Modifies() is a string, it must be a ModifiesP */
         auto sRef11 = parseStmtRef();
@@ -225,68 +247,69 @@ shared_ptr<RelRef> PQLParser::parseModifies()
 
 shared_ptr<SuchThatCl> PQLParser::parseSuchThat() // todo
 {
-
-    eat(PQLTokenType::SUCH_THAT);
+    eatKeyword(PQL_SUCH);
+    eatKeyword(PQL_THAT);
     auto r = parseRelRef();
     return make_shared<SuchThatCl>(r);
 
 }
 
-shared_ptr<RelRef> PQLParser::parseRelRef() // todo
+shared_ptr<RelRef> PQLParser::parseRelRef()
 {
-    switch (peek().type) {
-    case PQLTokenType::FOLLOWS:
-    {
-        eat(PQLTokenType::FOLLOWS);
-        eat(PQLTokenType::LEFT_PAREN);
-        auto sRef1 = parseStmtRef();
-        eat(PQLTokenType::COMMA);
-        auto sRef2 = parseStmtRef();
-        eat(PQLTokenType::RIGHT_PAREN);
-        return make_shared<Follows>(sRef1, sRef2);
+    auto curr = peek();
+    if (isKeyword(curr, PQL_FOLLOWS)) {
+        if (peekNext().type == PQLTokenType::STAR) {
+            // Follows*
+            eatKeyword(PQL_FOLLOWS_T);
+            eat(PQLTokenType::STAR);
+            eat(PQLTokenType::LEFT_PAREN);
+            auto sRef3 = parseStmtRef();
+            eat(PQLTokenType::COMMA);
+            auto sRef4 = parseStmtRef();
+            eat(PQLTokenType::RIGHT_PAREN);
+            return make_shared<FollowsT>(sRef3, sRef4);
+        }
+        else {
+            // Follows
+            eatKeyword(PQL_FOLLOWS);
+            eat(PQLTokenType::LEFT_PAREN);
+            auto sRef1 = parseStmtRef();
+            eat(PQLTokenType::COMMA);
+            auto sRef2 = parseStmtRef();
+            eat(PQLTokenType::RIGHT_PAREN);
+            return make_shared<Follows>(sRef1, sRef2);
+        }
     }
-
-    case PQLTokenType::FOLLOWS_T:
-    {
-        eat(PQLTokenType::FOLLOWS_T);
-        eat(PQLTokenType::LEFT_PAREN);
-        auto sRef3 = parseStmtRef();
-        eat(PQLTokenType::COMMA);
-        auto sRef4 = parseStmtRef();
-        eat(PQLTokenType::RIGHT_PAREN);
-        return make_shared<FollowsT>(sRef3, sRef4);
+    else if (isKeyword(curr, PQL_PARENT)) {
+        if (peekNext().type == PQLTokenType::STAR) {
+            eatKeyword(PQL_PARENT_T);
+            eat(PQLTokenType::STAR);
+            eat(PQLTokenType::LEFT_PAREN);
+            auto sRef7 = parseStmtRef();
+            eat(PQLTokenType::COMMA);
+            auto sRef8 = parseStmtRef();
+            eat(PQLTokenType::RIGHT_PAREN);
+            return make_shared<ParentT>(sRef7, sRef8);
+        }
+        else {
+            eatKeyword(PQL_PARENT);
+            eat(PQLTokenType::LEFT_PAREN);
+            auto sRef5 = parseStmtRef();
+            eat(PQLTokenType::COMMA);
+            auto sRef6 = parseStmtRef();
+            eat(PQLTokenType::RIGHT_PAREN);
+            return make_shared<Parent>(sRef5, sRef6);
+        }
     }
-    case PQLTokenType::PARENT:
-    {
-        eat(PQLTokenType::PARENT);
-        eat(PQLTokenType::LEFT_PAREN);
-        auto sRef5 = parseStmtRef();
-        eat(PQLTokenType::COMMA);
-        auto sRef6 = parseStmtRef();
-        eat(PQLTokenType::RIGHT_PAREN);
-        return make_shared<Parent>(sRef5, sRef6);
-    }
-
-    case PQLTokenType::PARENT_T:
-    {
-        eat(PQLTokenType::PARENT_T);
-        eat(PQLTokenType::LEFT_PAREN);
-        auto sRef7 = parseStmtRef();
-        eat(PQLTokenType::COMMA);
-        auto sRef8 = parseStmtRef();
-        eat(PQLTokenType::RIGHT_PAREN);
-        return make_shared<ParentT>(sRef7, sRef8);
-    }
-
-    case PQLTokenType::USES:
-    {
+    else if (isKeyword(curr, PQL_USES)) {
         return parseUses();
     }
-
-    default: 
-    {
+    else if (isKeyword(curr, PQL_MODIFIES)) {
         return parseModifies();
     }
+    else {
+        cout << "Expected: Follow, FollowsT, Parent, ParentT, Uses and Modifies but got: " << getPQLTokenLabel(curr) << " instead\n";
+        throw std::invalid_argument("Error parsing PQL Query!!");
     }
 }
 
@@ -320,7 +343,7 @@ shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
 
 shared_ptr<PatternCl> PQLParser::parsePatternCl()
 {
-    eat(PQLTokenType::PATTERN);
+    eatKeyword(PQL_PATTERN);
     auto syn = parseSynonym();
 
     // TODO (@jiachen247) Check syn is of type assign
@@ -337,17 +360,18 @@ shared_ptr<PatternCl> PQLParser::parsePatternCl()
 
 }
 
-inline bool tokenIsDesignEntity(PQLTokenType tk) {
-    return tk == PQLTokenType::STMT
-        || tk == PQLTokenType::READ
-        || tk == PQLTokenType::PRINT
-        || tk == PQLTokenType::CALL
-        || tk == PQLTokenType::WHILE
-        || tk == PQLTokenType::IF
-        || tk == PQLTokenType::ASSIGN
-        || tk == PQLTokenType::VARIABLE
-        || tk == PQLTokenType::CONSTANT
-        || tk == PQLTokenType::PROCEDURE;
+inline bool tokenIsDesignEntity(PQLToken tk) {
+    return tk.type == PQLTokenType::NAME && (
+        tk.stringValue == PQL_STMT
+        || tk.stringValue == PQL_READ
+        || tk.stringValue == PQL_PRINT
+        || tk.stringValue == PQL_CALL
+        || tk.stringValue == PQL_WHILE
+        || tk.stringValue == PQL_IF
+        || tk.stringValue == PQL_ASSIGN
+        || tk.stringValue == PQL_VARIABLE
+        || tk.stringValue == PQL_CONSTANT
+        || tk.stringValue == PQL_PROCEDURE);
 }
 
 shared_ptr<SelectCl> PQLParser::parseSelectCl()
@@ -357,17 +381,17 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     vector<shared_ptr<PatternCl>> patternClauses;
     shared_ptr<Synonym> synonym;
 
-    while (tokenIsDesignEntity(peek().type)) {
+    while (tokenIsDesignEntity(peek())) {
         declarations.push_back(parseDeclaration());
     }
 
-    eat(PQLTokenType::SELECT);
+    eatKeyword(PQL_SELECT);
     synonym = parseSynonym();
 
 
     /* YIDA Note: For iteration 1, multiple such that clauses are NOT allowed */
     while (!tokensAreEmpty()) {
-        if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::SUCH_THAT) { 
+        if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_SUCH) {
         //if (peek().type == PQLTokenType::SUCH_THAT) { /* YIDA: Trying out multiple such that to try out joins */
             if (suchThatClauses.size() != 0) {
                 cout << "Duplicate such that clauses are not allowed." << endl;
@@ -375,7 +399,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
             }
             suchThatClauses.push_back(parseSuchThat());
         }
-        else if (peek().type == PQLTokenType::PATTERN) {
+        else if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_PATTERN) {
             if (patternClauses.size() != 0) {
                 cout << "Duplicate pattern clauses are not allowed." << endl;
                 break;
