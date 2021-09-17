@@ -36,7 +36,7 @@ firsttest
 7 - Const
 constant c;
 Select c
-1, 37, 40, 999, 2103, 3203, 12345
+1, 37, 40, 999, 2103, 3203, 12345, 54321
 5000
 8 - Invalid query with Uses as procedure is on RHS
 variable v; procedure p;
