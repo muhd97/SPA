@@ -1,0 +1,210 @@
+1 - Parent  
+procedure p;
+Select p such that Parent(6, 19)
+none
+5000
+2 - Parent  
+stmt s, s0;
+Select s such that Parent(s, 13)
+12
+5000
+3 - Parent  
+stmt s;
+Select s such that Parent(7, s)
+none
+5000
+4 - Parent  
+stmt s;
+Select s such that Parent(s, s)
+none
+5000
+5 - Parent  
+procedure p;
+Select p such that Parent*(6, 19)
+none
+5000
+6 - Parent  
+procedure p, pp;
+Select p such that Parent*(7, 21)
+none
+5000
+7 - Parent  
+stmt s, s0, s1; procedure p, pp;
+Select s such that Parent*(s, 15)
+5, 11, 12
+5000
+8 - Parent  
+stmt s; assign a; while w; if ifs; variable v; procedure p;
+Select s such that Parent*(7, s)
+none
+5000
+9 - Parent  
+stmt s, s0, s1; assign a, a0; if ifs; while w; variable v; constant c; procedure p, pp; print ppp; read r;
+Select s such that Parent*(s, s)
+none
+5000
+10 - Follows  
+stmt s, s0, s1; assign a, a0; if ifs; while w; variable v; constant c; procedure p, pp; print ppp; read r;
+Select s such that Follows(8, s)
+9
+5000
+11 - Follows  
+stmt s, s0, s1;
+Select s such that Follows(s, 11) such that Follows(8, s)
+none
+5000
+12 - Follows  
+stmt s, s0, s1; assign a, a0; while w;
+Select a such that Follows(s, a)
+10, 15, 16, 19
+5000
+13 - Follows  
+stmt s;
+Select s such that Follows*(s, 15)
+13, 14
+5000
+14 - Follows  
+stmt s;
+Select s such that Follows*(13, s)
+14, 15, 16
+5000
+15 - Follows  
+stmt s, s0, s1; assign a, a0; if ifs; while w; variable v; constant c; procedure p, pp; print ppp; read r;
+Select w such that Follows(s, w) such that Follows*(w, ppp)
+5
+5000
+16 - Pattern  
+assign a;
+Select a pattern a ( _ , "(rr+1) * (rrrr-2)")
+none
+5000
+17 - Pattern  
+assign a;
+Select a pattern a ( _ , _"ynmjzm + (x + rrrr)"_)
+none
+5000
+18 - Pattern  
+assign a;
+Select a pattern a(_, _)
+1, 3, 4, 6, 10, 15, 16, 19 
+5000
+19 - Pattern  
+assign a;
+Select a pattern a ( "w" , "ynmjzm * ynmjzm - (rr + 1) * (rrrr - 2)")
+none
+5000
+20 - Pattern  
+assign a;
+Select a pattern a ( "w" , _"ynmjzm + (x + rrrr)"_)
+none
+5000
+21 - Pattern  
+assign a; variable v;
+Select v pattern a (v, "rrrr")
+none
+5000
+22 - Find all the variables modifies
+variable v;
+Select v such that Modifies (2, v)
+eye
+5000
+23 - Find all the variables modifies in lines
+stmt s; variable v;
+Select v such that Modifies (16, v)
+xm
+5000
+24 - Find all the statements that modifies a specific variable
+stmt s; variable v; read r;
+Select s such that Modifies (s, "rr")
+5, 7
+5000
+25 - Find all the statements that modifies any variable
+stmt s; 
+Select s such that Modifies (s, _)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19  
+5000
+26 - Find all the statements that modifies any variable
+stmt s; if ifs;
+Select ifs such that Modifies (ifs, _)
+2, 11
+5000
+27 - Find all the variables used in lines
+stmt s; variable v; 
+Select v such that Uses (2, v)
+eye
+5000
+28 - Find all the variables used in lines
+stmt s; assign a; while w; if ifs; variable v; procedure p;  print ppp; read r;
+Select v such that Uses (16, v)
+xm
+5000
+29 - Find all the statements that uses a specific variable
+stmt s; variable v; read r;
+Select s such that Uses (s, "rr")
+5, 10
+5000
+30 - Find all the statements that uses a specific variable
+if ifs; 
+Select ifs such that Uses (ifs, "world")
+11
+5000
+31 - Find all the statements that uses any variable
+stmt s; 
+Select s such that Uses (s, _)
+2, 4, 5, 10, 11, 12, 15, 16, 17, 18, 19, 20 
+5000
+32 - Find all the statements that uses any variable
+if ifs;
+Select ifs such that Uses (ifs, _)
+2, 11
+5000
+33 - Find all the variables used by if statements
+stmt s; if ifs; variable v;
+Select v such that Uses (ifs, v)
+eye, abcracadabra, rrrr, world, hello, ynmjzm, x, xm 
+5000
+34 - Combinations  
+stmt s; assign a, a0; variable v, v0; while w; if ifs; print ppp; procedure p;
+Select a such that Uses(a, "rr") pattern a(v, _"rrrr - 2"_)
+10
+5000
+35 - Combinations  
+stmt s; assign a, a0; variable v, v0;
+Select v such that Uses(s, v) pattern a(v, _)
+eye, xm, abcracadabra 
+5000
+36 - Combinations  
+assign a, a0; variable v, v0; while w;
+Select w such that Parent*(w, a) pattern a(v, _)
+5, 12
+5000
+37 - Combinations  
+assign a, a0; variable v, v0;
+Select v such that Uses(a, v) pattern a(v, _)
+eye, xm
+5000
+38 - Combinations  
+assign a, a0; variable v, v0; 
+Select a pattern a(v, _) Modifies(s, "a")
+none
+5000
+39 - Combinations  
+stmt s; assign a, a0; variable v, v0; while w; 
+Select w such that Parent(w, s) pattern a(v0, _)
+5, 12
+5000
+40 - Combinations  
+stmt s; assign a, a0; variable v, v0;
+Select a such that Uses(s, v) pattern a0(v, _)
+1, 3, 4, 6, 10, 15, 16, 19 
+5000
+41 - Combinations  
+assign a, a0; variable v, v0; while w;
+Select w such that Uses(a, v) pattern a(v, _)
+5, 12
+5000
+42 - Corner  
+stmt s;
+Select a
+none
+5000
