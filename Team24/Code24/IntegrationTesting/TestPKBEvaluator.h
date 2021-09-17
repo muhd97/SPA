@@ -19,11 +19,11 @@
 #include "../AutoTester/source/AbstractWrapper.h"
 #include "PKB/PKB.h"
 
-class PKBEvaluatorTester {
+class TestPKBEvaluator {
 public:
 
     // default constructor
-    PKBEvaluatorTester();
+    TestPKBEvaluator();
 
     // method for parsing the SIMPLE source
     void runTest1();
