@@ -1,5 +1,25 @@
-40 - Select all Assign statements - TargetSynonym Not in Parent*(10, 14)
+27 - Parent(none)
+stmt s;
+Select s such that Parent(6, 7)
+none
+5000
+28 - Parent(while)
+while w;
+Select w such that Parent(w, 7)
+none
+5000
+29 - Parent(_)
+call c; assign a;
+Select c such that Parent(_, a)
+none
+5000
+30 - Parent*(stmt, stmt)
+stmt s1, s2;
+Select s1 such that Parent*(s1, s2)
+1, 5, 7, 8, 14, 19, 25, 26, 32, 33
+5000
+31 - Parent*(1, assign)
 assign a;
-Select a such that Parent*(10, 14)
-
-25
+Select a such that Parent*(1, a)
+9, 11, 18, 20, 29, 34, 35
+5000

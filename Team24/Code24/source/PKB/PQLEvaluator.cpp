@@ -505,34 +505,28 @@ unordered_set<int> PQLEvaluator::getParentTIntSyn(int statementNo, PKBDesignEnti
 		return toReturn;
 	}
 
-	cout << "ParentT int syn\n";
-
 	if (!isContainerType(stmt->getType())) return toReturn;
 
 	for (auto& grp : stmt->getContainerGroups()) qOfGroups.push(grp);
 
-	cout << "Stmt = " << statementNo << ", size of container groups = " << stmt->getContainerGroups().size() << ", qsize = " << qOfGroups.size() << endl;
-
 	while (!qOfGroups.empty()) {
 		auto& currGroup = qOfGroups.front();
 		qOfGroups.pop();
-
-		cout << "currgroup size = " << currGroup->getMembers(targetChildrenType).size() << endl;
 
 		for (int& i : currGroup->getMembers(targetChildrenType)) toReturn.insert(i);
 
 		for (auto& subGrps : currGroup->getChildGroups()) qOfGroups.push(subGrps);
 	}
 
-	return toReturn;
+	return move(toReturn);
 }
 
-bool PQLEvaluator::getParentTIntUnderscore(int statementNo)
+bool PQLEvaluator::getParentTIntUnderscore(int parentStatementNo)
 {
 	unordered_set<int> toReturn;
 	queue<PKBGroup::SharedPtr> qOfGroups;
 	PKBStatement::SharedPtr stmt;
-	if (!mpPKB->getStatement(statementNo, stmt)) {
+	if (!mpPKB->getStatement(parentStatementNo, stmt)) {
 		return false;
 	}
 
@@ -578,6 +572,52 @@ bool PQLEvaluator::getParentTIntInt(int parentStatementNo, int childStatementNo)
 
 	return false;
 }
+
+unordered_set<int> PQLEvaluator::getParentTSynUnderscore(PKBDesignEntity targetParentType)
+{
+	unordered_set<int> toReturn;
+	vector<PKBStatement::SharedPtr> parentStmts;
+
+	if (targetParentType == PKBDesignEntity::AllExceptProcedure) {
+		addParentStmts(parentStmts);
+	}
+	else {
+		// check these 'possible' parent statements
+		parentStmts = mpPKB->getStatements(targetParentType);
+	}
+
+	for (auto& stmt : parentStmts) {
+		if (getParentTIntUnderscore(stmt->getIndex())) {
+			toReturn.insert(stmt->getIndex());
+		}
+	}
+
+	return move(toReturn);
+}
+
+unordered_set<int> PQLEvaluator::getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo)
+{
+	unordered_set<int> toReturn;
+	vector<PKBStatement::SharedPtr> parentStmts;
+
+	if (targetParentType == PKBDesignEntity::AllExceptProcedure) {
+		addParentStmts(parentStmts);
+	}
+	else {
+		// check these 'possible' parent statements
+		parentStmts = mpPKB->getStatements(targetParentType);
+	}
+
+	for (auto& stmt : parentStmts) {
+		if (getParentTIntInt(stmt->getIndex(), childStatementNo)) {
+			toReturn.insert(stmt->getIndex());
+		}
+	}
+
+	return move(toReturn);
+
+}
+
 
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 {
