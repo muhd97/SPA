@@ -35,7 +35,7 @@ void TestWrapper::parse(std::string filename) {
 
     while (getline(program_file, currentLine))
     {
-        program += currentLine;
+        program += currentLine + "\n";
     }
 
     vector<SimpleToken> tokens = simpleLex(program);

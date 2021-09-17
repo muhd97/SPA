@@ -5,23 +5,26 @@ using namespace std;
 // this is isnt allowed in a simple program and can be used as the EOF delimeter
 const char END_TOKEN = '$';
 
-SimpleToken makeToken(SimpleTokenType type) {
+SimpleToken makeToken(SimpleTokenType type, int location) {
     struct SimpleToken token;
     token.type = type;
+    token.location = location;
     return token;
 }
 
-SimpleToken makeIntToken(string value) {
+SimpleToken makeIntToken(string value, int location) {
     struct SimpleToken token;
     token.type = SimpleTokenType::INTEGER;
     token.value = value;
+    token.location = location;
     return token;
 }
 
-SimpleToken makeStringToken(string value) {
+SimpleToken makeStringToken(string value, int location) {
     struct SimpleToken token;
     token.type = SimpleTokenType::NAME;
     token.value = value;
+    token.location = location;
     return token;
 }
 
@@ -37,87 +40,94 @@ vector<SimpleToken> simpleLex(string program)
     int i = 0;
     int n = program.size() - 1;
 
+    int line = 1;
+
     while (i < n) {
         current = program[i];
         lookahead = program[i + 1];
         cout << current;
 
-        if (current == ' ' || current == '\n' || current == '\t' || current == '\r') {
+        if (current == ' ' || current == '\t' || current == '\r') {
+            i++;
+            continue;
+        }
+        else if (current == '\n') {
+            line++;
             i++;
             continue;
         }
         else if (current == '(') {
-            tokens.push_back(makeToken(SimpleTokenType::LEFT_PAREN));
+            tokens.push_back(makeToken(SimpleTokenType::LEFT_PAREN, line));
         }
         else if (current == ')') {
-            tokens.push_back(makeToken(SimpleTokenType::RIGHT_PAREN));
+            tokens.push_back(makeToken(SimpleTokenType::RIGHT_PAREN, line));
         }
         else if (current == '{') {
-            tokens.push_back(makeToken(SimpleTokenType::LEFT_BRACE));
+            tokens.push_back(makeToken(SimpleTokenType::LEFT_BRACE, line));
         }
         else if (current == '}') {
-            tokens.push_back(makeToken(SimpleTokenType::RIGHT_BRACE));
+            tokens.push_back(makeToken(SimpleTokenType::RIGHT_BRACE, line));
         }
         else if (current == ';') {
-            tokens.push_back(makeToken(SimpleTokenType::SEMICOLON));
+            tokens.push_back(makeToken(SimpleTokenType::SEMICOLON, line));
         }
         else if (current == '+') {
-            tokens.push_back(makeToken(SimpleTokenType::PLUS));
+            tokens.push_back(makeToken(SimpleTokenType::PLUS, line));
         }
         else if (current == '-') {
-            tokens.push_back(makeToken(SimpleTokenType::MINUS));
+            tokens.push_back(makeToken(SimpleTokenType::MINUS, line));
         }
         else if (current == '*') {
-            tokens.push_back(makeToken(SimpleTokenType::MUL));
+            tokens.push_back(makeToken(SimpleTokenType::MUL, line));
         }
         else if (current == '/') {
-            tokens.push_back(makeToken(SimpleTokenType::DIV));
+            tokens.push_back(makeToken(SimpleTokenType::DIV, line));
         }
         else if (current == '%') {
-            tokens.push_back(makeToken(SimpleTokenType::MOD));
+            tokens.push_back(makeToken(SimpleTokenType::MOD, line));
         }
         else if (current == '<') {
             if (lookahead == '=') {
-                tokens.push_back(makeToken(SimpleTokenType::LTE));
+                tokens.push_back(makeToken(SimpleTokenType::LTE, line));
                 i++;
             }
             else {
-                tokens.push_back(makeToken(SimpleTokenType::LT));
+                tokens.push_back(makeToken(SimpleTokenType::LT, line));
             }
         }
         else if (current == '>') {
             if (lookahead == '=') {
-                tokens.push_back(makeToken(SimpleTokenType::GTE));
+                tokens.push_back(makeToken(SimpleTokenType::GTE, line));
                 i++;
             }
             else {
-                tokens.push_back(makeToken(SimpleTokenType::GT));
+                tokens.push_back(makeToken(SimpleTokenType::GT, line));
             }
         }
         else if (current == '=') {
             if (lookahead == '=') {
-                tokens.push_back(makeToken(SimpleTokenType::EQ));
+                tokens.push_back(makeToken(SimpleTokenType::EQ, line));
                 i++;
             }
             else {
-                tokens.push_back(makeToken(SimpleTokenType::ASSIGN));
+                tokens.push_back(makeToken(SimpleTokenType::ASSIGN, line));
             }
         }
         else if (current == '!') {
             if (lookahead == '=') {
-                tokens.push_back(makeToken(SimpleTokenType::NEQ));
+                tokens.push_back(makeToken(SimpleTokenType::NEQ, line));
                 i++;
             }
             else {
-                tokens.push_back(makeToken(SimpleTokenType::NOT));
+                tokens.push_back(makeToken(SimpleTokenType::NOT, line));
             }
         }
         else if (current == '&' && lookahead == '&') {
-            tokens.push_back(makeToken(SimpleTokenType::AND));
+            tokens.push_back(makeToken(SimpleTokenType::AND, line));
             i++;
         }
         else if (current == '|' && lookahead == '|') {
-            tokens.push_back(makeToken(SimpleTokenType::OR));
+            tokens.push_back(makeToken(SimpleTokenType::OR, line));
             i++;
         }
         else if (isdigit(current)) {
@@ -137,7 +147,7 @@ vector<SimpleToken> simpleLex(string program)
                 cout << "Integer token cannot start with 0 but found interger value: " << value << endl;
                 return vector<SimpleToken>();
             }
-            tokens.push_back(makeIntToken(value));
+            tokens.push_back(makeIntToken(value, line));
 
         }
         else if (isalpha(current)) {
@@ -148,7 +158,7 @@ vector<SimpleToken> simpleLex(string program)
                 lookahead = program[++i + 1];
             }
             value.push_back(current);
-            tokens.push_back(makeStringToken(value));
+            tokens.push_back(makeStringToken(value, line));
         }
         else {
             cout << "Lexer: Unknown token '" << current << "'." << endl;
