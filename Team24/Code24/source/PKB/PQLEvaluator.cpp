@@ -1502,13 +1502,15 @@ unordered_set<string> PQLEvaluator::getAllConstants()
 
 // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 // if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern instead 
-vector<int> PQLEvaluator::matchAnyPattern(string& LHS) {
+vector<pair<int, string>> PQLEvaluator::matchAnyPattern(string& LHS) {
 	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
-	vector<int> res;
+	vector<pair<int, string>> res;
 	for (auto& assignStmt : assignStmts) {
 		// check LHS
 		if (LHS == assignStmt->simpleAssignStatement->getId()->getName() || LHS == "_") {
-			res.emplace_back(assignStmt->getIndex());
+			int statementIndex = assignStmt->getIndex();
+			string variableModified = assignStmt->simpleAssignStatement->getId()->getName();
+			res.emplace_back(make_pair(statementIndex, variableModified));
 		}
 	}
 	return res;
@@ -1516,9 +1518,9 @@ vector<int> PQLEvaluator::matchAnyPattern(string& LHS) {
 
 // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 // if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern instead 
-vector<int> PQLEvaluator::matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS) {
+vector<pair<int, string>> PQLEvaluator::matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS) {
 	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
-	vector<int> res;
+	vector<pair<int, string>> res;
 
 	//inorder and preorder traversals of RHS
 	vector<string> queryInOrder = inOrderTraversalHelper(RHS);
@@ -1533,7 +1535,9 @@ vector<int> PQLEvaluator::matchPartialPattern(string& LHS, shared_ptr<Expression
 		vector<string> assignInOrder = inOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
 		vector<string> assignPreOrder = preOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
 		if (checkForSubTree(queryInOrder, assignInOrder) && checkForSubTree(queryPreOrder, assignPreOrder)) {
-			res.emplace_back(assignStmt->getIndex());
+			int statementIndex = assignStmt->getIndex();
+			string variableModified = assignStmt->simpleAssignStatement->getId()->getName();
+			res.emplace_back(make_pair(statementIndex, variableModified));
 		}
 	}
 	return res;
@@ -1541,9 +1545,9 @@ vector<int> PQLEvaluator::matchPartialPattern(string& LHS, shared_ptr<Expression
 
 // For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
 // if you want to use a("_", _EXPR_) or a(IDENT, _EXPR_), use matchPattern instead
-vector<int> PQLEvaluator::matchExactPattern(string& LHS, shared_ptr<Expression>& RHS) {
+vector<pair<int, string>> PQLEvaluator::matchExactPattern(string& LHS, shared_ptr<Expression>& RHS) {
 	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
-	vector<int> res;
+	vector<pair<int, string>> res;
 	
 	//inorder and preorder traversals of RHS
 	vector<string> queryInOrder = inOrderTraversalHelper(RHS);
@@ -1558,7 +1562,9 @@ vector<int> PQLEvaluator::matchExactPattern(string& LHS, shared_ptr<Expression>&
 		vector<string> assignInOrder = inOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
 		vector<string> assignPreOrder = preOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
 		if (checkForExactTree(queryInOrder, assignInOrder) && checkForExactTree(queryPreOrder, assignPreOrder)) {
-			res.emplace_back(assignStmt->getIndex());
+			int statementIndex = assignStmt->getIndex();
+			string variableModified = assignStmt->simpleAssignStatement->getId()->getName();
+			res.emplace_back(make_pair(statementIndex, variableModified));
 		}
 	}
 	return res;

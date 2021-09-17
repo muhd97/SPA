@@ -1667,7 +1667,7 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
 {
     // LHS
     shared_ptr<EntRef> entRef = patternCl->entRef;
-    vector<int> assignStmts;
+    vector<pair<int, string>> pairsStmtIndexAndVariables;
     string LHS;
     string RHS;
     cout << "entRef string val: " << entRef->getStringVal() << endl;
@@ -1695,22 +1695,28 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
     shared_ptr<ExpressionSpec> exprSpec = patternCl->exprSpec;
     if (exprSpec->isAnything) {
         cout << "is ANything"<< endl;
-        assignStmts = evaluator->matchAnyPattern(LHS);
+        pairsStmtIndexAndVariables = evaluator->matchAnyPattern(LHS);
     }
     else if (exprSpec->isPartialMatch) {
         cout << "partial match" << endl;
-        assignStmts = evaluator->matchPartialPattern(LHS, exprSpec->expression);
+        pairsStmtIndexAndVariables = evaluator->matchPartialPattern(LHS, exprSpec->expression);
     }
     else {
         cout << "exactpaterrn" << endl;
-        assignStmts = evaluator->matchExactPattern(LHS, exprSpec->expression);
+        pairsStmtIndexAndVariables = evaluator->matchExactPattern(LHS, exprSpec->expression);
     }
-    for (auto& i : assignStmts) {
+    for (auto& pair : pairsStmtIndexAndVariables) {
         cout << "assign found key: " << patternCl->synonym->getValue() << endl;
-        cout << "assign found value: " << to_string(i) << endl;
+        cout << "assign found value: " << to_string(pair.first) << endl;
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         /* Map the value returned to this particular synonym. */
-        tupleToAdd->insertKeyValuePair(patternCl->synonym->getValue(), to_string(i));
+        tupleToAdd->insertKeyValuePair(patternCl->synonym->getValue(), to_string(pair.first));
+        if (entRef->getEntRefType() == EntRefType::SYNONYM) {
+            tupleToAdd->insertKeyValuePair(entRef->getStringVal(), pair.second);
+        }
+        else {
+            tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, pair.second);
+        }
         /* Add this tuple into the vector to tuples to return. */
         toReturn.emplace_back(move(tupleToAdd));
     }
