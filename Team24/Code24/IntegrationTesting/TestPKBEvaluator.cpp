@@ -1,15 +1,15 @@
-#include "PKBEvaluatorTester.h"
+#include "TestPKBEvaluator.h"
 
 using namespace std;
 
 // a default constructor
-PKBEvaluatorTester::PKBEvaluatorTester() {
+TestPKBEvaluator::TestPKBEvaluator() {
     // create any objects here as instance variables of this class
     // as well as any initialization required for your spa program
     pkb = make_shared<PKB>();
 }
 
-void PKBEvaluatorTester::runTest1() {
+void TestPKBEvaluator::runTest1() {
 
     string program =  "procedure computeCentroid{"
                                 "   count = 0;"
@@ -76,7 +76,7 @@ void PKBEvaluatorTester::runTest1() {
     cout << "\n==== End PQL Tests ====\n";
 }
 
-void PKBEvaluatorTester::runTest2() {
+void TestPKBEvaluator::runTest2() {
     string program = " procedure Example {\
                                                     x = 2;\
                                                     z = 3;\
@@ -163,7 +163,7 @@ void PKBEvaluatorTester::runTest2() {
     cout << "\n==== End PQL Tests ====\n";
 }
 
-void PKBEvaluatorTester::checkResult(int testIndex, vector<int> res, vector<int> expected) {
+void TestPKBEvaluator::checkResult(int testIndex, vector<int> res, vector<int> expected) {
     std::sort(res.begin(), res.end());
     if (res == expected) {
         cout << "RESULT " << testIndex << ": OK \n";
@@ -182,13 +182,13 @@ void PKBEvaluatorTester::checkResult(int testIndex, vector<int> res, vector<int>
     }
 }
 
-void PKBEvaluatorTester::printResult(int testIndex, vector<string> res) {
+void TestPKBEvaluator::printResult(int testIndex, vector<string> res) {
     cout << "RESULT: " << testIndex << ": ";
     for (int i = 0; i < res.size(); i++)
         std::cout << res.at(i) << ' ';
 }
 
-void PKBEvaluatorTester::runFollowsTests1() {
+void TestPKBEvaluator::runFollowsTests1() {
     //0
     vector<int> res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, 1);
     vector<int> expected = {2};
@@ -285,15 +285,15 @@ void PKBEvaluatorTester::runFollowsTests1() {
 
 }
 
-void PKBEvaluatorTester::runParentTests1() {
+void TestPKBEvaluator::runParentTests1() {
 
 }
 
-void PKBEvaluatorTester::runParentTests2()
+void TestPKBEvaluator::runParentTests2()
 {
 }
 
-void PKBEvaluatorTester::runFollowsTests2() {
+void TestPKBEvaluator::runFollowsTests2() {
     int testCounter = 0;
     vector<int> res;
     vector<int> expected;
@@ -332,7 +332,7 @@ void PKBEvaluatorTester::runFollowsTests2() {
     }
 }
 
-void PKBEvaluatorTester::runPatternTests1()
+void TestPKBEvaluator::runPatternTests1()
 {
     string program = " procedure Example {\
                                                     x = 1;\
@@ -422,12 +422,12 @@ void PKBEvaluatorTester::runPatternTests1()
     }
 }
 
-void PKBEvaluatorTester::runPatternTests2()
+void TestPKBEvaluator::runPatternTests2()
 {
 }
 
 int main() {
-    PKBEvaluatorTester tester = PKBEvaluatorTester();
+    TestPKBEvaluator tester = TestPKBEvaluator();
     tester.runTest1();
     tester.runTest2();
     tester.runPatternTests1();
