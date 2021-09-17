@@ -2,15 +2,6 @@
 
 using namespace std;
 
-const string PROCECURE = "procedure";
-const string READ = "read";
-const string PRINT = "print";
-const string CALL = "call";
-const string WHILE = "while";
-const string IF = "if";
-const string THEN = "then";
-const string ELSE = "else";
-
 // this is isnt allowed in a simple program and can be used as the EOF delimeter
 const char END_TOKEN = '$';
 
@@ -154,34 +145,7 @@ vector<SimpleToken> simpleLex(string program)
                 lookahead = program[++i + 1];
             }
             value.push_back(current);
-
-            if (value == PROCECURE) {
-                tokens.push_back(makeToken(SimpleTokenType::PROCEDURE));
-            }
-            else if (value == READ) {
-                tokens.push_back(makeToken(SimpleTokenType::READ));
-            }
-            else if (value == PRINT) {
-                tokens.push_back(makeToken(SimpleTokenType::PRINT));
-            }
-            else if (value == CALL) {
-                tokens.push_back(makeToken(SimpleTokenType::CALL));
-            }
-            else if (value == WHILE) {
-                tokens.push_back(makeToken(SimpleTokenType::WHILE));
-            }
-            else if (value == IF) {
-                tokens.push_back(makeToken(SimpleTokenType::IF));
-            }
-            else if (value == THEN) {
-                tokens.push_back(makeToken(SimpleTokenType::THEN));
-            }
-            else if (value == ELSE) {
-                tokens.push_back(makeToken(SimpleTokenType::ELSE));
-            }
-            else {
-                tokens.push_back(makeStringToken(value));
-            }
+            tokens.push_back(makeStringToken(value));
         }
         else {
             cout << "Lexer: Unknown token '" << current << "'." << endl;
@@ -236,26 +200,10 @@ string getSimpleTokenLabel(SimpleToken token) {
         return "&&";
     case SimpleTokenType::OR:
         return "||";
-    case SimpleTokenType::READ:
-        return READ;
-    case SimpleTokenType::PRINT:
-        return PRINT;
-    case SimpleTokenType::CALL:
-        return CALL;
-    case SimpleTokenType::WHILE:
-        return WHILE;
-    case SimpleTokenType::IF:
-        return IF;
-    case SimpleTokenType::THEN:
-        return THEN;
-    case SimpleTokenType::ELSE:
-        return ELSE;
-    case SimpleTokenType::PROCEDURE:
-        return PROCECURE;
     case SimpleTokenType::NAME:
-        return "id(" + token.stringValue + ")";
+        return "\"" + token.stringValue + "\"";
     case SimpleTokenType::INTEGER:
-        return "int(" + to_string(token.intValue) + ")";
+        return to_string(token.intValue);
     }
     return "";
 }
