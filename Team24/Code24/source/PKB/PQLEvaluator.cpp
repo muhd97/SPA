@@ -505,19 +505,13 @@ unordered_set<int> PQLEvaluator::getParentTIntSyn(int statementNo, PKBDesignEnti
 		return toReturn;
 	}
 
-	cout << "ParentT int syn\n";
-
 	if (!isContainerType(stmt->getType())) return toReturn;
 
 	for (auto& grp : stmt->getContainerGroups()) qOfGroups.push(grp);
 
-	cout << "Stmt = " << statementNo << ", size of container groups = " << stmt->getContainerGroups().size() << ", qsize = " << qOfGroups.size() << endl;
-
 	while (!qOfGroups.empty()) {
 		auto& currGroup = qOfGroups.front();
 		qOfGroups.pop();
-
-		cout << "currgroup size = " << currGroup->getMembers(targetChildrenType).size() << endl;
 
 		for (int& i : currGroup->getMembers(targetChildrenType)) toReturn.insert(i);
 
@@ -578,6 +572,38 @@ bool PQLEvaluator::getParentTIntInt(int parentStatementNo, int childStatementNo)
 
 	return false;
 }
+
+unordered_set<int> PQLEvaluator::getParentTSynUnderscore(PKBDesignEntity targetParentType)
+{
+	unordered_set<int> toReturn;
+	vector<PKBStatement::SharedPtr> parentStmts;
+
+	if (targetParentType == PKBDesignEntity::AllExceptProcedure) {
+		addParentStmts(parentStmts);
+	}
+	else {
+		// check these 'possible' parent statements
+		parentStmts = mpPKB->getStatements(targetParentType);
+	}
+
+	for (auto& stmt : parentStmts) {
+		if (getParentTIntUnderscore(stmt->getIndex())) {
+			toReturn.insert(stmt->getIndex());
+		}
+	}
+
+	return toReturn;
+}
+
+unordered_set<int> PQLEvaluator::getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo)
+{
+	unordered_set<int> toReturn;
+
+
+	return toReturn;
+
+}
+
 
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 {

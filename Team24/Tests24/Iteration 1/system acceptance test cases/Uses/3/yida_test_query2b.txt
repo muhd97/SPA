@@ -238,8 +238,33 @@ while w; if ifs;
 Select ifs such that Parent*(10, w)
 1, 2, 5, 10, 16
 25
-48 - Select w such that Parent*(10, ifs) - NEGATIVE CASE: TargetSynonym Not in Parent(10, w)
+48 - Select w such that Parent*(10, ifs) - NEGATIVE CASE: TargetSynonym Not in Parent(10, ifs)
 while w; if ifs;
 Select w such that Parent*(10, ifs)
+
+25
+49 - SELECT ALL IFS - TargetSynonym Not in Parent*(10, _)
+if ifs;
+Select ifs such that Parent*(10, _)
+1, 2, 5, 10, 16
+25
+50 - Select w such that Parent*(10, _) - TargetSynonym Not in Parent(10, _)
+while w; if ifs;
+Select w such that Parent*(10, _)
+6, 7, 8, 11, 13, 21
+25
+51 - Select w such that Parent*(1, _) - NEGATIVE CASE: TargetSynonym Not in Parent(1, _)
+while w; if ifs;
+Select w such that Parent*(1, _)
+
+25
+52 - Select w such that Parent*(11, 10) - NEGATIVE CASE: TargetSynonym Not in Parent(11, 10)
+while w; if ifs;
+Select w such that Parent*(11, 10)
+
+25
+53 - Select w such that Parent*(11, 10) - NEGATIVE CASE: TargetSynonym Not in Parent(11, 10)
+while w; if ifs;
+Select w such that Parent(11, 10)
 
 25

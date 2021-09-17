@@ -117,6 +117,8 @@ public:
 	unordered_set<int> getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
 	bool getParentTIntUnderscore(int statementNo);
 	bool getParentTIntInt(int parentStatementNo, int childStatementNo);
+	unordered_set<int> getParentTSynUnderscore(PKBDesignEntity targetParentType);
+	unordered_set<int> getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
 
 	// Follow
 
