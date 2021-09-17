@@ -998,9 +998,6 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared
             shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
             PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
-
-            cout << "YIDA DEBUG 3 ======================================\n";
-
             for (auto p : evaluator->mpPKB->setOfProceduresThatUseVars) {
 
                 for (auto v : p->getUsedVariables()) {
@@ -1019,8 +1016,6 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared
 
     }
 
-
-    cout << "YIDA DEBUG 4 ======================================\n";
 
     /* Uses (syn, _) */
     if (rightType == EntRefType::UNDERSCORE) {
