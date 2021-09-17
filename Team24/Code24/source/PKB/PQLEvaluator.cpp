@@ -555,6 +555,46 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity 
 	return res;
 }
 
+/* The pair will have the statement before first and the statement after after */
+set<pair<int, int>> PQLEvaluator::getBeforePairs(PKBDesignEntity beforeType, PKBDesignEntity afterType)
+{
+	set<pair<int, int>> res;
+	// check if res is cached, if so return results
+	// if (mpPKB->getCachedSet(PKB::Relation::Before, beforeType, afterType, res)) {
+	// 	return res;
+	// }
+
+	// get results manually
+	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(afterType);
+	PKBStatement::SharedPtr stmtBefore;
+	for (auto& stmt : stmts) {
+		// if there is no statement before, go next
+		if (!getStatementBefore(stmt, stmtBefore)) {
+			continue;
+		}
+
+		// if pass the type check
+		if (beforeType == PKBDesignEntity::AllExceptProcedure || stmtBefore->getType() == beforeType) {
+			// and pass the same nesting level check
+			if (stmt->getGroup() == stmtBefore->getGroup()) {
+				pair<int, int> toAdd;
+				toAdd.first = stmtBefore->getIndex();
+				toAdd.second = stmt->getIndex();
+				res.insert(toAdd);
+			}
+		}
+	}
+
+	//insert res into cache
+	//mpPKB->insertintoCacheSet(PKB::Relation::Before, beforeType, afterType, res);
+	return res;
+}
+
+set<pair<int, int>> PQLEvaluator::getBeforePairs(PKBDesignEntity afterType) {
+	return getBeforePairs(PKBDesignEntity::AllExceptProcedure, afterType);
+}
+
+
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity afterType)
 {
 	return getBefore(PKBDesignEntity::AllExceptProcedure, afterType);
@@ -619,9 +659,64 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity a
 	return res;
 }
 
+set<pair<int, int>> PQLEvaluator::getAfterPairs(PKBDesignEntity beforeType, PKBDesignEntity afterType)
+{
+	set<pair<int, int>> res;
+	// check if res is cached, if so return results
+	// if (mpPKB->getCachedSet(PKB::Relation::After, beforeType, afterType, res)) {
+	// 	return res;
+	// }
+
+	// get results manually
+	// todo @nicholas: add optimization to go through shorter list of synonym (since both ways cost the same)
+	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(beforeType);
+	PKBStatement::SharedPtr stmtAfter;
+	for (auto& stmt : stmts) {
+		// if there is no statement after, go next
+		if (!getStatementAfter(stmt, stmtAfter)) {
+			continue;
+		}
+		// if pass the type check
+		if (afterType == PKBDesignEntity::AllExceptProcedure || stmtAfter->getType() == afterType) {
+			// and pass the same nesting level check
+			if (stmt->getGroup() == stmtAfter->getGroup()) {
+				pair<int, int> toAdd;
+				toAdd.first = stmt->getIndex();
+				toAdd.second = stmtAfter->getIndex();
+				res.insert(toAdd);
+			}
+		}
+	}
+
+	//insert res into cache
+	//mpPKB->insertintoCacheSet(PKB::Relation::After, beforeType, afterType, res);
+	return res;
+}
+
+set<pair<int, int>> PQLEvaluator::getAfterPairs(PKBDesignEntity beforeType) {
+	return getAfterPairs(PKBDesignEntity::AllExceptProcedure, beforeType);
+}
+
+bool PQLEvaluator::getFollowsUnderscoreUnderscore() {
+	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(PKBDesignEntity::AllExceptProcedure);
+	PKBStatement::SharedPtr stmtAfter;
+	for (auto& stmt : stmts) {
+		// if there is no statement after, go next
+		if (!getStatementAfter(stmt, stmtAfter)) {
+			continue;
+		}
+
+		//same group check
+		if (stmt->getGroup() == stmtAfter->getGroup()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType)
 {
-	return getAfter(PKBDesignEntity::AllExceptProcedure, beforeType);
+	return getAfter(beforeType, PKBDesignEntity::AllExceptProcedure);
 }
 
 vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, int afterIndex)

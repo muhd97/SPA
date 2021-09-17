@@ -74,6 +74,9 @@ public:
 
 	bool getParentsUnderscoreUnderscore();
 
+	//Handles the specific case of Follows(_, _)
+	bool getFollowsUnderscoreUnderscore();
+
 	bool hasChildren(PKBDesignEntity childType, int parentIndex);
 
 	// Parent*
@@ -126,10 +129,20 @@ public:
 	// => getBefore( PKBDE::Assign, PKBDE::While )
 	vector<int> getBefore(PKBDesignEntity beforeType, PKBDesignEntity afterType);
 
+	// Get all pairs of statements (b, a) such that a of type {afterType} follow statements b of type {beforeType} 
+	// eg. assign a; while w; Select w such that Follows( a, w ); 
+	// => getBeforePairs( PKBDE::Assign, PKBDE::While )
+	set<pair<int, int>> getBeforePairs(PKBDesignEntity beforeType, PKBDesignEntity afterType);
+
 	// Get all statements that are followed by statements of type {afterType} 
 	// eg. assign a; stmt s; Select s such that Follows( s, a ); 
 	// => getBefore( PKBDE::Assign )
 	vector<int> getBefore(PKBDesignEntity afterType);
+
+	// Get all pairs of statements (b, a) such that a of type {AfterType} follows statements b
+	// eg. assign a; while w; Select w such that Follows( a, w ); 
+	// => getAfterPairs( PKBDE::Assign, PKBDE::While )
+	set<pair<int, int>> getBeforePairs(PKBDesignEntity afterType);
 
 	// Get statement if it is of type {afterType} and follows child statement indexed {child} 
 	// eg. stmt s; Select s such that Follows( 14, s ); 
@@ -143,10 +156,20 @@ public:
 	// => getAfter( PKBDE::Assign, PKBDE::While )
 	vector<int> getAfter(PKBDesignEntity beforeType, PKBDesignEntity afterType);
 
+	// Get all pairs of statements (a, b) such that a of type {afterType} follow statements b of type {beforeType} 
+	// eg. assign a; while w; Select w such that Follows( a, w ); 
+	// => getAfterPairs( PKBDE::Assign, PKBDE::While )
+	set<pair<int, int>> getAfterPairs(PKBDesignEntity beforeType, PKBDesignEntity afterType);
+
 	// Get all statements that follow statements of type {beforeType} 
 	// eg. assign a; stmt s; Select s such that Follows( a, s ); 
 	// => getAfter( PKBDE::Assign )
 	vector<int> getAfter(PKBDesignEntity beforeType);
+
+	// Get all pairs of statements (a, b) such that a follow statements b of type {beforeType} 
+	// eg. assign a; while w; Select w such that Follows( a, w ); 
+	// => getAfterPairs( PKBDE::Assign, PKBDE::While )
+	set<pair<int, int>> getAfterPairs(PKBDesignEntity beforeType);
 
 	// Follow*
 
