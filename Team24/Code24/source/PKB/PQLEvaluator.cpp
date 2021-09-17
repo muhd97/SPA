@@ -183,7 +183,7 @@ set<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDes
 	// insert into cache for future use
 	/*temp.insert(temp.end(), res.begin(), res.end());
 	mpPKB->insertintoCache(PKB::Relation::Child, parentType, childType, temp);*/
-	return res;
+	return move(res);
 }
 
 set<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType)

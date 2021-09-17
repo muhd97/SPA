@@ -1236,6 +1236,11 @@ void PQLProcessor::handleParentFirstArgSyn(shared_ptr<SelectCl>& selectCl, share
             return;
         }
 
+        /* Parent(syn, syn) -> BOTH Synonyms are the same! Parents is not reflexive. */
+        if (leftSynonym == rightSynonym) {
+            return;
+        }
+
 
         PKBDesignEntity rightArgType = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSynonym));
 
@@ -1435,6 +1440,12 @@ void PQLProcessor::handleParentTFirstArgSyn(shared_ptr<SelectCl>& selectCl, shar
             throw "TODO: Handle error case. ParentT(syn, s), but s is declared as Procedure, Constant or Variable. These DesignEntity types don't have parents.\n";
             return;
         }
+
+        /* Parent(syn, syn) -> BOTH Synonyms are the same! Parents is not reflexive. */
+        if (leftSynonym == rightSynonym) {
+            return;
+        }
+
 
         PKBDesignEntity rightArgType = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSynonym));
 
