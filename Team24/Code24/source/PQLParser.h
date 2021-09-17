@@ -796,7 +796,6 @@ public:
     }
 
     inline bool patternContainsSynonym(shared_ptr<Synonym> s) {
-        cout << "PATTERN contains synonym? \n";
         bool flag = false;
         for (auto& st : this->suchThatClauses) {
             flag = st->containsSynonym(s);
