@@ -34,6 +34,7 @@ inline bool targetSynonymMatchesMultipleTypes(shared_ptr<SelectCl> selectCl, ini
 /* Method to check if the target synonym in the select statement is found in its suchThat OR pattern clauses */
 inline bool targetSynonymIsInClauses(shared_ptr<SelectCl> selectCl) {
     shared_ptr<Synonym> targetSynonym = selectCl->targetSynonym;
+
     return selectCl->suchThatContainsSynonym(targetSynonym)
         || selectCl->patternContainsSynonym(targetSynonym);
 }
@@ -1911,7 +1912,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
 
     if (selectCl->hasPatternClauses()) {
         for (auto& cl : selectCl->patternClauses) handlePatternClause(selectCl, cl, patternReturnTuples);
-
         /* Get the first pattern clause (Iteration 1 only has ONE pattern clause) */
         //shared_ptr<PatternCl> patternCl = selectCl->patternClauses[0];
     }
@@ -1919,6 +1919,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     /* STEP 3: If Needed, join SuchThat and PatternResults */
     string joinSynonymToSet = "";
     if (selectCl->hasPatternClauses() && selectCl->hasSuchThatClauses()) {
+
         setCommonSynonymToJoinOn(selectCl->suchThatClauses[0], selectCl->patternClauses[0], joinSynonymToSet);
         vector<shared_ptr<ResultTuple>> combinedTuples;
 
@@ -1952,7 +1953,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     vector<shared_ptr<ResultTuple>>& finalTuples = !selectCl->hasPatternClauses() ? suchThatReturnTuples : patternReturnTuples;
     
     if (!targetSynonymIsInClauses(selectCl)) {
-        return finalTuples.size() <= 0 ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
+        return finalTuples.empty() ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
     }
 
     /* We use a set to help us get rid of duplicates. */

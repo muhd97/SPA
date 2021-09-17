@@ -800,8 +800,8 @@ public:
 
     inline bool patternContainsSynonym(shared_ptr<Synonym> s) {
         bool flag = false;
-        for (auto& st : this->suchThatClauses) {
-            flag = st->containsSynonym(s);
+        for (auto& pt : this->patternClauses) {
+            flag = pt->containsSynonym(s);
             if (flag) break;
         }
         return flag;
