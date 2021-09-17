@@ -132,6 +132,7 @@ public:
 
     void error(vector<SimpleTokenType> expectedTypes, SimpleToken actual) {
         // Can consider adding error productions to carry on parsing to catch more errors
+        cout << "Line " << actual.location << ":";
         cout << "Failed to match expected grammer" << endl;
         cout << "Expected [";
 
@@ -148,6 +149,7 @@ public:
     }
 
     void errorKeyword(string expectedKeyword, SimpleToken actual) {
+        cout << "Line " << actual.location << ":";
         cout << "Failed to match expected keyword" << endl;
         cout << "Expected \"" << expectedKeyword << "\" but got " << getSimpleTokenLabel(actual) << "' instead." << endl;
 

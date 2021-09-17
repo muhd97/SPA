@@ -38,6 +38,7 @@ struct SimpleToken
 {
     SimpleTokenType type;
     string value;
+    int location;
 };
 
 vector<SimpleToken> simpleLex(string program);
