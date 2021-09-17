@@ -1,0 +1,230 @@
+1 - Valid Query for all Calls (EMPTY RESULT)
+call c; 
+Select c
+
+5000
+2 - Valid Query for all Procedures
+procedure p; 
+Select p
+main
+5000
+3 - Valid Query for all Variables
+variable v; 
+Select v
+x, y, z, p, q, a, b, i, I, r, s
+5000
+4 - Valid Query for all Constants (DIFFERENT)
+constant c; 
+Select c
+2, 6, 123, 50, 5, 9, 10, 345, 7, 3, 25, 30, 0, 222, 2, 12, 40
+5000
+5 - Valid Query for all Assignments
+assign a; 
+Select a
+2, 4, 6, 10, 11, 16, 17, 18, 22, 25, 32, 34, 35
+5000
+6 - Valid Query for all While Statements
+while w; 
+Select w
+7, 19, 20, 27
+5000
+7 - Valid Query for all If Statements
+if ifs; 
+Select ifs
+5, 8, 13, 30
+5000
+8 - Valid Query for all Print Statements
+print pn; 
+Select pn
+3, 12, 15, 23, 26, 31, 33, 36
+5000
+9 - Valid Query for all Read Statements
+read r; 
+Select r
+1, 9, 14, 21, 24, 28, 29
+5000
+10 - Valid Query for all Read Statements
+procedure p; 
+Select p such that Follows(1, 2)
+main
+5000
+11 - Valid Query for all Read Statements
+variable v; 
+Select v such that Follows(21, 22)
+x, y, z, p, q, a, b, i, I, r, s
+5000
+12 - Valid Query for all Read Statements
+constant c; 
+Select c such that Follows(5, 27)
+2, 6, 123, 50, 5, 9, 10, 345, 7, 3, 25, 30, 0, 222, 2, 12, 40
+5000
+13 - Valid Query for all Read Statements
+read r;
+Select r such that Follows(6, 7)
+1, 9, 14, 21, 24, 28, 29
+5000
+14 - Follows Query that is False
+while w; 
+Select w such that Follows(5, 6)
+
+5000
+15 - Invalid Follows Query due to wrong order
+print pn; 
+Select pn such that Follows(2, 1)
+
+5000
+16 - Invalid Follows Query where statement number is out of range
+if ifs; 
+Select ifs such that Follows(36, 37)
+
+5000
+17 - Invalid Follows Query where statement number is not in range
+assign a; 
+Select a such that Follows(0, 1)
+
+5000
+18 - Valid Follows Query where Follows(r, a)
+read r; assign a;
+Select r such that Follows(r, a)
+1, 9, 21, 25
+5000
+19 - Valid Follows Query where Follows(a, r) (EMPTY RESULT)
+read r; assign a;
+Select a such that Follows(a, r) 
+
+5000
+20 - Valid Follows Query where Follows(a, pn)
+print pn; assign a;
+Select a such that Follows(a, pn)
+2, 11, 22, 25, 35
+5000
+21 - Valid Follows Query where Follows(pn, a)
+print pn; assign a;
+Select  such that Follows(pn, a)
+
+5000
+22 - Valid Follows Query where Follows(a, if)
+if ifs; assign a;
+Select ifs such that Follows(a, ifs)
+5
+5000
+23 - Valid Follows Query where Follows(a, w)
+while w; assign a;
+Select w such that Follows(a, w)
+7
+5000
+24 - Valid Follows Query where Follows(w, s)
+while w; stmt s;
+Select s such that Follows(w, s)
+24, 35
+5000
+25 - Valid Follows Query where Follows(a1, a2)
+assign a1, a2;
+Select a1 such that Follows(a1, a2)
+10, 16
+5000
+26 - Valid Follows Query where Follows(w1, w2)
+while w1, w2;
+Select w2 such that Follows(w1, w2)
+20
+5000
+27 - Valid Follows Query where Follows(if1, if2)
+if if1, if2;
+Select if1 such that Follows(if1, if2)
+8
+5000
+28 - Valid Follows Query where Follows(w, ifs)
+if ifs; while w;
+Select w such that Follows(w, ifs)
+7
+5000
+28b- Valid Follows Query where Follows(ifs, w) (EMPTY RESULT)
+if ifs; while w;
+Select w such that Follows(ifs, w)
+
+5000
+29 - Valid Follows Query where Follows(s, #) (EMPTY RESULT as stmt 6 is the start of new if block)
+stmt s;
+Select s such that Follows(s, 6)
+
+5000
+30 - Valid Follows Query where Follows(#, s)
+stmt s;
+Select s such that Follows(6, s)
+7
+5000
+31 - Valid Follows Query where Follows(s, #) (EMPTY RESULT as stmt 8 is the start of new while block)
+stmt s;
+Select s such that Follows(s, 8)
+
+5000
+32 - Valid Follows Query where Follows(#, s) where # is a while statement
+stmt s;
+Select s such that Follows(19, s)
+24
+5000
+33 - Valid Follows Query where Follows(#, s) where # is a if statement
+stmt s;
+Select s such that Follows(30, s)
+33
+5000
+34 - Valid Follows Query where Follows(#, 27) where # is a if statement
+stmt s;
+Select s such that Follows(s, 27)
+5
+5000
+35 - Invalid Follows Query where Follows(#, s) as # is the last statement
+stmt s;
+Select s such that Follows(36, s)
+
+5000
+36 - Invalid Follows Query where Follows(s, 1)
+stmt s;
+Select s such that Follows(s, 1)
+
+5000
+37 - Invalid Follows Query where Follows(17, s) as line 17 is end of if block
+stmt s;
+Select s such that Follows(17, s)
+
+5000
+38 - Invalid Follows Query where Follows(s, 18) as line 18 is start of else block
+stmt s;
+Select s such that Follows(s, 18)
+
+5000
+39 - Valid Follows Query where Follows(_, _)
+while w;
+Select w such that Follows(_, _)
+7, 19, 20, 27
+5000
+40 - Valid Follows Query where Follows(w, _)
+while w;
+Select w such that Follows(w, _)
+7, 19, 20, 27
+5000
+41 - Valid Follows Query where Follows(_, a)
+assign a;
+Select a such that Follows(_, a)
+2, 4, 10, 11, 16, 17, 22, 25, 35
+5000
+42 - Valid Follows Query where Follows(6, _) evaluates to True
+read r;
+Select r such that Follows(6, _)
+1, 9, 14, 21, 24, 28, 29
+5000
+43 - Follows Query where Follows(36, _) evaluates to False (EMPTY RESULT)
+while w; 
+Select w such that Follows(36, _)
+
+5000
+44 - Invalid Follows Query with Syntax error
+stmt s; while w; if ifs;
+Select x such that Follows(6, _)
+
+5000
+45 - Invalid Follows Query with Syntax error
+stmt s; while w; if ifs;
+Select s such that Follows(6, x)
+
+5000
