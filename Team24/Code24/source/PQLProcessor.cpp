@@ -167,7 +167,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
         /* Uses (_, ?) ERROR cannot have underscore as first arg!! */
         if (leftType == StmtRefType::UNDERSCORE) {
-            cout << "TODO: Handle Uses error case. Uses (_, x) cannot have first argument as Underscore. \n";
+            throw "TODO: Handle Uses error case. Uses (_, x) cannot have first argument as Underscore. \n";
             return;
         }
 
@@ -1269,7 +1269,7 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl>& selectCl, s
         const string& rightSynonym = rightArg->getStringVal();
         
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym, { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE })) {
-            cout << "TODO: Handle error case. Parent(INTEGER, syn), but syn is declared as Procedure, Constant or Variable. These DesignEntity types are not allowed.\n";
+            throw "TODO: Handle error case. Parent(INTEGER, syn), but syn is declared as Procedure, Constant or Variable. These DesignEntity types have no parents.\n";
             return;
         }        
 
@@ -1348,7 +1348,7 @@ void PQLProcessor::handleParentFirstArgSyn(shared_ptr<SelectCl>& selectCl, share
         const string& rightSynonym = rightArg->getStringVal();
 
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym, { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE })) {
-            throw "TODO: Handle error case. Parent(syn, s), but s is declared as Procedure, Constant or Variable. These DesignEntity types are not allowed.\n";
+            throw "TODO: Handle error case. Parent(syn, s), but s is declared as Procedure, Constant or Variable. These DesignEntity types have no parents.\n";
             return;
         }
 
@@ -1477,7 +1477,7 @@ void PQLProcessor::handleParentTFirstArgInteger(shared_ptr<SelectCl>& selectCl, 
         const string& rightSynonym = rightArg->getStringVal();
 
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym, { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE })) {
-            cout << "TODO: Handle error case. Parent(INTEGER, syn), but syn is declared as Procedure, Constant or Variable. These DesignEntity types are not allowed.\n";
+            throw "TODO: Handle error case. Parent(INTEGER, syn), but syn is declared as Procedure, Constant or Variable. These DesignEntity types have no parents.\n";
             return;
         }
 
@@ -1636,7 +1636,7 @@ void PQLProcessor::handleParentTFirstArgUnderscore(shared_ptr<SelectCl>& selectC
 
         /* Validate. Parent(_, syn) where syn MUST not be a Constant */
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym, { DesignEntity::CONSTANT, DesignEntity::VARIABLE, DesignEntity::PROCEDURE })) {
-            cout << "Special case. Parent(_, syn), but syn is a Constant, Var or Procedure. These types of entites have no parents.\n";
+            throw "Special case. Parent(_, syn), but syn is a Constant, Var or Procedure. These types of entites have no parents.\n";
             return;
         }
 
