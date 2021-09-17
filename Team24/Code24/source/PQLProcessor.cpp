@@ -1462,7 +1462,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
                     handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
                 }
                 catch (exception& ex) {
-                    throw;
+                    throw ex;
                 }
             }
             else {
@@ -1474,8 +1474,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
                 try {
                     handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
                 }
-                catch (exception & ex) {
-                    throw;
+                catch (exception& ex) {
+                    throw ex;
                 }
                 joinResultTuples(suchThatReturnTuples, currSuchThatRes, joinKeyV, joinedRes);
                 suchThatReturnTuples = move(joinedRes);
