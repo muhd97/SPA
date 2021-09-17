@@ -518,15 +518,15 @@ unordered_set<int> PQLEvaluator::getParentTIntSyn(int statementNo, PKBDesignEnti
 		for (auto& subGrps : currGroup->getChildGroups()) qOfGroups.push(subGrps);
 	}
 
-	return toReturn;
+	return move(toReturn);
 }
 
-bool PQLEvaluator::getParentTIntUnderscore(int statementNo)
+bool PQLEvaluator::getParentTIntUnderscore(int parentStatementNo)
 {
 	unordered_set<int> toReturn;
 	queue<PKBGroup::SharedPtr> qOfGroups;
 	PKBStatement::SharedPtr stmt;
-	if (!mpPKB->getStatement(statementNo, stmt)) {
+	if (!mpPKB->getStatement(parentStatementNo, stmt)) {
 		return false;
 	}
 
@@ -592,15 +592,29 @@ unordered_set<int> PQLEvaluator::getParentTSynUnderscore(PKBDesignEntity targetP
 		}
 	}
 
-	return toReturn;
+	return move(toReturn);
 }
 
 unordered_set<int> PQLEvaluator::getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo)
 {
 	unordered_set<int> toReturn;
+	vector<PKBStatement::SharedPtr> parentStmts;
 
+	if (targetParentType == PKBDesignEntity::AllExceptProcedure) {
+		addParentStmts(parentStmts);
+	}
+	else {
+		// check these 'possible' parent statements
+		parentStmts = mpPKB->getStatements(targetParentType);
+	}
 
-	return toReturn;
+	for (auto& stmt : parentStmts) {
+		if (getParentTIntInt(stmt->getIndex(), childStatementNo)) {
+			toReturn.insert(stmt->getIndex());
+		}
+	}
+
+	return move(toReturn);
 
 }
 
