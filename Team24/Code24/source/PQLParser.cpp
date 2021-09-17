@@ -260,7 +260,7 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
     if (isKeyword(curr, PQL_FOLLOWS)) {
         if (peekNext().type == PQLTokenType::STAR) {
             // Follows*
-            eatKeyword(PQL_FOLLOWS_T);
+            eatKeyword(PQL_FOLLOWS);
             eat(PQLTokenType::STAR);
             eat(PQLTokenType::LEFT_PAREN);
             auto sRef3 = parseStmtRef();
@@ -282,7 +282,7 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
     }
     else if (isKeyword(curr, PQL_PARENT)) {
         if (peekNext().type == PQLTokenType::STAR) {
-            eatKeyword(PQL_PARENT_T);
+            eatKeyword(PQL_PARENT);
             eat(PQLTokenType::STAR);
             eat(PQLTokenType::LEFT_PAREN);
             auto sRef7 = parseStmtRef();
