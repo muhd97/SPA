@@ -11,17 +11,17 @@ SimpleToken makeToken(SimpleTokenType type) {
     return token;
 }
 
-SimpleToken makeIntToken(int value) {
+SimpleToken makeIntToken(string value) {
     struct SimpleToken token;
     token.type = SimpleTokenType::INTEGER;
-    token.intValue = value;
+    token.value = value;
     return token;
 }
 
 SimpleToken makeStringToken(string value) {
     struct SimpleToken token;
     token.type = SimpleTokenType::NAME;
-    token.stringValue = value;
+    token.value = value;
     return token;
 }
 
@@ -40,6 +40,7 @@ vector<SimpleToken> simpleLex(string program)
     while (i < n) {
         current = program[i];
         lookahead = program[i + 1];
+        cout << current;
 
         if (current == ' ' || current == '\n' || current == '\t' || current == '\r') {
             i++;
@@ -130,12 +131,13 @@ vector<SimpleToken> simpleLex(string program)
             }
 
             value.push_back(current);
+            cout << value;
 
             if (value.size() > 1 && value[0] == '0') {
                 cout << "Integer token cannot start with 0 but found interger value: " << value << endl;
                 return vector<SimpleToken>();
             }
-            tokens.push_back(makeIntToken(stoi(value)));
+            tokens.push_back(makeIntToken(value));
 
         }
         else if (isalpha(current)) {
@@ -202,9 +204,9 @@ string getSimpleTokenLabel(SimpleToken token) {
     case SimpleTokenType::OR:
         return "||";
     case SimpleTokenType::NAME:
-        return "\"" + token.stringValue + "\"";
+        return "\"" + token.value + "\"";
     case SimpleTokenType::INTEGER:
-        return to_string(token.intValue);
+        return token.value;
     }
     return "";
 }

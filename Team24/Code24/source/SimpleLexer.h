@@ -37,8 +37,7 @@ enum class SimpleTokenType
 struct SimpleToken
 {
     SimpleTokenType type;
-    string stringValue;
-    int intValue = 0;
+    string value;
 };
 
 vector<SimpleToken> simpleLex(string program);

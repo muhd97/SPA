@@ -173,7 +173,7 @@ public:
 
     SimpleToken eatKeyword(string expectedKeyword) {
         SimpleToken actualSimpleToken = peek();
-        if (actualSimpleToken.type == SimpleTokenType::NAME && actualSimpleToken.stringValue == expectedKeyword) {
+        if (actualSimpleToken.type == SimpleTokenType::NAME && actualSimpleToken.value == expectedKeyword) {
             advance();
         }
         else {
@@ -214,7 +214,7 @@ public:
     shared_ptr<Procedure> parseProcedure(shared_ptr<Environment> env) {
         eatKeyword(SIMPLE_PROCEDURE);
         SimpleToken name = eat(SimpleTokenType::NAME);
-        string procName = name.stringValue;
+        string procName = name.value;
 
         if (env->isProcAlreadyDeclared(procName)) {
             cout << "Error: Procedure '" + procName + "' is already declared.\n";
@@ -247,19 +247,19 @@ public:
             // has to be assign statement
             return  parseAssignStatement();
         }
-        else if (peek().type == SimpleTokenType::NAME && peek().stringValue == SIMPLE_READ) {
+        else if (peek().type == SimpleTokenType::NAME && peek().value == SIMPLE_READ) {
             return parseReadStatement();
         }
-        else if (peek().type == SimpleTokenType::NAME && peek().stringValue == SIMPLE_PRINT) {
+        else if (peek().type == SimpleTokenType::NAME && peek().value == SIMPLE_PRINT) {
             return parsePrintStatement();
         }
-        else if (peek().type == SimpleTokenType::NAME && peek().stringValue == SIMPLE_CALL) {
+        else if (peek().type == SimpleTokenType::NAME && peek().value == SIMPLE_CALL) {
             return parseCallStatement(env);
         }
-        else if (peek().type == SimpleTokenType::NAME && peek().stringValue == SIMPLE_WHILE) {
+        else if (peek().type == SimpleTokenType::NAME && peek().value == SIMPLE_WHILE) {
             return parseWhileStatement(env);
         }
-        else if (peek().type == SimpleTokenType::NAME && peek().stringValue == SIMPLE_IF) {
+        else if (peek().type == SimpleTokenType::NAME && peek().value == SIMPLE_IF) {
             return parseIfStatement(env);
         }
         else {
@@ -273,7 +273,7 @@ public:
         eatKeyword(SIMPLE_READ);
         SimpleToken name = eat(SimpleTokenType::NAME);
         eat(SimpleTokenType::SEMICOLON);
-        return make_shared<ReadStatement>(index, make_shared<Identifier>(name.stringValue));
+        return make_shared<ReadStatement>(index, make_shared<Identifier>(name.value));
     }
 
     shared_ptr<PrintStatement> parsePrintStatement() {
@@ -281,14 +281,14 @@ public:
         eatKeyword(SIMPLE_PRINT);
         SimpleToken name = eat(SimpleTokenType::NAME);
         eat(SimpleTokenType::SEMICOLON);
-        return make_shared<PrintStatement>(index, make_shared<Identifier>(name.stringValue));
+        return make_shared<PrintStatement>(index, make_shared<Identifier>(name.value));
     }
 
     shared_ptr<CallStatement> parseCallStatement(shared_ptr<Environment> env) {
         int index = getNextStatementNumber();
         eatKeyword(SIMPLE_CALL);
         SimpleToken name = eat(SimpleTokenType::NAME);
-        string procName = name.stringValue;
+        string procName = name.value;
         env->addInvokeProcedure(procName);
         eat(SimpleTokenType::SEMICOLON);
         return make_shared<CallStatement>(index, make_shared<Identifier>(procName));
@@ -300,7 +300,7 @@ public:
         eat(SimpleTokenType::ASSIGN);
         shared_ptr<Expression> expr = parseExpression();
         eat(SimpleTokenType::SEMICOLON);
-        return make_shared<AssignStatement>(index, make_shared<Identifier>(name.stringValue), expr);
+        return make_shared<AssignStatement>(index, make_shared<Identifier>(name.value), expr);
     }
 
     shared_ptr<WhileStatement> parseWhileStatement(shared_ptr<Environment> env) {
@@ -546,11 +546,11 @@ public:
     shared_ptr<Expression> parseFactor() {
         if (peek().type == SimpleTokenType::NAME) {
             SimpleToken name = eat(SimpleTokenType::NAME);
-            return make_shared<Identifier>(name.stringValue);
+            return make_shared<Identifier>(name.value);
         }
         else if (peek().type == SimpleTokenType::INTEGER) {
             SimpleToken val = eat(SimpleTokenType::INTEGER);
-            return make_shared<Constant>(val.intValue);
+            return make_shared<Constant>(val.value);
         }
         else if (peek().type == SimpleTokenType::LEFT_PAREN) {
             eat(SimpleTokenType::LEFT_PAREN);

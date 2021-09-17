@@ -28,7 +28,7 @@ TestWrapper::TestWrapper() {
 
 // method for parsing the SIMPLE source
 void TestWrapper::parse(std::string filename) {
-   
+
     string program;
     string currentLine;
     ifstream program_file(filename);

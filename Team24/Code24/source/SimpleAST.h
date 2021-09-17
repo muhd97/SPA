@@ -37,13 +37,13 @@ public:
 
 class Constant : public Expression {
 private:
-    int value = 0;
+    string value;
 public:
-    Constant(int value) {
+    Constant(string value) {
         this->value = value;
     }
 
-    int getValue() {
+    string getValue() {
         return value;
     }
 
