@@ -12,6 +12,15 @@ int getNextStatementNumber() {
     return statementCounter++;
 }
 
+const string SIMPLE_PROCEDURE = "procedure";
+const string SIMPLE_READ = "read";
+const string SIMPLE_PRINT = "print";
+const string SIMPLE_CALL = "call";
+const string SIMPLE_WHILE = "while";
+const string SIMPLE_IF = "if";
+const string SIMPLE_THEN = "then";
+const string SIMPLE_ELSE = "else";
+
 // The goal of the parse env is to ensure 
 // proc table is maintained as we parse
 // to enable AST validation
@@ -72,8 +81,8 @@ class SimpleParser
 {
 private:
     vector<SimpleToken> SimpleTokens;
-    int index;
-    int size;
+    size_t index;
+    size_t size;
 
     bool doesCallGraphContainCycles(map<string, vector<string>> callGraph) {
         // TODO: (@jiachen247) Build call graph 
@@ -98,11 +107,18 @@ public:
             empty.type = SimpleTokenType::EMPTY;
             return empty;
         }
-        
     }
 
     SimpleToken peekNext() {
-        return SimpleTokens[index + 1];
+        if (index + 1 < SimpleTokens.size()) {
+            return SimpleTokens[index + 1];
+        }
+        else {
+            // parsing expression might peek into end of tokens
+            SimpleToken empty;
+            empty.type = SimpleTokenType::EMPTY;
+            return empty;
+        }
     }
 
     void advance() {
@@ -127,7 +143,15 @@ public:
 
         cout << "] but got '" << getSimpleTokenLabel(actual) << "' instead." << endl;
 
-        // hack to terminate for now
+        // TODO: (@jiachen) do proper error handling
+        exit(0);
+    }
+
+    void errorKeyword(string expectedKeyword, SimpleToken actual) {
+        cout << "Failed to match expected keyword" << endl;
+        cout << "Expected \"" << expectedKeyword << "\" but got " << getSimpleTokenLabel(actual) << "' instead." << endl;
+
+        // TODO: (@jiachen) do proper error handling
         exit(0);
     }
 
@@ -143,6 +167,17 @@ public:
         }
         else {
             error({ expectedType }, actualSimpleToken);
+        }
+        return actualSimpleToken;
+    }
+
+    SimpleToken eatKeyword(string expectedKeyword) {
+        SimpleToken actualSimpleToken = peek();
+        if (actualSimpleToken.type == SimpleTokenType::NAME && actualSimpleToken.value == expectedKeyword) {
+            advance();
+        }
+        else {
+            errorKeyword(expectedKeyword, actualSimpleToken);
         }
         return actualSimpleToken;
     }
@@ -177,9 +212,9 @@ public:
     }
 
     shared_ptr<Procedure> parseProcedure(shared_ptr<Environment> env) {
-        eat(SimpleTokenType::PROCEDURE);
+        eatKeyword(SIMPLE_PROCEDURE);
         SimpleToken name = eat(SimpleTokenType::NAME);
-        string procName = name.stringValue;
+        string procName = name.value;
 
         if (env->isProcAlreadyDeclared(procName)) {
             cout << "Error: Procedure '" + procName + "' is already declared.\n";
@@ -207,46 +242,53 @@ public:
     }
 
     shared_ptr<Statement> parseStatement(shared_ptr<Environment> env) {
-        switch (peek().type) {
-        case SimpleTokenType::READ:
-            return parseReadStatement();
-        case SimpleTokenType::PRINT:
-            return parsePrintStatement();
-        case SimpleTokenType::CALL:
-            return parseCallStatement(env);
-        case SimpleTokenType::WHILE:
-            return parseWhileStatement(env);
-        case SimpleTokenType::IF:
-            return parseIfStatement(env);
-        case SimpleTokenType::NAME:
+
+        if (peekNext().type == SimpleTokenType::ASSIGN) {
+            // has to be assign statement
             return  parseAssignStatement();
-        default:
-            error({ SimpleTokenType::READ, SimpleTokenType::PRINT, SimpleTokenType::CALL, SimpleTokenType::WHILE, SimpleTokenType::IF, SimpleTokenType::NAME }, peek());
+        }
+        else if (peek().type == SimpleTokenType::NAME && peek().value == SIMPLE_READ) {
+            return parseReadStatement();
+        }
+        else if (peek().type == SimpleTokenType::NAME && peek().value == SIMPLE_PRINT) {
+            return parsePrintStatement();
+        }
+        else if (peek().type == SimpleTokenType::NAME && peek().value == SIMPLE_CALL) {
+            return parseCallStatement(env);
+        }
+        else if (peek().type == SimpleTokenType::NAME && peek().value == SIMPLE_WHILE) {
+            return parseWhileStatement(env);
+        }
+        else if (peek().type == SimpleTokenType::NAME && peek().value == SIMPLE_IF) {
+            return parseIfStatement(env);
+        }
+        else {
+            error({ SimpleTokenType::NAME }, peek());
             return make_shared<ErrorStatement>(0);
         }
     }
 
     shared_ptr<ReadStatement> parseReadStatement() {
         int index = getNextStatementNumber();
-        eat(SimpleTokenType::READ);
+        eatKeyword(SIMPLE_READ);
         SimpleToken name = eat(SimpleTokenType::NAME);
         eat(SimpleTokenType::SEMICOLON);
-        return make_shared<ReadStatement>(index, make_shared<Identifier>(name.stringValue));
+        return make_shared<ReadStatement>(index, make_shared<Identifier>(name.value));
     }
 
     shared_ptr<PrintStatement> parsePrintStatement() {
         int index = getNextStatementNumber();
-        eat(SimpleTokenType::PRINT);
+        eatKeyword(SIMPLE_PRINT);
         SimpleToken name = eat(SimpleTokenType::NAME);
         eat(SimpleTokenType::SEMICOLON);
-        return make_shared<PrintStatement>(index, make_shared<Identifier>(name.stringValue));
+        return make_shared<PrintStatement>(index, make_shared<Identifier>(name.value));
     }
 
     shared_ptr<CallStatement> parseCallStatement(shared_ptr<Environment> env) {
         int index = getNextStatementNumber();
-        eat(SimpleTokenType::CALL);
+        eatKeyword(SIMPLE_CALL);
         SimpleToken name = eat(SimpleTokenType::NAME);
-        string procName = name.stringValue;
+        string procName = name.value;
         env->addInvokeProcedure(procName);
         eat(SimpleTokenType::SEMICOLON);
         return make_shared<CallStatement>(index, make_shared<Identifier>(procName));
@@ -258,12 +300,12 @@ public:
         eat(SimpleTokenType::ASSIGN);
         shared_ptr<Expression> expr = parseExpression();
         eat(SimpleTokenType::SEMICOLON);
-        return make_shared<AssignStatement>(index, make_shared<Identifier>(name.stringValue), expr);
+        return make_shared<AssignStatement>(index, make_shared<Identifier>(name.value), expr);
     }
 
     shared_ptr<WhileStatement> parseWhileStatement(shared_ptr<Environment> env) {
         int index = getNextStatementNumber();
-        eat(SimpleTokenType::WHILE);
+        eatKeyword(SIMPLE_WHILE);
         eat(SimpleTokenType::LEFT_PAREN);
         shared_ptr<ConditionalExpression> cond = parseConditionalExpression();
         eat(SimpleTokenType::RIGHT_PAREN);
@@ -275,15 +317,15 @@ public:
 
     shared_ptr<IfStatement> parseIfStatement(shared_ptr<Environment> env) {
         int index = getNextStatementNumber();
-        eat(SimpleTokenType::IF);
+        eatKeyword(SIMPLE_IF);
         eat(SimpleTokenType::LEFT_PAREN);
         shared_ptr<ConditionalExpression> condExpr = parseConditionalExpression();
         eat(SimpleTokenType::RIGHT_PAREN);
-        eat(SimpleTokenType::THEN);
+        eatKeyword(SIMPLE_THEN);
         eat(SimpleTokenType::LEFT_BRACE);
         shared_ptr<StatementList> consequent = parseStatementList(env);
         eat(SimpleTokenType::RIGHT_BRACE);
-        eat(SimpleTokenType::ELSE);
+        eatKeyword(SIMPLE_ELSE);
         eat(SimpleTokenType::LEFT_BRACE);
         shared_ptr<StatementList> alternative = parseStatementList(env);
         eat(SimpleTokenType::RIGHT_BRACE);
@@ -302,7 +344,7 @@ public:
     // This code looks horrible
     // Could probs be implemented more efficiently using regex / pattern matching??
     bool tryConditionalExpressionLookaheadHack() {
-        int index = this->index;
+        size_t index = this->index;
         int nestingDepth = 0;
 
         if (SimpleTokens[index].type != SimpleTokenType::LEFT_PAREN) {
@@ -384,7 +426,7 @@ public:
             return parseRelationalExpression();
         }
         else {
-            error({ SimpleTokenType::NOT, SimpleTokenType::PRINT, SimpleTokenType::LEFT_PAREN, SimpleTokenType::WHILE, SimpleTokenType::IF, SimpleTokenType::NAME }, peek());
+            error({ SimpleTokenType::NOT, SimpleTokenType::LEFT_PAREN, SimpleTokenType::NAME }, peek());
             return NULL;
         }
     }
@@ -504,11 +546,11 @@ public:
     shared_ptr<Expression> parseFactor() {
         if (peek().type == SimpleTokenType::NAME) {
             SimpleToken name = eat(SimpleTokenType::NAME);
-            return make_shared<Identifier>(name.stringValue);
+            return make_shared<Identifier>(name.value);
         }
         else if (peek().type == SimpleTokenType::INTEGER) {
             SimpleToken val = eat(SimpleTokenType::INTEGER);
-            return make_shared<Constant>(val.intValue);
+            return make_shared<Constant>(val.value);
         }
         else if (peek().type == SimpleTokenType::LEFT_PAREN) {
             eat(SimpleTokenType::LEFT_PAREN);

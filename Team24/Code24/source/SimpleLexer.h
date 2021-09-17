@@ -14,7 +14,6 @@ enum class SimpleTokenType
     LEFT_BRACE,
     RIGHT_BRACE,
     SEMICOLON,
-    ASSIGN,
     PLUS,
     MINUS,
     MUL,
@@ -29,24 +28,16 @@ enum class SimpleTokenType
     NOT,
     AND,
     OR,
-    READ,
-    PRINT,
-    CALL,
-    WHILE,
-    IF,
-    THEN,
-    ELSE,
+    ASSIGN,
     NAME,
     INTEGER,
-    PROCEDURE,
     EMPTY,
 };
 
 struct SimpleToken
 {
     SimpleTokenType type;
-    string stringValue;
-    int intValue = 0;
+    string value;
 };
 
 vector<SimpleToken> simpleLex(string program);

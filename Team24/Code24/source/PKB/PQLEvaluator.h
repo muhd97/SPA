@@ -305,7 +305,7 @@ public:
 	vector<PKBVariable::SharedPtr> getAllVariables();
 
 	/* TODO: @nicholasnge Provide function to return all Constants in the program. */
-	unordered_set<int> getAllConstants();
+	unordered_set<string> getAllConstants();
 
 	// For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 	vector<int> matchPattern(string LHS, string RHS);

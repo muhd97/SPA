@@ -1301,7 +1301,7 @@ vector<PKBVariable::SharedPtr> PQLEvaluator::getAllVariables()
 }
 
 /* TODO: @nicholasnge Provide function to return all Constants in the program. */
-unordered_set<int> PQLEvaluator::getAllConstants()
+unordered_set<string> PQLEvaluator::getAllConstants()
 {
 	return mpPKB->getConstants();
 }
@@ -1380,7 +1380,7 @@ vector<string> PQLEvaluator::inOrderTraversalHelper(shared_ptr<Expression> expr)
 		switch (e->getExpressionType()) {
 		case ExpressionType::CONSTANT: {
 			shared_ptr<Constant> constant = static_pointer_cast<Constant>(e);
-			res.emplace_back(to_string(constant->getValue()));
+			res.emplace_back(constant->getValue());
 			break;
 		}		
 		case ExpressionType::IDENTIFIER: {
@@ -1434,7 +1434,7 @@ vector<string> PQLEvaluator::preOrderTraversalHelper(shared_ptr<Expression> expr
 		switch (e->getExpressionType()) {
 		case ExpressionType::CONSTANT: {
 			shared_ptr<Constant> constant = static_pointer_cast<Constant>(e);
-			res.emplace_back(to_string(constant->getValue()));
+			res.emplace_back(constant->getValue());
 			break;
 		}
 		case ExpressionType::IDENTIFIER: {
