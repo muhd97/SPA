@@ -112,6 +112,12 @@ public:
 	// => getChildrenT( PKBDE::While ) // find all children stmts of all while stmts
 	set<pair<int, int>> getChildrenT(PKBDesignEntity parentType);
 
+	unordered_set<int> getAllChildAndSubChildren(PKBStatement::SharedPtr targetParent, PKBDesignEntity targetChildrenType);
+
+	unordered_set<int> getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
+	bool getParentTIntUnderscore(int statementNo);
+	bool getParentTIntInt(int parentStatementNo, int childStatementNo);
+
 	// Follow
 
 	// Get statement if it is of type {beforeType} and followed by statement indexed {after} 

@@ -1,0 +1,5 @@
+40 - Select all Assign statements - TargetSynonym Not in Parent*(10, 14)
+assign a;
+Select a such that Parent*(10, 14)
+
+25

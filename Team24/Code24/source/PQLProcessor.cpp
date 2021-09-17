@@ -116,7 +116,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
     vector<shared_ptr<Result>> toReturn;
 
     if (de->getEntityTypeName() == CONSTANT) {
-        cout << "TODO: Handle get all constants from PKB\n";
+        for (const int& x : evaluator->getAllConstants()) toReturn.emplace_back(make_shared<StringSingleResult>(to_string(x)));
         return move(toReturn);
     }
 
@@ -448,36 +448,35 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
         if (leftType == StmtRefType::SYNONYM) {
             handleParentFirstArgSyn(selectCl, parentCl, toReturn);
+            break;
         }
 
         break;
     }
     case RelRefType::PARENT_T:
     {
-        shared_ptr<Parent> parentCl = static_pointer_cast<Parent>(suchThatCl->relRef);
+        shared_ptr<ParentT> parentCl = static_pointer_cast<ParentT>(suchThatCl->relRef);
         StmtRefType leftType = parentCl->stmtRef1->getStmtRefType();
         StmtRefType rightType = parentCl->stmtRef2->getStmtRefType();
 
-        ///* Parent (_, ?) */
-        //if (leftType == StmtRefType::UNDERSCORE) {
-        //    handleParentFirstArgUnderscore(selectCl, parentCl, toReturn);
-        //    break;
-        //}
+        /* ParentT (_, ?) */
+        if (leftType == StmtRefType::UNDERSCORE) {
+            handleParentTFirstArgUnderscore(selectCl, parentCl, toReturn);
+            break;
+        }
 
-        ///* Parent (1, ?) */
-        //if (leftType == StmtRefType::INTEGER) {
-        //    handleParentFirstArgInteger(selectCl, parentCl, toReturn);
-        //    break;
-        //}
+        /* ParentT (1, ?) */
+        if (leftType == StmtRefType::INTEGER) {
+            handleParentTFirstArgInteger(selectCl, parentCl, toReturn);
+            break;
+        }
 
-        ///* Parent (syn, ?) */
+        /* ParentT (syn, ?) */
 
-        //if (leftType == StmtRefType::SYNONYM) {
-        //    handleParentFirstArgSyn(selectCl, parentCl, toReturn);
-        //}
-
-        break;
-
+        if (leftType == StmtRefType::SYNONYM) {
+            handleParentTFirstArgSyn(selectCl, parentCl, toReturn);
+        }
+        
         break;
     }
     case RelRefType::FOLLOWS:
@@ -1341,6 +1340,83 @@ void PQLProcessor::handleParentFirstArgUnderscore(shared_ptr<SelectCl>& selectCl
     }
 
 
+}
+
+void PQLProcessor::handleParentTFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<ParentT>& parentCl, vector<shared_ptr<ResultTuple>>& toReturn)
+{
+    shared_ptr<StmtRef>& leftArg = parentCl->stmtRef1;
+    shared_ptr<StmtRef>& rightArg = parentCl->stmtRef2;
+
+    assert(leftArg->getStmtRefType() == StmtRefType::INTEGER);
+    int leftArgInteger = leftArg->getIntVal();
+
+    /* ParentT(1, syn) Special case. No Synonym, left side is Integer. */
+    if (rightArg->getStmtRefType() == StmtRefType::SYNONYM) {
+
+        cout << "HELOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n";
+
+        const string& rightSynonym = rightArg->getStringVal();
+
+        if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym, { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE })) {
+            cout << "TODO: Handle error case. Parent(INTEGER, syn), but syn is declared as Procedure, Constant or Variable. These DesignEntity types are not allowed.\n";
+            return;
+        }
+
+        PKBDesignEntity rightArgType = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSynonym));
+
+        for (auto& i : evaluator->getParentTIntSyn(leftArgInteger, rightArgType)) {
+            /* Create the result tuple */
+            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+            /* Map the value returned to this particular synonym. */
+            tupleToAdd->insertKeyValuePair(rightSynonym, to_string(i));
+            /* Add this tuple into the vector to tuples to return. */
+            toReturn.emplace_back(move(tupleToAdd));
+        }
+
+
+    }
+
+    /* ParentT(1, _) Special case. No Synonym, left side is Integer. */
+    if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE) {
+        PKBStatement::SharedPtr stmt = nullptr;
+
+        if (evaluator->mpPKB->getStatement(leftArgInteger, stmt)) {
+            if (evaluator->getParentTIntUnderscore(leftArgInteger)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger));
+                /* Add this tuple into the vector to tuples to return. */
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+        }
+    }
+
+
+    /* ParentT(1, 2) Special Case. No Synonym, both args are Integer. */
+    if (rightArg->getStmtRefType() == StmtRefType::INTEGER) {
+        PKBStatement::SharedPtr stmt = nullptr;
+
+        int rightArgInteger = rightArg->getIntVal();
+
+        if (evaluator->mpPKB->getStatement(leftArgInteger, stmt)) {
+            if (evaluator->getParentTIntInt(leftArgInteger, rightArgInteger)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger));
+                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(rightArgInteger));
+                /* Add this tuple into the vector to tuples to return. */
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+        }
+    }
+}
+
+void PQLProcessor::handleParentTFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<ParentT>& parentCl, vector<shared_ptr<ResultTuple>>& toReturn)
+{
+}
+
+void PQLProcessor::handleParentTFirstArgUnderscore(shared_ptr<SelectCl>& selectCl, shared_ptr<ParentT>& parentCl, vector<shared_ptr<ResultTuple>>& toReturn)
+{
 }
 
 void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl, vector<shared_ptr<ResultTuple>>& toReturn)
