@@ -6,8 +6,8 @@ procedure firsttest {
 
     if (((eightmc >= 2103) || (2103 <= 37)) && (!(help <= SIX))) then {
       read SHAG;
-      while ((12345 != 40 - 40) || ((999 == ByeBye) && (RIP < RIP + 2103))) {
-        if (40 - 2103 >= 2103) then {
+      while ((12345 != 54321) || ((999 == ByeBye) && (RIP < 2103))) {
+        if (3203 >= 2103) then {
           SHAG = 2103 * SIX;
           print SIX;
           ByeBye = 37 / 1;
@@ -15,7 +15,7 @@ procedure firsttest {
         } else {
           print RIP;
         }
-        while (((help - pls != FasterEnd) || (2103 - FasterEnd >= FasterEnd)) || (3203 > 40)) {
+        while (((pls != FasterEnd) || (2103 >= FasterEnd)) || (3203 > 40)) {
           read eightmc;
         }
         read rEKT;
@@ -23,7 +23,7 @@ procedure firsttest {
 
       }
       whySoMuchWork = MorelikesixteenMC - RIP;
-      if ((!(rEKT - 2103 >= 37)) && ((2103 >= SHAG) && (2103 >= SIX))) then {
+      if ((!(rEKT >= 2103)) && ((3203 >= SHAG) && (2103 >= SIX))) then {
         pls = 3203 - 1 + 12345 % 12345;
         print help;
       } else {
@@ -31,8 +31,8 @@ procedure firsttest {
         print whySoMuchWork;
         print rEKT;
       }
-      while ((whySoMuchWork < 2103) && ((eightmc + RIP == 12345) || (whySoMuchWork >= 999))) {
-        while (2103 + 1 > pls) {
+      while ((whySoMuchWork < 2103) && ((eightmc == 12345) || (whySoMuchWork >= 999))) {
+        while (3203 > pls) {
           read sian;
           read MorelikesixteenMC;
         }
@@ -41,8 +41,8 @@ procedure firsttest {
       read MorelikesixteenMC;
       print help;
     } else {
-      if ((37 > 3203) && (MorelikesixteenMC > 2103)) then {
-        while (((!(999 == 2103)) && (whySoMuchWork + RIP < 999)) || (help == SHAG - PressF)) {
+      if ((3203 > 2103) && (MorelikesixteenMC > 3203)) then {
+        while (((!(999 == whySoMuchWork)) && (RIP < 999)) || (SHAG == PressF)) {
           PressF = rEKT + 2103 + rEKT;
         }
       } else {
