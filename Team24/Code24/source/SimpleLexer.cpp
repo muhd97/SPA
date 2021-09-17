@@ -129,13 +129,14 @@ vector<SimpleToken> simpleLex(string program)
                 lookahead = program[++i + 1];
             }
 
-            if (value.size() > 1 && current == '0') {
-                cout << "Integer token cannot start with 0." << endl;
+            value.push_back(current);
+
+            if (value.size() > 1 && value[0] == '0') {
+                cout << "Integer token cannot start with 0 but found interger value: " << value << endl;
                 return vector<SimpleToken>();
             }
-
-            value.push_back(current);
             tokens.push_back(makeIntToken(stoi(value)));
+
         }
         else if (isalpha(current)) {
             string value;
