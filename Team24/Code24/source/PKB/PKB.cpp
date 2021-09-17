@@ -363,6 +363,12 @@ PKBStatement::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement>& statem
 		var->addModifierStatement(res->getIndex());
 	}
 
+	if (group->getUsedVariables().size() > 0) {
+		//contained statements of the while loop modify variable(s)
+		designEntityToStatementsThatUseVarsMap[PKBDesignEntity::While].insert(res);
+		mAllUseStmts.insert(res);
+	}
+
 	if (group->getModifiedVariables().size() > 0) {
 		//contained statements of the while loop modify variable(s)
 		designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::While].insert(res);

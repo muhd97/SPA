@@ -1,0 +1,5 @@
+1 - Select s such that Uses(s, _) - With container statements that do not use 
+stmt s;
+Select s such that Uses(s, _)
+1, 2, 3, 4, 5, 6, 7, 8
+500
