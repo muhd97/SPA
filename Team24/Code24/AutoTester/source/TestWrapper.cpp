@@ -44,6 +44,7 @@ void TestWrapper::parse(std::string filename) {
     printSimpleTokens(tokens);
     
     shared_ptr<Program> root = parseSimpleProgram(tokens);
+
     if (root == NULL) {
         cout << "Failed to parse program!";
     }
@@ -52,20 +53,12 @@ void TestWrapper::parse(std::string filename) {
         cout << root->format();
     }
 
-    // BUILD PKB HERE
     cout << "\n==== Building PKB ====\n";
 
     this->pkb->initialise();
     this->pkb->extractDesigns(root);
 
     cout << "\n==== PKB has been populated. ====\n";
-
-    // initializePKB(root, this->pkb);
-    
-    cout << "\n==== Running PQL Tests ====\n";
-
-
-    cout << "\n==== End PQL Tests ====\n";
 }
 
 // method to evaluating a query
@@ -73,25 +66,25 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
 // call your evaluator to evaluate the query here
   // ...code to evaluate query...
 
-    cout << "\n==== Parsing queries ====\n";
+    // cout << "\n==== Parsing queries ====\n";
 
     try {
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
-        cout << "\n==== Printing Parsed Query ====\n";
-        cout << sel->format() << endl;
+        // cout << "\n==== Printing Parsed Query ====\n";
+        // cout << sel->format() << endl;
 
         // TODO: @kohyida1997 PRE VALIDATE THE QUERY FIRST!!! Handle duplicate declaration, undeclared synonyms.
 
-        cout << "\n==== Processing PQL Query ====\n";
+        // cout << "\n==== Processing PQL Query ====\n";
 
         shared_ptr<PQLEvaluator> evaluator = PQLEvaluator::create(this->pkb);
 
-        cout << "\n==== Created PQLEvaluator using PKB ====\n";
+        // cout << "\n==== Created PQLEvaluator using PKB ====\n";
 
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
 
-        cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
+        // cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
 
         vector<shared_ptr<Result>> res = pqlProcessor->processPQLQuery(sel);
 
@@ -105,8 +98,5 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
         cout << "Error message: " << ex.what() << endl;;
     }
 
-    cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";
-
-  // store the answers to the query in the results list (it is initially empty)
-  // each result must be a string.
+    //cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";
 }
