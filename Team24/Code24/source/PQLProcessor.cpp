@@ -1459,7 +1459,9 @@ void PQLProcessor::handleFollowsTFirstArgInteger(shared_ptr<SelectCl>& selectCl,
             return;
         }
 
-        for (auto& s : evaluator->getFollowsTIntegerSyn(PKBDesignEntity::AllExceptProcedure, stmtRef1->getIntVal())) {
+        shared_ptr<Declaration>& decl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
+        PKBDesignEntity pkbde = resolvePQLDesignEntityToPKBDesignEntity(decl->getDesignEntity());
+        for (auto& s : evaluator->getFollowsTIntegerSyn(pkbde, stmtRef1->getIntVal())) {
 
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
@@ -1513,8 +1515,8 @@ void PQLProcessor::handleFollowsTFirstArgUnderscore(shared_ptr<SelectCl>& select
     if (rightType == StmtRefType::SYNONYM) {
         const string& rightSynonymKey = stmtRef2->getStringVal();
 
-        shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
-        PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
+        shared_ptr<Declaration>& decl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
+        PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(decl->getDesignEntity());
 
         for (auto& s : evaluator->getFollowsTUnderscoreSyn(pkbDe)) {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
