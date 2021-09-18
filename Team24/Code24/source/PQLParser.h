@@ -641,6 +641,10 @@ public:
     inline bool containsSynonym(shared_ptr<Synonym> s) {
         return relRef->containsSynonym(s);
     }
+
+    inline vector<string> getAllSynonymsAsString() {
+        return relRef->getAllSynonymsAsString();
+    }
 };
 
 class ExpressionSpec {
@@ -700,6 +704,16 @@ public:
         return synonym->getValue() == s->getValue()
             || (entRef->getEntRefType() == EntRefType::SYNONYM 
                 && entRef->getStringVal() == s->getValue());
+    }
+
+    inline vector<string> getAllSynonymsAsString() {
+        vector<string> toReturn;
+        toReturn.push_back(synonym->getValue());
+        if (entRef->getEntRefType() == EntRefType::SYNONYM) {
+            toReturn.emplace_back(entRef->getStringVal());
+        }
+
+        return move(toReturn);
     }
 };
 
@@ -800,8 +814,8 @@ public:
 
     inline bool patternContainsSynonym(shared_ptr<Synonym> s) {
         bool flag = false;
-        for (auto& st : this->suchThatClauses) {
-            flag = st->containsSynonym(s);
+        for (auto& pt : this->patternClauses) {
+            flag = pt->containsSynonym(s);
             if (flag) break;
         }
         return flag;

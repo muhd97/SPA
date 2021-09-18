@@ -236,6 +236,14 @@ public:
 	// => getAfterT( PKBDE::Assign )
 	vector<int> getAfterT(PKBDesignEntity beforeType);
 	
+	/* Use for Follows*(s1, s2) */
+	set<pair<int, int>> getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType);
+
+	/* Use for Follows*(s1, _) */
+	unordered_set<int> getFollowsTSynUnderscore(PKBDesignEntity leftType);
+
+	/* Use for Follows*(s1, INT) */
+	unordered_set<int> getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo);
 
 	/* Uses */
 	
@@ -353,10 +361,12 @@ public:
 	/* TODO: @nicholasnge Provide function to return all Constants in the program. */
 	unordered_set<string> getAllConstants();
 
+	// For pattern a("_", "_") or pattern a(IDENT, "_")
+	vector<pair<int, string>> matchAnyPattern(string& LHS);
 	// For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
-	vector<int> matchPattern(string LHS, string RHS);
+	vector<pair<int, string>> matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS);
 	// For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
-	vector<int> matchExactPattern(string LHS, string RHS);
+	vector<pair<int, string>> matchExactPattern(string& LHS, shared_ptr<Expression>& RHS);
 
 protected:
 	PQLEvaluator(PKB::SharedPtr pPKB) {

@@ -31,7 +31,7 @@ firsttest
 7 - Const
 constant c;
 Select c
-1, 37, 40, 999, 2103, 3203, 12345
+1, 37, 40, 999, 2103, 3203, 12345, 54321
 5000
 8 - Invalid query with Uses as procedure is on RHS
 variable v; procedure p;
@@ -165,8 +165,8 @@ none
 5000
 34 - Pattern clause(exact LHS and inexact RHS)
 assign a;
-Select a pattern a("SHAG", _"y"_)
-none
+Select a pattern a("SHAG", _"2103"_)
+9
 5000
 35 - Pattern clause(undeclared LHS)
 assign a;

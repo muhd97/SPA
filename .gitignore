@@ -531,3 +531,9 @@ FodyWeavers.xsd
 
 # AutoTester
 output.xml
+/Team24/Tests24/Iteration 1/system acceptance test cases/Uses/1/out-first_source.xml
+/Team24/Tests24/Iteration 1/system acceptance test cases/Uses/2/out-test_1b.xml
+/Team24/Tests24/Iteration 1/system acceptance test cases/Pattern/1/out-fist_test.xml
+/Team24/Tests24/Iteration 1/system acceptance test cases/Modifies/1/out-yida_1.xml
+/Team24/Tests24/Iteration 1/system acceptance test cases/Mixed/2/out-second_test.xml
+/Team24/Tests24/Iteration 1/system acceptance test cases/Mixed/1/out-fist_test.xml

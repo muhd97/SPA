@@ -1023,14 +1023,6 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 {
 	vector<int> res;
 
-	// if before type is a container, it can never be in the same nesting level
-	if (beforeType == PKBDesignEntity::If
-		|| beforeType == PKBDesignEntity::While
-		|| beforeType == PKBDesignEntity::Procedure
-		|| afterType == PKBDesignEntity::Procedure) {
-		return res;
-	}
-
 	// check if res is cached, if so return results
 	if (mpPKB->getCached(PKB::Relation::AfterT, beforeType, afterType, res)) {
 		return res;
@@ -1062,6 +1054,94 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType)
 {
 	return getAfterT(PKBDesignEntity::AllExceptProcedure, beforeType);
+}
+
+set<pair<int, int>> PQLEvaluator::getFollowsTSynSyn(PKBDesignEntity beforeType, PKBDesignEntity afterType)
+{
+	set<pair<int, int>> toReturn;
+	// get results manually
+	// get all the 'before' users first
+	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(beforeType);
+	
+	//count from the back, using rbegin and rend
+	for (int i = beforeStatements.size() - 1; i >= 0; i--) {
+		auto& currStmt = beforeStatements[i];
+		PKBGroup::SharedPtr grp = currStmt->getGroup();
+		vector<int> afterStatements = grp->getMembers(afterType);
+
+		for (int j = afterStatements.size() - 1; j >= 0; j--) { // count from back again
+			if (afterStatements[j] <= currStmt->getIndex()) {
+				break; // this should break back into the outer loop
+			}
+			pair<int, int> toAdd;
+			toAdd.first = currStmt->getIndex();
+			toAdd.second = afterStatements[j];
+			toReturn.insert(move(toAdd));
+		}
+	}
+
+	return move(toReturn);
+}
+
+unordered_set<int> PQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity beforeType)
+{
+	unordered_set<int> toReturn;
+
+	// get results manually
+	// get all the 'before' users first
+	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(beforeType);
+
+	//count from the back, using rbegin and rend
+	for (int i = beforeStatements.size() - 1; i >= 0; i--) {
+		auto& currStmt = beforeStatements[i];
+		PKBGroup::SharedPtr grp = currStmt->getGroup();
+		vector<int> afterStatements = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
+
+		for (int j = afterStatements.size() - 1; j >= 0; j--) { // count from back again
+			if (currStmt->getIndex() < afterStatements[j]) {
+				toReturn.insert(currStmt->getIndex());
+				break;
+			}
+			if (afterStatements[j] <= currStmt->getIndex()) {
+				break; // this should break back into the outer loop
+			}
+
+		}
+	}
+
+	return move(toReturn);
+}
+
+unordered_set<int> PQLEvaluator::getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo)
+{
+	unordered_set<int> toReturn;
+
+	// get results manually
+	// get all the 'before' users first
+	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(parentType);
+
+	//count from the back, using rbegin and rend
+	for (int i = beforeStatements.size() - 1; i >= 0; i--) {
+		auto& currStmt = beforeStatements[i];
+		
+		if (currStmt->getIndex() >= childStmtNo) continue;
+		
+		PKBGroup::SharedPtr grp = currStmt->getGroup();
+		vector<int> afterStatements = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
+
+		for (int j = afterStatements.size() - 1; j >= 0; j--) { // count from back again
+			if (childStmtNo == afterStatements[j]) {
+				toReturn.insert(currStmt->getIndex());
+				break;
+			}
+			if (afterStatements[j] <= currStmt->getIndex()) {
+				break; // this should break back into the outer loop
+			}
+
+		}
+	}
+
+	return move(toReturn);
 }
 
 vector<string> PQLEvaluator::getUsed(int statementIndex)
@@ -1412,11 +1492,17 @@ vector<string> PQLEvaluator::getProceduresThatModifyVar(string variableName)
 vector<int> PQLEvaluator::getModifiers(string variableName)
 {
 	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
+	
+	if (v == nullptr) {
+		return vector<int>();
+	}
+
 	return v->getModifiers();
 }
 
 vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string variableName)
 {
+	
 	// if we are looking for ALL users using the variable, call the other function
 	if (modifierType == PKBDesignEntity::AllExceptProcedure) {
 		return getModifiers(variableName);
@@ -1436,6 +1522,7 @@ vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string vari
 			res.emplace_back(modifierIndex);
 		}
 	}
+
 
 	return res;
 }
@@ -1502,18 +1589,29 @@ unordered_set<string> PQLEvaluator::getAllConstants()
 
 // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 // if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern instead 
-vector<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
+vector<pair<int, string>> PQLEvaluator::matchAnyPattern(string& LHS) {
 	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
-	vector<int> res;
-	// lex and parse RHS
-	vector<SimpleToken> tokens = simpleLex(RHS);
-	//printSimpleTokens(tokens);
-	shared_ptr<Expression> expr = parseSimpleExpression(tokens);
-	//cout << expr->format(0);
+	vector<pair<int, string>> res;
+	for (auto& assignStmt : assignStmts) {
+		// check LHS
+		if (LHS == assignStmt->simpleAssignStatement->getId()->getName() || LHS == "_") {
+			int statementIndex = assignStmt->getIndex();
+			string variableModified = assignStmt->simpleAssignStatement->getId()->getName();
+			res.emplace_back(make_pair(statementIndex, variableModified));
+		}
+	}
+	return res;
+}
+
+// For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
+// if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern instead 
+vector<pair<int, string>> PQLEvaluator::matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS) {
+	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
+	vector<pair<int, string>> res;
 
 	//inorder and preorder traversals of RHS
-	vector<string> queryInOrder = inOrderTraversalHelper(expr);
-	vector<string> queryPreOrder = preOrderTraversalHelper(expr);
+	vector<string> queryInOrder = inOrderTraversalHelper(RHS);
+	vector<string> queryPreOrder = preOrderTraversalHelper(RHS);
 
 	for (auto& assignStmt : assignStmts) {
 		// check LHS
@@ -1524,7 +1622,9 @@ vector<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
 		vector<string> assignInOrder = inOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
 		vector<string> assignPreOrder = preOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
 		if (checkForSubTree(queryInOrder, assignInOrder) && checkForSubTree(queryPreOrder, assignPreOrder)) {
-			res.emplace_back(assignStmt->getIndex());
+			int statementIndex = assignStmt->getIndex();
+			string variableModified = assignStmt->simpleAssignStatement->getId()->getName();
+			res.emplace_back(make_pair(statementIndex, variableModified));
 		}
 	}
 	return res;
@@ -1532,18 +1632,13 @@ vector<int> PQLEvaluator::matchPattern(string LHS, string RHS) {
 
 // For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
 // if you want to use a("_", _EXPR_) or a(IDENT, _EXPR_), use matchPattern instead
-vector<int> PQLEvaluator::matchExactPattern(string LHS, string RHS) {
+vector<pair<int, string>> PQLEvaluator::matchExactPattern(string& LHS, shared_ptr<Expression>& RHS) {
 	vector<PKBStatement::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
-	vector<int> res;
-	// lex and parse RHS
-	vector<SimpleToken> tokens = simpleLex(RHS);
-	//printSimpleTokens(tokens);
-	shared_ptr<Expression> expr = parseSimpleExpression(tokens);
-	//cout << expr->format(0);
-
+	vector<pair<int, string>> res;
+	
 	//inorder and preorder traversals of RHS
-	vector<string> queryInOrder = inOrderTraversalHelper(expr);
-	vector<string> queryPreOrder = preOrderTraversalHelper(expr);
+	vector<string> queryInOrder = inOrderTraversalHelper(RHS);
+	vector<string> queryPreOrder = preOrderTraversalHelper(RHS);
 
 	for (auto& assignStmt : assignStmts) {
 		// check LHS
@@ -1554,7 +1649,9 @@ vector<int> PQLEvaluator::matchExactPattern(string LHS, string RHS) {
 		vector<string> assignInOrder = inOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
 		vector<string> assignPreOrder = preOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
 		if (checkForExactTree(queryInOrder, assignInOrder) && checkForExactTree(queryPreOrder, assignPreOrder)) {
-			res.emplace_back(assignStmt->getIndex());
+			int statementIndex = assignStmt->getIndex();
+			string variableModified = assignStmt->simpleAssignStatement->getId()->getName();
+			res.emplace_back(make_pair(statementIndex, variableModified));
 		}
 	}
 	return res;
