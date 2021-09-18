@@ -641,6 +641,10 @@ public:
     inline bool containsSynonym(shared_ptr<Synonym> s) {
         return relRef->containsSynonym(s);
     }
+
+    inline vector<string> getAllSynonymsAsString() {
+        return relRef->getAllSynonymsAsString();
+    }
 };
 
 class ExpressionSpec {

@@ -71,12 +71,12 @@ none
 14 - valid query Follows* 
 stmt s;
 Select s such that Follows* (4, s)
-none
+8, 12
 5000
 15 - valid query Follows*
 stmt s;
 Select s such that Follows* (s, 8)
-none
+1,2,3,4
 5000
 16 - valid query Follows* (stmt)
 stmt s;

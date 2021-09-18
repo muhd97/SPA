@@ -1,0 +1,25 @@
+22 - valid query Follows*
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select w such that Follows(s, w) such that Follows*(w, pr)
+none
+5000
+1 - valid query Follows*
+stmt s, s1, s2; assign a, a1; while w, such; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select such such that Follows(s, such)
+4
+5000
+2 - valid query Follows*
+variable such; procedure that;
+Select that such that Modifies(that, such)
+main
+5000
+3 - valid query Follows*
+variable that; procedure such;
+Select such such that Modifies(such, that)
+main
+5000
+4 - valid query Follows*
+variable such; procedure that;
+Select such such that Modifies(that, such)
+square, aB, bA, track, signal
+5000
