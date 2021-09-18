@@ -1,0 +1,127 @@
+<?xml-stylesheet type="text/xsl" href="analysis.xsl"?>
+<test_results>
+<info>
+<name>3(followsT)</name><parsing_time_taken>65.000000</parsing_time_taken>
+</info>
+<queries>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="FollowsT(INT, INT)">1</id><querystr><![CDATA[call c;  Select c]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="FollowsT(INT, SYN)">2</id><querystr><![CDATA[procedure p;  Select p]]></querystr>
+<stuans>main</stuans>
+<correct>main</correct>
+<time_taken>6.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="FollowsT(INT, _)">3</id><querystr><![CDATA[variable v;  Select v]]></querystr>
+<stuans>p,x,i,a,q,y,b,z,I,r,s</stuans>
+<correct>x,y,z,p,q,a,b,i,I,r,s</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="FollowsT(SYN, INT)">4</id><querystr><![CDATA[constant c;  Select c]]></querystr>
+<stuans>345,2,6,123,5,50,25,10,9,3,7,30,0,222,121,40</stuans>
+<correct>2,6,123,50,5,9,10,345,7,3,25,30,0,222,121,40</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="FollowsT(SYN, SYN)">5</id><querystr><![CDATA[assign a;  Select a]]></querystr>
+<stuans>2,4,6,10,11,16,17,18,22,25,32,34,35</stuans>
+<correct>2,4,6,10,11,16,17,18,22,25,32,34,35</correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="FollowsT(SYN, _)">6</id><querystr><![CDATA[while w;  Select w]]></querystr>
+<stuans>7,19,20,27</stuans>
+<correct>7,19,20,27</correct>
+<time_taken>16.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="FollowsT(_, INT)">7</id><querystr><![CDATA[if ifs;  Select ifs]]></querystr>
+<stuans>5,8,13,30</stuans>
+<correct>5,8,13,30</correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="FollowsT(_, SYN)">8</id><querystr><![CDATA[print pn;  Select pn]]></querystr>
+<stuans>3,12,15,23,26,31,33,36</stuans>
+<correct>3,12,15,23,26,31,33,36</correct>
+<time_taken>6.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="FollowsT(_, _)">9</id><querystr><![CDATA[read r;  Select r]]></querystr>
+<stuans>1,9,14,21,24,28,29</stuans>
+<correct>1,9,14,21,24,28,29</correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid query involving non-statements #1">10</id><querystr><![CDATA[procedure p;  Select p such that Follows(1, 2)]]></querystr>
+<stuans>main</stuans>
+<correct>main</correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid query involving non-statements #2">11</id><querystr><![CDATA[variable v;  Select v such that Follows(21, 22)]]></querystr>
+<stuans>p,x,i,a,q,y,b,z,I,r,s</stuans>
+<correct>x,y,z,p,q,a,b,i,I,r,s</correct>
+<time_taken>8.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid query involving non-statements #3">12</id><querystr><![CDATA[constant c;  Select c such that Follows(5, 27)]]></querystr>
+<stuans>345,2,6,123,5,50,25,10,9,3,7,30,0,222,121,40</stuans>
+<correct>2,6,123,50,5,9,10,345,7,3,25,30,0,222,121,40</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid query: out of bounds statement index #1">13</id><querystr><![CDATA[read r; Select r such that Follows(6, 7)]]></querystr>
+<stuans>1,9,14,21,24,28,29</stuans>
+<correct>1,9,14,21,24,28,29</correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid query: out of bounds statement index #2">14</id><querystr><![CDATA[while w;  Select w such that Follows(5, 6)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>5.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="FollowsT Pattern #1">15</id><querystr><![CDATA[print pn;  Select pn such that Follows(2, 1)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="FollowsT Pattern #2">16</id><querystr><![CDATA[if ifs;  Select ifs such that Follows(36, 37)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>18.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="FollowsT Pattern #3">17</id><querystr><![CDATA[assign a;  Select a such that Follows(0, 1)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+</queries>
+</test_results>

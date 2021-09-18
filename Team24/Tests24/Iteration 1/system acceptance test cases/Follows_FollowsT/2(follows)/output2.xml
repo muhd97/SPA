@@ -1,0 +1,324 @@
+<?xml-stylesheet type="text/xsl" href="analysis.xsl"?>
+<test_results>
+<info>
+<name>2</name><parsing_time_taken>68.000000</parsing_time_taken>
+</info>
+<queries>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="Valid Query for all Calls (EMPTY RESULT)">1</id><querystr><![CDATA[call c;  Select c]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="Valid Query for all Procedures">2</id><querystr><![CDATA[procedure p;  Select p]]></querystr>
+<stuans>main</stuans>
+<correct>main</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="Valid Query for all Variables">3</id><querystr><![CDATA[variable v;  Select v]]></querystr>
+<stuans>p,x,i,a,q,y,b,z,I,r,s</stuans>
+<correct>x,y,z,p,q,a,b,i,I,r,s</correct>
+<time_taken>12.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="Valid Query for all Constants (DIFFERENT)">4</id><querystr><![CDATA[constant c;  Select c]]></querystr>
+<stuans>345,2,6,123,5,50,25,10,9,3,7,30,0,222,121,40</stuans>
+<correct>2,6,123,50,5,9,10,345,7,3,25,30,0,222,121,40</correct>
+<time_taken>12.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="Valid Query for all Assignments">5</id><querystr><![CDATA[assign a;  Select a]]></querystr>
+<stuans>2,4,6,10,11,16,17,18,22,25,32,34,35</stuans>
+<correct>2,4,6,10,11,16,17,18,22,25,32,34,35</correct>
+<time_taken>11.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="Valid Query for all While Statements">6</id><querystr><![CDATA[while w;  Select w]]></querystr>
+<stuans>7,19,20,27</stuans>
+<correct>7,19,20,27</correct>
+<time_taken>10.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="Valid Query for all If Statements">7</id><querystr><![CDATA[if ifs;  Select ifs]]></querystr>
+<stuans>5,8,13,30</stuans>
+<correct>5,8,13,30</correct>
+<time_taken>11.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="Valid Query for all Print Statements">8</id><querystr><![CDATA[print pn;  Select pn]]></querystr>
+<stuans>3,12,15,23,26,31,33,36</stuans>
+<correct>3,12,15,23,26,31,33,36</correct>
+<time_taken>11.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="Valid Query for all Read Statements">9</id><querystr><![CDATA[read r;  Select r]]></querystr>
+<stuans>1,9,14,21,24,28,29</stuans>
+<correct>1,9,14,21,24,28,29</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Query for all Read Statements">10</id><querystr><![CDATA[procedure p;  Select p such that Follows(1, 2)]]></querystr>
+<stuans>main</stuans>
+<correct>main</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Query for all Read Statements">11</id><querystr><![CDATA[variable v;  Select v such that Follows(21, 22)]]></querystr>
+<stuans>p,x,i,a,q,y,b,z,I,r,s</stuans>
+<correct>x,y,z,p,q,a,b,i,I,r,s</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Query for all Read Statements">12</id><querystr><![CDATA[constant c;  Select c such that Follows(5, 27)]]></querystr>
+<stuans>345,2,6,123,5,50,25,10,9,3,7,30,0,222,121,40</stuans>
+<correct>2,6,123,50,5,9,10,345,7,3,25,30,0,222,121,40</correct>
+<time_taken>10.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Query for all Read Statements">13</id><querystr><![CDATA[read r; Select r such that Follows(6, 7)]]></querystr>
+<stuans>1,9,14,21,24,28,29</stuans>
+<correct>1,9,14,21,24,28,29</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Follows Query that is False">14</id><querystr><![CDATA[while w;  Select w such that Follows(5, 6)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid Follows Query due to wrong order">15</id><querystr><![CDATA[print pn;  Select pn such that Follows(2, 1)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid Follows Query where statement number is out of range">16</id><querystr><![CDATA[if ifs;  Select ifs such that Follows(36, 37)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid Follows Query where statement number is not in range">17</id><querystr><![CDATA[assign a;  Select a such that Follows(0, 1)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>17.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(r, a)">18</id><querystr><![CDATA[read r; assign a; Select r such that Follows(r, a)]]></querystr>
+<stuans>1,9,21,24</stuans>
+<correct>1,9,21,24</correct>
+<time_taken>11.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(a, r) (EMPTY RESULT)">19</id><querystr><![CDATA[read r; assign a; Select a such that Follows(a, r) ]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>10.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(a, pn)">20</id><querystr><![CDATA[print pn; assign a; Select a such that Follows(a, pn)]]></querystr>
+<stuans>2,11,22,25,35</stuans>
+<correct>2,11,22,25,35</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(pn, a)">21</id><querystr><![CDATA[print pn; assign a; Select  such that Follows(pn, a)]]></querystr>
+<exception>Bad PQL Query. The target synonym is NOT declared
+</exception>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(a, if)">22</id><querystr><![CDATA[if ifs; assign a; Select ifs such that Follows(a, ifs)]]></querystr>
+<stuans>5</stuans>
+<correct>5</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(a, w)">23</id><querystr><![CDATA[while w; assign a; Select w such that Follows(a, w)]]></querystr>
+<stuans>7</stuans>
+<correct>7</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(w, s)">24</id><querystr><![CDATA[while w; stmt s; Select s such that Follows(w, s)]]></querystr>
+<stuans>24,35</stuans>
+<correct>24,35</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(a1, a2)">25</id><querystr><![CDATA[assign a1, a2; Select a1 such that Follows(a1, a2)]]></querystr>
+<stuans>10,16</stuans>
+<correct>10,16</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(w1, w2)">26</id><querystr><![CDATA[while w1, w2; Select w2 such that Follows(w1, w2)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(if1, if2)">27</id><querystr><![CDATA[if if1, if2; Select if1 such that Follows(if1, if2)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(w, ifs)">28</id><querystr><![CDATA[if ifs; while w; Select w such that Follows(w, ifs)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>10.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(ifs, w)">28</id><querystr><![CDATA[if ifs; while w; Select w such that Follows(ifs, w)]]></querystr>
+<stuans>27</stuans>
+<correct>27</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(s, #) (EMPTY RESULT as stmt 6 is the start of new if block)">29</id><querystr><![CDATA[stmt s; Select s such that Follows(s, 6)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(#, s)">30</id><querystr><![CDATA[stmt s; Select s such that Follows(6, s)]]></querystr>
+<stuans>7</stuans>
+<correct>7</correct>
+<time_taken>11.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(s, #) (EMPTY RESULT as stmt 8 is the start of new while block)">31</id><querystr><![CDATA[stmt s; Select s such that Follows(s, 8)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(#, s) where # is a while statement">32</id><querystr><![CDATA[stmt s; Select s such that Follows(19, s)]]></querystr>
+<stuans>24</stuans>
+<correct>24</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(#, s) where # is a if statement">33</id><querystr><![CDATA[stmt s; Select s such that Follows(30, s)]]></querystr>
+<stuans>33</stuans>
+<correct>33</correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Valid Follows Query where Follows(#, 27) where # is a if statement">34</id><querystr><![CDATA[stmt s; Select s such that Follows(s, 27)]]></querystr>
+<stuans>5</stuans>
+<correct>5</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid Follows Query where Follows(#, s) as # is the last statement">35</id><querystr><![CDATA[stmt s; Select s such that Follows(36, s)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>8.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid Follows Query where Follows(s, 1)">36</id><querystr><![CDATA[stmt s; Select s such that Follows(s, 1)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>11.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid Follows Query where Follows(17, s) as line 17 is end of if block">37</id><querystr><![CDATA[stmt s; Select s such that Follows(17, s)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>10.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid Follows Query where Follows(s, 18) as line 18 is start of else block">38</id><querystr><![CDATA[stmt s; Select s such that Follows(s, 18)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>10.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" UnnamedVar="2" SuchThat="1" CondNum="5" RelNum="1" comment="Valid Follows Query where Follows(_, _)">39</id><querystr><![CDATA[while w; Select w such that Follows(_, _)]]></querystr>
+<stuans>7,19,20,27</stuans>
+<correct>7,19,20,27</correct>
+<time_taken>11.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" UnnamedVar="1" SuchThat="1" CondNum="4" RelNum="1" comment="Valid Follows Query where Follows(w, _)">40</id><querystr><![CDATA[while w; Select w such that Follows(w, _)]]></querystr>
+<stuans>19,27</stuans>
+<correct>19,27</correct>
+<time_taken>10.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" UnnamedVar="1" SuchThat="1" CondNum="4" RelNum="1" comment="Valid Follows Query where Follows(_, a)">41</id><querystr><![CDATA[assign a; Select a such that Follows(_, a)]]></querystr>
+<stuans>2,4,10,11,16,17,22,25,35,34</stuans>
+<correct>2,4,10,11,16,17,22,25,34,35</correct>
+<time_taken>14.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" UnnamedVar="1" SuchThat="1" CondNum="4" RelNum="1" comment="Valid Follows Query where Follows(6, _) evaluates to True">42</id><querystr><![CDATA[read r; Select r such that Follows(6, _)]]></querystr>
+<stuans>1,9,14,21,24,28,29</stuans>
+<correct>1,9,14,21,24,28,29</correct>
+<time_taken>16.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" UnnamedVar="1" SuchThat="1" CondNum="4" RelNum="1" comment="Follows Query where Follows(36, _) evaluates to False (EMPTY RESULT)">43</id><querystr><![CDATA[while w;  Select w such that Follows(36, _)]]></querystr>
+<stuans></stuans>
+<correct></correct>
+<time_taken>14.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" UnnamedVar="1" SuchThat="1" CondNum="4" RelNum="1" comment="Invalid Follows Query with Syntax error">44</id><querystr><![CDATA[stmt s; while w; if ifs; Select x such that Follows(6, _)]]></querystr>
+<exception>Bad PQL Query. The target synonym is NOT declared
+</exception>
+</query>
+<query>
+<id ReturnTuple="1" Follows="1" SuchThat="1" CondNum="3" RelNum="1" comment="Invalid Follows Query with Syntax error">45</id><querystr><![CDATA[stmt s; while w; if ifs; Select s such that Follows(6, x)]]></querystr>
+<exception>BAD PQL Query. Some synonyms in the such-that clauses were NOT declared
+</exception>
+</query>
+</queries>
+</test_results>

@@ -32,10 +32,13 @@ void PKB::extractDesigns(shared_ptr<Program> program) {
 		}
 	}
 
-	std::sort(mStatements[PKBDesignEntity::AllExceptProcedure].begin(), mStatements[PKBDesignEntity::AllExceptProcedure].end(), 
-		[](const PKBStatement::SharedPtr& a, const PKBStatement::SharedPtr& b) -> bool{
-			return a->getIndex() < b->getIndex();
-		});
+	// sort all the vectors of statements in ascending order
+	for (auto& vec : mStatements) {
+		std::sort(vec.second.begin(), vec.second.end(),
+			[](const PKBStatement::SharedPtr& a, const PKBStatement::SharedPtr& b) -> bool {
+				return a->getIndex() < b->getIndex();
+			});
+	}
 }
 
 PKBStatement::SharedPtr PKB::extractStatement(shared_ptr<Statement>& statement, PKBGroup::SharedPtr& group) {

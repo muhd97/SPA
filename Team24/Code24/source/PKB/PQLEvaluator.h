@@ -202,13 +202,6 @@ public:
 
 	// Follow*
 
-	// Get all statements of type {beforeType} followed directly/indirectly by statement indexed {after} 
-	// eg. stmt s; Select s such that FollowsT( s, 14 ); 
-	// => getBeforeT( PKBDE::AllExceptProcedure, 14 )
-	// eg. if ifs; Select ifs such that FollowsT( ifs, 14 ); 
-	// => getBeforeT( PKBDE::If, 14 )
-	vector<int> getBeforeT(PKBDesignEntity beforeType, int after);
-
 	// Get all statements of type {beforeType} followed directly/indirectly by statements of type {afterType} 
 	// eg. assign a; while w; Select a such that FollowsT( a, w ); 
 	// => getBeforeT( PKBDE::Assign, PKBDE::While )
@@ -219,31 +212,37 @@ public:
 	// => getBeforeT( PKBDE::Assign )
 	vector<int> getBeforeT(PKBDesignEntity afterType);
 
-	// Get statement if it is of type {afterType} and follows directly/indirectly child statement indexed {child} 
-	// eg. stmt s; Select s such that FollowsT( 14, s ); 
-	// => getAfterT( PKBDE::AllExceptProcedure, 14 )
-	// eg. if ifs; Select ifs such that FollowsT( 14, ifs ); 
-	// => getAfterT( PKBDE::If, 14 )
-	vector<int> getAfterT(PKBDesignEntity afterType, int beforeIndex);
-
-	// Get all statements of type {afterType} that follow directly/indirect statements of type {beforeType} 
-	// eg. assign a; while w; Select w such that Follows( a, w ); 
-	// => getAfterT( PKBDE::Assign, PKBDE::While )
-	vector<int> getAfterT(PKBDesignEntity beforeType, PKBDesignEntity afterType);
-
 	// Get all statements that follow directly/indirectly statements of type {beforeType} 
 	// eg. assign a; stmt s; Select s such that Follows( a, s ); 
 	// => getAfterT( PKBDE::Assign )
 	vector<int> getAfterT(PKBDesignEntity beforeType);
 	
+	/* Use for Follows*(INT, INT) */
+	bool getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo);
+
+	/* Use for Follows*(INT, s1) */
+	unordered_set<int> getFollowsTIntegerSyn(PKBDesignEntity childType, int parentStmtNo);
+
+	/* Use for Follows*(INT, _) */
+	bool getFollowsTIntegerUnderscore(int leftStmtNo);
+
+	/* Use for Follows*(s1, INT) */
+	unordered_set<int> getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo);
+
 	/* Use for Follows*(s1, s2) */
 	set<pair<int, int>> getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType);
 
 	/* Use for Follows*(s1, _) */
 	unordered_set<int> getFollowsTSynUnderscore(PKBDesignEntity leftType);
 
-	/* Use for Follows*(s1, INT) */
-	unordered_set<int> getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo);
+	/* Use for Follows*(_, INT) */
+	bool getFollowsTUnderscoreInteger(int rightStmtNo);
+
+	/* Use for Follows*(_, s1) */
+	unordered_set<int> getFollowsTUnderscoreSyn(PKBDesignEntity rightType);
+
+	/* Use for Follows*(_, _) */
+	bool getFollowsTUnderscoreUnderscore();
 
 	/* Uses */
 	

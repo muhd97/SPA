@@ -27,7 +27,7 @@ set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesi
 {
 	set<pair<int, int>> res;
 
-	// if parentType is none of the container types, there are no such children
+	// if rightType is none of the container types, there are no such children
 	if (!isContainerType(parentType)) {
 		return res;
 	}
@@ -48,7 +48,7 @@ set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesi
 	
 	for (auto& stmt : parentStmts) {
 		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
-		// if this statement's container group contains at least one child of required type, add statement to our results
+		// if this rightStatement's container group contains at least one child of required type, add rightStatement to our results
 		for (auto& grp : grps) {
 			if (!grp->getMembers(childType).empty()) {
 				res.insert(make_pair(stmt->getIndex(), stmt->getIndex()));
@@ -81,7 +81,7 @@ set<int> PQLEvaluator::getParentsSynUnderscore(PKBDesignEntity parentType)
 
 	for (auto& stmt : parentStmts) {
 		vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
-		// if this statement's container group contains at least one child of required type, add statement to our results
+		// if this rightStatement's container group contains at least one child of required type, add rightStatement to our results
 		for (auto& grp : grps) {
 			if (!grp->getMembers(PKBDesignEntity::AllExceptProcedure).empty()) {
 
@@ -142,14 +142,14 @@ set<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDes
 
 	set<pair<int, int>> res;
 	vector<int> temp;
-	// if parentType is none of the container types, there are no such children
+	// if rightType is none of the container types, there are no such children
 	if (!isContainerType(parentType)) {
 		return res;
 	}
 
 
 	// check if res is cached, if so return results
-	/*if (mpPKB->getCached(PKB::Relation::Child, parentType, childType, temp)) {
+	/*if (mpPKB->getCached(PKB::Relation::Child, rightType, childType, temp)) {
 		res.insert(temp.begin(), temp.end());
 		return res;
 	}*/
@@ -182,7 +182,7 @@ set<pair<int, int>> PQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDes
 
 	// insert into cache for future use
 	/*temp.insert(temp.end(), res.begin(), res.end());
-	mpPKB->insertintoCache(PKB::Relation::Child, parentType, childType, temp);*/
+	mpPKB->insertintoCache(PKB::Relation::Child, rightType, childType, temp);*/
 	return move(res);
 }
 
@@ -232,8 +232,8 @@ set<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex)
 {
 	set<int> res;
 
-	//// if parentType is none of the container types, there are no such parents
-	//if (!isContainerType(parentType)) {
+	//// if rightType is none of the container types, there are no such parents
+	//if (!isContainerType(rightType)) {
 	//	return res;
 	//}
 
@@ -243,17 +243,17 @@ set<int> PQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex)
 	//}
 	//do {
 	//	// recurse up the parent tree
-	//	// replace current statement with parent statement
+	//	// replace current rightStatement with parent rightStatement
 	//	int parentStatementIndex = currentStatement->getGroup()->getOwner();
 	//	if (!mpPKB->getStatement(parentStatementIndex, currentStatement)) {
 	//		return res;
 	//	}
-	//	// if current statement type is the desired type, add it to the results list
-	//	if (currentStatement->getType() == parentType) {
+	//	// if current rightStatement type is the desired type, add it to the results list
+	//	if (currentStatement->getType() == rightType) {
 	//		res.insert(parentStatementIndex);
 	//	}
 	//} while (currentStatement->getType() != PKBDesignEntity::Procedure); 
-	//// we recurse until our 'statement' is actually a Procedure, then we cant go further up no more
+	//// we recurse until our 'rightStatement' is actually a Procedure, then we cant go further up no more
 
 	return res;
 }
@@ -263,42 +263,42 @@ set<pair<int, int>> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDes
 	set<pair<int, int>> res;
 	//vector<int> temp;
 
-	//// if parentType is none of the container types, there are no such parents
-	//if (!isContainerType(parentType)) {
+	//// if rightType is none of the container types, there are no such parents
+	//if (!isContainerType(rightType)) {
 	//	return res;
 	//}
 
 	//// check if res is cached, if so return results
-	//if (mpPKB->getCached(PKB::Relation::ParentT, parentType, childType, temp)) {
+	//if (mpPKB->getCached(PKB::Relation::ParentT, rightType, childType, temp)) {
 	//	res.insert(temp.begin(), temp.end());
 	//	return res;
 	//}
 
-	//// if parentType is PKBDesignEntity::AllExceptProcedure call the other function instead (temporarily doing this because im scared of bugs)
-	//if (parentType == PKBDesignEntity::AllExceptProcedure) {
+	//// if rightType is PKBDesignEntity::AllExceptProcedure call the other function instead (temporarily doing this because im scared of bugs)
+	//if (rightType == PKBDesignEntity::AllExceptProcedure) {
 	//	return getParentsT(childType);
 	//}
 
 	//// if not cached, we find the res manually and insert it into the cache
 	//vector<PKBStatement::SharedPtr> parentStmts;
-	//if (parentType == PKBDesignEntity::AllExceptProcedure) {
+	//if (rightType == PKBDesignEntity::AllExceptProcedure) {
 	//	addParentStmts(parentStmts);
 	//}
 	//else {
 	//	// check these 'possible' parent statements
-	//	parentStmts = mpPKB->getStatements(parentType);
+	//	parentStmts = mpPKB->getStatements(rightType);
 	//}
 
 	//// recursive check on children
 	//for (auto& stmt : parentStmts) {
-	//	// if this statement has already been added in our res set, skip it
+	//	// if this rightStatement has already been added in our res set, skip it
 	//	if (res.count(stmt->getIndex())) {
 	//		continue;
 	//	}
-	//	// check for children in the groups that this statement owns
+	//	// check for children in the groups that this rightStatement owns
 	//	vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
 	//	for (auto& grp : grps) {
-	//		if (hasEligibleChildRecursive(grp, parentType, childType, res)) {
+	//		if (hasEligibleChildRecursive(grp, rightType, childType, res)) {
 	//			res.insert(stmt->getIndex());
 	//			break;
 	//		}
@@ -307,7 +307,7 @@ set<pair<int, int>> PQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDes
 	//// add results from set to vector which we are returning
 	//temp.insert(temp.end(), res.begin(), res.end());
 	//// insert into cache for future use
-	//mpPKB->insertintoCache(PKB::Relation::ParentT, parentType, childType, temp);
+	//mpPKB->insertintoCache(PKB::Relation::ParentT, rightType, childType, temp);
 	return res;
 }
 
@@ -320,14 +320,14 @@ bool PQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignE
 
 	//for (PKBGroup::SharedPtr& childGroup : grp->getChildGroups()) {
 	//	// recursive step: on the childGroups of grp
-	//	if (hasEligibleChildRecursive(childGroup, parentType, childType, setResult)) {
+	//	if (hasEligibleChildRecursive(childGroup, rightType, childType, setResult)) {
 	//		// if one of grp's childGrps does have a child of desired type:
 	//		PKBStatement::SharedPtr childGroupOwner;
 	//		if (!mpPKB->getStatement(childGroup->getOwner(), childGroupOwner)) {
 	//			return false;
 	//		}
 	//		// add the grp's childGrp if it also qualifies as a parent
-	//		if (childGroupOwner->getType() == parentType) {
+	//		if (childGroupOwner->getType() == rightType) {
 	//			setResult.insert(childGroupOwner->getIndex());
 	//		}
 	//		// and let grp's parents know we found a desired child
@@ -394,19 +394,19 @@ set<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDe
 	set<pair<int, int>> res;
 	vector<int> temp;
 
-	// if parentType is none of the container types, there are no such children
+	// if rightType is none of the container types, there are no such children
 	if (!isContainerType(parentType)) {
 		return res;
 	}
 
 	// check if res is cached, if so return results
-	//if (mpPKB->getCached(PKB::Relation::ChildT, parentType, childType, temp)) {
+	//if (mpPKB->getCached(PKB::Relation::ChildT, rightType, childType, temp)) {
 	//	res.insert(temp.begin(), temp.end());
 	//	return res;
 	//}
 
-	// if parentType is PKBDesignEntity::AllExceptProcedure call the other function instead (temporarily doing this because im scared of bugs)
-	//if (parentType == PKBDesignEntity::AllExceptProcedure) {
+	// if rightType is PKBDesignEntity::AllExceptProcedure call the other function instead (temporarily doing this because im scared of bugs)
+	//if (rightType == PKBDesignEntity::AllExceptProcedure) {
 	//	return getChildrenT(childType);
 	//}
 
@@ -465,7 +465,7 @@ set<pair<int, int>> PQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDe
 	//// add results from set to vector which we are returning
 	//temp.insert(temp.end(), res.begin(), res.end());
 	//// insert into cache for future use
-	//mpPKB->insertintoCache(PKB::Relation::ChildT, parentType, childType, temp);
+	//mpPKB->insertintoCache(PKB::Relation::ChildT, rightType, childType, temp);
 	return res;
 }
 
@@ -702,7 +702,7 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 }
 
 bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, PKBStatement::SharedPtr& result) {
-// find the statement before in the stmt's group
+// find the rightStatement before in the stmt's group
 	PKBGroup::SharedPtr grp = statementAfter->getGroup();
 	vector<int>& members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
 	for (size_t i = 0; i < members.size(); i++) {
@@ -721,7 +721,7 @@ bool PQLEvaluator::getStatementBefore(PKBStatement::SharedPtr& statementAfter, P
 }
 
 bool PQLEvaluator::getStatementAfter(PKBStatement::SharedPtr& statementBefore, PKBStatement::SharedPtr& result) {
-// find the statement before in the stmt's group
+// find the rightStatement before in the stmt's group
 	PKBGroup::SharedPtr grp = statementBefore->getGroup();
 	vector<int>& members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
 	for (size_t i = 0; i < members.size(); i++) {
@@ -749,7 +749,7 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity 
 	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(afterType);
 	PKBStatement::SharedPtr stmtBefore;
 	for (auto& stmt : stmts) {
-		// if there is no statement before, go next
+		// if there is no rightStatement before, go next
 		if (!getStatementBefore(stmt, stmtBefore)) {
 			continue;
 		}
@@ -768,12 +768,12 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity 
 	return res;
 }
 
-/* The pair will have the statement before first and the statement after after */
+/* The pair will have the rightStatement before first and the rightStatement after after */
 set<pair<int, int>> PQLEvaluator::getBeforePairs(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
 	set<pair<int, int>> res;
 	// check if res is cached, if so return results
-	// if (mpPKB->getCachedSet(PKB::Relation::Before, beforeType, afterType, res)) {
+	// if (mpPKB->getCachedSet(PKB::Relation::Before, rightType, rightType, res)) {
 	// 	return res;
 	// }
 
@@ -781,7 +781,7 @@ set<pair<int, int>> PQLEvaluator::getBeforePairs(PKBDesignEntity beforeType, PKB
 	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(afterType);
 	PKBStatement::SharedPtr stmtBefore;
 	for (auto& stmt : stmts) {
-		// if there is no statement before, go next
+		// if there is no rightStatement before, go next
 		if (!getStatementBefore(stmt, stmtBefore)) {
 			continue;
 		}
@@ -799,7 +799,7 @@ set<pair<int, int>> PQLEvaluator::getBeforePairs(PKBDesignEntity beforeType, PKB
 	}
 
 	//insert res into cache
-	//mpPKB->insertintoCacheSet(PKB::Relation::Before, beforeType, afterType, res);
+	//mpPKB->insertintoCacheSet(PKB::Relation::Before, rightType, rightType, res);
 	return res;
 }
 
@@ -853,7 +853,7 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity a
 	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(beforeType);
 	PKBStatement::SharedPtr stmtAfter;
 	for (auto& stmt : stmts) {
-		// if there is no statement after, go next
+		// if there is no rightStatement after, go next
 		if (!getStatementAfter(stmt, stmtAfter)) {
 			continue;
 		}
@@ -876,7 +876,7 @@ set<pair<int, int>> PQLEvaluator::getAfterPairs(PKBDesignEntity beforeType, PKBD
 {
 	set<pair<int, int>> res;
 	// check if res is cached, if so return results
-	// if (mpPKB->getCachedSet(PKB::Relation::After, beforeType, afterType, res)) {
+	// if (mpPKB->getCachedSet(PKB::Relation::After, rightType, rightType, res)) {
 	// 	return res;
 	// }
 
@@ -885,7 +885,7 @@ set<pair<int, int>> PQLEvaluator::getAfterPairs(PKBDesignEntity beforeType, PKBD
 	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(beforeType);
 	PKBStatement::SharedPtr stmtAfter;
 	for (auto& stmt : stmts) {
-		// if there is no statement after, go next
+		// if there is no rightStatement after, go next
 		if (!getStatementAfter(stmt, stmtAfter)) {
 			continue;
 		}
@@ -902,7 +902,7 @@ set<pair<int, int>> PQLEvaluator::getAfterPairs(PKBDesignEntity beforeType, PKBD
 	}
 
 	//insert res into cache
-	//mpPKB->insertintoCacheSet(PKB::Relation::After, beforeType, afterType, res);
+	//mpPKB->insertintoCacheSet(PKB::Relation::After, rightType, rightType, res);
 	return res;
 }
 
@@ -914,7 +914,7 @@ bool PQLEvaluator::getFollowsUnderscoreUnderscore() {
 	vector<PKBStatement::SharedPtr> stmts = mpPKB->getStatements(PKBDesignEntity::AllExceptProcedure);
 	PKBStatement::SharedPtr stmtAfter;
 	for (auto& stmt : stmts) {
-		// if there is no statement after, go next
+		// if there is no rightStatement after, go next
 		if (!getStatementAfter(stmt, stmtAfter)) {
 			continue;
 		}
@@ -927,147 +927,95 @@ bool PQLEvaluator::getFollowsUnderscoreUnderscore() {
 	return false;
 }
 
-vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType)
-{
-	return getAfter(beforeType, PKBDesignEntity::AllExceptProcedure);
+bool PQLEvaluator::getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo) {
+	PKBStatement::SharedPtr leftStatement;
+	PKBStatement::SharedPtr rightStatement;
+	
+	// get left and right statement
+	if (!mpPKB->getStatement(leftStmtNo, leftStatement)) {
+		return false;
+	}
+	if (!mpPKB->getStatement(rightStmtNo, rightStatement)) {
+		return false;
+	}
+	
+	if (leftStatement->getGroup() == rightStatement->getGroup() && leftStmtNo < rightStmtNo) {
+		return true;
+	}
+	return false;
 }
 
-vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, int afterIndex)
+// getAfterT
+unordered_set<int> PQLEvaluator::getFollowsTIntegerSyn(PKBDesignEntity rightType, int leftStmtNo)
 {
-	vector<int> res;
-	PKBStatement::SharedPtr statement;
-	if (!mpPKB->getStatement(afterIndex, statement)) {
+	unordered_set<int> res;
+	PKBStatement::SharedPtr rightStatement;
+	if (!mpPKB->getStatement(leftStmtNo, rightStatement)) {
 		return res;
 	}
-	PKBGroup::SharedPtr grp = statement->getGroup();
-	vector<int> grpStatements = grp->getMembers(beforeType);
+	PKBGroup::SharedPtr grp = rightStatement->getGroup();
+	vector<int> grpMembers = grp->getMembers(rightType);
+
+	// this loops from the back, r stands for reverse
+	// todo @nicholas possible bug place, may be using rbegin wrong
+	for (auto& rightStmtNo = grpMembers.rbegin(); rightStmtNo != grpMembers.rend(); ++rightStmtNo) {
+		// if we go past ourself, we are done
+		if (*rightStmtNo <= leftStmtNo) {
+			return res;
+		}
+		res.insert(*rightStmtNo);
+	}
+
+	return res;
+}
+
+bool PQLEvaluator::getFollowsTIntegerUnderscore(int leftStmtNo) {
+	PKBStatement::SharedPtr leftStatement;
+	if (!mpPKB->getStatement(leftStmtNo, leftStatement)) {
+		return false;
+	}
+
+	vector<int> members = leftStatement->getGroup()->getMembers(PKBDesignEntity::AllExceptProcedure);
+	return leftStmtNo < members.back();
+}
+
+// getBeforeT
+unordered_set<int> PQLEvaluator::getFollowsTSynInteger(PKBDesignEntity leftType, int rightStmtNo)
+{
+	unordered_set<int> toReturn;
+	PKBStatement::SharedPtr rightStatement;
+
+	if (!mpPKB->getStatement(rightStmtNo, rightStatement)) {
+		return toReturn;
+	}
+
+	PKBGroup::SharedPtr grp = rightStatement->getGroup();
+	vector<int> grpStatements = grp->getMembers(leftType);
 
 	// assume ascending order of line numbers
 	for (int statementIndex : grpStatements) {
 		// we've seen past ourself, we can stop now (we could search past since we are searching specific type only)
-		if (statementIndex >= afterIndex) {
-			return res;
+		if (statementIndex >= rightStmtNo) {
+			return toReturn;
 		}
-		res.emplace_back(statementIndex);
+		toReturn.insert(statementIndex);
 	}
 
-	return res;
+	return move(toReturn);
 }
 
-vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity afterType)
-{
-	vector<int> res;
-
-	// if before type is a procedure, it can never be in the same nesting level
-	if (beforeType == PKBDesignEntity::Procedure) {
-		return vector<int>();
-	}
-
-	// check if res is cached, if so return results
-	if (mpPKB->getCached(PKB::Relation::BeforeT, beforeType, afterType, res)) {
-		return res;
-	}
-
-	// get results manually
-	// get all the 'after' users first
-	vector<PKBStatement::SharedPtr> afterStatements = mpPKB->getStatements(afterType);
-	// keeps track of the furthest statement number seen, so we dont double add users seen b4
-	set<int> tempRes;
-	for (auto& afterStatement : afterStatements) {
-		PKBGroup::SharedPtr grp = afterStatement->getGroup();
-		// get 'before' users of the desired type in the same group as the after statement
-		vector<int> beforeStatements = grp->getMembers(beforeType);
-		for (int beforeStatement : beforeStatements) {
-			// we've seen past ourself, we can stop now
-			if (beforeStatement >= afterStatement->getIndex()) {
-				break; // this should break back into the outer loop and move the statement index
-			}
-			tempRes.insert(beforeStatement);
-		}
-	}
-	res = vector<int>(tempRes.begin(), tempRes.end());
-	//insert res into cache
-	mpPKB->insertintoCache(PKB::Relation::BeforeT, beforeType, afterType, res);
-	return res;
-}
-
-vector<int> PQLEvaluator::getBeforeT(PKBDesignEntity afterType)
-{
-	return getBeforeT(PKBDesignEntity::AllExceptProcedure, afterType);
-}
-
-vector<int> PQLEvaluator::getAfterT(PKBDesignEntity afterType, int beforeIndex)
-{
-	vector<int> res;
-	PKBStatement::SharedPtr statement;
-	if (!mpPKB->getStatement(beforeIndex, statement)) {
-		return res;
-	}
-	PKBGroup::SharedPtr grp = statement->getGroup();
-	vector<int> grpMembers = grp->getMembers(afterType);
-
-	// this loops from the back, r stands for reverse
-	// todo @nicholas possible bug place, may be using rbegin wrong
-	for (auto& afterIndex = grpMembers.rbegin(); afterIndex != grpMembers.rend(); ++afterIndex) {
-		// if we go past ourself, we are done
-		if (*afterIndex <= beforeIndex) {
-			return res;
-		}
-		res.emplace_back(*afterIndex);
-	}
-
-	return res;
-}
-
-vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity afterType)
-{
-	vector<int> res;
-
-	// check if res is cached, if so return results
-	if (mpPKB->getCached(PKB::Relation::AfterT, beforeType, afterType, res)) {
-		return res;
-	}
-
-	// get results manually
-	// get all the 'before' users first
-	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(beforeType);
-	set<int> tempRes;
-	//count from the back, using rbegin and rend
-	for (auto& beforeStatement = beforeStatements.rbegin(); beforeStatement != beforeStatements.rend(); ++beforeStatement) {
-		PKBGroup::SharedPtr grp = (*beforeStatement)->getGroup();
-		vector<int> afterStatements = grp->getMembers(afterType);
-
-		for (auto& afterStatement = afterStatements.rbegin(); afterStatement != afterStatements.rend(); ++afterStatement) { // count from back again
-			if (*afterStatement <= (*beforeStatement)->getIndex()) {
-				break; // this should break back into the outer loop
-			}
-			tempRes.insert(*afterStatement);	
-		}
-	}
-
-	//insert res into cache
-	res = vector<int>(tempRes.begin(), tempRes.end());
-	mpPKB->insertintoCache(PKB::Relation::AfterT, beforeType, afterType, res);
-	return res;
-}
-
-vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType)
-{
-	return getAfterT(PKBDesignEntity::AllExceptProcedure, beforeType);
-}
-
-set<pair<int, int>> PQLEvaluator::getFollowsTSynSyn(PKBDesignEntity beforeType, PKBDesignEntity afterType)
+set<pair<int, int>> PQLEvaluator::getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType)
 {
 	set<pair<int, int>> toReturn;
 	// get results manually
 	// get all the 'before' users first
-	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(beforeType);
+	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(leftType);
 	
 	//count from the back, using rbegin and rend
 	for (int i = beforeStatements.size() - 1; i >= 0; i--) {
 		auto& currStmt = beforeStatements[i];
 		PKBGroup::SharedPtr grp = currStmt->getGroup();
-		vector<int> afterStatements = grp->getMembers(afterType);
+		vector<int> afterStatements = grp->getMembers(rightType);
 
 		for (int j = afterStatements.size() - 1; j >= 0; j--) { // count from back again
 			if (afterStatements[j] <= currStmt->getIndex()) {
@@ -1083,13 +1031,13 @@ set<pair<int, int>> PQLEvaluator::getFollowsTSynSyn(PKBDesignEntity beforeType, 
 	return move(toReturn);
 }
 
-unordered_set<int> PQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity beforeType)
+unordered_set<int> PQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity leftType)
 {
 	unordered_set<int> toReturn;
 
 	// get results manually
 	// get all the 'before' users first
-	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(beforeType);
+	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(leftType);
 
 	//count from the back, using rbegin and rend
 	for (int i = beforeStatements.size() - 1; i >= 0; i--) {
@@ -1097,51 +1045,56 @@ unordered_set<int> PQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity before
 		PKBGroup::SharedPtr grp = currStmt->getGroup();
 		vector<int> afterStatements = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
 
-		for (int j = afterStatements.size() - 1; j >= 0; j--) { // count from back again
-			if (currStmt->getIndex() < afterStatements[j]) {
-				toReturn.insert(currStmt->getIndex());
-				break;
-			}
-			if (afterStatements[j] <= currStmt->getIndex()) {
-				break; // this should break back into the outer loop
-			}
-
+		if (currStmt->getIndex() < afterStatements[afterStatements.size() -1]) {
+			toReturn.insert(currStmt->getIndex());
 		}
 	}
 
 	return move(toReturn);
 }
 
-unordered_set<int> PQLEvaluator::getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo)
-{
+/* Use for Follows*(_, INT) */
+bool PQLEvaluator::getFollowsTUnderscoreInteger(int rightStmtNo) {
+	PKBStatement::SharedPtr rightStatement;
+	if (!mpPKB->getStatement(rightStmtNo, rightStatement)) {
+		return false;
+	}
+
+	vector<int> members = rightStatement->getGroup()->getMembers(PKBDesignEntity::AllExceptProcedure);
+	return rightStmtNo > members.front();
+}
+
+/* Use for Follows*(_, s1) */
+unordered_set<int> PQLEvaluator::getFollowsTUnderscoreSyn(PKBDesignEntity rightType) {
 	unordered_set<int> toReturn;
 
 	// get results manually
-	// get all the 'before' users first
-	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(parentType);
+	// get all the 'after' users first
+	vector<PKBStatement::SharedPtr> rightStatements = mpPKB->getStatements(rightType);
 
 	//count from the back, using rbegin and rend
-	for (int i = beforeStatements.size() - 1; i >= 0; i--) {
-		auto& currStmt = beforeStatements[i];
-		
-		if (currStmt->getIndex() >= childStmtNo) continue;
-		
+	for (int i = rightStatements.size() - 1; i >= 0; i--) {
+		auto& currStmt = rightStatements[i];
 		PKBGroup::SharedPtr grp = currStmt->getGroup();
-		vector<int> afterStatements = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
-
-		for (int j = afterStatements.size() - 1; j >= 0; j--) { // count from back again
-			if (childStmtNo == afterStatements[j]) {
+		vector<int> leftStatements = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
+		if (currStmt->getIndex() > leftStatements[0]) {
 				toReturn.insert(currStmt->getIndex());
-				break;
-			}
-			if (afterStatements[j] <= currStmt->getIndex()) {
-				break; // this should break back into the outer loop
-			}
-
 		}
 	}
 
 	return move(toReturn);
+}
+
+/* Use for Follows*(_, _) */
+bool PQLEvaluator::getFollowsTUnderscoreUnderscore() {
+	vector<PKBStatement::SharedPtr> allStatements = mpPKB->getStatements(PKBDesignEntity::AllExceptProcedure);
+	for (auto& stmt : allStatements) {
+		int index = stmt->getIndex();
+		if (getFollowsTIntegerUnderscore(index)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 vector<string> PQLEvaluator::getUsed(int statementIndex)
@@ -1421,7 +1374,7 @@ bool PQLEvaluator::checkAnyProceduresModifyVar(string variableName)
 	return mpPKB->mVariableNameToProceduresThatModifyVarsMap[variableName].size() > 0;
 }
 
-/* Get all variable names modified by the particular statement */
+/* Get all variable names modified by the particular rightStatement */
 vector<string> PQLEvaluator::getModified(int statementIndex)
 {
 	PKBStatement::SharedPtr stmt;
@@ -1432,7 +1385,7 @@ vector<string> PQLEvaluator::getModified(int statementIndex)
 	return varToString(vars);
 }
 
-/* Get all variable names modified by the particular statement */
+/* Get all variable names modified by the particular rightStatement */
 vector<string> PQLEvaluator::getModified(PKBDesignEntity modifierType)
 {
 	/* YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */

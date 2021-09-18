@@ -1,0 +1,85 @@
+1 - FollowsT(INT, INT)
+assign a; 
+Select a such that FollowsT(4, 27)
+
+5000
+2 - FollowsT(INT, SYN)
+assign a; 
+Select a such that FollowsT(6, a)
+main
+5000
+3 - FollowsT(INT, _)
+read r; 
+Select r such that FollowsT(6, _)
+x, y, z, p, q, a, b, i, I, r, s
+5000
+4 - FollowsT(SYN, INT)
+constant c; 
+Select c
+2, 6, 123, 50, 5, 9, 10, 345, 7, 3, 25, 30, 0, 222, 121, 40
+5000
+5 - FollowsT(SYN, SYN)
+assign a; 
+Select a
+2, 4, 6, 10, 11, 16, 17, 18, 22, 25, 32, 34, 35
+5000
+6 - FollowsT(SYN, _)
+while w; 
+Select w
+7, 19, 20, 27
+5000
+7 - FollowsT(_, INT)
+if ifs; 
+Select ifs
+5, 8, 13, 30
+5000
+8 - FollowsT(_, SYN)
+print pn; 
+Select pn
+3, 12, 15, 23, 26, 31, 33, 36
+5000
+9 - FollowsT(_, _)
+read r; 
+Select r
+1, 9, 14, 21, 24, 28, 29
+5000
+10 - Invalid query involving non-statements #1
+procedure p; 
+Select p such that Follows(1, 2)
+main
+5000
+11 - Invalid query involving non-statements #2
+variable v; 
+Select v such that Follows(21, 22)
+x, y, z, p, q, a, b, i, I, r, s
+5000
+12 - Invalid query involving non-statements #3
+constant c; 
+Select c such that Follows(5, 27)
+2, 6, 123, 50, 5, 9, 10, 345, 7, 3, 25, 30, 0, 222, 121, 40
+5000
+13 - Invalid query: out of bounds statement index #1
+read r;
+Select r such that Follows(6, 7)
+1, 9, 14, 21, 24, 28, 29
+5000
+14 - Invalid query: out of bounds statement index #2
+while w; 
+Select w such that Follows(5, 6)
+
+5000
+15 - FollowsT Pattern #1
+print pn; 
+Select pn such that Follows(2, 1)
+
+5000
+16 - FollowsT Pattern #2
+if ifs; 
+Select ifs such that Follows(36, 37)
+
+5000
+17 - FollowsT Pattern #3
+assign a; 
+Select a such that Follows(0, 1)
+
+5000
