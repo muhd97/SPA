@@ -1674,15 +1674,12 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
     vector<pair<int, string>> pairsStmtIndexAndVariables;
     string LHS;
     string RHS;
-    cout << "entRef string val: " << entRef->getStringVal() << endl;
     switch (entRef->getEntRefType()) {
     case EntRefType::SYNONYM: {
         if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != DesignEntity::VARIABLE) {
-            cout << "terminated" << endl;
             // invalid query
             return;
         }
-        cout << "not terminated: variable";
         LHS = "_";
         break;
     }
@@ -1698,36 +1695,27 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
     // RHS
     shared_ptr<ExpressionSpec> exprSpec = patternCl->exprSpec;
     if (exprSpec->isAnything) {
-        //cout << "is anything"<< endl;
         pairsStmtIndexAndVariables = evaluator->matchAnyPattern(LHS);
     }
     else if (exprSpec->isPartialMatch) {
-        cout << "partial match" << endl;
         pairsStmtIndexAndVariables = evaluator->matchPartialPattern(LHS, exprSpec->expression);
     }
     else {
-        cout << "exactpaterrn" << endl;
         pairsStmtIndexAndVariables = evaluator->matchExactPattern(LHS, exprSpec->expression);
     }
     for (auto& pair : pairsStmtIndexAndVariables) {
-        cout << "assign found key: " << patternCl->synonym->getValue() << endl;
-        cout << "assign found value: " << to_string(pair.first) << endl;
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         /* Map the value returned to this particular synonym. */
         tupleToAdd->insertKeyValuePair(patternCl->synonym->getValue(), to_string(pair.first));
         if (entRef->getEntRefType() == EntRefType::SYNONYM) {
             tupleToAdd->insertKeyValuePair(entRef->getStringVal(), pair.second);
-            cout << "variable found key: " << entRef->getStringVal() << endl;
         }
         else {
             tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, pair.second);
-            cout << "variable found key: IDENT PLACEHODLER" << endl;
         }
-        cout << "variable found value: " << pair.second << endl;
         /* Add this tuple into the vector to tuples to return. */
         toReturn.emplace_back(move(tupleToAdd));
     }
-    cout << "toreturn size: " << toReturn.size() << endl;
 }
 
 
