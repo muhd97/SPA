@@ -2186,9 +2186,9 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     }
 
     /* STEP 3: If Needed, join SuchThat and PatternResults */
-    string joinSynonymToSet = "";
     if (selectCl->hasPatternClauses() && selectCl->hasSuchThatClauses())
     {
+
         vector<shared_ptr<ResultTuple>> combinedTuples;
 
         unordered_set<string> &setOfSynonymsToJoinOn =
@@ -2196,7 +2196,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
 
         if (setOfSynonymsToJoinOn.empty())
         { // no need to join, take cartesian product
-            cout << "NO NEED TO JOIN\n";
             cartesianProductResultTuples(suchThatReturnTuples, patternReturnTuples, combinedTuples);
         }
         else
@@ -2217,12 +2216,16 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
 
         for (auto &tuple : combinedTuples)
         {
-            if (!stringIsInsideSet(combinedResults, tuple->get(targetSynonymVal)))
-            {
-                res.emplace_back(make_shared<StringSingleResult>(tuple->get(targetSynonymVal)));
-                combinedResults.insert(tuple->get(targetSynonymVal));
+            if (tuple->synonymKeyAlreadyExists(targetSynonymVal)) {
+                if (!stringIsInsideSet(combinedResults, tuple->get(targetSynonymVal)))
+                {
+                    res.emplace_back(make_shared<StringSingleResult>(tuple->get(targetSynonymVal)));
+                    combinedResults.insert(tuple->get(targetSynonymVal));
+
+                }
             }
         }
+
         return move(res);
     }
 
@@ -2243,10 +2246,12 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
 
     for (auto &tuple : finalTuples)
     {
-        if (!stringIsInsideSet(combinedResults, tuple->get(targetSynonymVal)))
-        {
-            res.emplace_back(make_shared<StringSingleResult>(tuple->get(targetSynonymVal)));
-            combinedResults.insert(tuple->get(targetSynonymVal));
+        if (tuple->synonymKeyAlreadyExists(targetSynonymVal)) {
+            if (!stringIsInsideSet(combinedResults, tuple->get(targetSynonymVal)))
+            {
+                res.emplace_back(make_shared<StringSingleResult>(tuple->get(targetSynonymVal)));
+                combinedResults.insert(tuple->get(targetSynonymVal));
+            }
         }
     }
 
