@@ -158,3 +158,23 @@ while w;
 Select w such that Follows(_, w)
 4
 250
+31 - Select all assignment statements following a specific statement number 3 (int, syn) - Empty
+assign a;
+Select a such that Follows(3, a)
+none
+250
+32 - Select all while statements following a specific statement number 3 (int, syn) - Not empty
+while w;
+Select w such that Follows(3, w)
+4
+250
+33 - Select all statements that follow itself - Empty
+stmt s;
+Select s such that Follows(s, s)
+none
+250
+34 - Select all read statements that follow itself - Empty
+read s;
+Select s such that Follows(s, s)
+none
+250
