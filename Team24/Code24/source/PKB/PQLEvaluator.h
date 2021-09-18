@@ -236,6 +236,14 @@ public:
 	// => getAfterT( PKBDE::Assign )
 	vector<int> getAfterT(PKBDesignEntity beforeType);
 	
+	/* Use for Follows*(s1, s2) */
+	set<pair<int, int>> getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType);
+
+	/* Use for Follows*(s1, _) */
+	unordered_set<int> getFollowsTSynUnderscore(PKBDesignEntity leftType);
+
+	/* Use for Follows*(s1, INT) */
+	unordered_set<int> getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo);
 
 	/* Uses */
 	

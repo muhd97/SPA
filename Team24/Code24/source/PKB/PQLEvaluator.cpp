@@ -1023,14 +1023,6 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 {
 	vector<int> res;
 
-	// if before type is a container, it can never be in the same nesting level
-	if (beforeType == PKBDesignEntity::If
-		|| beforeType == PKBDesignEntity::While
-		|| beforeType == PKBDesignEntity::Procedure
-		|| afterType == PKBDesignEntity::Procedure) {
-		return res;
-	}
-
 	// check if res is cached, if so return results
 	if (mpPKB->getCached(PKB::Relation::AfterT, beforeType, afterType, res)) {
 		return res;
@@ -1062,6 +1054,94 @@ vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType, PKBDesignEntity 
 vector<int> PQLEvaluator::getAfterT(PKBDesignEntity beforeType)
 {
 	return getAfterT(PKBDesignEntity::AllExceptProcedure, beforeType);
+}
+
+set<pair<int, int>> PQLEvaluator::getFollowsTSynSyn(PKBDesignEntity beforeType, PKBDesignEntity afterType)
+{
+	set<pair<int, int>> toReturn;
+	// get results manually
+	// get all the 'before' users first
+	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(beforeType);
+	
+	//count from the back, using rbegin and rend
+	for (int i = beforeStatements.size() - 1; i >= 0; i--) {
+		auto& currStmt = beforeStatements[i];
+		PKBGroup::SharedPtr grp = currStmt->getGroup();
+		vector<int> afterStatements = grp->getMembers(afterType);
+
+		for (int j = afterStatements.size() - 1; j >= 0; j--) { // count from back again
+			if (afterStatements[j] <= currStmt->getIndex()) {
+				break; // this should break back into the outer loop
+			}
+			pair<int, int> toAdd;
+			toAdd.first = currStmt->getIndex();
+			toAdd.second = afterStatements[j];
+			toReturn.insert(move(toAdd));
+		}
+	}
+
+	return move(toReturn);
+}
+
+unordered_set<int> PQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity beforeType)
+{
+	unordered_set<int> toReturn;
+
+	// get results manually
+	// get all the 'before' users first
+	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(beforeType);
+
+	//count from the back, using rbegin and rend
+	for (int i = beforeStatements.size() - 1; i >= 0; i--) {
+		auto& currStmt = beforeStatements[i];
+		PKBGroup::SharedPtr grp = currStmt->getGroup();
+		vector<int> afterStatements = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
+
+		for (int j = afterStatements.size() - 1; j >= 0; j--) { // count from back again
+			if (currStmt->getIndex() < afterStatements[j]) {
+				toReturn.insert(currStmt->getIndex());
+				break;
+			}
+			if (afterStatements[j] <= currStmt->getIndex()) {
+				break; // this should break back into the outer loop
+			}
+
+		}
+	}
+
+	return move(toReturn);
+}
+
+unordered_set<int> PQLEvaluator::getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo)
+{
+	unordered_set<int> toReturn;
+
+	// get results manually
+	// get all the 'before' users first
+	vector<PKBStatement::SharedPtr> beforeStatements = mpPKB->getStatements(parentType);
+
+	//count from the back, using rbegin and rend
+	for (int i = beforeStatements.size() - 1; i >= 0; i--) {
+		auto& currStmt = beforeStatements[i];
+		
+		if (currStmt->getIndex() >= childStmtNo) continue;
+		
+		PKBGroup::SharedPtr grp = currStmt->getGroup();
+		vector<int> afterStatements = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
+
+		for (int j = afterStatements.size() - 1; j >= 0; j--) { // count from back again
+			if (childStmtNo == afterStatements[j]) {
+				toReturn.insert(currStmt->getIndex());
+				break;
+			}
+			if (afterStatements[j] <= currStmt->getIndex()) {
+				break; // this should break back into the outer loop
+			}
+
+		}
+	}
+
+	return move(toReturn);
 }
 
 vector<string> PQLEvaluator::getUsed(int statementIndex)

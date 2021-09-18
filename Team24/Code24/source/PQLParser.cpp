@@ -391,11 +391,11 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
 
     /* YIDA Note: For iteration 1, multiple such that clauses are NOT allowed */
     while (!tokensAreEmpty()) {
-        if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_SUCH) {
-        //if (peek().type == PQLTokenType::SUCH_THAT) { /* YIDA: Trying out multiple such that to try out joins */
+        //if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_SUCH) {
+        if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_SUCH) { /* YIDA: Comment this to DISABLE Multiple Clauses */
             if (suchThatClauses.size() != 0) {
                 cout << "Duplicate such that clauses are not allowed." << endl;
-                break;
+                //break; /* YIDA: Uncomment this to DISABLE Multiple Clauses */
             }
             suchThatClauses.push_back(parseSuchThat());
         }
