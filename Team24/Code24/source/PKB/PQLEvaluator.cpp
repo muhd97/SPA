@@ -1645,13 +1645,18 @@ vector<int> PQLEvaluator::getModifiers(string variableName)
 vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string variableName)
 {
     // if we are looking for ALL users using the variable, call the other function
+
+    
     if (modifierType == PKBDesignEntity::AllExceptProcedure)
     {
         return getModifiers(variableName);
     }
 
+    
     vector<int> res;
     PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
+    if (v == nullptr) return res;
+
     vector<int> modifiers = v->getModifiers();
 
     // filter only the desired type

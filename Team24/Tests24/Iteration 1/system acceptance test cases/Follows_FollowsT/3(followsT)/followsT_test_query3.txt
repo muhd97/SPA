@@ -1,17 +1,17 @@
 1 - FollowsT(INT, INT)
 assign a; 
-Select a such that FollowsT(4, 27)
+Select a such that FollowsT*4, 27)
 
 5000
 2 - FollowsT(INT, SYN)
 assign a; 
-Select a such that FollowsT(6, a)
-main
+Select a such that Follows*(6, a)
+
 5000
 3 - FollowsT(INT, _)
 read r; 
-Select r such that FollowsT(6, _)
-x, y, z, p, q, a, b, i, I, r, s
+Select r such that Follows*(6, _)
+1, 9, 14, 21, 24, 28, 29
 5000
 4 - FollowsT(SYN, INT)
 constant c; 

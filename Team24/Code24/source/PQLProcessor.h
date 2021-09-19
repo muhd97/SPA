@@ -69,7 +69,7 @@ class ResultTuple
         synonymKeyToValMap.reserve(sizeToReserve);
     }
 
-    inline void insertKeyValuePair(string key, string &value)
+    inline void insertKeyValuePair(string key, string value)
     {
         /* Yida note: Pass by ref argument, please don't use move(value) or else
          * original string becomes empty */
