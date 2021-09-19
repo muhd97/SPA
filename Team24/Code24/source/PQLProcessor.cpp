@@ -197,7 +197,7 @@ inline bool targetSynonymIsProcedure(shared_ptr<SelectCl> selectCl)
 
 void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl,
                                         vector<shared_ptr<ResultTuple>> &toReturn)
-{ // TODO IMPLEMENT
+{ 
     switch (suchThatCl->relRef->getType())
     {
     case RelRefType::USES_S: /* Uses(s, v) where s MUST be a
@@ -254,6 +254,8 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
     }
     case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
     {
+
+
         shared_ptr<ModifiesS> modifiesCl = static_pointer_cast<ModifiesS>(suchThatCl->relRef);
         shared_ptr<StmtRef> &stmtRef = modifiesCl->stmtRef;
         shared_ptr<EntRef> &entRef = modifiesCl->entRef;
@@ -300,6 +302,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
             /* SPECIAL CASE */
             if (rightType == EntRefType::IDENT)
             {
+
                 if (evaluator->checkModified(stmtRef->getIntVal(), entRef->getStringVal()))
                 {
                     /* Create the result tuple */
@@ -440,6 +443,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
             /* Modifies (syn, "IDENT") -> Return 1-tuple */
             if (rightType == EntRefType::IDENT)
             {
+
                 shared_ptr<Declaration> &parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
                 PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
                 string identVarName = entRef->getStringVal();
@@ -1779,6 +1783,14 @@ void PQLProcessor::handleFollowsTFirstArgUnderscore(shared_ptr<SelectCl> &select
     {
         const string &rightSynonymKey = stmtRef2->getStringVal();
 
+        if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonymKey,
+            { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE }))
+        {
+            throw "Follows*(_, s2) but s2 is not declared a type of statement. "
+                "Follows*() is only defined for statements\n";
+            return;
+        }
+
         shared_ptr<Declaration> &decl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
         PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(decl->getDesignEntity());
 
@@ -1873,6 +1885,7 @@ void PQLProcessor::joinResultTuples(vector<shared_ptr<ResultTuple>> leftResults,
                                     vector<shared_ptr<ResultTuple>> rightResults, unordered_set<string> &joinKeys,
                                     vector<shared_ptr<ResultTuple>> &newResults)
 {
+
     for (auto &leftPtr : leftResults)
     {
         for (auto &rightPtr : rightResults)
@@ -1895,7 +1908,7 @@ void PQLProcessor::joinResultTuples(vector<shared_ptr<ResultTuple>> leftResults,
                     make_shared<ResultTuple>(leftPtr->synonymKeyToValMap.size() + rightPtr->synonymKeyToValMap.size());
 
                 /* Copy over the key-values */
-                for (auto &leftPair : leftPtr->synonymKeyToValMap)
+                for (const auto &leftPair : leftPtr->synonymKeyToValMap)
                 {
                     if (!toAdd->synonymKeyAlreadyExists(leftPair.first))
                     {
@@ -1903,7 +1916,7 @@ void PQLProcessor::joinResultTuples(vector<shared_ptr<ResultTuple>> leftResults,
                     }
                 }
 
-                for (auto &rightPair : leftPtr->synonymKeyToValMap)
+                for (const auto &rightPair : rightPtr->synonymKeyToValMap)
                 {
                     if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
                     {
@@ -1941,7 +1954,7 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> 
                 make_shared<ResultTuple>(leftPtr->synonymKeyToValMap.size() + rightPtr->synonymKeyToValMap.size());
 
             /* Copy over the key-values */
-            for (auto &leftPair : leftPtr->synonymKeyToValMap)
+            for (const auto &leftPair : leftPtr->synonymKeyToValMap)
             {
                 if (!toAdd->synonymKeyAlreadyExists(leftPair.first))
                 {
@@ -1949,7 +1962,7 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> 
                 }
             }
 
-            for (auto &rightPair : leftPtr->synonymKeyToValMap)
+            for (const auto &rightPair : rightPtr->synonymKeyToValMap)
             {
                 if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
                 {
@@ -1960,6 +1973,15 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> 
             newResults.emplace_back(move(toAdd));
         }
     }
+
+    /* Debugging */
+    //for (auto& tup : newResults) {
+    //    for (auto& pair : tup->getMap()) {
+    //        cout << "(key=" << pair.first << ", val=" << pair.second << ") ";
+    //    }
+    //    cout << endl;
+    //}
+
 }
 
 void setCommonSynonymToJoinOn(shared_ptr<SuchThatCl> suchThatCl, shared_ptr<PatternCl> patternCl, string &synonymToSet)
@@ -2140,6 +2162,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
                 }
                 catch (exception &ex)
                 {
+                    cout << "EXCEPTION!\n";
                     throw ex;
                 }
             }
@@ -2178,6 +2201,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
 
     if (selectCl->hasPatternClauses())
     {
+        //cout << "eval pattern\n";
         for (auto &cl : selectCl->patternClauses)
             handlePatternClause(selectCl, cl, patternReturnTuples);
         /* Get the first pattern clause (Iteration 1 only has ONE pattern clause)
@@ -2189,17 +2213,25 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     if (selectCl->hasPatternClauses() && selectCl->hasSuchThatClauses())
     {
 
+        //cout << "has both\n";
+
         vector<shared_ptr<ResultTuple>> combinedTuples;
 
         unordered_set<string> &setOfSynonymsToJoinOn =
             getSetOfSynonymsToJoinOn(selectCl->suchThatClauses[0], selectCl->patternClauses[0]);
 
+        //cout << "patternClauseResultSize = " << patternReturnTuples.size() << endl;
+        //cout << "suchThatSize = " << suchThatReturnTuples.size() << endl;
+
         if (setOfSynonymsToJoinOn.empty())
         { // no need to join, take cartesian product
+            //cout << "cartesian product\n";
             cartesianProductResultTuples(suchThatReturnTuples, patternReturnTuples, combinedTuples);
         }
         else
         {
+
+
             joinResultTuples(suchThatReturnTuples, patternReturnTuples, setOfSynonymsToJoinOn, combinedTuples);
         }
 
@@ -2213,6 +2245,9 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
         string &targetSynonymVal = selectCl->targetSynonym->getValue();
         unordered_set<string> combinedResults;
         combinedResults.reserve(combinedTuples.size());
+
+        //cout << "has both pattern and such that. combined tuple size = " << combinedTuples.size() << endl;
+        //cout << "targetSyn = " << targetSynonymVal << endl;
 
         for (auto &tuple : combinedTuples)
         {
