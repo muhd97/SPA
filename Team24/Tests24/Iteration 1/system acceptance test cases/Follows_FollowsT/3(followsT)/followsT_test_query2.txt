@@ -1,190 +1,190 @@
-1 - FollowsT Query for all Read Statements 
+1 - Follows* Query for all Read Statements 
 procedure p; 
-Select p such that FollowsT(1, 2)
+Select p such that Follows*(1, 2)
 main
 5000
-2 - FollowsT Query for all Read Statements
+2 - Follows* Query for all Read Statements
 variable v; 
-Select v such that FollowsT(3, 27)
+Select v such that Follows*(3, 27)
 x, y, z, p, q, a, b, i, I, r, s
 5000
-3 - FollowsT Query for all Read Statements
+3 - Follows* Query for all Read Statements
 constant c; 
-Select c such that FollowsT(5, 35)
-2, 6, 123, 50, 5, 9, 10, 345, 7, 3, 25, 30, 0, 222, 2, 12, 40
+Select c such that Follows*(5, 35)
+2, 6, 123, 50, 5, 9, 10, 345, 7, 3, 25, 30, 0, 222, 121, 40
 5000
-4 - FollowsT Query for all Read Statements
+4 - Follows* Query for all Read Statements
 read r;
-Select r such that FollowsT(19, 25)
+Select r such that Follows*(19, 25)
 1, 9, 14, 21, 24, 28, 29
 5000
-5 - FollowsT Query that is False
+5 - Follows* Query that is False
 while w; 
-Select w such that FollowsT(2, 6)
+Select w such that Follows*(2, 6)
 
 5000
-6 - Invalid FollowsT Query due to wrong order
+6 - Invalid Follows* Query due to wrong order
 print pn; 
-Select pn such that FollowsT(2, 1)
+Select pn such that Follows*(2, 1)
 
 5000
-7 - Invalid FollowsT Query where statement number is out of range
+7 - Invalid Follows* Query where statement number is out of range
 if ifs; 
-Select ifs such that FollowsT(35, 37)
+Select ifs such that Follows*(35, 37)
 
 5000
-8 - Invalid FollowsT Query where statement number is not in range
+8 - Invalid Follows* Query where statement number is not in range
 assign a; 
-Select a such that FollowsT(0, 3)
+Select a such that Follows*(0, 3)
 
 5000
-9 - Invalid FollowsT Query
+9 - Invalid Follows* Query
 stmt s;
-Select s such that FollowsT(31, 33)
+Select s such that Follows*(31, 33)
 
 5000
-10 - Valid FollowsT Query where FollowsT(s, #) (EMPTY RESULT as stmt 6 is the start of new if block)
+10 - Valid Follows* Query where Follows*(s, #) (EMPTY RESULT as stmt 6 is the start of new if block)
 stmt s;
-Select s such that FollowsT(s, 6)
+Select s such that Follows*(s, 6)
 
 5000
-11 - Valid FollowsT Query where FollowsT(#, s)
+11 - Valid Follows* Query where Follows*(#, s)
 stmt s;
-Select s such that FollowsT(1, s)
+Select s such that Follows*(1, s)
 2, 3, 4, 5, 27, 35, 36
 5000
-12 - Valid FollowsT Query where FollowsT(s, #) (EMPTY RESULT as stmt 8 is the start of new while block)
+12 - Valid Follows* Query where Follows*(s, #) (EMPTY RESULT as stmt 8 is the start of new while block)
 stmt s;
-Select s such that FollowsT(s, 8)
+Select s such that Follows*(s, 8)
 
 5000
-13 - Valid FollowsT Query where FollowsT(#, s) where # is a while statement
+13 - Valid Follows* Query where Follows*(#, s) where # is a while statement
 stmt s;
-Select s such that FollowsT(19, s)
+Select s such that Follows*(19, s)
 24, 25, 26
 5000
-14 - Valid FollowsT Query where FollowsT(#, s) where # is a if statement
+14 - Valid Follows* Query where Follows*(#, s) where # is a if statement
 stmt s;
-Select s such that FollowsT(30, s)
+Select s such that Follows*(30, s)
 33, 34
 5000
-15 - Valid FollowsT Query where FollowsT(#, 27) where # is a if statement
+15 - Valid Follows* Query where Follows*(#, 27) where # is a if statement
 stmt s;
-Select s such that FollowsT(s, 27)
+Select s such that Follows*(s, 27)
 1, 2, 3, 4, 5
 5000
-16 - Invalid FollowsT Query where FollowsT(#, s) as # is the last statement
+16 - Invalid Follows* Query where Follows*(#, s) as # is the last statement
 stmt s;
-Select s such that FollowsT(36, s)
+Select s such that Follows*(36, s)
 
 5000
-17 - Invalid FollowsT Query where FollowsT(s, 1)
+17 - Invalid Follows* Query where Follows*(s, 1)
 stmt s;
-Select s such that FollowsT(s, 1)
+Select s such that Follows*(s, 1)
 
 5000
-18 - Invalid FollowsT Query where FollowsT(7, s) as line 7 is end of if block
+18 - Invalid Follows* Query where Follows*(7, s) as line 7 is end of if block
 stmt s;
-Select s such that FollowsT(7, s)
+Select s such that Follows*(7, s)
 
 5000
-19 - Invalid FollowsT Query where FollowsT(s, 18) as line 18 is start of else block
+19 - Invalid Follows* Query where Follows*(s, 18) as line 18 is start of else block
 stmt s;
-Select s such that FollowsT(s, 18)
+Select s such that Follows*(s, 18)
 
 5000
-20 - Valid FollowsT Query where FollowsT(r, a)
+20 - Valid Follows* Query where Follows*(r, a)
 read r; assign a;
-Select r such that FollowsT(r, a)
+Select r such that Follows*(r, a)
 1, 9, 14, 21, 24, 28, 29
 5000
-21 - Valid FollowsT Query where FollowsT(a, r) (EMPTY RESULT)
+21 - Valid Follows* Query where Follows*(a, r) (EMPTY RESULT)
 read r; assign a;
-Select a such that FollowsT(a, r) 
+Select a such that Follows*(a, r) 
 
 5000
-22 - Valid FollowsT Query where FollowsT(a, pn)
+22 - Valid Follows* Query where Follows*(a, pn)
 print pn; assign a;
-Select a such that FollowsT(a, pn)
+Select a such that Follows*(a, pn)
 2, 4, 10, 11, 22, 25, 35
 5000
-23 - Valid FollowsT Query where FollowsT(pn, a)
+23 - Valid Follows* Query where Follows*(pn, a)
 print pn; assign a;
-Select pn such that FollowsT(pn, a)
+Select pn such that Follows*(pn, a)
 3, 15, 33
 5000
-24 - Valid FollowsT Query where FollowsT(a, if)
+24 - Valid Follows* Query where Follows*(a, if)
 if ifs; assign a;
-Select ifs such that FollowsT(a, ifs)
+Select ifs such that Follows*(a, ifs)
 5
 5000
-25 - Valid FollowsT Query where FollowsT(a, w)
+25 - Valid Follows* Query where Follows*(a, w)
 while w; assign a;
-Select a such that FollowsT(a, w)
+Select a such that Follows*(a, w)
 2, 4, 6
 5000
-26 - Valid FollowsT Query where FollowsT(w, s)
+26 - Valid Follows* Query where Follows*(w, s)
 while w; stmt s;
-Select s such that FollowsT(w, s)
+Select s such that Follows*(w, s)
 24, 25, 26, 35, 36
 5000
-27 - Valid FollowsT Query where FollowsT(a1, a2)
+27 - Valid Follows* Query where Follows*(a1, a2)
 assign a1, a2;
-Select a1 such that Follows(a1, a2)
+Select a1 such that Follows*(a1, a2)
 2, 4, 10, 16
 5000
-28 - Valid FollowsT Query where FollowsT(w1, w2) (EMPTY RESULT)
+28 - Valid Follows* Query where Follows*(w1, w2) (EMPTY RESULT)
 while w1, w2;
-Select w2 such that Follows(w1, w2)
+Select w2 such that Follows*(w1, w2)
 
 5000
-29 - Valid FollowsT Query where FollowsT(if1, if2) (EMPTY RESULT)
+29 - Valid Follows* Query where Follows*(if1, if2) (EMPTY RESULT)
 if if1, if2;
-Select if1 such that Follows(if1, if2)
+Select if1 such that Follows*(if1, if2)
 
 5000
-30 - Valid FollowsT Query where FollowsT(w, ifs) (EMPTY RESULT)
+30 - Valid Follows* Query where Follows*(w, ifs) (EMPTY RESULT)
 if ifs; while w;
-Select w such that Follows(w, ifs)
+Select w such that Follows*(w, ifs)
 
 5000
-31 - Valid FollowsT Query where FollowsT(ifs, w)
+31 - Valid Follows* Query where Follows*(ifs, w)
 if ifs; while w;
-Select w such that FollowsT(ifs, w)
+Select w such that Follows*(ifs, w)
 27
 5000
-32 - Valid FollowsT Query where FollowsT(_, _)
+32 - Valid Follows* Query where Follows*(_, _)
 while w;
-Select w such that FollowsT(_, _)
+Select w such that Follows*(_, _)
 7, 19, 20, 27
 5000
-33 - Valid FollowsT Query where FollowsT(w, _)
+33 - Valid Follows* Query where Follows*(w, _)
 while w;
-Select w such that FollowsT(w, _)
+Select w such that Follows*(w, _)
 19, 27
 5000
-34 - Valid FollowsT Query where FollowsT(_, a)
+34 - Valid Follows* Query where Follows*(_, a)
 assign a;
-Select a such that FollowsT(_, a)
-2, 4, 10, 11, 16, 17, 22, 25, 35
+Select a such that Follows*(_, a)
+2, 4, 10, 11, 16, 17, 22, 25, 34, 35
 5000
-35 - Valid FollowsT Query where FollowsT(6, _) evaluates to True
+35 - Valid Follows* Query where Follows*(6, _) evaluates to True
 read r;
-Select r such that FollowsT(6, _)
+Select r such that Follows*(6, _)
 1, 9, 14, 21, 24, 28, 29
 5000
-36 - FollowsT Query where FollowsT(36, _) evaluates to False (EMPTY RESULT)
+36 - Follows* Query where Follows*(36, _) evaluates to False (EMPTY RESULT)
 while w; 
-Select w such that FollowsT(36, _)
+Select w such that Follows*(36, _)
 
 5000
-37 - Invalid FollowsT Query with Syntax error
+37 - Invalid Follows* Query with Syntax error
 stmt s; while w; if ifs;
-Select x such that FollowsT(6, _)
+Select x such that Follows*(6, _)
 
 5000
-38 - Invalid FollowsT Query with Syntax error
+38 - Invalid Follows* Query with Syntax error
 stmt s; while w; if ifs;
-Select s such that FollowsT(6, x)
+Select s such that Follows*(6, x)
 
 5000
