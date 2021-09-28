@@ -2109,15 +2109,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
 
     // TODO @kohyida1997 implement validation.
 
-    try
-    {
-        validateSelectCl(selectCl);
-    }
-    catch (exception &e)
-    {
-        cout << e.what() << endl;
-        throw;
-    }
+    validateSelectCl(selectCl);
 
     // TODO @kohyida1997 catch duplicate synonyms!!
 
@@ -2154,33 +2146,19 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
         {
             if (i == 0)
             {
-                try
-                {
-                    handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
-                    // cout << "First iteration return tuple size = " <<
-                    // suchThatReturnTuples.size() << endl;
-                }
-                catch (exception &ex)
-                {
-                    cout << "EXCEPTION!\n";
-                    throw ex;
-                }
+                handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
+                // cout << "First iteration return tuple size = " <<
+                // suchThatReturnTuples.size() << endl;
             }
             else
             {
                 vector<shared_ptr<ResultTuple>> currSuchThatRes;
                 vector<shared_ptr<ResultTuple>> joinedRes;
                 joinedRes.reserve(suchThatReturnTuples.size());
-                try
-                {
-                    handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
-                    // cout << "Second iteration return tuple size = " <<
-                    // currSuchThatRes.size() << endl;
-                }
-                catch (exception &ex)
-                {
-                    throw ex;
-                }
+
+                handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
+                // cout << "Second iteration return tuple size = " <<
+                // currSuchThatRes.size() << endl;
 
                 unordered_set<string> &setOfSynonymsToJoinOn =
                     getSetOfSynonymsToJoinOn(previousSelectCl, selectCl->suchThatClauses[i]);

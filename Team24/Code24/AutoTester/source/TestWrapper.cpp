@@ -57,6 +57,9 @@ void TestWrapper::parse(std::string filename) {
         cout << "Exception was thrown while trying to parsing simple code.\n";
         cout << "Error message: " << ex.what() << endl;;
     }
+    catch (...) {
+        cout << "Exception was thrown while trying to parsing simple code.\n";
+    }
 }
 
 // method to evaluating a query
@@ -66,20 +69,20 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
     try {
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
-        // c out << "\n==== Printing Parsed Query ====\n";
-        // cout << sel->format() << endl;
+        cout << "\n==== Printing Parsed Query ====\n";
+        cout << sel->format() << endl;
 
         // TODO: @kohyida1997 PRE VALIDATE THE QUERY FIRST!!! Handle duplicate declaration, undeclared synonyms.
 
-        // cout << "\n==== Processing PQL Query ====\n";
+        cout << "\n==== Processing PQL Query ====\n";
 
         shared_ptr<PQLEvaluator> evaluator = PQLEvaluator::create(this->pkb);
 
-        // cout << "\n==== Created PQLEvaluator using PKB ====\n";
+        cout << "\n==== Created PQLEvaluator using PKB ====\n";
 
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
 
-        // cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
+        cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
 
         vector<shared_ptr<Result>> res = pqlProcessor->processPQLQuery(sel);
 
@@ -87,10 +90,13 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
             results.emplace_back(r->getResultAsString());
         }
     }
-    catch (const std::exception & ex) {
+    catch (std::exception& ex) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
         cout << "Error message: " << ex.what() << endl;;
     }
+    catch (...) {
+        cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
+    }
 
-    //cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";
+    cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";
 }
