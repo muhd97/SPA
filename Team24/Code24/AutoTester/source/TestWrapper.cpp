@@ -28,50 +28,45 @@ TestWrapper::TestWrapper() {
 
 // method for parsing the SIMPLE source
 void TestWrapper::parse(std::string filename) {
-
     string program;
     string currentLine;
     ifstream program_file(filename);
 
-    while (getline(program_file, currentLine))
-    {
-        program += currentLine + "\n";
-    }
+    try {
+        while (getline(program_file, currentLine))
+        {
+            program += currentLine + "\n";
+        }
 
-    vector<SimpleToken> tokens = simpleLex(program);
-    
-    // for debugging
-    printSimpleTokens(tokens);
-    
-    shared_ptr<Program> root = parseSimpleProgram(tokens);
+        vector<SimpleToken> tokens = simpleLex(program);
+        printSimpleTokens(tokens);
 
-    if (root == NULL) {
-        cout << "Failed to parse program!";
-    }
-    else {
+        shared_ptr<Program> root = parseSimpleProgram(tokens);
+
         // for debugging
         cout << root->format();
+
+        cout << "\n==== Building PKB ====\n";
+
+        this->pkb->initialise();
+        this->pkb->extractDesigns(root);
+
+        cout << "\n==== PKB has been populated. ====\n";
     }
-
-    cout << "\n==== Building PKB ====\n";
-
-    this->pkb->initialise();
-    this->pkb->extractDesigns(root);
-
-    cout << "\n==== PKB has been populated. ====\n";
+    catch (const std::exception& ex) {
+        cout << "Exception was thrown while trying to parsing simple code.\n";
+        cout << "Error message: " << ex.what() << endl;;
+    }
 }
 
 // method to evaluating a query
 void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
-// call your evaluator to evaluate the query here
-  // ...code to evaluate query...
-
-    // cout << "\n==== Parsing queries ====\n";
+    cout << "\n==== Parsing queries ====\n";
 
     try {
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
-        // cout << "\n==== Printing Parsed Query ====\n";
+        // c out << "\n==== Printing Parsed Query ====\n";
         // cout << sel->format() << endl;
 
         // TODO: @kohyida1997 PRE VALIDATE THE QUERY FIRST!!! Handle duplicate declaration, undeclared synonyms.
@@ -91,7 +86,6 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
         for (auto& r : res) {
             results.emplace_back(r->getResultAsString());
         }
-
     }
     catch (const std::exception & ex) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
