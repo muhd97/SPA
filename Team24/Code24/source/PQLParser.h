@@ -13,6 +13,7 @@ const bool DESTRUCTOR_MESSAGE_ENABLED = false;
 
 using namespace std;
 
+const string PQL_PROG_LINE = "prog_line";
 const string PQL_PROCEDURE = "procedure";
 const string PQL_READ = "read";
 const string PQL_PRINT = "print";
@@ -132,6 +133,7 @@ class DesignEntity
     static string VARIABLE;
     static string CONSTANT;
     static string CALL;
+    static string PROG_LINE;
 
     DesignEntity(string name) : entityTypeName(move(name))
     {

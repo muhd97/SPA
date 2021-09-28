@@ -142,6 +142,10 @@ shared_ptr<DesignEntity> PQLParser::parseDesignEntity()
         {
             eatKeyword(PQL_PROCEDURE);
         }
+        else if (curr.stringValue == PQL_PROG_LINE)
+        {
+            eatKeyword(PQL_PROG_LINE);
+        }
         else
         {
             cout << "ERROR: Unrecognized Design Entity!\n" << curr.stringValue;
