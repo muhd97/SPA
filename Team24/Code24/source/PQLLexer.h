@@ -5,6 +5,10 @@
 
 using namespace std;
 
+const string SPECIAL_PARENT = "Parent";
+const string SPECIAL_FOLLOWS = "Follows";
+const string SPECIAL_STMT = "stmt";
+
 enum class PQLTokenType
 {
     LEFT_PAREN,
@@ -15,10 +19,15 @@ enum class PQLTokenType
     NAME, // Name and Ident have some definition in grammar???
     INTEGER,
     STRING, // We introduce this new token type for anything within qoutes
-    STAR,
     DOT,
     LT,
     GT,
+
+    // speical keywords that are not names
+    // all other keywords are handled in the parser
+    PARENT_T,
+    FOLLOWS_T,
+    STMT_NUMBER
 };
 
 const char END_TOKEN = '$'; // marker for EOF

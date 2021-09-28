@@ -287,55 +287,45 @@ shared_ptr<SuchThatCl> PQLParser::parseSuchThat() // todo
 shared_ptr<RelRef> PQLParser::parseRelRef()
 {
     auto curr = peek();
-    if (isKeyword(curr, PQL_FOLLOWS))
+    if (curr.type == PQLTokenType::FOLLOWS_T) {
+        // Follows*
+        eat(PQLTokenType::FOLLOWS_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto sRef3 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto sRef4 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<FollowsT>(sRef3, sRef4);
+    }
+    else if (isKeyword(curr, PQL_FOLLOWS))
     {
-        if (peekNext().type == PQLTokenType::STAR)
-        {
-            // Follows*
-            eatKeyword(PQL_FOLLOWS);
-            eat(PQLTokenType::STAR);
-            eat(PQLTokenType::LEFT_PAREN);
-            auto sRef3 = parseStmtRef();
-            eat(PQLTokenType::COMMA);
-            auto sRef4 = parseStmtRef();
-            eat(PQLTokenType::RIGHT_PAREN);
-            return make_shared<FollowsT>(sRef3, sRef4);
-        }
-        else
-        {
-            // Follows
-            eatKeyword(PQL_FOLLOWS);
-            eat(PQLTokenType::LEFT_PAREN);
-            auto sRef1 = parseStmtRef();
-            eat(PQLTokenType::COMMA);
-            auto sRef2 = parseStmtRef();
-            eat(PQLTokenType::RIGHT_PAREN);
-            return make_shared<Follows>(sRef1, sRef2);
-        }
+        // Follows
+        eatKeyword(PQL_FOLLOWS);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto sRef1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto sRef2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<Follows>(sRef1, sRef2);
+    }
+    else if (curr.type == PQLTokenType::PARENT_T) {
+        eat(PQLTokenType::PARENT_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto sRef7 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto sRef8 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<ParentT>(sRef7, sRef8);
     }
     else if (isKeyword(curr, PQL_PARENT))
     {
-        if (peekNext().type == PQLTokenType::STAR)
-        {
-            eatKeyword(PQL_PARENT);
-            eat(PQLTokenType::STAR);
-            eat(PQLTokenType::LEFT_PAREN);
-            auto sRef7 = parseStmtRef();
-            eat(PQLTokenType::COMMA);
-            auto sRef8 = parseStmtRef();
-            eat(PQLTokenType::RIGHT_PAREN);
-            return make_shared<ParentT>(sRef7, sRef8);
-        }
-        else
-        {
-            eatKeyword(PQL_PARENT);
-            eat(PQLTokenType::LEFT_PAREN);
-            auto sRef5 = parseStmtRef();
-            eat(PQLTokenType::COMMA);
-            auto sRef6 = parseStmtRef();
-            eat(PQLTokenType::RIGHT_PAREN);
-            return make_shared<Parent>(sRef5, sRef6);
-        }
+        eatKeyword(PQL_PARENT);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto sRef5 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto sRef6 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<Parent>(sRef5, sRef6);
     }
     else if (isKeyword(curr, PQL_USES))
     {

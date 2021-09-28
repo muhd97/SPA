@@ -42,10 +42,6 @@ vector<PQLToken> pqlLex(string &program)
         {
             tokens.emplace_back(PQLTokenType::COMMA);
         }
-        else if (curr == '*')
-        {
-            tokens.emplace_back(PQLTokenType::STAR);
-        }
         else if (curr == '<')
         {
             tokens.emplace_back(PQLTokenType::LT);
@@ -87,13 +83,30 @@ vector<PQLToken> pqlLex(string &program)
         {
             string value;
             // TODO (@jiachen) fix this, # should not be allowed other than stmt#
-            while (isalpha(curr) || isdigit(curr) || curr == '#')
+            while (isalpha(curr) || isdigit(curr))
             {
                 value.push_back(curr);
                 curr = lookahead;
                 lookahead = program[++i + 1];
             }
-            tokens.emplace_back(std::move(value));
+            
+            if (value == SPECIAL_STMT && curr == '#') {
+                // stmt# in AttrName
+                i++;
+                tokens.emplace_back(PQLTokenType::STMT_NUMBER);
+            }
+            else if (value == SPECIAL_PARENT && curr == '*') {
+                i++;
+                tokens.emplace_back(PQLTokenType::PARENT_T);
+            }
+            else if (value == SPECIAL_FOLLOWS && curr == '*') {
+                i++;
+                tokens.emplace_back(PQLTokenType::FOLLOWS_T);
+            }
+            else {
+                tokens.emplace_back(std::move(value));
+            }
+            
             continue;
         }
         else if (isdigit(curr))
@@ -138,8 +151,6 @@ string getPQLTokenLabel(PQLToken &token)
         return "id(" + token.stringValue + ")";
     case PQLTokenType::INTEGER:
         return std::to_string(token.intValue);
-    case PQLTokenType::STAR:
-        return "*";
     case PQLTokenType::DOT:
         return ".";
     case PQLTokenType::LT:
