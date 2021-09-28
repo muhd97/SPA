@@ -414,6 +414,10 @@ inline bool tokenIsDesignEntity(PQLToken tk)
             tk.stringValue == PQL_PROCEDURE);
 }
 
+shared_ptr<ResultCl> PQLParser::parseResultCl() {
+
+}
+
 shared_ptr<SelectCl> PQLParser::parseSelectCl()
 {
     vector<shared_ptr<Declaration>> declarations;

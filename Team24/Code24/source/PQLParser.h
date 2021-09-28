@@ -34,7 +34,15 @@ const string PQL_PATTERN = "pattern";
 const string PQL_SUCH = "such";
 const string PQL_THAT = "that";
 
-class Synonym
+class Element
+{
+public:
+    virtual string format() {
+        return "element";
+    }
+};
+
+class Synonym : public Element
 {
   private:
     string value;
@@ -48,9 +56,57 @@ class Synonym
         return value;
     }
 
-    string format()
+    string format() override
     {
         return "$" + value;
+    }
+};
+
+enum class AttrNameType
+{
+    PROC_NAME,
+    VAR_NAME,
+    VALUE,
+    STMT_NUMBER
+};
+
+class AttrName {
+private:
+    AttrNameType name;
+public:
+    AttrName(AttrNameType name)
+    {
+        this->name = name;
+    }
+
+    string format() {
+        switch (name)
+        {
+        case AttrNameType::PROC_NAME:
+            return "procName";
+        case AttrNameType::VAR_NAME:
+            return "varName";
+        case AttrNameType::VALUE:
+            return "value";
+        case AttrNameType::STMT_NUMBER:
+            return "stmt#";
+        }
+        return "";
+    }
+};
+
+class AttrRef : public Element {
+private:
+    shared_ptr<Synonym> synonym;
+    shared_ptr<AttrName> attrName;
+public:
+    AttrRef(shared_ptr<Synonym> synonym, shared_ptr<AttrName> attrName)
+        : synonym(move(synonym)), attrName(move(attrName))
+    {
+    }
+
+    string format() override {
+        return synonym->format() + "." + attrName->format();
     }
 };
 
@@ -1017,6 +1073,41 @@ class SelectCl
     }
 };
 
+class ResultCl
+{
+public:
+    vector<shared_ptr<Element>> elements;
+    bool isBoolean;
+
+    ResultCl(vector<shared_ptr<Element>> elements, bool isBoolean)
+        : elements(move(elements))
+    {
+        this->isBoolean = isBoolean;
+    }
+
+    ~ResultCl()
+    {
+        if (DESTRUCTOR_MESSAGE_ENABLED)
+        {
+            cout << "Deleted: " << format() << endl;
+        }
+    }
+
+    string format()
+    {
+        if (isBoolean) {
+            return "BOOLEAN";
+        }
+        else {
+            string str = "<";
+            for (auto elem : elements) {
+                str += elem->format() + ", ";
+            }
+            return str + ">";
+        }
+    }
+};
+
 class PQLParser
 {
   private:
@@ -1057,4 +1148,6 @@ class PQLParser
     shared_ptr<PatternCl> parsePatternCl();
     shared_ptr<ExpressionSpec> parseExpressionSpec();
     shared_ptr<SelectCl> parseSelectCl();
+
+    shared_ptr<ResultCl> parseResultCl();
 };
