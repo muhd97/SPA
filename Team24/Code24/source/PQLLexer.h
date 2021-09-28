@@ -15,7 +15,10 @@ enum class PQLTokenType
     NAME, // Name and Ident have some definition in grammar???
     INTEGER,
     STRING, // We introduce this new token type for anything within qoutes
-    STAR
+    STAR,
+    DOT,
+    LT,
+    GT,
 };
 
 const char END_TOKEN = '$'; // marker for EOF

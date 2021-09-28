@@ -408,14 +408,66 @@ shared_ptr<PatternCl> PQLParser::parsePatternCl()
 inline bool tokenIsDesignEntity(PQLToken tk)
 {
     return tk.type == PQLTokenType::NAME &&
-           (tk.stringValue == PQL_STMT || tk.stringValue == PQL_READ || tk.stringValue == PQL_PRINT ||
+        (tk.stringValue == PQL_STMT || tk.stringValue == PQL_READ || tk.stringValue == PQL_PRINT ||
             tk.stringValue == PQL_CALL || tk.stringValue == PQL_WHILE || tk.stringValue == PQL_IF ||
             tk.stringValue == PQL_ASSIGN || tk.stringValue == PQL_VARIABLE || tk.stringValue == PQL_CONSTANT ||
             tk.stringValue == PQL_PROCEDURE);
 }
 
-shared_ptr<ResultCl> PQLParser::parseResultCl() {
+shared_ptr<AttrName> PQLParser::parseAttrName() {
+    PQLToken name = eat(PQLTokenType::NAME);
+    if (name.stringValue == PQL_PROC_NAME) {
+        return make_shared<AttrName>(AttrNameType::PROC_NAME);
+    }
+    else if (name.stringValue == PQL_VAR_NAME) {
+        return make_shared<AttrName>(AttrNameType::VAR_NAME);
+    }
+    else if (name.stringValue == PQL_VALUE) {
+        return make_shared<AttrName>(AttrNameType::VALUE);
+    }
+    else if (name.stringValue == PQL_STMT_NUMBER) {
+        return make_shared<AttrName>(AttrNameType::STMT_NUMBER);
+    } else {
+        throw "Unreconized attribute name: " + name.stringValue;
+    }
+}
 
+shared_ptr<Element> PQLParser::parseElement() {
+    auto syn = parseSynonym();
+    
+    if (peek().type == PQLTokenType::DOT) {
+        // parse attr ref
+        eat(PQLTokenType::DOT);
+        shared_ptr<AttrName> attrName = parseAttrName();
+        return make_shared<AttrRef>(syn, attrName);
+    }
+    else {
+        return syn;
+    }
+}
+
+shared_ptr<ResultCl> PQLParser::parseResultCl() {
+    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_BOOLEAN) {
+        return make_shared<ResultCl>();
+    }
+    else if (peek().type == PQLTokenType::LT) {
+        vector<shared_ptr<Element>> elements;
+        elements.push_back(parseElement());
+
+        eat(PQLTokenType::LT);
+        while (peek().type == PQLTokenType::COMMA) {
+            eat(PQLTokenType::COMMA);
+            elements.push_back(parseElement());
+        }
+        eat(PQLTokenType::GT);
+
+        return make_shared<ResultCl>(elements);
+    }
+    else {
+        vector<shared_ptr<Element>> elements;
+        elements.push_back(parseElement());
+        return make_shared<ResultCl>(elements);
+    }
 }
 
 shared_ptr<SelectCl> PQLParser::parseSelectCl()
@@ -423,7 +475,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
-    shared_ptr<Synonym> synonym;
+    shared_ptr<ResultCl> result;
 
     while (tokenIsDesignEntity(peek()))
     {
@@ -431,7 +483,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     }
 
     eatKeyword(PQL_SELECT);
-    synonym = parseSynonym();
+    result = parseResultCl();
 
     /* YIDA Note: For iteration 1, multiple such that clauses are NOT allowed */
     while (!tokensAreEmpty())
@@ -463,5 +515,5 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
         }
     }
 
-    return make_shared<SelectCl>(move(synonym), move(declarations), move(suchThatClauses), move(patternClauses));
+    return make_shared<SelectCl>(move(result), move(declarations), move(suchThatClauses), move(patternClauses));
 }

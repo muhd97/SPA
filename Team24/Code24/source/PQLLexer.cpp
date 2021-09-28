@@ -46,6 +46,18 @@ vector<PQLToken> pqlLex(string &program)
         {
             tokens.emplace_back(PQLTokenType::STAR);
         }
+        else if (curr == '<')
+        {
+            tokens.emplace_back(PQLTokenType::LT);
+        }
+        else if (curr == '>')
+        {
+            tokens.emplace_back(PQLTokenType::GT);
+        }
+        else if (curr == '.')
+        {
+            tokens.emplace_back(PQLTokenType::DOT);
+        }
         else if (curr == '"')
         {
             string value;
@@ -74,13 +86,14 @@ vector<PQLToken> pqlLex(string &program)
         else if (isalpha(curr))
         {
             string value;
-            while (isalpha(curr) || isdigit(curr))
+            // TODO (@jiachen) fix this, # should not be allowed other than stmt#
+            while (isalpha(curr) || isdigit(curr) || curr == '#')
             {
                 value.push_back(curr);
                 curr = lookahead;
                 lookahead = program[++i + 1];
             }
-            tokens.emplace_back(std::move(value)); // string token
+            tokens.emplace_back(std::move(value));
             continue;
         }
         else if (isdigit(curr))
@@ -127,6 +140,12 @@ string getPQLTokenLabel(PQLToken &token)
         return std::to_string(token.intValue);
     case PQLTokenType::STAR:
         return "*";
+    case PQLTokenType::DOT:
+        return ".";
+    case PQLTokenType::LT:
+        return "<";
+    case PQLTokenType::GT:
+        return ">";
     }
     return "";
 }

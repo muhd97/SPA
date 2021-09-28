@@ -33,6 +33,12 @@ const string PQL_MODIFIES = "Modifies";
 const string PQL_PATTERN = "pattern";
 const string PQL_SUCH = "such";
 const string PQL_THAT = "that";
+const string PQL_BOOLEAN = "BOOLEAN";
+const string PQL_PROC_NAME = "procName";
+const string PQL_VAR_NAME = "varName";
+const string PQL_VALUE = "value";
+const string PQL_STMT_NUMBER = "stmt#";
+
 
 class Element
 {
@@ -890,6 +896,52 @@ class ExpressionSpec
         }
     }
 };
+
+class ResultCl
+{
+private:
+    vector<shared_ptr<Element>> elements;
+    bool isBoolean;
+public:
+    ResultCl()
+    {
+        this->elements = {};
+        this->isBoolean = true;
+    }
+
+    ResultCl(vector<shared_ptr<Element>> elements)
+        : elements(move(elements))
+    {
+        this->isBoolean = false;
+    }
+
+    ~ResultCl()
+    {
+        if (DESTRUCTOR_MESSAGE_ENABLED)
+        {
+            cout << "Deleted: " << format() << endl;
+        }
+    }
+
+    vector<shared_ptr<Element>> getElements() {
+        return elements;
+    }
+
+    string format()
+    {
+        if (isBoolean) {
+            return "BOOLEAN";
+        }
+        else {
+            string str = "<";
+            for (auto elem : elements) {
+                str += elem->format() + ", ";
+            }
+            return str + ">";
+        }
+    }
+};
+
 class PatternCl
 {
   public:
@@ -940,12 +992,12 @@ class SelectCl
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
-    shared_ptr<Synonym> targetSynonym;
+    shared_ptr<ResultCl> target;
     unordered_map<string, shared_ptr<Declaration>> synonymToParentDeclarationMap;
 
-    SelectCl(shared_ptr<Synonym> syn, vector<shared_ptr<Declaration>> decl, vector<shared_ptr<SuchThatCl>> stht,
+    SelectCl(shared_ptr<ResultCl> target, vector<shared_ptr<Declaration>> decl, vector<shared_ptr<SuchThatCl>> stht,
              vector<shared_ptr<PatternCl>> pttn)
-        : targetSynonym(move(syn)), declarations(move(decl)), suchThatClauses(move(stht)), patternClauses(move(pttn))
+        : target(move(target)), declarations(move(decl)), suchThatClauses(move(stht)), patternClauses(move(pttn))
     {
         for (auto &d : declarations)
         {
@@ -1015,7 +1067,7 @@ class SelectCl
             builder += d->format() + ", ";
         }
 
-        builder += "\nSELECT " + targetSynonym->format();
+        builder += "\nSELECT " + target->format();
 
         for (auto &st : suchThatClauses)
         {
@@ -1073,41 +1125,6 @@ class SelectCl
     }
 };
 
-class ResultCl
-{
-public:
-    vector<shared_ptr<Element>> elements;
-    bool isBoolean;
-
-    ResultCl(vector<shared_ptr<Element>> elements, bool isBoolean)
-        : elements(move(elements))
-    {
-        this->isBoolean = isBoolean;
-    }
-
-    ~ResultCl()
-    {
-        if (DESTRUCTOR_MESSAGE_ENABLED)
-        {
-            cout << "Deleted: " << format() << endl;
-        }
-    }
-
-    string format()
-    {
-        if (isBoolean) {
-            return "BOOLEAN";
-        }
-        else {
-            string str = "<";
-            for (auto elem : elements) {
-                str += elem->format() + ", ";
-            }
-            return str + ">";
-        }
-    }
-};
-
 class PQLParser
 {
   private:
@@ -1150,4 +1167,6 @@ class PQLParser
     shared_ptr<SelectCl> parseSelectCl();
 
     shared_ptr<ResultCl> parseResultCl();
+    shared_ptr<Element> parseElement();
+    shared_ptr<AttrName> parseAttrName();
 };
