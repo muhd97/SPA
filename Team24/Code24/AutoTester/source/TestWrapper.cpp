@@ -51,6 +51,7 @@ void TestWrapper::parse(std::string filename) {
         this->pkb->initialise();
         this->pkb->extractDesigns(root);
         this->pkb->initializeRelationshipTables();
+        this->evaluator = PQLEvaluator::create(this->pkb);
 
         cout << "\n==== PKB has been populated. ====\n";
     }
@@ -77,7 +78,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
 
         cout << "\n==== Processing PQL Query ====\n";
 
-        shared_ptr<PQLEvaluator> evaluator = PQLEvaluator::create(this->pkb);
+        
 
         cout << "\n==== Created PQLEvaluator using PKB ====\n";
 

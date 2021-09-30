@@ -277,6 +277,7 @@ class PQLEvaluator
     const vector<string>& getUsesSynIdentProc(string ident);
 
     bool variableExists(string name);
+    bool procExists(string procname);
 
     // Get the names of all variables used by statement indexed {statementIndex}
     vector<string> getUsed(int statementIndex);
