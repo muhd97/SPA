@@ -227,6 +227,22 @@ class PKB
     /* Table that maps every statement to a set of all variables it uses (as a string). Use for Uses(INT, SYN), Uses(INT, "IDENT"), Uses(INT, _) */
     unordered_map<int, unordered_set<string>> usesIntSynTable;
 
+    /* Table that maps DesignEntity to all pairs that satisfy Uses(DESIGN_ENTITY_SYN, VAR) */
+    unordered_map<PKBDesignEntity, vector<pair<int, string>>> usesSynSynTableNonProc;
+    
+    /* Table of all pairs that satisfy Uses(PROCEDURE_SYN, VAR) */
+    vector<pair<string, string>> usesSynSynTableProc;
+
+    /* Table that maps each DesignEntity to all statements that satisfy Uses(DESIGN_ENTITY_SYN, _) */
+    unordered_map<PKBDesignEntity, vector<int>> usesSynUnderscoreTableNonProc;
+
+    /* Table of all procedures that satisfy Uses(PROCEDURE_SYN, _) */
+    vector<string> usesSynUnderscoreTableProc;
+
+    /* Table that maps every var name, to a map of DesignEntity to Statements that use the given varname. Meant for Uses(STMT_SYN, "IDENT") */
+    unordered_map<string, unordered_map<PKBDesignEntity, vector<int>>> usesSynIdentTableNonProc;
+    /* Similar to above, but for var name to procedures that use the given var instead. Meant for Uses(PROC_SYN, "IDENT") */
+    unordered_map<string, vector<string>> usesSynIdentTableProc;
 
   protected:
     // cache of our results, can be prebuilt
@@ -234,6 +250,8 @@ class PKB
     // immediately
     map<Relation, map<PKBDesignEntity, map<PKBDesignEntity, vector<int>>>> cache;
     map<Relation, map<PKBDesignEntity, map<PKBDesignEntity, set<pair<int, int>>>>> cacheSet;
+
+    void initializeUsesTables();
 
     void addStatement(PKBStatement::SharedPtr &statement, PKBDesignEntity designEntity);
     inline void addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr &variable);

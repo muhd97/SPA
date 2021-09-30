@@ -949,18 +949,27 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared
             shared_ptr<Declaration> &parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
             PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
-            for (auto &s : evaluator->mpPKB->getAllUseStmts(pkbDe))
-            {
-                for (auto &v : s->getUsedVariables())
-                {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+            //for (auto &s : evaluator->mpPKB->getAllUseStmts(pkbDe))
+            //{
+            //    for (auto &v : s->getUsedVariables())
+            //    {
+            //        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
-                    /* Map the value returned to this particular synonym. */
-                    tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s->getIndex()));
-                    tupleToAdd->insertKeyValuePair(rightSynonymKey, v->getName());
+            //        /* Map the value returned to this particular synonym. */
+            //        tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s->getIndex()));
+            //        tupleToAdd->insertKeyValuePair(rightSynonymKey, v->getName());
 
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
+            //        toReturn.emplace_back(move(tupleToAdd));
+            //    }
+            //}
+
+            for (auto& p : evaluator->getUsesSynSynNonProc(pkbDe)) {
+                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(p.first));
+                tupleToAdd->insertKeyValuePair(rightSynonymKey, p.second);
+
+                toReturn.emplace_back(move(tupleToAdd));
             }
         }
 
@@ -970,18 +979,26 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared
             shared_ptr<Declaration> &parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
             PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
-            for (auto p : evaluator->mpPKB->setOfProceduresThatUseVars)
-            {
-                for (auto v : p->getUsedVariables())
-                {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+            //for (auto p : evaluator->mpPKB->setOfProceduresThatUseVars)
+            //{
+            //    for (auto v : p->getUsedVariables())
+            //    {
+            //        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
-                    /* Map the value returned to this particular synonym. */
-                    tupleToAdd->insertKeyValuePair(leftSynonymKey, p->mName);
-                    tupleToAdd->insertKeyValuePair(rightSynonymKey, v->getName());
+            //        /* Map the value returned to this particular synonym. */
+            //        tupleToAdd->insertKeyValuePair(leftSynonymKey, p->mName);
+            //        tupleToAdd->insertKeyValuePair(rightSynonymKey, v->getName());
 
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
+            //        toReturn.emplace_back(move(tupleToAdd));
+            //    }
+            //}
+            for (auto& p : evaluator->getUsesSynSynProc()) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(leftSynonymKey, p.first);
+                tupleToAdd->insertKeyValuePair(rightSynonymKey, p.second);
+
+                toReturn.emplace_back(move(tupleToAdd));
             }
         }
     }
@@ -997,13 +1014,19 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared
             shared_ptr<Declaration> &parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
             PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
-            for (auto &s : evaluator->mpPKB->getAllUseStmts(pkbDe))
-            {
+            //for (auto &s : evaluator->mpPKB->getAllUseStmts(pkbDe))
+            //{
+            //    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+            //    /* Map the value returned to this particular synonym. */
+            //    tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s->getIndex()));
+
+            //    toReturn.emplace_back(move(tupleToAdd));
+            //}
+            for (auto& i : evaluator->getUsesSynUnderscoreNonProc(pkbDe)) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
                 /* Map the value returned to this particular synonym. */
-                tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s->getIndex()));
-
+                tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(i));
                 toReturn.emplace_back(move(tupleToAdd));
             }
         }
@@ -1014,12 +1037,12 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared
             shared_ptr<Declaration> &parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
             PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
-            for (auto &p : evaluator->mpPKB->setOfProceduresThatUseVars)
+            for (auto &p : evaluator->getUsesSynUnderscoreProc())
             {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
                 /* Map the value returned to this particular synonym. */
-                tupleToAdd->insertKeyValuePair(leftSynonymKey, p->mName);
+                tupleToAdd->insertKeyValuePair(leftSynonymKey, p);
 
                 toReturn.emplace_back(move(tupleToAdd));
             }
@@ -1032,11 +1055,19 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared
         shared_ptr<Declaration> &parentDecl = selectCl->synonymToParentDeclarationMap[stmtRefLeft->getStringVal()];
         PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
         string identVarName = entRefRight->getStringVal();
+        
+        if (!evaluator->variableExists(identVarName)) {
+            return;
+        }
+
+        cout << "VARIABLE EXISTS!\n";
 
         /* Uses (syn, "IDENT") -> syn is NOT a procedure. */
         if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) != DesignEntity::PROCEDURE)
         {
-            for (auto &s : evaluator->getUsers(pkbDe, move(identVarName)))
+
+
+            for (auto &s : evaluator->getUsesSynIdentNonProc(pkbDe, move(identVarName)))
             {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
@@ -1050,12 +1081,12 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared
         /* Uses (syn, "IDENT") -> syn is a procedure. */
         if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) == DesignEntity::PROCEDURE)
         {
-            for (auto &p : evaluator->mpPKB->variableNameToProceduresThatUseVarMap[identVarName])
+            for (auto &p : evaluator->getUsesSynIdentProc(identVarName))
             {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
                 /* Map the value returned to this particular synonym. */
-                tupleToAdd->insertKeyValuePair(leftSynonymKey, p->mName);
+                tupleToAdd->insertKeyValuePair(leftSynonymKey, p);
 
                 toReturn.emplace_back(move(tupleToAdd));
             }

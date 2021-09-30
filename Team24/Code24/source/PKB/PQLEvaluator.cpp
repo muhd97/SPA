@@ -1267,6 +1267,26 @@ bool PQLEvaluator::getUsesIntUnderscore(int statementNo)
     return !mpPKB->usesIntSynTable[statementNo].empty();
 }
 
+const vector<pair<int, string>>& PQLEvaluator::getUsesSynSynNonProc(PKBDesignEntity de)
+{
+    return mpPKB->usesSynSynTableNonProc[de];
+}
+
+const vector<pair<string, string>>& PQLEvaluator::getUsesSynSynProc()
+{
+    return mpPKB->usesSynSynTableProc;
+}
+
+const vector<int>& PQLEvaluator::getUsesSynUnderscoreNonProc(PKBDesignEntity de)
+{
+    return mpPKB->usesSynUnderscoreTableNonProc[de];
+}
+
+const vector<string>& PQLEvaluator::getUsesSynUnderscoreProc()
+{
+    return mpPKB->usesSynUnderscoreTableProc;
+}
+
 
 vector<string> PQLEvaluator::getUsed(int statementIndex)
 {
@@ -1384,17 +1404,16 @@ bool PQLEvaluator::checkUsedByProcName(string procname, string ident)
     return varsUsed.find(targetVar) != varsUsed.end();
 }
 
-vector<int> PQLEvaluator::getUsers(string variableName)
+/* PRE-CONDITION: Variable Name exists in this program */
+const vector<int>& PQLEvaluator::getUsers(string variableName)
 {
     PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
 
-    if (v == nullptr)
-        return vector<int>();
-
-    return v->getUsers();
+    return v->getUsersByConstRef();
 }
 
-vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName)
+/* PRE-CONDITION: Variable Name exists in this program */
+const vector<int>& PQLEvaluator::getUsesSynIdentNonProc(PKBDesignEntity userType, string variableName)
 {
     // if we are looking for ALL users using the variable, call the other function
     if (userType == PKBDesignEntity::AllExceptProcedure)
@@ -1402,29 +1421,40 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName
         return getUsers(variableName);
     }
 
-    vector<int> res;
-    PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
 
-    if (v == nullptr)
-        return move(res);
+    return mpPKB->usesSynIdentTableNonProc[variableName][userType];
+    
+    //vector<int> users = v->getUsers();
 
-    vector<int> users = v->getUsers();
+    //// filter only the desired type
+    //for (int userIndex : users)
+    //{
+    //    PKBStatement::SharedPtr userStatement;
+    //    if (!mpPKB->getStatement(userIndex, userStatement))
+    //    {
+    //        return res;
+    //    }
+    //    if (userStatement->getType() == userType)
+    //    {
+    //        res.emplace_back(userIndex);
+    //    }
+    //}
 
-    // filter only the desired type
-    for (int userIndex : users)
-    {
-        PKBStatement::SharedPtr userStatement;
-        if (!mpPKB->getStatement(userIndex, userStatement))
-        {
-            return res;
-        }
-        if (userStatement->getType() == userType)
-        {
-            res.emplace_back(userIndex);
-        }
-    }
+    //return move(res);
+}
 
-    return move(res);
+/* PRE-CONDITION: Variable Name exists in this program */
+const vector<string>& PQLEvaluator::getUsesSynIdentProc(string ident)
+{
+    
+     return mpPKB->usesSynIdentTableProc[ident];
+    
+}
+
+bool PQLEvaluator::variableExists(string name)
+{
+    PKBVariable::SharedPtr& v = mpPKB->getVarByName(name);
+    return v != nullptr;
 }
 
 vector<int> PQLEvaluator::getUsers()

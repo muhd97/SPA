@@ -49,22 +49,8 @@ void PKB::extractDesigns(shared_ptr<Program> program)
 
 void PKB::initializeRelationshipTables()
 {
-    // Initialize UsesIntSynTable
-    for (auto& stmt : getStatements(PKBDesignEntity::AllExceptProcedure)) {
-        if (stmt->getType() == PKBDesignEntity::Procedure) continue;
 
-        int stmtIdx = stmt->getIndex();
-        set<PKBVariable::SharedPtr> &temp = stmt->getUsedVariables();
-        unordered_set<string> setOfVariablesUsedByThisStmt;
-        setOfVariablesUsedByThisStmt.reserve(temp.size());
-
-        for (auto& varPtr : temp) setOfVariablesUsedByThisStmt.insert(varPtr->getName());
-
-        if (usesIntSynTable.find(stmtIdx) != usesIntSynTable.end()) {
-            cout << "Warning: Reinitializing Uses(stmtIdx, vars) for stmtIdx = " << stmtIdx << endl;
-        }
-        usesIntSynTable[stmtIdx] = move(setOfVariablesUsedByThisStmt);
-    }
+    initializeUsesTables();
 
 
 }
@@ -514,6 +500,114 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &stateme
     }
 
     return res;
+}
+
+void PKB::initializeUsesTables()
+{
+    // Initialize UsesIntSynTable
+    for (auto& stmt : getStatements(PKBDesignEntity::AllExceptProcedure)) {
+        if (stmt->getType() == PKBDesignEntity::Procedure) continue;
+
+        int stmtIdx = stmt->getIndex();
+        set<PKBVariable::SharedPtr>& temp = stmt->getUsedVariables();
+        unordered_set<string> setOfVariablesUsedByThisStmt;
+        setOfVariablesUsedByThisStmt.reserve(temp.size());
+
+        for (auto& varPtr : temp) setOfVariablesUsedByThisStmt.insert(varPtr->getName());
+
+        if (usesIntSynTable.find(stmtIdx) != usesIntSynTable.end()) {
+            cout << "Warning: Reinitializing Uses(stmtIdx, vars) for stmtIdx = " << stmtIdx << endl;
+        }
+        usesIntSynTable[stmtIdx] = move(setOfVariablesUsedByThisStmt);
+    }
+
+    // Initialize UsesSynSynTableNonProc and usesSynUnderscoreTableNonProc
+    for (PKBDesignEntity de : PKBDesignEntityIterator()) {
+        if (de == PKBDesignEntity::Procedure) continue;
+        vector<pair<int, string>> pairs;
+        for (auto& stmt : getAllUseStmts(de)) {
+
+            if (!stmt->getUsedVariables().empty()) {
+                if (usesSynUnderscoreTableNonProc.find(de) == usesSynUnderscoreTableNonProc.end()) {
+                    vector<int> stmtsOfTypeDeThatUseVariables;
+                    stmtsOfTypeDeThatUseVariables.emplace_back(stmt->getIndex());
+                    usesSynUnderscoreTableNonProc[de] = move(stmtsOfTypeDeThatUseVariables);
+                }
+                else {
+                    usesSynUnderscoreTableNonProc[de].emplace_back(stmt->getIndex());
+                }
+            }
+
+            for (auto& v : stmt->getUsedVariables()) {
+                pairs.emplace_back<int, string>(stmt->getIndex(), v->getName());
+            }
+        }
+        usesSynSynTableNonProc[de] = move(pairs);
+    }
+
+
+    // Initialize UsesSynSynTableProc and usesSynUnderscoreTableProc
+    for (auto &proc : setOfProceduresThatUseVars) {
+
+        auto& vars = proc->getUsedVariables();
+        if (!vars.empty()) usesSynUnderscoreTableProc.emplace_back(proc->mName);
+
+        for (auto& v : proc->getUsedVariables()) {
+            usesSynSynTableProc.push_back(make_pair(proc->mName, v->getName()));
+        }
+    }
+
+    // Initialize usesSynIdentTableNonProc
+    for (auto& keyVal : mVariables) {
+        const string& varName = keyVal.first;
+        for (int& stmtNo : keyVal.second->getUsers()) {
+            PKBStatement::SharedPtr userStatement;
+
+            if (getStatement(stmtNo, userStatement)) {
+                PKBDesignEntity type = userStatement->getType();
+
+                if (usesSynIdentTableNonProc.find(varName) == usesSynIdentTableNonProc.end()) {
+                    unordered_map<PKBDesignEntity, vector<int>> innerMap;
+                    if (innerMap.find(type) == innerMap.end()) {
+                        vector<int> toAdd;
+                        toAdd.emplace_back(stmtNo);
+                        innerMap[type] = move(toAdd);
+                    }
+                    else {
+                        innerMap[type].emplace_back(stmtNo);
+                    }
+                    usesSynIdentTableNonProc[varName] = move(innerMap);
+                }
+                else {
+                    unordered_map<PKBDesignEntity, vector<int>>& innerMap = usesSynIdentTableNonProc[varName];
+                    if (innerMap.find(type) == innerMap.end()) {
+                        vector<int> toAdd;
+                        toAdd.emplace_back(stmtNo);
+                        innerMap[type] = move(toAdd);
+                    }
+                    else {
+                        innerMap[type].emplace_back(stmtNo);
+                    }
+                }
+            }
+        }
+    }
+
+    // Initialize usesSynIdentTableProc
+    for (auto& keyVal : variableNameToProceduresThatUseVarMap) {
+        const string& varName = keyVal.first;
+        const auto& setOfProcs = keyVal.second;
+        for (auto& ptr : setOfProcs) {
+            if (usesSynIdentTableProc.find(varName) == usesSynIdentTableProc.end()) {
+                vector<string> procNames;
+                procNames.emplace_back(ptr->mName);
+                usesSynIdentTableProc[varName] = move(procNames);
+            }
+            else {
+                usesSynIdentTableProc[varName].emplace_back(ptr->mName);
+            }
+        }
+    }
 }
 
 void PKB::addStatement(PKBStatement::SharedPtr &statement, PKBDesignEntity designEntity)

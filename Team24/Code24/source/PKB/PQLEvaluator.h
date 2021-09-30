@@ -266,11 +266,17 @@ class PQLEvaluator
 
     /* Uses */
 
-
     const unordered_set<string>& getUsesIntSyn(int statementNo);
     bool getUsesIntIdent(int statementNo, string ident);
     bool getUsesIntUnderscore(int statementNo);
+    const vector<pair<int, string>>& getUsesSynSynNonProc(PKBDesignEntity de);
+    const vector<pair<string, string>>& getUsesSynSynProc();
+    const vector<int>& getUsesSynUnderscoreNonProc(PKBDesignEntity de);
+    const vector<string>& getUsesSynUnderscoreProc();
+    const vector<int>& getUsesSynIdentNonProc(PKBDesignEntity entityType, string variableName);
+    const vector<string>& getUsesSynIdentProc(string ident);
 
+    bool variableExists(string name);
 
     // Get the names of all variables used by statement indexed {statementIndex}
     vector<string> getUsed(int statementIndex);
@@ -302,10 +308,10 @@ class PQLEvaluator
     bool checkUsedByProcName(string procname, string ident);
 
     // Get all statements that use the variable of name {variableName}
-    vector<int> getUsers(string variableName);
+    const vector<int>& getUsers(string variableName);
     // Get all statements of type {entityType} that use the variable of name
     // {variableName}
-    vector<int> getUsers(PKBDesignEntity entityType, string variableName);
+
     // Get all statements that use at least one variable
     vector<int> getUsers();
     // Get all statements of type {entityType} that use at least one variable
