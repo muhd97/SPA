@@ -47,6 +47,28 @@ void PKB::extractDesigns(shared_ptr<Program> program)
     }
 }
 
+void PKB::initializeRelationshipTables()
+{
+    // Initialize UsesIntSynTable
+    for (auto& stmt : getStatements(PKBDesignEntity::AllExceptProcedure)) {
+        if (stmt->getType() == PKBDesignEntity::Procedure) continue;
+
+        int stmtIdx = stmt->getIndex();
+        set<PKBVariable::SharedPtr> &temp = stmt->getUsedVariables();
+        unordered_set<string> setOfVariablesUsedByThisStmt;
+        setOfVariablesUsedByThisStmt.reserve(temp.size());
+
+        for (auto& varPtr : temp) setOfVariablesUsedByThisStmt.insert(varPtr->getName());
+
+        if (usesIntSynTable.find(stmtIdx) != usesIntSynTable.end()) {
+            cout << "Warning: Reinitializing Uses(stmtIdx, vars) for stmtIdx = " << stmtIdx << endl;
+        }
+        usesIntSynTable[stmtIdx] = move(setOfVariablesUsedByThisStmt);
+    }
+
+
+}
+
 PKBStatement::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group)
 {
     // determine statement type

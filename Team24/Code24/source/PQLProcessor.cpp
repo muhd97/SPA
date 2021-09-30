@@ -858,7 +858,6 @@ void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl> &selectCl, sh
 {
     shared_ptr<StmtRef> &stmtRef = usesCl->stmtRef;
     assert(stmtRef->getStmtRefType() == StmtRefType::INTEGER);
-    vector<string> variablesUsedByStmtNo = evaluator->getUsed(stmtRef->getIntVal());
 
     /* Uses (1, syn) */
     if (usesCl->entRef->getEntRefType() == EntRefType::SYNONYM)
@@ -873,7 +872,7 @@ void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl> &selectCl, sh
                   "delcaration.\n";
         }
 
-        for (auto &s : variablesUsedByStmtNo)
+        for (auto &s : evaluator->getUsesIntSyn(stmtRef->getIntVal()))
         {
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -890,7 +889,7 @@ void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl> &selectCl, sh
     /* SPECIAL CASE */
     if (usesCl->entRef->getEntRefType() == EntRefType::IDENT)
     {
-        if (evaluator->checkUsed(stmtRef->getIntVal(), usesCl->entRef->getStringVal()))
+        if (evaluator->getUsesIntIdent(stmtRef->getIntVal(), usesCl->entRef->getStringVal()))
         {
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -905,7 +904,7 @@ void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl> &selectCl, sh
     /* SPECIAL CASE */
     if (usesCl->entRef->getEntRefType() == EntRefType::UNDERSCORE)
     {
-        if (evaluator->checkUsed(stmtRef->getIntVal()))
+        if (evaluator->getUsesIntUnderscore(stmtRef->getIntVal()))
         {
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -1988,15 +1987,6 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> 
     //    cout << endl;
     //}
 
-}
-
-void setCommonSynonymToJoinOn(shared_ptr<SuchThatCl> suchThatCl, shared_ptr<PatternCl> patternCl, string &synonymToSet)
-{
-    shared_ptr<Synonym> &patternSyn = patternCl->synonym;
-    if (suchThatCl->containsSynonym(patternSyn))
-    {
-        synonymToSet = patternSyn->getValue();
-    }
 }
 
 unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<SuchThatCl> suchThatCl, shared_ptr<PatternCl> patternCl)

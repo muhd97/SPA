@@ -39,6 +39,7 @@ class PKB
 
     void initialise();
     void extractDesigns(shared_ptr<Program> program);
+    void initializeRelationshipTables();
 
     // for all statements, use PKBDesignEntity::AllExceptProcedure, where position
     // corresponds to statement index
@@ -219,6 +220,13 @@ class PKB
     }
 
     const unordered_map<string, PKBVariable::SharedPtr> &getAllVariablesMap() const;
+
+
+    /* ==================================== RELATIONSHIP TABLES ==================================== */
+
+    /* Table that maps every statement to a set of all variables it uses (as a string). Use for Uses(INT, SYN), Uses(INT, "IDENT"), Uses(INT, _) */
+    unordered_map<int, unordered_set<string>> usesIntSynTable;
+
 
   protected:
     // cache of our results, can be prebuilt

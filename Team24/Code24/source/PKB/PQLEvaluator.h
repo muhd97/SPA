@@ -266,6 +266,12 @@ class PQLEvaluator
 
     /* Uses */
 
+
+    const unordered_set<string>& getUsesIntSyn(int statementNo);
+    bool getUsesIntIdent(int statementNo, string ident);
+    bool getUsesIntUnderscore(int statementNo);
+
+
     // Get the names of all variables used by statement indexed {statementIndex}
     vector<string> getUsed(int statementIndex);
     /* Check if the given stmt Index USES any variables. */
@@ -395,6 +401,8 @@ class PQLEvaluator
     vector<pair<int, string>> matchExactPattern(string &LHS, shared_ptr<Expression> &RHS);
 
   protected:
+
+
     PQLEvaluator(PKB::SharedPtr pPKB)
     {
         mpPKB = pPKB;

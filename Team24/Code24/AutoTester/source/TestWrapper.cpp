@@ -50,6 +50,7 @@ void TestWrapper::parse(std::string filename) {
 
         this->pkb->initialise();
         this->pkb->extractDesigns(root);
+        this->pkb->initializeRelationshipTables();
 
         cout << "\n==== PKB has been populated. ====\n";
     }

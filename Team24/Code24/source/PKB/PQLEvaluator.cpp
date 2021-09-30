@@ -1251,6 +1251,23 @@ bool PQLEvaluator::getFollowsTUnderscoreUnderscore()
     return false;
 }
 
+const unordered_set<string>& PQLEvaluator::getUsesIntSyn(int statementNo)
+{
+    return mpPKB->usesIntSynTable[statementNo];
+}
+
+bool PQLEvaluator::getUsesIntIdent(int statementNo, string ident)
+{
+    unordered_set<string>& temp = mpPKB->usesIntSynTable[statementNo];
+    return temp.find(ident) != temp.end();
+}
+
+bool PQLEvaluator::getUsesIntUnderscore(int statementNo)
+{
+    return !mpPKB->usesIntSynTable[statementNo].empty();
+}
+
+
 vector<string> PQLEvaluator::getUsed(int statementIndex)
 {
     set<PKBVariable::SharedPtr> res;
@@ -1262,6 +1279,8 @@ vector<string> PQLEvaluator::getUsed(int statementIndex)
     res = stmt->getUsedVariables();
     return varToString(move(res));
 }
+
+
 
 bool PQLEvaluator::checkUsed(int statementIndex)
 {
