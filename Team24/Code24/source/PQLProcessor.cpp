@@ -1392,6 +1392,8 @@ void PQLProcessor::handleParentTFirstArgInteger(shared_ptr<SelectCl> &selectCl, 
     assert(leftArg->getStmtRefType() == StmtRefType::INTEGER);
     int leftArgInteger = leftArg->getIntVal();
 
+    if (!evaluator->statementExists(leftArgInteger)) return;
+
     /* ParentT(1, syn) Special case. No Synonym, left side is Integer. */
     if (rightArg->getStmtRefType() == StmtRefType::SYNONYM)
     {
@@ -1470,7 +1472,7 @@ void PQLProcessor::handleParentTFirstArgSyn(shared_ptr<SelectCl> &selectCl, shar
     assert(leftArg->getStmtRefType() == StmtRefType::SYNONYM);
 
     const string &leftSynonym = leftArg->getStringVal();
-
+    
     /* Validate. ParentT(syn, ?) where syn MUST not be a
      * Procedure/Constant/Variable */
     if (!givenSynonymMatchesMultipleTypes(selectCl, leftSynonym,
@@ -1546,6 +1548,8 @@ void PQLProcessor::handleParentTFirstArgSyn(shared_ptr<SelectCl> &selectCl, shar
     if (rightArg->getStmtRefType() == StmtRefType::INTEGER)
     {
         int rightArgInteger = rightArg->getIntVal();
+
+        if (!evaluator->statementExists(rightArgInteger)) return;
 
         for (const int &x : evaluator->getParentTSynInt(leftArgType, rightArgInteger))
         {

@@ -73,9 +73,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
         auto sel = p.parseSelectCl();
         cout << "\n==== Printing Parsed Query ====\n";
         cout << sel->format() << endl;
-
-        // TODO: @kohyida1997 PRE VALIDATE THE QUERY FIRST!!! Handle duplicate declaration, undeclared synonyms.
-
+        
         cout << "\n==== Processing PQL Query ====\n";
 
         

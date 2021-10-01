@@ -135,7 +135,7 @@ class PQLEvaluator
                                                             PKBDesignEntity targetChildrenType);
 
     /* Use for Parent*(INT, synonym) */
-    unordered_set<int> getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
+    const vector<int>& getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
 
     /* Use for Parent*(INT, _) */
     bool getParentTIntUnderscore(int statementNo);
@@ -144,13 +144,13 @@ class PQLEvaluator
     bool getParentTIntInt(int parentStatementNo, int childStatementNo);
 
     /* Use for Parent*(synonym, _) */
-    unordered_set<int> getParentTSynUnderscore(PKBDesignEntity targetParentType);
+    const unordered_set<int>& getParentTSynUnderscore(PKBDesignEntity targetParentType);
 
     /* Use for Parent*(synonym, INT) */
-    unordered_set<int> getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
+    const unordered_set<int>& getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
 
     /* Use for Parent*(synonym1, synonym2) */
-    set<pair<int, int>> getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType);
+    const set<pair<int, int>>& getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType);
 
     /* Use for Parent*(_, INT) */
     bool getParentTUnderscoreInt(int childStatementNo);
@@ -278,6 +278,7 @@ class PQLEvaluator
 
     bool variableExists(string name);
     bool procExists(string procname);
+    bool statementExists(int statementNo);
 
     // Get the names of all variables used by statement indexed {statementIndex}
     vector<string> getUsed(int statementIndex);

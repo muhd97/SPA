@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include <queue>
 #include <vector>
 
 #include "../SimpleAST.h"
@@ -51,6 +52,7 @@ void PKB::initializeRelationshipTables()
 {
 
     initializeUsesTables();
+    initializeParentTTables();
 
 
 }
@@ -500,6 +502,209 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &stateme
     }
 
     return res;
+}
+
+inline bool isContainerType(PKBDesignEntity s)
+{
+    return s == PKBDesignEntity::If || s == PKBDesignEntity::While || s == PKBDesignEntity::Procedure ||
+        s == PKBDesignEntity::AllExceptProcedure;
+}
+
+inline bool isStatementType(PKBDesignEntity de) {
+    return de != PKBDesignEntity::Procedure;
+}
+
+unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStatement::SharedPtr targetParent,
+    PKBDesignEntity targetChildrenType)
+{
+    unordered_set<int> toReturn;
+    queue<PKBGroup::SharedPtr> qOfGroups;
+
+    for (auto& grp : targetParent->getContainerGroups())
+        qOfGroups.push(grp);
+
+    while (!qOfGroups.empty())
+    {
+        auto& currGroup = qOfGroups.front();
+        qOfGroups.pop();
+
+        for (int& i : currGroup->getMembers(targetChildrenType))
+            toReturn.insert(i);
+
+        for (auto& subGrps : currGroup->getChildGroups())
+            qOfGroups.push(subGrps);
+    }
+
+    return toReturn;
+}
+
+void PKB::initializeParentTTables()
+{
+    // Initialize parentTIntSynTable and parentTIntIntTable
+    for (auto stmt : mStatements[PKBDesignEntity::AllExceptProcedure]) {
+
+        parentTIntSynTable[stmt->getIndex()] = unordered_map<PKBDesignEntity, vector<int>>();
+
+        for (auto de : PKBDesignEntityIterator()) {
+            unordered_set<int> toReturn;
+            queue<PKBGroup::SharedPtr> qOfGroups;
+            vector<int> toAdd;            
+            if (!isContainerType(stmt->getType())) {
+                parentTIntSynTable[stmt->getIndex()][de] = move(toAdd);
+                continue;
+            }
+                
+
+            for (auto grp : stmt->getContainerGroups())
+                qOfGroups.push(grp);
+
+            while (!qOfGroups.empty())
+            {
+                auto currGroup = qOfGroups.front();
+                qOfGroups.pop();
+
+                for (int i : currGroup->getMembers(de)) {
+                    toReturn.insert(i);
+                    parentTIntIntTable.insert(make_pair(stmt->getIndex(), i));
+                }
+
+                for (auto subGrps : currGroup->getChildGroups())
+                    qOfGroups.push(subGrps);
+            }
+
+            toAdd.insert(toAdd.end(), toReturn.begin(), toReturn.end());
+            parentTIntSynTable[stmt->getIndex()][de] = move(toAdd);
+        }
+    }
+
+    // Initialize parentTSynSynTable
+    for (auto deParent : PKBDesignEntityIterator()) {
+        if (!isStatementType(deParent)) continue;
+        
+        for (auto deChild : PKBDesignEntityIterator()) {
+            if (!isStatementType(deChild)) continue;
+
+            parentTSynSynTable[make_pair(deParent, deChild)] = set<pair<int, int>>();
+
+            if (!isContainerType(deParent)) continue;
+
+            vector<PKBStatement::SharedPtr> parentStmts;
+            if (deParent == PKBDesignEntity::AllExceptProcedure)
+            {
+                vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+                vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+
+                parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
+                parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
+
+                //addParentStmts(parentStmts);
+            }
+            else
+            {
+                // check these 'possible' parent statements
+                parentStmts = getStatements(deParent);
+            }
+
+            for (auto& stmt : parentStmts)
+            {
+                for (const int& x : getAllChildAndSubChildrenOfGivenType(stmt, deChild))
+                {
+                    pair<int, int> toAdd;
+                    toAdd.first = stmt->getIndex();
+                    toAdd.second = x;
+                    parentTSynSynTable[make_pair(deParent, deChild)].insert(move(toAdd));
+                }
+            }
+
+        }
+    }
+
+    // Initialize parentTSynUnderscoreTable
+    /* PRE-CONDITION: parentTIntSynTable is initialize already */
+    for (auto deParent : PKBDesignEntityIterator()) {
+        if (!isStatementType(deParent)) continue;
+
+        parentTSynUnderscoreTable[deParent] = unordered_set<int>();
+
+        if (!isContainerType(deParent)) continue;
+
+        vector<PKBStatement::SharedPtr> parentStmts;
+        if (deParent == PKBDesignEntity::AllExceptProcedure) 
+        {
+            vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+            vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+
+            parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
+            parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
+
+            //addParentStmts(parentStmts);
+        }
+        else
+        {
+            // check these 'possible' parent statements
+            parentStmts = getStatements(deParent);
+        }
+
+        for (auto& stmt : parentStmts)
+        {
+            bool flag = false;
+            const auto& innerMap = parentTIntSynTable[stmt->getIndex()];
+
+            for (auto& pair : innerMap) {
+                if (!pair.second.empty()) flag = true;
+            }
+
+            if (flag)
+            {
+                parentTSynUnderscoreTable[deParent].insert(stmt->getIndex());
+            }
+        }
+
+
+    }
+
+    // Initialize parentTSynIntTable
+    /* PRE-CONDITION, parentTIntIntTable is initialized already */
+    for (auto stmt : mStatements[PKBDesignEntity::AllExceptProcedure]) {
+        int childStmtNo = stmt->getIndex();
+        parentTSynIntTable[childStmtNo] = unordered_map<PKBDesignEntity, unordered_set<int>>();
+        for (auto de : PKBDesignEntityIterator()) {
+            if (!isStatementType(de)) continue;
+
+            parentTSynIntTable[childStmtNo][de] = unordered_set<int>();
+            if (!isContainerType(de)) continue;
+
+            vector<PKBStatement::SharedPtr> parentStmts;
+
+            if (de == PKBDesignEntity::AllExceptProcedure)
+            {
+                vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+                vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+
+                parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
+                parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
+            }
+            else
+            {
+                // check these 'possible' parent statements
+                parentStmts = getStatements(de);
+            }
+            for (auto& parStmt : parentStmts)
+            {
+                bool isValidParentStmt = true;
+                if (parentTIntIntTable.find(make_pair(parStmt->getIndex(), childStmtNo)) == parentTIntIntTable.end()) {
+                    isValidParentStmt = false;
+                }
+
+                if (isValidParentStmt)
+                {
+                    parentTSynIntTable[childStmtNo][de].insert(parStmt->getIndex());
+                }
+            }
+
+        }
+
+    }
 }
 
 void PKB::initializeUsesTables()
