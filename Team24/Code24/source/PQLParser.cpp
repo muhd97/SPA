@@ -429,7 +429,7 @@ shared_ptr<AttrName> PQLParser::parseAttrName() {
 shared_ptr<Element> PQLParser::parseElement() {
     auto syn = parseSynonym();
     
-    if (peek().type == PQLTokenType::DOT) {
+    if (!tokensAreEmpty() && peek().type == PQLTokenType::DOT) {
         // parse attr ref
         eat(PQLTokenType::DOT);
         shared_ptr<AttrName> attrName = parseAttrName();

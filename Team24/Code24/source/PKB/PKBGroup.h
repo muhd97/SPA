@@ -5,6 +5,7 @@
 
 #include "PKBDesignEntity.h"
 #include "PKBVariable.h"
+#include "../SimpleAST.h"
 
 using namespace std;
 
@@ -54,7 +55,7 @@ class PKBGroup
     }
 
     // get members of particular synonym. to get all members, use
-    // PKBDesignEntity::AllExceptProcedure
+    // PKBDesignEntity::AllStatements
     vector<int> getMembers(PKBDesignEntity s)
     {
         return mMembers[s];
@@ -81,9 +82,9 @@ class PKBGroup
         mMembers[designEntity].emplace_back(statementIndex);
 
         // also add it to the combined list of all members
-        if (designEntity != PKBDesignEntity::AllExceptProcedure)
+        if (designEntity != PKBDesignEntity::AllStatements)
         {
-            mMembers[PKBDesignEntity::AllExceptProcedure].emplace_back(statementIndex);
+            mMembers[PKBDesignEntity::AllStatements].emplace_back(statementIndex);
         }
     }
 
@@ -116,6 +117,7 @@ class PKBGroup
         mOwnerIndex = ownerStatementIndex;
     }
 
+
     PKBGroup(string procedureName)
     {
         mIndex = totalGroupCount;
@@ -125,4 +127,54 @@ class PKBGroup
 
     // keeps track of total number of groups, also lets us assign group index
     static int totalGroupCount;
+};
+
+
+class PKBGroupEntity {
+private:  
+    PKBGroup::SharedPtr mBelongsTo;
+    vector<PKBGroup::SharedPtr> mContainerGroups;
+    set<PKBVariable::SharedPtr> mUses;
+    set<PKBVariable::SharedPtr> mModifies;
+public:
+    using SharedPtr = std::shared_ptr<PKBGroupEntity>;
+
+    // for pattern
+    shared_ptr<AssignStatement> simpleAssignStatement;
+
+    PKBGroup::SharedPtr getGroup();
+
+    // only for If and While statements and Procedures that are the parent of their group
+    // if the PKBGroupEntity does not have a container group, will return empty vector
+    vector<PKBGroup::SharedPtr> getContainerGroups();
+
+    set<PKBVariable::SharedPtr> getUsedVariables();
+
+    int getUsedVariablesSize();
+
+    set<PKBVariable::SharedPtr> getModifiedVariables();
+
+    void setGroup(PKBGroup::SharedPtr belongsTo);
+
+    void addContainerGroup(PKBGroup::SharedPtr &containerGroup);
+
+    void addUsedVariable(PKBVariable::SharedPtr &variable);
+
+    void addModifiedVariable(PKBVariable::SharedPtr variable);
+
+    void addUsedVariables(set<PKBVariable::SharedPtr> &variables);
+
+    void addModifiedVariables(set<PKBVariable::SharedPtr> variables);
+
+    virtual bool isProcedure() = 0;
+
+protected:
+    PKBGroupEntity(set<PKBVariable::SharedPtr> uses,
+                 set<PKBVariable::SharedPtr> modifies)
+    {
+        mUses = uses;
+        mModifies = modifies;
+    }
+
+    PKBGroupEntity() {}
 };

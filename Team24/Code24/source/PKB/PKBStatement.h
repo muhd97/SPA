@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "../SimpleAST.h"
-#include "PKBDesignEntity.h"
 #include "PKBGroup.h"
 
 using namespace std;
