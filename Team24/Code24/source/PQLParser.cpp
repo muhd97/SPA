@@ -280,12 +280,21 @@ be a ModifiesP */
     }
 }
 
-shared_ptr<SuchThatCl> PQLParser::parseSuchThat() // todo
+vector<shared_ptr<SuchThatCl>> PQLParser::parseSuchThat()
 {
+    vector<shared_ptr<SuchThatCl>> clauses;
     eatKeyword(PQL_SUCH);
     eatKeyword(PQL_THAT);
     auto r = parseRelRef();
-    return make_shared<SuchThatCl>(r);
+    clauses.push_back(make_shared<SuchThatCl>(r));
+    
+    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+        eatKeyword(PQL_AND);
+        auto r = parseRelRef();
+        clauses.push_back(make_shared<SuchThatCl>(r));
+    }
+
+    return clauses;
 }
 
 shared_ptr<RelRef> PQLParser::parseRelRef()
@@ -381,15 +390,23 @@ shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
     return make_shared<ExpressionSpec>(false, false, nullptr);
 }
 
-shared_ptr<PatternCl> PQLParser::parsePatternCl()
+vector<shared_ptr<PatternCl>> PQLParser::parsePatternCl()
 {
+    vector<shared_ptr<PatternCl>> clauses;
+    clauses.push_back(parsePatternClCond());
     eatKeyword(PQL_PATTERN);
+
+    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+        eatKeyword(PQL_AND);
+        clauses.push_back(parsePatternClCond());
+    }
+    return clauses;
+}
+
+shared_ptr<PatternCl> PQLParser::parsePatternClCond()
+{
     auto syn = parseSynonym();
-
-    // TODO (@jiachen247) Check syn is of type assign
-
     eat(PQLTokenType::LEFT_PAREN);
-
     auto entRef = parseEntRef();
     eat(PQLTokenType::COMMA);
     string rawExpression;
@@ -398,6 +415,7 @@ shared_ptr<PatternCl> PQLParser::parsePatternCl()
     eat(PQLTokenType::RIGHT_PAREN);
     return make_shared<PatternCl>(syn, entRef, exprSpec);
 }
+
 
 inline bool tokenIsDesignEntity(PQLToken tk)
 {
@@ -478,8 +496,6 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     vector<shared_ptr<PatternCl>> patternClauses;
     shared_ptr<ResultCl> result;
 
-    
-
     while (tokenIsDesignEntity(peek()))
     {
         declarations.push_back(parseDeclaration());
@@ -492,25 +508,15 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     /* YIDA Note: For iteration 1, multiple such that clauses are NOT allowed */
     while (!tokensAreEmpty())
     {
-        // if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::NAME
-        // && peek().stringValue == PQL_SUCH) {
         if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_SUCH)
-        { /* YIDA: Comment this to DISABLE Multiple Clauses */
-            if (suchThatClauses.size() != 0)
-            {
-                cout << "Duplicate such that clauses are not allowed." << endl;
-                // break; /* YIDA: Uncomment this to DISABLE Multiple Clauses */
-            }
-            suchThatClauses.push_back(parseSuchThat());
+        { 
+            vector<shared_ptr<SuchThatCl>> clauses = parseSuchThat();
+            suchThatClauses.insert(end(suchThatClauses), begin(clauses), end(clauses));
         }
         else if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_PATTERN)
         {
-            if (patternClauses.size() != 0)
-            {
-                cout << "Duplicate pattern clauses are not allowed." << endl;
-                break;
-            }
-            patternClauses.push_back(parsePatternCl());
+            vector<shared_ptr<PatternCl>> clauses = parsePatternCl();
+            patternClauses.insert(end(patternClauses), begin(clauses), end(clauses));
         }
         else
         {

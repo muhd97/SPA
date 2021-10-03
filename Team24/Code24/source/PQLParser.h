@@ -39,6 +39,7 @@ const string PQL_PROC_NAME = "procName";
 const string PQL_VAR_NAME = "varName";
 const string PQL_VALUE = "value";
 const string PQL_STMT_NUMBER = "stmt#";
+const string PQL_AND = "and";
 
 
 class Element
@@ -1156,7 +1157,7 @@ class PQLParser
     PQLToken eatKeyword(string keyword);
     shared_ptr<Declaration> parseDeclaration();
     shared_ptr<DesignEntity> parseDesignEntity();
-    shared_ptr<SuchThatCl> parseSuchThat();
+    vector<shared_ptr<SuchThatCl>> parseSuchThat();
     shared_ptr<RelRef> parseRelRef();
     shared_ptr<Synonym> parseSynonym();
     int parseInteger();
@@ -1164,7 +1165,8 @@ class PQLParser
     shared_ptr<EntRef> parseEntRef();
     shared_ptr<RelRef> parseUses();
     shared_ptr<RelRef> parseModifies();
-    shared_ptr<PatternCl> parsePatternCl();
+    vector<shared_ptr<PatternCl>> parsePatternCl();
+    shared_ptr<PatternCl> parsePatternClCond();
     shared_ptr<ExpressionSpec> parseExpressionSpec();
     shared_ptr<SelectCl> parseSelectCl();
 
