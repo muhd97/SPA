@@ -434,17 +434,22 @@ shared_ptr<Element> PQLParser::parseElement() {
         eat(PQLTokenType::DOT);
         shared_ptr<AttrName> attrName = parseAttrName();
         return make_shared<AttrRef>(syn, attrName);
+
     }
     else {
+
         return syn;
     }
 }
 
 shared_ptr<ResultCl> PQLParser::parseResultCl() {
+
     if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_BOOLEAN) {
+
         return make_shared<ResultCl>();
     }
     else if (peek().type == PQLTokenType::LT) {
+
         vector<shared_ptr<Element>> elements;
         elements.push_back(parseElement());
 
@@ -454,12 +459,14 @@ shared_ptr<ResultCl> PQLParser::parseResultCl() {
             elements.push_back(parseElement());
         }
         eat(PQLTokenType::GT);
-
+   
         return make_shared<ResultCl>(elements);
     }
     else {
+        
         vector<shared_ptr<Element>> elements;
         elements.push_back(parseElement());
+        
         return make_shared<ResultCl>(elements);
     }
 }
@@ -471,10 +478,13 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     vector<shared_ptr<PatternCl>> patternClauses;
     shared_ptr<ResultCl> result;
 
+    
+
     while (tokenIsDesignEntity(peek()))
     {
         declarations.push_back(parseDeclaration());
     }
+
 
     eatKeyword(PQL_SELECT);
     result = parseResultCl();

@@ -136,6 +136,7 @@ private:
     vector<PKBGroup::SharedPtr> mContainerGroups;
     set<PKBVariable::SharedPtr> mUses;
     set<PKBVariable::SharedPtr> mModifies;
+    vector<string> mUsesStringVector;
 public:
     using SharedPtr = std::shared_ptr<PKBGroupEntity>;
 
@@ -149,6 +150,8 @@ public:
     vector<PKBGroup::SharedPtr> getContainerGroups();
 
     set<PKBVariable::SharedPtr> getUsedVariables();
+
+    const vector<string>& getUsedVariablesAsString();
 
     int getUsedVariablesSize();
 

@@ -358,3 +358,8 @@ stmt s; variable x; call ca;
 Select ca such that Parent*(_, 19)
 20, 22, 18, 15
 500
+72 - Select ca such that Parent*(3, s) - Parent*, parent is not container type.
+stmt s; variable x; call ca;
+Select ca such that Parent*(3, s)
+
+500

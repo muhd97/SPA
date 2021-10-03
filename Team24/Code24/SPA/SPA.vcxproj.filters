@@ -29,6 +29,6 @@
     <ClInclude Include="..\source\SimpleParser.h" />
     <ClInclude Include="..\source\PQLProcessor.h" />
     <ClInclude Include="..\source\PKB\PKBStmt.h" />
-    <ClInclude Include="..\source\PKB\PKBProcedure.h"
+	<ClInclude Include="..\source\PKB\PKBProcedure.h" />
   </ItemGroup>
 </Project>

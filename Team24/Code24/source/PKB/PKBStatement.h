@@ -1,12 +1,11 @@
 #pragma once
 #include <memory>
 #include <vector>
-
-#include "../SimpleAST.h"
 #include "PKBGroup.h"
 
 using namespace std;
 
+//Old PKBStatement class with combined meaning of Stmt and Procedure
 class PKBStatement
 {
   public:
@@ -34,6 +33,7 @@ class PKBStatement
     PKBGroup::SharedPtr mBelongsTo;
     vector<PKBGroup::SharedPtr> mContainerGroup;
     set<PKBVariable::SharedPtr> mUses;
+    vector<string> mUsesStringVector;
     set<PKBVariable::SharedPtr> mModifies;
 
     // for pattern
@@ -56,6 +56,10 @@ class PKBStatement
         // cout << mName << " proc | " << "GETUSEDVARIABLES: size = " <<
         // mUses.size() << endl;
         return mUses;
+    }
+
+    const vector<string>& getUsedVariablesAsString() {
+        return mUsesStringVector;
     }
 
     int getUsedVariablesSize()
@@ -90,7 +94,10 @@ class PKBStatement
 
     void addUsedVariable(PKBVariable::SharedPtr &variable)
     {
-        mUses.insert(variable);
+        if (mUses.find(variable) == mUses.end()) {
+            mUses.insert(variable);
+            mUsesStringVector.emplace_back(variable->getName());
+        }
     }
 
     void addModifiedVariable(PKBVariable::SharedPtr variable)
@@ -100,7 +107,13 @@ class PKBStatement
 
     void addUsedVariables(set<PKBVariable::SharedPtr> &variables)
     {
-        mUses.insert(variables.begin(), variables.end());
+        for (const auto ptr : variables) {
+            if (mUses.find(ptr) == mUses.end()) {
+                mUses.insert(ptr);
+                mUsesStringVector.emplace_back(ptr->getName());
+            }
+        }
+        //mUses.insert(variables.begin(), variables.end());
     }
 
     void addModifiedVariables(set<PKBVariable::SharedPtr> variables)

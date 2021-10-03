@@ -1,7 +1,6 @@
 #pragma once
-#include <type_traits>
 
-enum class PKBDesignEntity
+enum class PKBDesignEntity : unsigned int
 {
     Read = 0,
     Print = 1,
@@ -50,4 +49,7 @@ template <typename C, C beginVal, C endVal> class Iterator
     }
 };
 
+
+
 typedef Iterator<PKBDesignEntity, PKBDesignEntity::Read, PKBDesignEntity::AllStatements> PKBDesignEntityIterator;
+

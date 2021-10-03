@@ -1,3 +1,4 @@
+#pragma once
 #ifndef EVALUATOR_TESTER_H
 #define EVALUATOR_TESTER_H
 

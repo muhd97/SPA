@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include <queue>
 #include <vector>
 
 #include "../SimpleAST.h"
@@ -47,6 +48,15 @@ void PKB::extractDesigns(shared_ptr<Program> program)
                       return a->getIndex() < b->getIndex();
                   });
     }
+}
+
+void PKB::initializeRelationshipTables()
+{
+
+    initializeUsesTables();
+    initializeParentTTables();
+
+
 }
 
 PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group)
@@ -491,6 +501,317 @@ PKBStmt::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &statement, P
     }
 
     return res;
+}
+
+inline bool isContainerType(PKBDesignEntity s)
+{
+    return s == PKBDesignEntity::If || s == PKBDesignEntity::While || s == PKBDesignEntity::Procedure ||
+        s == PKBDesignEntity::AllStatements;
+}
+
+inline bool isStatementType(PKBDesignEntity de) {
+    return de != PKBDesignEntity::Procedure;
+}
+
+unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStmt::SharedPtr targetParent,
+    PKBDesignEntity targetChildrenType)
+{
+    unordered_set<int> toReturn;
+    queue<PKBGroup::SharedPtr> qOfGroups;
+
+    for (auto& grp : targetParent->getContainerGroups())
+        qOfGroups.push(grp);
+
+    while (!qOfGroups.empty())
+    {
+        auto& currGroup = qOfGroups.front();
+        qOfGroups.pop();
+
+        for (int& i : currGroup->getMembers(targetChildrenType))
+            toReturn.insert(i);
+
+        for (auto& subGrps : currGroup->getChildGroups())
+            qOfGroups.push(subGrps);
+    }
+
+    return toReturn;
+}
+
+void PKB::initializeParentTTables()
+{
+    // Initialize parentTIntSynTable and parentTIntIntTable
+    for (auto stmt : mStatements[PKBDesignEntity::AllStatements]) {
+
+        parentTIntSynTable[stmt->getIndex()] = unordered_map<PKBDesignEntity, vector<int>>();
+
+        for (auto de : PKBDesignEntityIterator()) {
+            unordered_set<int> toReturn;
+            queue<PKBGroup::SharedPtr> qOfGroups;
+            vector<int> toAdd;            
+            if (!isContainerType(stmt->getType())) {
+                parentTIntSynTable[stmt->getIndex()][de] = move(toAdd);
+                continue;
+            }
+                
+
+            for (auto grp : stmt->getContainerGroups())
+                qOfGroups.push(grp);
+
+            while (!qOfGroups.empty())
+            {
+                auto currGroup = qOfGroups.front();
+                qOfGroups.pop();
+
+                for (int i : currGroup->getMembers(de)) {
+                    toReturn.insert(i);
+                    parentTIntIntTable.insert(make_pair(stmt->getIndex(), i));
+                }
+
+                for (auto subGrps : currGroup->getChildGroups())
+                    qOfGroups.push(subGrps);
+            }
+
+            toAdd.insert(toAdd.end(), toReturn.begin(), toReturn.end());
+            parentTIntSynTable[stmt->getIndex()][de] = move(toAdd);
+        }
+    }
+
+    // Initialize parentTSynSynTable
+    for (auto deParent : PKBDesignEntityIterator()) {
+        if (!isStatementType(deParent)) continue;
+        
+        for (auto deChild : PKBDesignEntityIterator()) {
+            if (!isStatementType(deChild)) continue;
+
+            parentTSynSynTable[make_pair(deParent, deChild)] = set<pair<int, int>>();
+
+            if (!isContainerType(deParent)) continue;
+
+            vector<PKBStmt::SharedPtr> parentStmts;
+            if (deParent == PKBDesignEntity::AllStatements)
+            {
+                vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+                vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+
+                parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
+                parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
+
+                //addParentStmts(parentStmts);
+            }
+            else
+            {
+                // check these 'possible' parent statements
+                parentStmts = getStatements(deParent);
+            }
+
+            for (auto& stmt : parentStmts)
+            {
+                for (const int& x : getAllChildAndSubChildrenOfGivenType(stmt, deChild))
+                {
+                    pair<int, int> toAdd;
+                    toAdd.first = stmt->getIndex();
+                    toAdd.second = x;
+                    parentTSynSynTable[make_pair(deParent, deChild)].insert(move(toAdd));
+                }
+            }
+
+        }
+    }
+
+    // Initialize parentTSynUnderscoreTable
+    /* PRE-CONDITION: parentTIntSynTable is initialize already */
+    for (auto deParent : PKBDesignEntityIterator()) {
+        if (!isStatementType(deParent)) continue;
+
+        parentTSynUnderscoreTable[deParent] = unordered_set<int>();
+
+        if (!isContainerType(deParent)) continue;
+
+        vector<PKBStmt::SharedPtr> parentStmts;
+        if (deParent == PKBDesignEntity::AllStatements) 
+        {
+            vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+            vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+
+            parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
+            parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
+
+            //addParentStmts(parentStmts);
+        }
+        else
+        {
+            // check these 'possible' parent statements
+            parentStmts = getStatements(deParent);
+        }
+
+        for (auto& stmt : parentStmts)
+        {
+            bool flag = false;
+            const auto& innerMap = parentTIntSynTable[stmt->getIndex()];
+
+            for (auto& pair : innerMap) {
+                if (!pair.second.empty()) flag = true;
+            }
+
+            if (flag)
+            {
+                parentTSynUnderscoreTable[deParent].insert(stmt->getIndex());
+            }
+        }
+
+
+    }
+
+    // Initialize parentTSynIntTable
+    /* PRE-CONDITION, parentTIntIntTable is initialized already */
+    for (auto stmt : mStatements[PKBDesignEntity::AllStatements]) {
+        int childStmtNo = stmt->getIndex();
+        parentTSynIntTable[childStmtNo] = unordered_map<PKBDesignEntity, unordered_set<int>>();
+        for (auto de : PKBDesignEntityIterator()) {
+            if (!isStatementType(de)) continue;
+
+            parentTSynIntTable[childStmtNo][de] = unordered_set<int>();
+            if (!isContainerType(de)) continue;
+
+            vector<PKBStmt::SharedPtr> parentStmts;
+
+            if (de == PKBDesignEntity::AllStatements)
+            {
+                vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+                vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+
+                parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
+                parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
+            }
+            else
+            {
+                // check these 'possible' parent statements
+                parentStmts = getStatements(de);
+            }
+            for (auto& parStmt : parentStmts)
+            {
+                bool isValidParentStmt = true;
+                if (parentTIntIntTable.find(make_pair(parStmt->getIndex(), childStmtNo)) == parentTIntIntTable.end()) {
+                    isValidParentStmt = false;
+                }
+
+                if (isValidParentStmt)
+                {
+                    parentTSynIntTable[childStmtNo][de].insert(parStmt->getIndex());
+                }
+            }
+
+        }
+
+    }
+}
+
+void PKB::initializeUsesTables()
+{
+    // Initialize UsesIntSynTable
+    for (auto& stmt : getStatements(PKBDesignEntity::AllStatements)) {
+        if (stmt->getType() == PKBDesignEntity::Procedure) continue;
+
+        int stmtIdx = stmt->getIndex();
+        set<PKBVariable::SharedPtr>& temp = stmt->getUsedVariables();
+        unordered_set<string> setOfVariablesUsedByThisStmt;
+        setOfVariablesUsedByThisStmt.reserve(temp.size());
+
+        for (auto& varPtr : temp) setOfVariablesUsedByThisStmt.insert(varPtr->getName());
+
+        if (usesIntSynTable.find(stmtIdx) != usesIntSynTable.end()) {
+            cout << "Warning: Reinitializing Uses(stmtIdx, vars) for stmtIdx = " << stmtIdx << endl;
+        }
+        usesIntSynTable[stmtIdx] = move(setOfVariablesUsedByThisStmt);
+    }
+
+    // Initialize UsesSynSynTableNonProc and usesSynUnderscoreTableNonProc
+    for (PKBDesignEntity de : PKBDesignEntityIterator()) {
+        if (de == PKBDesignEntity::Procedure) continue;
+        vector<pair<int, string>> pairs;
+        for (auto& stmt : getAllUseStmts(de)) {
+
+            if (!stmt->getUsedVariables().empty()) {
+                if (usesSynUnderscoreTableNonProc.find(de) == usesSynUnderscoreTableNonProc.end()) {
+                    vector<int> stmtsOfTypeDeThatUseVariables;
+                    stmtsOfTypeDeThatUseVariables.emplace_back(stmt->getIndex());
+                    usesSynUnderscoreTableNonProc[de] = move(stmtsOfTypeDeThatUseVariables);
+                }
+                else {
+                    usesSynUnderscoreTableNonProc[de].emplace_back(stmt->getIndex());
+                }
+            }
+
+            for (auto& v : stmt->getUsedVariables()) {
+                pairs.emplace_back<int, string>(stmt->getIndex(), v->getName());
+            }
+        }
+        usesSynSynTableNonProc[de] = move(pairs);
+    }
+
+
+    // Initialize UsesSynSynTableProc and usesSynUnderscoreTableProc
+    for (auto &proc : setOfProceduresThatUseVars) {
+
+        auto& vars = proc->getUsedVariables();
+        if (!vars.empty()) usesSynUnderscoreTableProc.emplace_back(proc->getName());
+
+        for (auto& v : proc->getUsedVariables()) {
+            usesSynSynTableProc.push_back(make_pair(proc->getName(), v->getName()));
+        }
+    }
+
+    // Initialize usesSynIdentTableNonProc
+    for (auto& keyVal : mVariables) {
+        const string& varName = keyVal.first;
+        for (int& stmtNo : keyVal.second->getUsers()) {
+            PKBStmt::SharedPtr userStatement;
+
+            if (getStatement(stmtNo, userStatement)) {
+                PKBDesignEntity type = userStatement->getType();
+
+                if (usesSynIdentTableNonProc.find(varName) == usesSynIdentTableNonProc.end()) {
+                    unordered_map<PKBDesignEntity, vector<int>> innerMap;
+                    if (innerMap.find(type) == innerMap.end()) {
+                        vector<int> toAdd;
+                        toAdd.emplace_back(stmtNo);
+                        innerMap[type] = move(toAdd);
+                    }
+                    else {
+                        innerMap[type].emplace_back(stmtNo);
+                    }
+                    usesSynIdentTableNonProc[varName] = move(innerMap);
+                }
+                else {
+                    unordered_map<PKBDesignEntity, vector<int>>& innerMap = usesSynIdentTableNonProc[varName];
+                    if (innerMap.find(type) == innerMap.end()) {
+                        vector<int> toAdd;
+                        toAdd.emplace_back(stmtNo);
+                        innerMap[type] = move(toAdd);
+                    }
+                    else {
+                        innerMap[type].emplace_back(stmtNo);
+                    }
+                }
+            }
+        }
+    }
+
+    // Initialize usesSynIdentTableProc
+    for (auto& keyVal : variableNameToProceduresThatUseVarMap) {
+        const string& varName = keyVal.first;
+        const auto& setOfProcs = keyVal.second;
+        for (auto& ptr : setOfProcs) {
+            if (usesSynIdentTableProc.find(varName) == usesSynIdentTableProc.end()) {
+                vector<string> procNames;
+                procNames.emplace_back(ptr->getName());
+                usesSynIdentTableProc[varName] = move(procNames);
+            }
+            else {
+                usesSynIdentTableProc[varName].emplace_back(ptr->getName());
+            }
+        }
+    }
 }
 
 void PKB::addStatement(PKBStmt::SharedPtr &statement, PKBDesignEntity designEntity)
