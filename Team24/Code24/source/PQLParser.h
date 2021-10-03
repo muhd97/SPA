@@ -31,6 +31,7 @@ const string PQL_PARENT = "Parent";
 const string PQL_PARENT_T = "Parent*";
 const string PQL_USES = "Uses";
 const string PQL_MODIFIES = "Modifies";
+const string PQL_CALLS = "Calls";
 const string PQL_PATTERN = "pattern";
 const string PQL_SUCH = "such";
 const string PQL_THAT = "that";
@@ -354,7 +355,9 @@ enum class RelRefType
     FOLLOWS,
     FOLLOWS_T,
     PARENT,
-    PARENT_T
+    PARENT_T,
+    CALLS,
+    CALLS_T
 };
 
 // extend entRef to catch synonym vs. underscore vs. ident
@@ -828,6 +831,122 @@ class FollowsT : public RelRef
     }
 };
 
+class Calls : public RelRef {
+public:
+    shared_ptr<EntRef> entRef1;
+    shared_ptr<EntRef> entRef2;
+
+    Calls(shared_ptr<EntRef> ref1, shared_ptr<EntRef> ref2) : entRef1(move(ref1)), entRef2(move(ref2))
+    {
+    }
+
+    string format() override
+    {
+        return "Calls(" + entRef1->format() + ", " + entRef2->format() + ")";
+    }
+
+    ~Calls()
+    {
+        if (DESTRUCTOR_MESSAGE_ENABLED)
+        {
+            cout << "Deleted: " << format() << endl;
+        }
+    }
+
+    inline bool containsSynonym(shared_ptr<Synonym> s)
+    {
+        bool flag = false;
+        if (entRef1->getEntRefType() == EntRefType::SYNONYM)
+        {
+            flag = entRef1->getStringVal() == s->getValue();
+            if (flag)
+                return flag;
+        }
+
+        if (entRef2->getEntRefType() == EntRefType::SYNONYM)
+        {
+            flag = entRef2->getStringVal() == s->getValue();
+        }
+
+        return flag;
+    }
+
+    inline RelRefType getType()
+    {
+        return RelRefType::CALLS;
+    }
+
+    vector<string> getAllSynonymsAsString()
+    {
+        vector<string> toReturn;
+
+        if (entRef1->getEntRefType() == EntRefType::SYNONYM)
+            toReturn.emplace_back(entRef1->getStringVal());
+        if (entRef2->getEntRefType() == EntRefType::SYNONYM)
+            toReturn.emplace_back(entRef2->getStringVal());
+
+        return toReturn;
+    }
+};
+
+class CallsT : public RelRef {
+public:
+    shared_ptr<EntRef> entRef1;
+    shared_ptr<EntRef> entRef2;
+
+    CallsT(shared_ptr<EntRef> ref1, shared_ptr<EntRef> ref2) : entRef1(move(ref1)), entRef2(move(ref2))
+    {
+    }
+
+    string format() override
+    {
+        return "CallsT(" + entRef1->format() + ", " + entRef2->format() + ")";
+    }
+
+    ~CallsT()
+    {
+        if (DESTRUCTOR_MESSAGE_ENABLED)
+        {
+            cout << "Deleted: " << format() << endl;
+        }
+    }
+
+    inline bool containsSynonym(shared_ptr<Synonym> s)
+    {
+        bool flag = false;
+        if (entRef1->getEntRefType() == EntRefType::SYNONYM)
+        {
+            flag = entRef1->getStringVal() == s->getValue();
+            if (flag)
+                return flag;
+        }
+
+        if (entRef2->getEntRefType() == EntRefType::SYNONYM)
+        {
+            flag = entRef2->getStringVal() == s->getValue();
+        }
+
+        return flag;
+    }
+
+    inline RelRefType getType()
+    {
+        return RelRefType::CALLS;
+    }
+
+    vector<string> getAllSynonymsAsString()
+    {
+        vector<string> toReturn;
+
+        if (entRef1->getEntRefType() == EntRefType::SYNONYM)
+            toReturn.emplace_back(entRef1->getStringVal());
+        if (entRef2->getEntRefType() == EntRefType::SYNONYM)
+            toReturn.emplace_back(entRef2->getStringVal());
+
+        return move(toReturn);
+    }
+};
+
 class SuchThatCl
 {
   public:
@@ -1165,6 +1284,7 @@ class PQLParser
     shared_ptr<EntRef> parseEntRef();
     shared_ptr<RelRef> parseUses();
     shared_ptr<RelRef> parseModifies();
+    shared_ptr<RelRef> parseCalls();
     vector<shared_ptr<PatternCl>> parsePatternCl();
     shared_ptr<PatternCl> parsePatternClCond();
     shared_ptr<ExpressionSpec> parseExpressionSpec();

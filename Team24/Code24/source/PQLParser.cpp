@@ -15,6 +15,7 @@ string DesignEntity::VARIABLE = "variable";
 string DesignEntity::CONSTANT = "constant";
 string DesignEntity::PROCEDURE = "procedure";
 string DesignEntity::CALL = "call";
+string DesignEntity::PROG_LINE = "prog_line";
 
 PQLToken PQLParser::peek()
 {
@@ -280,6 +281,11 @@ be a ModifiesP */
     }
 }
 
+shared_ptr<RelRef> PQLParser::parseCalls() {
+
+}
+
+
 vector<shared_ptr<SuchThatCl>> PQLParser::parseSuchThat()
 {
     vector<shared_ptr<SuchThatCl>> clauses;
@@ -340,6 +346,25 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
         eat(PQLTokenType::RIGHT_PAREN);
         return make_shared<Parent>(sRef5, sRef6);
     }
+    else if (curr.type == PQLTokenType::CALLS_T) {
+        eat(PQLTokenType::CALLS_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto entRef1 = parseEntRef();
+        eat(PQLTokenType::COMMA);
+        auto entRef2 = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<CallsT>(entRef1, entRef2);
+    }
+    else if (isKeyword(curr, PQL_CALLS))
+    {
+        eatKeyword(PQL_CALLS);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto entRef1 = parseEntRef();
+        eat(PQLTokenType::COMMA);
+        auto entRef2 = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<Calls>(entRef1, entRef2);
+    }
     else if (isKeyword(curr, PQL_USES))
     {
         return parseUses();
@@ -350,7 +375,7 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
     }
     else
     {
-        cout << "Expected: Follow, FollowsT, Parent, ParentT, Uses and Modifies "
+        cout << "Expected: Follow, FollowsT, Parent, ParentT, Uses, Calls, CallsT and Modifies "
                 "but got: "
              << getPQLTokenLabel(curr) << " instead\n";
         throw std::invalid_argument("Error parsing PQL Query!!");
@@ -423,7 +448,7 @@ inline bool tokenIsDesignEntity(PQLToken tk)
         (tk.stringValue == PQL_STMT || tk.stringValue == PQL_READ || tk.stringValue == PQL_PRINT ||
             tk.stringValue == PQL_CALL || tk.stringValue == PQL_WHILE || tk.stringValue == PQL_IF ||
             tk.stringValue == PQL_ASSIGN || tk.stringValue == PQL_VARIABLE || tk.stringValue == PQL_CONSTANT ||
-            tk.stringValue == PQL_PROCEDURE);
+            tk.stringValue == PQL_PROCEDURE || tk.stringValue == PQL_PROG_LINE);
 }
 
 shared_ptr<AttrName> PQLParser::parseAttrName() {

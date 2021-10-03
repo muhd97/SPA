@@ -5,8 +5,10 @@
 
 using namespace std;
 
+// Special keyowrds that can be followed by special characters like _, * and #
 const string SPECIAL_PARENT = "Parent";
 const string SPECIAL_FOLLOWS = "Follows";
+const string SPECIAL_CALLS = "Calls";
 const string SPECIAL_STMT = "stmt";
 
 enum class PQLTokenType
@@ -27,6 +29,7 @@ enum class PQLTokenType
     // all other keywords are handled in the parser
     PARENT_T,
     FOLLOWS_T,
+    CALLS_T,
     STMT_NUMBER
 };
 
