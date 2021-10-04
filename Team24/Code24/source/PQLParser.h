@@ -1542,7 +1542,6 @@ class PQLParser
     shared_ptr<Ref> parseRef();
     shared_ptr<RelRef> parseUses();
     shared_ptr<RelRef> parseModifies();
-    shared_ptr<RelRef> parseCalls();
     vector<shared_ptr<PatternCl>> parsePatternCl();
     shared_ptr<PatternCl> parsePatternClCond();
     vector<shared_ptr<WithCl>> parseWithCl();
