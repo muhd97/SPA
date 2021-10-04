@@ -336,12 +336,14 @@ vector<shared_ptr<SuchThatCl>> PQLParser::parseSuchThat()
     eatKeyword(PQL_THAT);
     auto r = parseRelRef();
     clauses.push_back(make_shared<SuchThatCl>(r));
-    
-    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+
+
+    if (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
         eatKeyword(PQL_AND);
         auto r = parseRelRef();
         clauses.push_back(make_shared<SuchThatCl>(r));
     }
+
 
     return clauses;
 }
@@ -448,7 +450,7 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
 
 shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
 {
-    if (peek().type == PQLTokenType::UNDERSCORE)
+    if (!tokensAreEmpty() && peek().type == PQLTokenType::UNDERSCORE)
     {
         eat(PQLTokenType::UNDERSCORE);
         if (peek().type == PQLTokenType::STRING)
@@ -464,7 +466,7 @@ shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
             return make_shared<ExpressionSpec>(true, false, nullptr);
         }
     }
-    else if (peek().type == PQLTokenType::STRING)
+    else if (!tokensAreEmpty() && peek().type == PQLTokenType::STRING)
     {
         auto token = eat(PQLTokenType::STRING);
         auto expressionTokens = simpleLex(token.stringValue);
@@ -476,7 +478,7 @@ shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
         cout << "Error: Invalid expression spec." << endl;
     }
 
-    if (peek().type == PQLTokenType::COMMA) {
+    if (!tokensAreEmpty() && peek().type == PQLTokenType::COMMA) {
         // only for syn-if
         eat(PQLTokenType::COMMA);
         eat(PQLTokenType::UNDERSCORE);
@@ -491,7 +493,7 @@ vector<shared_ptr<PatternCl>> PQLParser::parsePatternCl()
     eatKeyword(PQL_PATTERN);
     clauses.push_back(parsePatternClCond());
 
-    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+    if (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
         eatKeyword(PQL_AND);
         clauses.push_back(parsePatternClCond());
     }
@@ -520,7 +522,7 @@ vector<shared_ptr<WithCl>> PQLParser::parseWithCl()
     clauses.push_back(parseAttrCompare());
     
 
-    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+    if (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
         eatKeyword(PQL_AND);
         clauses.push_back(parseAttrCompare());
     }
@@ -589,15 +591,18 @@ shared_ptr<ResultCl> PQLParser::parseResultCl() {
     }
     else if (peek().type == PQLTokenType::LT) {
         vector<shared_ptr<Element>> elements;
+        eat(PQLTokenType::LT);
         elements.push_back(parseElement());
 
-        eat(PQLTokenType::LT);
+
+        
         while (peek().type == PQLTokenType::COMMA) {
             eat(PQLTokenType::COMMA);
             elements.push_back(parseElement());
         }
         eat(PQLTokenType::GT);
    
+
         return make_shared<ResultCl>(elements);
     }
     else {
@@ -611,6 +616,8 @@ shared_ptr<ResultCl> PQLParser::parseResultCl() {
 
 shared_ptr<SelectCl> PQLParser::parseSelectCl()
 {
+    unordered_set<string> clausesAlreadySeen;
+
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
@@ -630,17 +637,43 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
         if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_SUCH)
         { 
             vector<shared_ptr<SuchThatCl>> clauses = parseSuchThat();
-            suchThatClauses.insert(end(suchThatClauses), begin(clauses), end(clauses));
+
+            for (auto ptr : clauses) {
+                string& format = ptr->format();
+                if (clausesAlreadySeen.find(format) == clausesAlreadySeen.end()) {
+                    suchThatClauses.emplace_back(ptr);
+                    clausesAlreadySeen.insert(format);
+                }
+            }
+
+            //suchThatClauses.insert(end(suchThatClauses), begin(clauses), end(clauses));
         }
         else if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_PATTERN)
         {
             vector<shared_ptr<PatternCl>> clauses = parsePatternCl();
-            patternClauses.insert(end(patternClauses), begin(clauses), end(clauses));
+
+            for (auto ptr : clauses) {
+                string& format = ptr->format();
+                if (clausesAlreadySeen.find(format) == clausesAlreadySeen.end()) {
+                    patternClauses.emplace_back(ptr);
+                    clausesAlreadySeen.insert(format);
+                }
+            }
+
+            //patternClauses.insert(end(patternClauses), begin(clauses), end(clauses));
         }
         else if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_WITH)
         {
             vector<shared_ptr<WithCl>> clauses = parseWithCl();
-            withClauses.insert(end(withClauses), begin(clauses), end(clauses));
+            for (auto ptr : clauses) {
+                string& format = ptr->format();
+                if (clausesAlreadySeen.find(format) == clausesAlreadySeen.end()) {
+                    withClauses.emplace_back(ptr);
+                    clausesAlreadySeen.insert(format);
+                }
+            }
+            
+            //withClauses.insert(end(withClauses), begin(clauses), end(clauses));
         }
         else
         {

@@ -101,7 +101,7 @@ class PKB
     // note: position of statement in vector does NOT correspond to statement
     // index except for PKBDesignEntity::AllExceptProcedure this function gets all
     // the statements corresponding to a specified type: eg. assign, call etc.
-    vector<PKBStatement::SharedPtr> &getStatements(PKBDesignEntity s)
+    const vector<PKBStatement::SharedPtr> &getStatements(PKBDesignEntity s)
     {
         return mStatements[s];
     }

@@ -28,7 +28,7 @@ variable vsew; variable v;
 Select vsew such that Uses(11, v)
 x, y, z, a, b, i, j, p, q, w
 500
-6 - Select all Variables - NEGATIVE CASE: TargetSynonym Not in Uses(3, "i")
+6 - Select all Variables - NEGATIVE CASE: TargetSynonym Not in Uses(3, "j")
 variable vsew; variable v;
 Select vsew such that Uses(3, "i")
 
@@ -98,19 +98,19 @@ stmt s; assign a; print p; call dd;
 Select s such that Uses(dd,  "q")
 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
 500
-20 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(call, "i")
+20 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(call, "j")
 stmt s; assign a; print p; call dd;
-Select s such that Uses(dd,  "i")
+Select s such that Uses(dd,  "j")
 
 500
-21 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(proc, "i")
+21 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(proc, "j")
 stmt s; assign a; print p; call dd; procedure k;
-Select s such that Uses(k,  "i")
+Select s such that Uses(k,  "j")
 
 500
-22 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(ass, "i")
+22 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(ass, "j")
 stmt s; assign a; print p; call dd; procedure k;
-Select s such that Uses(a,  "i")
+Select s such that Uses(a,  "j")
 
 500
 23 - Select all Statements - NEGATIVE CASE: TargetSynonym Not in Uses(read, "i")
@@ -168,9 +168,9 @@ variable vsew, z; assign a, b; stmt k; procedure sd; print p; read r;
 Select k such that Uses("yida2", "x")
 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
 500
-34 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses ("procName", "i")
+34 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses ("procName", "j")
 variable vsew; assign a, b; stmt k; procedure sd; print p; read r;
-Select k such that Uses("yida2", "i")
+Select k such that Uses("yida2", "j")
 
 500
 35 - Select all Assign - NEGATIVE CASE: TargetSynonym Not in Uses ("procName", "nonExistentVar")

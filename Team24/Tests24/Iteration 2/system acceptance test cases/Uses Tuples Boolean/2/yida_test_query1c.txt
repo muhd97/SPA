@@ -1,7 +1,7 @@
 1 - Select a such that Uses(a, _) // Select Assigns that use a variable
 assign a; variable k;
 Select a such that Uses(a, _)
-3, 8
+3, 8,7
 500
 2 - Select a such that Uses(pr, _) // Select Prints that use a variable
 assign a; variable k; print pr, rp, rr, pp;
@@ -68,9 +68,9 @@ print syn;
 Select syn such that Uses(syn, "x")
 
 500
-15 - Select procedures such that Uses(s, "i") // NEGATIVE Case: No Procedures use given variable IDENT
+15 - Select procedures such that Uses(s, "j") // NEGATIVE Case: No Procedures use given variable IDENT
 procedure syn;
-Select syn such that Uses(syn, "i")
+Select syn such that Uses(syn, "j")
 
 500
 16 - Select calls such that Uses(s, "j") // NEGATIVE Case: No Calls use given variable IDENT

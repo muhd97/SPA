@@ -591,8 +591,8 @@ void PKB::initializeParentTTables()
             vector<PKBStatement::SharedPtr> parentStmts;
             if (deParent == PKBDesignEntity::AllExceptProcedure)
             {
-                vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-                vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+                const vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+                const vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
                 parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
                 parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
@@ -631,8 +631,8 @@ void PKB::initializeParentTTables()
         vector<PKBStatement::SharedPtr> parentStmts;
         if (deParent == PKBDesignEntity::AllExceptProcedure) 
         {
-            vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-            vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+            const vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+            const vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
             parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
             parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
@@ -678,8 +678,8 @@ void PKB::initializeParentTTables()
 
             if (de == PKBDesignEntity::AllExceptProcedure)
             {
-                vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-                vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+                const vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+                const vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
                 parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
                 parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());

@@ -61,7 +61,7 @@ class Synonym : public Element
     Synonym(string value) : value(move(value))
     {
     }
-    string getValue()
+    const string& getValue() const
     {
         return value;
     }
@@ -444,7 +444,7 @@ enum class RelRefType
 class RelRef
 {
   public:
-    virtual string format()
+    virtual inline string format()
     {
         return "RelRef THIS SHOULD NOT BE PRINTED";
     }
@@ -466,7 +466,7 @@ class UsesS : public RelRef
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "UsesS(" + stmtRef->getStmtRefTypeName() + ", " + entRef->getEntRefTypeName() + ")";
     }
@@ -526,7 +526,7 @@ class UsesP : public RelRef
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "UsesP(" + entRef1->getEntRefTypeName() + ", " + entRef2->getEntRefTypeName() + ")";
     }
@@ -577,7 +577,7 @@ class ModifiesS : public RelRef
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "ModifiesS(" + stmtRef->getStmtRefTypeName() + ", " + entRef->getEntRefTypeName() + ")";
     }
@@ -654,7 +654,7 @@ class ModifiesP : public RelRef
         return RelRefType::MODIFIES_P;
     }
 
-    string format() override
+    inline string format() override
     {
         return "ModifiesP(" + entRef1->getEntRefTypeName() + ", " + entRef2->getEntRefTypeName() + ")";
     }
@@ -682,7 +682,7 @@ class Parent : public RelRef
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "Parent(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
     }
@@ -741,7 +741,7 @@ class ParentT : public RelRef
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "Parent*(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
     }
@@ -800,7 +800,7 @@ class Follows : public RelRef
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "Follows(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
     }
@@ -859,7 +859,7 @@ class FollowsT : public RelRef
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "Follows*(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
     }
@@ -917,7 +917,7 @@ public:
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "Calls(" + entRef1->format() + ", " + entRef2->format() + ")";
     }
@@ -975,7 +975,7 @@ public:
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "CallsT(" + entRef1->format() + ", " + entRef2->format() + ")";
     }
@@ -1034,7 +1034,7 @@ public:
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "Next*(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
     }
@@ -1093,7 +1093,7 @@ public:
     {
     }
 
-    string format() override
+    inline string format() override
     {
         return "Next(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
     }
@@ -1159,7 +1159,7 @@ class SuchThatCl
         }
     }
 
-    string format()
+    inline string format()
     {
         return "\nSUCHTHAT " + relRef->format();
     }
@@ -1240,7 +1240,7 @@ public:
         }
     }
 
-    vector<shared_ptr<Element>> getElements() {
+    const vector<shared_ptr<Element>>& getElements() const {
         return elements;
     }
 
