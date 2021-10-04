@@ -480,6 +480,12 @@ shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
         cout << "Error: Invalid expression spec." << endl;
     }
 
+    if (peek().type == PQLTokenType::COMMA) {
+        // only for syn-if
+        eat(PQLTokenType::COMMA);
+        eat(PQLTokenType::UNDERSCORE);
+    }
+
     return make_shared<ExpressionSpec>(false, false, nullptr);
 }
 
@@ -498,6 +504,8 @@ vector<shared_ptr<PatternCl>> PQLParser::parsePatternCl()
 
 shared_ptr<PatternCl> PQLParser::parsePatternClCond()
 {
+    // Rewriting grammer rule to 
+    // syn (entRef, exprSpec [, _])
     auto syn = parseSynonym();
     eat(PQLTokenType::LEFT_PAREN);
     auto entRef = parseEntRef();
