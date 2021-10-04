@@ -328,11 +328,6 @@ be a ModifiesP */
     }
 }
 
-shared_ptr<RelRef> PQLParser::parseCalls() {
-
-}
-
-
 vector<shared_ptr<SuchThatCl>> PQLParser::parseSuchThat()
 {
     vector<shared_ptr<SuchThatCl>> clauses;
