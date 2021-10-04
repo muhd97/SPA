@@ -84,7 +84,7 @@ vector<PQLToken> pqlLex(string &program)
             string value;
             // TODO (@jiachen) fix this, # should not be allowed other than stmt#
             // prog_line is currently a hack...
-            // the grammar is IDIOTIC i swear, `_` is an illegal variable name character but used in prog_line which `such that` uses a space as its delimiter
+            // the grammar is IDIOTIC i swear, `_` is an illegal variable name character but used in prog_line while `such that` uses a space as its delimiter
             while (isalpha(curr) || isdigit(curr) || (value == "prog" && curr == '_'))
             {
                 value.push_back(curr);
@@ -108,6 +108,10 @@ vector<PQLToken> pqlLex(string &program)
             else if (value == SPECIAL_CALLS && curr == '*') {
                 i++;
                 tokens.emplace_back(PQLTokenType::CALLS_T);
+            }
+            else if (value == SPECIAL_NEXT && curr == '*') {
+                i++;
+                tokens.emplace_back(PQLTokenType::NEXT_T);
             }
             else {
                 tokens.emplace_back(std::move(value));

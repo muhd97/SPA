@@ -9,6 +9,7 @@ using namespace std;
 const string SPECIAL_PARENT = "Parent";
 const string SPECIAL_FOLLOWS = "Follows";
 const string SPECIAL_CALLS = "Calls";
+const string SPECIAL_NEXT = "Next";
 const string SPECIAL_STMT = "stmt";
 
 enum class PQLTokenType
@@ -29,6 +30,7 @@ enum class PQLTokenType
     // all other keywords are handled in the parser
     PARENT_T,
     FOLLOWS_T,
+    NEXT_T,
     CALLS_T,
     STMT_NUMBER
 };

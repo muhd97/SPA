@@ -365,6 +365,27 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
         eat(PQLTokenType::RIGHT_PAREN);
         return make_shared<Calls>(entRef1, entRef2);
     }
+    if (curr.type == PQLTokenType::NEXT_T) {
+        // Next*
+        eat(PQLTokenType::NEXT_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto ref1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto ref2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<NextT>(ref1, ref2);
+    }
+    else if (isKeyword(curr, PQL_NEXT))
+    {
+        // Next
+        eatKeyword(PQL_NEXT);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto ref1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto ref2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<Next>(ref1, ref2);
+    }
     else if (isKeyword(curr, PQL_USES))
     {
         return parseUses();
@@ -375,7 +396,7 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
     }
     else
     {
-        cout << "Expected: Follow, FollowsT, Parent, ParentT, Uses, Calls, CallsT and Modifies "
+        cout << "Expected: Follows(*), Parent(*), Calls(*), Next(*), Uses and Modifies."
                 "but got: "
              << getPQLTokenLabel(curr) << " instead\n";
         throw std::invalid_argument("Error parsing PQL Query!!");
