@@ -1257,6 +1257,18 @@ public:
             return str + ">";
         }
     }
+
+    inline bool isBooleanReturnType() {
+        return isBoolean;
+    }
+
+    inline bool isMultiTupleReturnType() {
+        return elements.size() > 1;
+    }
+
+    inline bool isSingleValReturnType() {
+        return elements.size() == 1;
+    }
 };
 
 class PatternCl

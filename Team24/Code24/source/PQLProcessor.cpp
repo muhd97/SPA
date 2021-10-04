@@ -1848,6 +1848,8 @@ void PQLProcessor::handleFollowsTFirstArgUnderscore(shared_ptr<SelectCl> &select
 void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl,
                                        vector<shared_ptr<ResultTuple>> &toReturn)
 {
+    //TODO: @kohyida1997. Do typechecking for different kinds of pattern clauses. If/assign/while have different pattern logic and syntax.
+
     // LHS
     shared_ptr<EntRef> entRef = patternCl->entRef;
     vector<pair<int, string>> pairsStmtIndexAndVariables;
@@ -2124,14 +2126,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     /* Pre-Validate PQLQuery first to catch simple errors like a synonym not
      * being declared first. */
 
-    // TODO @kohyida1997 implement validation.
-
     validateSelectCl(selectCl);
-
-    // TODO @kohyida1997 catch duplicate synonyms!!
-
-    // preValidateQuery(selectCl);
-
+       
     /* Final Results to Return */
     vector<shared_ptr<Result>> res;
 
