@@ -36,6 +36,7 @@ const string PQL_NEXT = "Next";
 const string PQL_PATTERN = "pattern";
 const string PQL_SUCH = "such";
 const string PQL_THAT = "that";
+const string PQL_WITH = "with";
 const string PQL_BOOLEAN = "BOOLEAN";
 const string PQL_PROC_NAME = "procName";
 const string PQL_VAR_NAME = "varName";
@@ -343,6 +344,80 @@ class EntRef
     string format()
     {
         return getEntRefTypeName();
+    }
+};
+
+enum class RefType
+{
+    SYNONYM,
+    UNDERSCORE,
+    IDENT,
+    ATTR
+};
+
+class Ref
+{
+private:
+    string stringValue;
+    RefType refType;
+    shared_ptr<AttrRef> attrRef;
+
+public:
+    Ref(RefType type)
+    {
+        refType = type;
+        attrRef = NULL;
+        stringValue = "";
+    }
+    Ref(RefType type, string val) : stringValue(move(val))
+    {
+        refType = type;
+    }
+
+    Ref(shared_ptr<AttrRef> ref) : attrRef(move(ref))
+    {
+        refType = RefType::ATTR;
+    }
+
+    const string& getStringVal() const
+    {
+        return stringValue;
+    }
+
+    RefType getRefType()
+    {
+        return refType;
+    }
+
+    string format()
+    {
+        switch (refType)
+        {
+        case RefType::IDENT:
+            return "ident(" + getStringVal() + ")";
+        case RefType::SYNONYM:
+            return "syn(" + getStringVal() + ")";
+        case RefType::UNDERSCORE:
+            return "_";
+        case RefType::ATTR:
+            return attrRef->format();
+        }
+        return "";
+    }
+
+    Ref(const Ref& other)
+    {
+        stringValue = other.stringValue;
+        refType = other.refType;
+        attrRef = other.attrRef;
+    }
+
+    ~Ref()
+    {
+        if (DESTRUCTOR_MESSAGE_ENABLED)
+        {
+            cout << "Deleted: " << format();
+        }
     }
 };
 
@@ -1224,7 +1299,51 @@ class PatternCl
             toReturn.emplace_back(entRef->getStringVal());
         }
 
-        return move(toReturn);
+        return toReturn;
+    }
+};
+
+class WithCl
+{
+public:
+    shared_ptr<Ref> lhs;
+    shared_ptr<Ref> rhs;
+
+    WithCl(shared_ptr<Ref> lhs, shared_ptr<Ref> rhs)
+        : lhs(move(lhs)), rhs(move(rhs))
+    {
+    }
+
+    ~WithCl()
+    {
+        if (DESTRUCTOR_MESSAGE_ENABLED)
+        {
+            cout << "Deleted: " << format() << endl;
+        }
+    }
+
+    string format()
+    {
+        return "\nWITH (" + lhs->format() + ") = (" + rhs->format() + ")\n";
+    }
+
+    inline bool containsSynonym(shared_ptr<Synonym> s)
+    {
+        // TODO (@jiachen247) does attrRef syn.attr counts as containing a syn?
+        return (lhs->getRefType() == RefType::SYNONYM && lhs->getStringVal() == s->getValue()) ||
+            (rhs->getRefType() == RefType::SYNONYM && rhs->getStringVal() == s->getValue());
+    }
+
+    inline vector<string> getAllSynonymsAsString()
+    {
+        vector<string> toReturn;
+
+        if (lhs->getRefType() == RefType::SYNONYM)
+            toReturn.emplace_back(lhs->getStringVal());
+        if (rhs->getRefType() == RefType::SYNONYM)
+            toReturn.emplace_back(rhs->getStringVal());
+
+        return toReturn;
     }
 };
 
@@ -1402,11 +1521,14 @@ class PQLParser
     int parseInteger();
     shared_ptr<StmtRef> parseStmtRef();
     shared_ptr<EntRef> parseEntRef();
+    shared_ptr<Ref> parseRef();
     shared_ptr<RelRef> parseUses();
     shared_ptr<RelRef> parseModifies();
     shared_ptr<RelRef> parseCalls();
     vector<shared_ptr<PatternCl>> parsePatternCl();
     shared_ptr<PatternCl> parsePatternClCond();
+    vector<shared_ptr<WithCl>> parseWithCl();
+    shared_ptr<WithCl> parseAttrCompare();
     shared_ptr<ExpressionSpec> parseExpressionSpec();
     shared_ptr<SelectCl> parseSelectCl();
 

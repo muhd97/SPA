@@ -25,6 +25,7 @@ enum class PQLTokenType
     DOT,
     LT,
     GT,
+    EQUAL,
 
     // speical keywords that are not names
     // all other keywords are handled in the parser

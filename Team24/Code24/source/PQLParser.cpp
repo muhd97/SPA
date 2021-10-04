@@ -189,6 +189,27 @@ shared_ptr<StmtRef> PQLParser::parseStmtRef()
     }
 }
 
+string parseIdent(string str) {
+    // remove leading and trailing whitespaces
+    string clean = regex_replace(str, regex("^ +| +$"), "");
+
+    if (str.length() < 1) {
+        throw "Ident must contain at least one letter";
+    }
+    // check that first char is a letter
+    else if (!isalpha(str[0])) {
+        throw "First of character of ident has to be a letter";
+    }
+    // if whole string is alpha numeric
+    for (char x : str) {
+        if (!isalnum(x)) {
+            throw "Character in ident has to be alpha numeric";
+        }
+    }
+
+    return clean;
+}
+
 shared_ptr<EntRef> PQLParser::parseEntRef()
 {
     switch (peek().type)
@@ -202,13 +223,39 @@ shared_ptr<EntRef> PQLParser::parseEntRef()
 
     case PQLTokenType::STRING:
         auto str = eat(PQLTokenType::STRING);
-        // remove leading and trailing whitespaces
-        string cleaned = regex_replace(str.stringValue, regex("^ +| +$"), "");
-        auto toReturn = make_shared<EntRef>(EntRefType::IDENT, cleaned);
-        return toReturn;
+        return make_shared<EntRef>(EntRefType::IDENT, parseIdent(str.stringValue));
     }
-    cout << "Unrecognized entity ref\n";
-    return make_shared<EntRef>(EntRefType::UNDERSCORE);
+    throw "Faild to parse entRef: " + getPQLTokenLabel(peek());
+}
+
+shared_ptr<Ref> PQLParser::parseRef()
+{
+    switch (peek().type)
+    {
+    case PQLTokenType::UNDERSCORE: {
+        eat(PQLTokenType::UNDERSCORE);
+        return make_shared<Ref>(RefType::UNDERSCORE);
+    }
+    case PQLTokenType::NAME: {
+        auto syn = parseSynonym();
+
+        if (!tokensAreEmpty() && peek().type == PQLTokenType::DOT) {
+            // parse attr ref
+            eat(PQLTokenType::DOT);
+            shared_ptr<AttrName> attrName = parseAttrName();
+            auto attrRef = make_shared<AttrRef>(syn, attrName);
+            return make_shared<Ref>(attrRef);
+        }
+        else {
+            return make_shared<Ref>(RefType::SYNONYM, parseSynonym()->getValue());
+        }
+    }
+    case PQLTokenType::STRING: {
+        auto str = eat(PQLTokenType::STRING);
+        return make_shared<Ref>(RefType::IDENT, parseIdent(str.stringValue));
+    }
+    }
+    throw "Faild to parse ref: " + getPQLTokenLabel(peek());
 }
 
 shared_ptr<RelRef> PQLParser::parseUses()
@@ -439,8 +486,8 @@ shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
 vector<shared_ptr<PatternCl>> PQLParser::parsePatternCl()
 {
     vector<shared_ptr<PatternCl>> clauses;
-    clauses.push_back(parsePatternClCond());
     eatKeyword(PQL_PATTERN);
+    clauses.push_back(parsePatternClCond());
 
     if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
         eatKeyword(PQL_AND);
@@ -462,6 +509,27 @@ shared_ptr<PatternCl> PQLParser::parsePatternClCond()
     return make_shared<PatternCl>(syn, entRef, exprSpec);
 }
 
+vector<shared_ptr<WithCl>> PQLParser::parseWithCl()
+{
+    vector<shared_ptr<WithCl>> clauses;
+    eatKeyword(PQL_WITH);
+    clauses.push_back(parseAttrCompare());
+    
+
+    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+        eatKeyword(PQL_AND);
+        clauses.push_back(parseAttrCompare());
+    }
+    return clauses;
+}
+
+shared_ptr<WithCl> PQLParser::parseAttrCompare()
+{
+    auto ref1 = parseRef();
+    eat(PQLTokenType::EQUAL);
+    auto ref2 = parseRef();
+    return make_shared<WithCl>(ref1, ref2);
+}
 
 inline bool tokenIsDesignEntity(PQLToken tk)
 {
@@ -540,6 +608,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
+    vector<shared_ptr<WithCl>> withClauses;
     shared_ptr<ResultCl> result;
 
     while (tokenIsDesignEntity(peek()))
@@ -547,11 +616,9 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
         declarations.push_back(parseDeclaration());
     }
 
-
     eatKeyword(PQL_SELECT);
     result = parseResultCl();
 
-    /* YIDA Note: For iteration 1, multiple such that clauses are NOT allowed */
     while (!tokensAreEmpty())
     {
         if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_SUCH)
@@ -563,6 +630,11 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
         {
             vector<shared_ptr<PatternCl>> clauses = parsePatternCl();
             patternClauses.insert(end(patternClauses), begin(clauses), end(clauses));
+        }
+        else if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_WITH)
+        {
+            vector<shared_ptr<WithCl>> clauses = parseWithCl();
+            withClauses.insert(end(withClauses), begin(clauses), end(clauses));
         }
         else
         {

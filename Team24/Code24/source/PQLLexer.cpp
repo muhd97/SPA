@@ -54,6 +54,10 @@ vector<PQLToken> pqlLex(string &program)
         {
             tokens.emplace_back(PQLTokenType::DOT);
         }
+        else if (curr == '=')
+        {
+            tokens.emplace_back(PQLTokenType::EQUAL);
+        }
         else if (curr == '"')
         {
             string value;
@@ -167,6 +171,8 @@ string getPQLTokenLabel(PQLToken &token)
         return "<";
     case PQLTokenType::GT:
         return ">";
+    case PQLTokenType::EQUAL:
+        return "=";
     }
     return "";
 }
