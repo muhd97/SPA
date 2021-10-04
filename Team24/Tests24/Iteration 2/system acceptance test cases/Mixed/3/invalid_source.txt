@@ -1,9 +1,0 @@
-procedure m0 {
-	p = 10;
-	q = 9;
-	read p;
-	while (s != 8) {
-		if ( q != 7) then {
-			while (t == 6) { read p;}} else {
-
-while( t == 5) { print p;}}}
