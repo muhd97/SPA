@@ -1353,12 +1353,13 @@ class SelectCl
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
+    vector<shared_ptr<WithCl>> withClauses;
     shared_ptr<ResultCl> target;
     unordered_map<string, shared_ptr<Declaration>> synonymToParentDeclarationMap;
 
     SelectCl(shared_ptr<ResultCl> target, vector<shared_ptr<Declaration>> decl, vector<shared_ptr<SuchThatCl>> stht,
-             vector<shared_ptr<PatternCl>> pttn)
-        : target(move(target)), declarations(move(decl)), suchThatClauses(move(stht)), patternClauses(move(pttn))
+             vector<shared_ptr<PatternCl>> pttn, vector<shared_ptr<WithCl>> with)
+        : target(move(target)), declarations(move(decl)), suchThatClauses(move(stht)), patternClauses(move(pttn)), withClauses(move(with))
     {
         for (auto &d : declarations)
         {
@@ -1438,6 +1439,11 @@ class SelectCl
         for (auto &pt : patternClauses)
         {
             builder += pt->format();
+        }
+
+        for (auto& wt : withClauses)
+        {
+            builder += wt->format();
         }
 
         return builder;

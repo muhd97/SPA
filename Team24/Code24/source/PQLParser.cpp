@@ -247,7 +247,7 @@ shared_ptr<Ref> PQLParser::parseRef()
             return make_shared<Ref>(attrRef);
         }
         else {
-            return make_shared<Ref>(RefType::SYNONYM, parseSynonym()->getValue());
+            return make_shared<Ref>(RefType::SYNONYM, syn->getValue());
         }
     }
     case PQLTokenType::STRING: {
@@ -549,6 +549,12 @@ inline bool tokenIsDesignEntity(PQLToken tk)
 }
 
 shared_ptr<AttrName> PQLParser::parseAttrName() {
+
+    if (peek().type == PQLTokenType::STMT_NUMBER) {
+        eat(PQLTokenType::STMT_NUMBER);
+        return make_shared<AttrName>(AttrNameType::STMT_NUMBER);
+    }
+
     PQLToken name = eat(PQLTokenType::NAME);
     if (name.stringValue == PQL_PROC_NAME) {
         return make_shared<AttrName>(AttrNameType::PROC_NAME);
@@ -558,9 +564,6 @@ shared_ptr<AttrName> PQLParser::parseAttrName() {
     }
     else if (name.stringValue == PQL_VALUE) {
         return make_shared<AttrName>(AttrNameType::VALUE);
-    }
-    else if (name.stringValue == PQL_STMT_NUMBER) {
-        return make_shared<AttrName>(AttrNameType::STMT_NUMBER);
     } else {
         throw "Unreconized attribute name: " + name.stringValue;
     }
@@ -585,11 +588,10 @@ shared_ptr<Element> PQLParser::parseElement() {
 shared_ptr<ResultCl> PQLParser::parseResultCl() {
 
     if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_BOOLEAN) {
-
+        eatKeyword(PQL_BOOLEAN);
         return make_shared<ResultCl>();
     }
     else if (peek().type == PQLTokenType::LT) {
-
         vector<shared_ptr<Element>> elements;
         elements.push_back(parseElement());
 
@@ -651,5 +653,5 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
         }
     }
 
-    return make_shared<SelectCl>(move(result), move(declarations), move(suchThatClauses), move(patternClauses));
+    return make_shared<SelectCl>(move(result), move(declarations), move(suchThatClauses), move(patternClauses), move(withClauses));
 }

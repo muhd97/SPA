@@ -173,6 +173,8 @@ string getPQLTokenLabel(PQLToken &token)
         return ">";
     case PQLTokenType::EQUAL:
         return "=";
+    case PQLTokenType::STMT_NUMBER:
+        return "stmt#";
     }
     return "";
 }
