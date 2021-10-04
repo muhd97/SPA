@@ -135,7 +135,7 @@ class PQLEvaluator
                                                             PKBDesignEntity targetChildrenType);
 
     /* Use for Parent*(INT, synonym) */
-    unordered_set<int> getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
+    const vector<int>& getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
 
     /* Use for Parent*(INT, _) */
     bool getParentTIntUnderscore(int statementNo);
@@ -144,13 +144,13 @@ class PQLEvaluator
     bool getParentTIntInt(int parentStatementNo, int childStatementNo);
 
     /* Use for Parent*(synonym, _) */
-    unordered_set<int> getParentTSynUnderscore(PKBDesignEntity targetParentType);
+    const unordered_set<int>& getParentTSynUnderscore(PKBDesignEntity targetParentType);
 
     /* Use for Parent*(synonym, INT) */
-    unordered_set<int> getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
+    const unordered_set<int>& getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
 
     /* Use for Parent*(synonym1, synonym2) */
-    set<pair<int, int>> getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType);
+    const set<pair<int, int>>& getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType);
 
     /* Use for Parent*(_, INT) */
     bool getParentTUnderscoreInt(int childStatementNo);
@@ -266,6 +266,20 @@ class PQLEvaluator
 
     /* Uses */
 
+    const unordered_set<string>& getUsesIntSyn(int statementNo);
+    bool getUsesIntIdent(int statementNo, string ident);
+    bool getUsesIntUnderscore(int statementNo);
+    const vector<pair<int, string>>& getUsesSynSynNonProc(PKBDesignEntity de);
+    const vector<pair<string, string>>& getUsesSynSynProc();
+    const vector<int>& getUsesSynUnderscoreNonProc(PKBDesignEntity de);
+    const vector<string>& getUsesSynUnderscoreProc();
+    const vector<int>& getUsesSynIdentNonProc(PKBDesignEntity entityType, string variableName);
+    const vector<string>& getUsesSynIdentProc(string ident);
+
+    bool variableExists(string name);
+    bool procExists(string procname);
+    bool statementExists(int statementNo);
+
     // Get the names of all variables used by statement indexed {statementIndex}
     vector<string> getUsed(int statementIndex);
     /* Check if the given stmt Index USES any variables. */
@@ -296,10 +310,10 @@ class PQLEvaluator
     bool checkUsedByProcName(string procname, string ident);
 
     // Get all statements that use the variable of name {variableName}
-    vector<int> getUsers(string variableName);
+    const vector<int>& getUsers(string variableName);
     // Get all statements of type {entityType} that use the variable of name
     // {variableName}
-    vector<int> getUsers(PKBDesignEntity entityType, string variableName);
+
     // Get all statements that use at least one variable
     vector<int> getUsers();
     // Get all statements of type {entityType} that use at least one variable
@@ -395,6 +409,8 @@ class PQLEvaluator
     vector<pair<int, string>> matchExactPattern(string &LHS, shared_ptr<Expression> &RHS);
 
   protected:
+
+
     PQLEvaluator(PKB::SharedPtr pPKB)
     {
         mpPKB = pPKB;

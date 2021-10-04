@@ -2,84 +2,84 @@
 assign a; variable k;
 Select a such that Uses(a, _)
 3, 8
-25
+500
 2 - Select a such that Uses(pr, _) // Select Prints that use a variable
 assign a; variable k; print pr, rp, rr, pp;
 Select pp such that Uses(pp, _)
 9, 5
-25
+500
 3 - Select v such that Uses(c, _) // Select Calls that use variable
 call k;
 Select k such that Uses(k, _)
 11, 12
-25
+500
 4 - Select p such that Uses(p, _) // Select Procedures that use variable
 procedure k;
 Select k such that Uses(k, _)
 yida1, yida2, yida3
-25
+500
 5 - Select syn such that Uses(syn, "x") // Select Stmts that Use an IDENT
 stmt syn;
 Select syn such that Uses(syn, "x")
 3, 8, 11, 12
-25
+500
 6 - Select syn such that Uses(syn, "b") // Select Prints that Use an IDENT
 print syn;
 Select syn such that Uses(syn, "b")
 5
-25
+500
 7 - Select syn such that Uses(syn, "x") // Select Assigns that Use an IDENT
 assign syn;
 Select syn such that Uses(syn, "x")
 3, 8
-25
+500
 8 - Select proc such that Uses(syn, "q") // Select Procedures that Use an IDENT
 procedure syn;
 Select syn such that Uses(syn, "q")
 yida2, yida3
-25
+500
 9 - Select stmt such that Uses(s, "error") // NEGATIVE Case: Select Stmts that use non-existent Variable
 stmt syn;
 Select syn such that Uses(syn, "error")
 
-25
+500
 10 - Select assigns such that Uses(s, "error") // NEGATIVE Case: Select Assigns that use non-existent Variable
 assign syn;
 Select syn such that Uses(syn, "error")
 
-25
+500
 11 - Select prints such that Uses(s, "error") // NEGATIVE Case: Select Prints that use non-existent Variable
 print syn;
 Select syn such that Uses(syn, "error")
 
-25
+500
 12 - Select procedures such that Uses(s, "error") // NEGATIVE Case: Select Procedures that use non-existent Variable
 procedure syn;
 Select syn such that Uses(syn, "error")
 
-25
+500
 13 - Select assigns such that Uses(s, "b") // NEGATIVE Case: No Assigns use given variable IDENT
 assign syn;
 Select syn such that Uses(syn, "b")
 
-25
+500
 14 - Select prints such that Uses(s, "x") // NEGATIVE Case: No Prints use given variable IDENT
 print syn;
 Select syn such that Uses(syn, "x")
 
-25
+500
 15 - Select procedures such that Uses(s, "i") // NEGATIVE Case: No Procedures use given variable IDENT
 procedure syn;
 Select syn such that Uses(syn, "i")
 
-25
+500
 16 - Select calls such that Uses(s, "j") // NEGATIVE Case: No Calls use given variable IDENT
 call syn;
 Select syn such that Uses(syn, "j")
 
-25
+500
 17 - Select stmts such that Uses(s, "j") // NEGATIVE Case: No Stmts use given variable IDENT
 stmt syn;
 Select syn such that Uses(syn, "j")
 
-25
+500

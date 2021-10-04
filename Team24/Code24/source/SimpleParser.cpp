@@ -59,7 +59,6 @@ class Environment
 
     bool isProcedureCallsValid()
     {
-        // why this cpp version no `std::all_of`
         unordered_set<string> ps = this->procedures;
         for (string proc : proceduresInvoked)
         {
@@ -172,8 +171,7 @@ class SimpleParser
 
         cout << "] but got '" << getSimpleTokenLabel(actual) << "' instead." << endl;
 
-        // TODO: (@jiachen) do proper error handling
-        exit(0);
+        throw "Simple parser failed to parse source code.";
     }
 
     void errorKeyword(string expectedKeyword, SimpleToken actual)
@@ -183,8 +181,7 @@ class SimpleParser
         cout << "Expected \"" << expectedKeyword << "\" but got " << getSimpleTokenLabel(actual) << "' instead."
              << endl;
 
-        // TODO: (@jiachen) do proper error handling
-        exit(0);
+        throw "Simple parser failed to parse source code.";
     }
 
     bool isEmpty()
@@ -229,26 +226,21 @@ class SimpleParser
         while (!this->isEmpty())
         {
             procedure = parseProcedure(env);
-            if (procedure == NULL)
-            {
-                return NULL;
-            }
             procedures.push_back(procedure);
         }
 
         // Validate program and procs
         if (procedures.size() == 0)
         {
-            return NULL;
+            throw "Simple program must have at least one procedure.";
         }
         else if (!env->isProcedureCallsValid())
         {
-            return NULL;
+            throw "Procedure call invalid.";
         }
         else if (doesCallGraphContainCycles(env->getCallGraph()))
         {
-            cout << "Call graph should not contain cycles.";
-            return NULL;
+            throw "Call graph contains cycles.";
         }
         else
         {
@@ -265,7 +257,7 @@ class SimpleParser
         if (env->isProcAlreadyDeclared(procName))
         {
             cout << "Error: Procedure '" + procName + "' is already declared.\n";
-            return NULL;
+            throw "Redeclation of proc in simple code";
         }
         else
         {
@@ -511,7 +503,6 @@ class SimpleParser
         else
         {
             error({SimpleTokenType::NOT, SimpleTokenType::LEFT_PAREN, SimpleTokenType::NAME}, peek());
-            return NULL;
         }
     }
 
@@ -531,7 +522,6 @@ class SimpleParser
         else
         {
             error({SimpleTokenType::AND, SimpleTokenType::OR}, peek());
-            return NULL;
         }
         eat(SimpleTokenType::LEFT_PAREN);
         shared_ptr<ConditionalExpression> rhs = parseConditionalExpression();
@@ -580,7 +570,6 @@ class SimpleParser
             error({SimpleTokenType::GT, SimpleTokenType::GTE, SimpleTokenType::LTE, SimpleTokenType::LT,
                    SimpleTokenType::EQ, SimpleTokenType::NEQ},
                   peek());
-            return NULL;
         }
         shared_ptr<Expression> rhs = parseRelationalFactor();
         return make_shared<RelationalExpression>(op, lhs, rhs);
@@ -675,7 +664,6 @@ class SimpleParser
         else
         {
             error({SimpleTokenType::NAME, SimpleTokenType::INTEGER, SimpleTokenType::LEFT_PAREN}, peek());
-            return NULL;
         }
     }
 };

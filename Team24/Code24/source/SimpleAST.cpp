@@ -118,10 +118,6 @@ ConditionalType RelationalExpression::getConditionalType()
 
 string CombinationExpression::format(int level)
 {
-    if (lhs == NULL)
-    {
-        return "ERROR: LEFT SHOULD NOT BE NULL";
-    }
     return "(" + lhs->format(level) + " " + getBopLabel(op) + " " + rhs->format(level) + ")";
 }
 

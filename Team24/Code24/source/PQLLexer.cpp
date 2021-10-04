@@ -42,9 +42,21 @@ vector<PQLToken> pqlLex(string &program)
         {
             tokens.emplace_back(PQLTokenType::COMMA);
         }
-        else if (curr == '*')
+        else if (curr == '<')
         {
-            tokens.emplace_back(PQLTokenType::STAR);
+            tokens.emplace_back(PQLTokenType::LT);
+        }
+        else if (curr == '>')
+        {
+            tokens.emplace_back(PQLTokenType::GT);
+        }
+        else if (curr == '.')
+        {
+            tokens.emplace_back(PQLTokenType::DOT);
+        }
+        else if (curr == '=')
+        {
+            tokens.emplace_back(PQLTokenType::EQUAL);
         }
         else if (curr == '"')
         {
@@ -74,13 +86,41 @@ vector<PQLToken> pqlLex(string &program)
         else if (isalpha(curr))
         {
             string value;
-            while (isalpha(curr) || isdigit(curr))
+            // TODO (@jiachen) fix this, # should not be allowed other than stmt#
+            // prog_line is currently a hack...
+            // the grammar is IDIOTIC i swear, `_` is an illegal variable name character but used in prog_line while `such that` uses a space as its delimiter
+            while (isalpha(curr) || isdigit(curr) || (value == "prog" && curr == '_'))
             {
                 value.push_back(curr);
                 curr = lookahead;
                 lookahead = program[++i + 1];
             }
-            tokens.emplace_back(std::move(value)); // string token
+            
+            if (value == SPECIAL_STMT && curr == '#') {
+                // stmt# in AttrName
+                i++;
+                tokens.emplace_back(PQLTokenType::STMT_NUMBER);
+            }
+            else if (value == SPECIAL_PARENT && curr == '*') {
+                i++;
+                tokens.emplace_back(PQLTokenType::PARENT_T);
+            }
+            else if (value == SPECIAL_FOLLOWS && curr == '*') {
+                i++;
+                tokens.emplace_back(PQLTokenType::FOLLOWS_T);
+            }
+            else if (value == SPECIAL_CALLS && curr == '*') {
+                i++;
+                tokens.emplace_back(PQLTokenType::CALLS_T);
+            }
+            else if (value == SPECIAL_NEXT && curr == '*') {
+                i++;
+                tokens.emplace_back(PQLTokenType::NEXT_T);
+            }
+            else {
+                tokens.emplace_back(std::move(value));
+            }
+            
             continue;
         }
         else if (isdigit(curr))
@@ -125,8 +165,14 @@ string getPQLTokenLabel(PQLToken &token)
         return "id(" + token.stringValue + ")";
     case PQLTokenType::INTEGER:
         return std::to_string(token.intValue);
-    case PQLTokenType::STAR:
-        return "*";
+    case PQLTokenType::DOT:
+        return ".";
+    case PQLTokenType::LT:
+        return "<";
+    case PQLTokenType::GT:
+        return ">";
+    case PQLTokenType::EQUAL:
+        return "=";
     }
     return "";
 }

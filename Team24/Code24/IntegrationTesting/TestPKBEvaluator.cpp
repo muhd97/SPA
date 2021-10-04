@@ -37,13 +37,9 @@ void TestPKBEvaluator::runTest1() {
     printSimpleTokens(tokens);
 
     shared_ptr<Program> root = parseSimpleProgram(tokens);
-    if (root == NULL) {
-        cout << "Failed to parse program!";
-    }
-    else {
-        // for debugging
-        cout << root->format();
-    }
+
+    // for debugging
+    cout << root->format();
 
     // BUILD PKB HERE
     cout << "\n==== Building PKB ====\n";
@@ -124,13 +120,9 @@ void TestPKBEvaluator::runTest2() {
     // for debugging
     printSimpleTokens(tokens);
     shared_ptr<Program> root = parseSimpleProgram(tokens);
-    if (root == NULL) {
-        cout << "Failed to parse program!";
-    }
-    else {
-        // for debugging
-        cout << root->format();
-    }
+
+    // for debugging
+    cout << root->format();
 
     // BUILD PKB HERE
     cout << "\n==== Building PKB ====\n";
@@ -350,13 +342,8 @@ void TestPKBEvaluator::runPatternTests1()
     // for debugging
     printSimpleTokens(tokens);
     shared_ptr<Program> root = parseSimpleProgram(tokens);
-    if (root == NULL) {
-        cout << "Failed to parse program!";
-    }
-    else {
-        // for debugging
-        cout << root->format();
-    }
+    // for debugging
+    cout << root->format();
 
     // BUILD PKB HERE
     cout << "\n==== Building PKB ====\n";

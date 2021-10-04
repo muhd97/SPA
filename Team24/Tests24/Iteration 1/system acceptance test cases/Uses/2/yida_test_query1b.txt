@@ -2,80 +2,80 @@
 assign a; variable v;
 Select v such that Uses(a, v)
 x, y, z
-25
+500
 2 - Select v such that Uses(3, v)
 variable variablee;
 Select variablee such that Uses(3, variablee)
 y, x
-25
+500
 3 - Select v such that Uses(8, v)
 variable suchthat;
 Select suchthat such that Uses(8, suchthat)
 y, x, z
-25
+500
 4 - Select v such that Uses(1, v) // EMPTY RESULT
 variable suchthat;
 Select suchthat such that Uses(1, suchthat)
 
-25
+500
 5 - Select v such that Uses(p, v)
 print printt; variable v;
 Select v such that Uses(printt, v)
 q, b
-25
+500
 6 - Select a such that Uses(a, v) // Select Assigns that use a variable
 assign a; variable v;
 Select a such that Uses(a, v)
 3, 8
-25
+500
 7 - Select a such that Uses(pr, v) // Select Prints that use a variable
 assign a; variable v; print pr, rp, rr, pp;
 Select pp such that Uses(pp, v)
 9, 5
-25
+500
 8 - Select v such that Uses("IDENT", v) // Select variables Used in procedure
 variable v;
 Select v such that Uses("yida1", v)
 x, y, b
-25
+500
 9 - Select v such that Uses("IDENT", v) // Select variables Used in procedure
 variable yida2;
 Select yida2 such that Uses("yida2", yida2)
 x, y, z, q
-25
+500
 10 - Select v such that Uses("IDENT", v) // Select variables Used in procedure
 variable yida3;
 Select yida3 such that Uses("yida3", yida3)
 x, y, z, q, b
-25
+500
 11 - Select v such that Uses("IDENT", v) // Select variables Used in procedure (empty)
 variable yida4;
 Select yida4 such that Uses("yida4", yida4)
 
-25
+500
 12 - Select v such that Uses(c, v) // Select Calls that use variable
 call k; variable v;
 Select k such that Uses(k, v)
 11, 12
-25
+500
 13 - Select p such that Uses(p, v) // Select Procedures that use variable
 procedure k; variable posiadadasdhsdasjdnmassmaasjndjadsad;
 Select k such that Uses(k, posiadadasdhsdasjdnmassmaasjndjadsad)
 yida1, yida2, yida3
-25
+500
 14 - Select stmt such that Uses(stmt, v) // Return only assign/if/while/print/call
 variable v; stmt s;
 Select s such that Uses(s, v)
 11, 12, 9, 8, 5, 3
-25
+500
 15 - Select v such that Uses(INT, v) // NEGATIVE CASE: INT is a non-Uses statement?
 variable v;
 Select v such that Uses(4, v)
 
-25
+500
 16 - Select v such that Uses(s, v) // s is general STMT
 stmt s; variable v;
 Select v such that Uses(s, v)
 z, x, y, b, q
-25
+500
 

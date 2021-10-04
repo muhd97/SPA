@@ -15,6 +15,7 @@ string DesignEntity::VARIABLE = "variable";
 string DesignEntity::CONSTANT = "constant";
 string DesignEntity::PROCEDURE = "procedure";
 string DesignEntity::CALL = "call";
+string DesignEntity::PROG_LINE = "prog_line";
 
 PQLToken PQLParser::peek()
 {
@@ -142,6 +143,10 @@ shared_ptr<DesignEntity> PQLParser::parseDesignEntity()
         {
             eatKeyword(PQL_PROCEDURE);
         }
+        else if (curr.stringValue == PQL_PROG_LINE)
+        {
+            eatKeyword(PQL_PROG_LINE);
+        }
         else
         {
             cout << "ERROR: Unrecognized Design Entity!\n" << curr.stringValue;
@@ -184,6 +189,27 @@ shared_ptr<StmtRef> PQLParser::parseStmtRef()
     }
 }
 
+string parseIdent(string str) {
+    // remove leading and trailing whitespaces
+    string clean = regex_replace(str, regex("^ +| +$"), "");
+
+    if (str.length() < 1) {
+        throw "Ident must contain at least one letter";
+    }
+    // check that first char is a letter
+    else if (!isalpha(str[0])) {
+        throw "First of character of ident has to be a letter";
+    }
+    // if whole string is alpha numeric
+    for (char x : str) {
+        if (!isalnum(x)) {
+            throw "Character in ident has to be alpha numeric";
+        }
+    }
+
+    return clean;
+}
+
 shared_ptr<EntRef> PQLParser::parseEntRef()
 {
     switch (peek().type)
@@ -197,13 +223,39 @@ shared_ptr<EntRef> PQLParser::parseEntRef()
 
     case PQLTokenType::STRING:
         auto str = eat(PQLTokenType::STRING);
-        // remove leading and trailing whitespaces
-        string cleaned = regex_replace(str.stringValue, regex("^ +| +$"), "");
-        auto toReturn = make_shared<EntRef>(EntRefType::IDENT, cleaned);
-        return toReturn;
+        return make_shared<EntRef>(EntRefType::IDENT, parseIdent(str.stringValue));
     }
-    cout << "Unrecognized entity ref\n";
-    return make_shared<EntRef>(EntRefType::UNDERSCORE);
+    throw "Faild to parse entRef: " + getPQLTokenLabel(peek());
+}
+
+shared_ptr<Ref> PQLParser::parseRef()
+{
+    switch (peek().type)
+    {
+    case PQLTokenType::UNDERSCORE: {
+        eat(PQLTokenType::UNDERSCORE);
+        return make_shared<Ref>(RefType::UNDERSCORE);
+    }
+    case PQLTokenType::NAME: {
+        auto syn = parseSynonym();
+
+        if (!tokensAreEmpty() && peek().type == PQLTokenType::DOT) {
+            // parse attr ref
+            eat(PQLTokenType::DOT);
+            shared_ptr<AttrName> attrName = parseAttrName();
+            auto attrRef = make_shared<AttrRef>(syn, attrName);
+            return make_shared<Ref>(attrRef);
+        }
+        else {
+            return make_shared<Ref>(RefType::SYNONYM, parseSynonym()->getValue());
+        }
+    }
+    case PQLTokenType::STRING: {
+        auto str = eat(PQLTokenType::STRING);
+        return make_shared<Ref>(RefType::IDENT, parseIdent(str.stringValue));
+    }
+    }
+    throw "Faild to parse ref: " + getPQLTokenLabel(peek());
 }
 
 shared_ptr<RelRef> PQLParser::parseUses()
@@ -276,66 +328,110 @@ be a ModifiesP */
     }
 }
 
-shared_ptr<SuchThatCl> PQLParser::parseSuchThat() // todo
+shared_ptr<RelRef> PQLParser::parseCalls() {
+
+}
+
+
+vector<shared_ptr<SuchThatCl>> PQLParser::parseSuchThat()
 {
+    vector<shared_ptr<SuchThatCl>> clauses;
     eatKeyword(PQL_SUCH);
     eatKeyword(PQL_THAT);
     auto r = parseRelRef();
-    return make_shared<SuchThatCl>(r);
+    clauses.push_back(make_shared<SuchThatCl>(r));
+    
+    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+        eatKeyword(PQL_AND);
+        auto r = parseRelRef();
+        clauses.push_back(make_shared<SuchThatCl>(r));
+    }
+
+    return clauses;
 }
 
 shared_ptr<RelRef> PQLParser::parseRelRef()
 {
     auto curr = peek();
-    if (isKeyword(curr, PQL_FOLLOWS))
+    if (curr.type == PQLTokenType::FOLLOWS_T) {
+        // Follows*
+        eat(PQLTokenType::FOLLOWS_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto sRef3 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto sRef4 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<FollowsT>(sRef3, sRef4);
+    }
+    else if (isKeyword(curr, PQL_FOLLOWS))
     {
-        if (peekNext().type == PQLTokenType::STAR)
-        {
-            // Follows*
-            eatKeyword(PQL_FOLLOWS);
-            eat(PQLTokenType::STAR);
-            eat(PQLTokenType::LEFT_PAREN);
-            auto sRef3 = parseStmtRef();
-            eat(PQLTokenType::COMMA);
-            auto sRef4 = parseStmtRef();
-            eat(PQLTokenType::RIGHT_PAREN);
-            return make_shared<FollowsT>(sRef3, sRef4);
-        }
-        else
-        {
-            // Follows
-            eatKeyword(PQL_FOLLOWS);
-            eat(PQLTokenType::LEFT_PAREN);
-            auto sRef1 = parseStmtRef();
-            eat(PQLTokenType::COMMA);
-            auto sRef2 = parseStmtRef();
-            eat(PQLTokenType::RIGHT_PAREN);
-            return make_shared<Follows>(sRef1, sRef2);
-        }
+        // Follows
+        eatKeyword(PQL_FOLLOWS);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto sRef1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto sRef2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<Follows>(sRef1, sRef2);
+    }
+    else if (curr.type == PQLTokenType::PARENT_T) {
+        eat(PQLTokenType::PARENT_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto sRef7 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto sRef8 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<ParentT>(sRef7, sRef8);
     }
     else if (isKeyword(curr, PQL_PARENT))
     {
-        if (peekNext().type == PQLTokenType::STAR)
-        {
-            eatKeyword(PQL_PARENT);
-            eat(PQLTokenType::STAR);
-            eat(PQLTokenType::LEFT_PAREN);
-            auto sRef7 = parseStmtRef();
-            eat(PQLTokenType::COMMA);
-            auto sRef8 = parseStmtRef();
-            eat(PQLTokenType::RIGHT_PAREN);
-            return make_shared<ParentT>(sRef7, sRef8);
-        }
-        else
-        {
-            eatKeyword(PQL_PARENT);
-            eat(PQLTokenType::LEFT_PAREN);
-            auto sRef5 = parseStmtRef();
-            eat(PQLTokenType::COMMA);
-            auto sRef6 = parseStmtRef();
-            eat(PQLTokenType::RIGHT_PAREN);
-            return make_shared<Parent>(sRef5, sRef6);
-        }
+        eatKeyword(PQL_PARENT);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto sRef5 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto sRef6 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<Parent>(sRef5, sRef6);
+    }
+    else if (curr.type == PQLTokenType::CALLS_T) {
+        eat(PQLTokenType::CALLS_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto entRef1 = parseEntRef();
+        eat(PQLTokenType::COMMA);
+        auto entRef2 = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<CallsT>(entRef1, entRef2);
+    }
+    else if (isKeyword(curr, PQL_CALLS))
+    {
+        eatKeyword(PQL_CALLS);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto entRef1 = parseEntRef();
+        eat(PQLTokenType::COMMA);
+        auto entRef2 = parseEntRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<Calls>(entRef1, entRef2);
+    }
+    if (curr.type == PQLTokenType::NEXT_T) {
+        // Next*
+        eat(PQLTokenType::NEXT_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto ref1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto ref2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<NextT>(ref1, ref2);
+    }
+    else if (isKeyword(curr, PQL_NEXT))
+    {
+        // Next
+        eatKeyword(PQL_NEXT);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto ref1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto ref2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<Next>(ref1, ref2);
     }
     else if (isKeyword(curr, PQL_USES))
     {
@@ -347,7 +443,7 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
     }
     else
     {
-        cout << "Expected: Follow, FollowsT, Parent, ParentT, Uses and Modifies "
+        cout << "Expected: Follows(*), Parent(*), Calls(*), Next(*), Uses and Modifies."
                 "but got: "
              << getPQLTokenLabel(curr) << " instead\n";
         throw std::invalid_argument("Error parsing PQL Query!!");
@@ -384,18 +480,34 @@ shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
         cout << "Error: Invalid expression spec." << endl;
     }
 
+    if (peek().type == PQLTokenType::COMMA) {
+        // only for syn-if
+        eat(PQLTokenType::COMMA);
+        eat(PQLTokenType::UNDERSCORE);
+    }
+
     return make_shared<ExpressionSpec>(false, false, nullptr);
 }
 
-shared_ptr<PatternCl> PQLParser::parsePatternCl()
+vector<shared_ptr<PatternCl>> PQLParser::parsePatternCl()
 {
+    vector<shared_ptr<PatternCl>> clauses;
     eatKeyword(PQL_PATTERN);
+    clauses.push_back(parsePatternClCond());
+
+    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+        eatKeyword(PQL_AND);
+        clauses.push_back(parsePatternClCond());
+    }
+    return clauses;
+}
+
+shared_ptr<PatternCl> PQLParser::parsePatternClCond()
+{
+    // Rewriting grammer rule to 
+    // syn (entRef, exprSpec [, _])
     auto syn = parseSynonym();
-
-    // TODO (@jiachen247) Check syn is of type assign
-
     eat(PQLTokenType::LEFT_PAREN);
-
     auto entRef = parseEntRef();
     eat(PQLTokenType::COMMA);
     string rawExpression;
@@ -405,13 +517,98 @@ shared_ptr<PatternCl> PQLParser::parsePatternCl()
     return make_shared<PatternCl>(syn, entRef, exprSpec);
 }
 
+vector<shared_ptr<WithCl>> PQLParser::parseWithCl()
+{
+    vector<shared_ptr<WithCl>> clauses;
+    eatKeyword(PQL_WITH);
+    clauses.push_back(parseAttrCompare());
+    
+
+    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+        eatKeyword(PQL_AND);
+        clauses.push_back(parseAttrCompare());
+    }
+    return clauses;
+}
+
+shared_ptr<WithCl> PQLParser::parseAttrCompare()
+{
+    auto ref1 = parseRef();
+    eat(PQLTokenType::EQUAL);
+    auto ref2 = parseRef();
+    return make_shared<WithCl>(ref1, ref2);
+}
+
 inline bool tokenIsDesignEntity(PQLToken tk)
 {
     return tk.type == PQLTokenType::NAME &&
-           (tk.stringValue == PQL_STMT || tk.stringValue == PQL_READ || tk.stringValue == PQL_PRINT ||
+        (tk.stringValue == PQL_STMT || tk.stringValue == PQL_READ || tk.stringValue == PQL_PRINT ||
             tk.stringValue == PQL_CALL || tk.stringValue == PQL_WHILE || tk.stringValue == PQL_IF ||
             tk.stringValue == PQL_ASSIGN || tk.stringValue == PQL_VARIABLE || tk.stringValue == PQL_CONSTANT ||
-            tk.stringValue == PQL_PROCEDURE);
+            tk.stringValue == PQL_PROCEDURE || tk.stringValue == PQL_PROG_LINE);
+}
+
+shared_ptr<AttrName> PQLParser::parseAttrName() {
+    PQLToken name = eat(PQLTokenType::NAME);
+    if (name.stringValue == PQL_PROC_NAME) {
+        return make_shared<AttrName>(AttrNameType::PROC_NAME);
+    }
+    else if (name.stringValue == PQL_VAR_NAME) {
+        return make_shared<AttrName>(AttrNameType::VAR_NAME);
+    }
+    else if (name.stringValue == PQL_VALUE) {
+        return make_shared<AttrName>(AttrNameType::VALUE);
+    }
+    else if (name.stringValue == PQL_STMT_NUMBER) {
+        return make_shared<AttrName>(AttrNameType::STMT_NUMBER);
+    } else {
+        throw "Unreconized attribute name: " + name.stringValue;
+    }
+}
+
+shared_ptr<Element> PQLParser::parseElement() {
+    auto syn = parseSynonym();
+    
+    if (!tokensAreEmpty() && peek().type == PQLTokenType::DOT) {
+        // parse attr ref
+        eat(PQLTokenType::DOT);
+        shared_ptr<AttrName> attrName = parseAttrName();
+        return make_shared<AttrRef>(syn, attrName);
+
+    }
+    else {
+
+        return syn;
+    }
+}
+
+shared_ptr<ResultCl> PQLParser::parseResultCl() {
+
+    if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_BOOLEAN) {
+
+        return make_shared<ResultCl>();
+    }
+    else if (peek().type == PQLTokenType::LT) {
+
+        vector<shared_ptr<Element>> elements;
+        elements.push_back(parseElement());
+
+        eat(PQLTokenType::LT);
+        while (peek().type == PQLTokenType::COMMA) {
+            eat(PQLTokenType::COMMA);
+            elements.push_back(parseElement());
+        }
+        eat(PQLTokenType::GT);
+   
+        return make_shared<ResultCl>(elements);
+    }
+    else {
+        
+        vector<shared_ptr<Element>> elements;
+        elements.push_back(parseElement());
+        
+        return make_shared<ResultCl>(elements);
+    }
 }
 
 shared_ptr<SelectCl> PQLParser::parseSelectCl()
@@ -419,7 +616,8 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
-    shared_ptr<Synonym> synonym;
+    vector<shared_ptr<WithCl>> withClauses;
+    shared_ptr<ResultCl> result;
 
     while (tokenIsDesignEntity(peek()))
     {
@@ -427,30 +625,24 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     }
 
     eatKeyword(PQL_SELECT);
-    synonym = parseSynonym();
+    result = parseResultCl();
 
-    /* YIDA Note: For iteration 1, multiple such that clauses are NOT allowed */
     while (!tokensAreEmpty())
     {
-        // if (suchThatClauses.size() == 0 && peek().type == PQLTokenType::NAME
-        // && peek().stringValue == PQL_SUCH) {
         if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_SUCH)
-        { /* YIDA: Comment this to DISABLE Multiple Clauses */
-            if (suchThatClauses.size() != 0)
-            {
-                cout << "Duplicate such that clauses are not allowed." << endl;
-                // break; /* YIDA: Uncomment this to DISABLE Multiple Clauses */
-            }
-            suchThatClauses.push_back(parseSuchThat());
+        { 
+            vector<shared_ptr<SuchThatCl>> clauses = parseSuchThat();
+            suchThatClauses.insert(end(suchThatClauses), begin(clauses), end(clauses));
         }
         else if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_PATTERN)
         {
-            if (patternClauses.size() != 0)
-            {
-                cout << "Duplicate pattern clauses are not allowed." << endl;
-                break;
-            }
-            patternClauses.push_back(parsePatternCl());
+            vector<shared_ptr<PatternCl>> clauses = parsePatternCl();
+            patternClauses.insert(end(patternClauses), begin(clauses), end(clauses));
+        }
+        else if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_WITH)
+        {
+            vector<shared_ptr<WithCl>> clauses = parseWithCl();
+            withClauses.insert(end(withClauses), begin(clauses), end(clauses));
         }
         else
         {
@@ -459,5 +651,5 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
         }
     }
 
-    return make_shared<SelectCl>(move(synonym), move(declarations), move(suchThatClauses), move(patternClauses));
+    return make_shared<SelectCl>(move(result), move(declarations), move(suchThatClauses), move(patternClauses));
 }

@@ -2,6 +2,17 @@
 
 #include <queue>
 
+bool PQLEvaluator::statementExists(int statementNo)
+{
+    PKBStatement::SharedPtr stmt;
+    if (!mpPKB->getStatement(statementNo, stmt))
+    {
+        return false;
+    }
+
+    return true;
+}
+
 set<int> PQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
 {
     set<int> res;
@@ -248,7 +259,7 @@ bool PQLEvaluator::getParentsUnderscoreUnderscore()
         vector<PKBGroup::SharedPtr> grps = stmt->getContainerGroups();
         for (auto &grp : grps)
         {
-            vector<int> members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
+            vector<int>& members = grp->getMembers(PKBDesignEntity::AllExceptProcedure);
             if (!members.empty())
                 return true;
         }
@@ -544,9 +555,16 @@ unordered_set<int> PQLEvaluator::getAllChildAndSubChildrenOfGivenType(PKBStateme
     return toReturn;
 }
 
-unordered_set<int> PQLEvaluator::getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType)
+
+/* PRE-CONDITION: StatementNo exists in this program */
+const vector<int>& PQLEvaluator::getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType)
 {
-    unordered_set<int> toReturn;
+
+    return mpPKB->parentTIntSynTable[statementNo][targetChildrenType];
+
+    // Below is non pre-compute version.
+
+    /*unordered_set<int> toReturn;
     queue<PKBGroup::SharedPtr> qOfGroups;
     PKBStatement::SharedPtr stmt;
     if (!mpPKB->getStatement(statementNo, stmt))
@@ -572,12 +590,22 @@ unordered_set<int> PQLEvaluator::getParentTIntSyn(int statementNo, PKBDesignEnti
             qOfGroups.push(subGrps);
     }
 
-    return move(toReturn);
+    return move(toReturn);*/
 }
 
 bool PQLEvaluator::getParentTIntUnderscore(int parentStatementNo)
 {
-    unordered_set<int> toReturn;
+    const auto& innerMap = mpPKB->parentTIntSynTable[parentStatementNo];
+
+    for (auto& pair : innerMap) {
+        if (!pair.second.empty()) return true;
+    }
+
+    return false;
+
+    // Below is non-precomputed version.
+
+    /*unordered_set<int> toReturn;
     queue<PKBGroup::SharedPtr> qOfGroups;
     PKBStatement::SharedPtr stmt;
     if (!mpPKB->getStatement(parentStatementNo, stmt))
@@ -603,12 +631,18 @@ bool PQLEvaluator::getParentTIntUnderscore(int parentStatementNo)
             qOfGroups.push(subGrps);
     }
 
-    return false;
+    return false;*/
 }
 
 bool PQLEvaluator::getParentTIntInt(int parentStatementNo, int childStatementNo)
 {
-    unordered_set<int> toReturn;
+    if (mpPKB->parentTIntIntTable.find(make_pair(parentStatementNo, childStatementNo)) == mpPKB->parentTIntIntTable.end()) {
+        return false;
+    }
+
+    return true;
+
+    /*unordered_set<int> toReturn;
     queue<PKBGroup::SharedPtr> qOfGroups;
     PKBStatement::SharedPtr stmt;
     if (!mpPKB->getStatement(parentStatementNo, stmt))
@@ -637,93 +671,109 @@ bool PQLEvaluator::getParentTIntInt(int parentStatementNo, int childStatementNo)
             qOfGroups.push(subGrps);
     }
 
-    return false;
+    return false;*/
 }
 
-unordered_set<int> PQLEvaluator::getParentTSynUnderscore(PKBDesignEntity targetParentType)
+/* PRE-CONDITION: TargetParentType IS a container type. */
+const unordered_set<int>& PQLEvaluator::getParentTSynUnderscore(PKBDesignEntity targetParentType)
 {
-    unordered_set<int> toReturn;
-    vector<PKBStatement::SharedPtr> parentStmts;
 
-    if (targetParentType == PKBDesignEntity::AllExceptProcedure)
-    {
-        addParentStmts(parentStmts);
-    }
-    else
-    {
-        // check these 'possible' parent statements
-        parentStmts = mpPKB->getStatements(targetParentType);
-    }
+    return mpPKB->parentTSynUnderscoreTable[targetParentType];
 
-    for (auto &stmt : parentStmts)
-    {
-        if (getParentTIntUnderscore(stmt->getIndex()))
-        {
-            toReturn.insert(stmt->getIndex());
-        }
-    }
+    //unordered_set<int> toReturn;
+    //vector<PKBStatement::SharedPtr> parentStmts;
 
-    return move(toReturn);
+    //if (targetParentType == PKBDesignEntity::AllExceptProcedure)
+    //{
+    //    addParentStmts(parentStmts);
+    //}
+    //else
+    //{
+    //    // check these 'possible' parent statements
+    //    parentStmts = mpPKB->getStatements(targetParentType);
+    //}
+
+    //for (auto &stmt : parentStmts)
+    //{
+    //    if (getParentTIntUnderscore(stmt->getIndex()))
+    //    {
+    //        toReturn.insert(stmt->getIndex());
+    //    }
+    //}
+
+    //return move(toReturn);
 }
 
-unordered_set<int> PQLEvaluator::getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo)
+/* PRE-CONDITION: TargetParentType IS a container and statement type type. */
+const unordered_set<int>& PQLEvaluator::getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo)
 {
-    unordered_set<int> toReturn;
-    vector<PKBStatement::SharedPtr> parentStmts;
+    
+    return mpPKB->parentTSynIntTable[childStatementNo][targetParentType];
 
-    if (targetParentType == PKBDesignEntity::AllExceptProcedure)
-    {
-        addParentStmts(parentStmts);
-    }
-    else
-    {
-        // check these 'possible' parent statements
-        parentStmts = mpPKB->getStatements(targetParentType);
-    }
+    // Below is non-precomputed version
 
-    for (auto &stmt : parentStmts)
-    {
-        if (getParentTIntInt(stmt->getIndex(), childStatementNo))
-        {
-            toReturn.insert(stmt->getIndex());
-        }
-    }
+    //unordered_set<int> toReturn;
+    //vector<PKBStatement::SharedPtr> parentStmts;
 
-    return move(toReturn);
+    //if (targetParentType == PKBDesignEntity::AllExceptProcedure)
+    //{
+    //    addParentStmts(parentStmts);
+    //}
+    //else
+    //{
+    //    // check these 'possible' parent statements
+    //    parentStmts = mpPKB->getStatements(targetParentType);
+    //}
+
+    //for (auto &stmt : parentStmts)
+    //{
+    //    if (getParentTIntInt(stmt->getIndex(), childStatementNo))
+    //    {
+    //        toReturn.insert(stmt->getIndex());
+    //    }
+    //}
+
+    //return move(toReturn);
 }
 
-set<pair<int, int>> PQLEvaluator::getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType)
+/* PRE-CONDITION: Both parent and child types are STATEMENT types (not procedure or variable or others) */
+const set<pair<int, int>>& PQLEvaluator::getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-    set<pair<int, int>> res;
 
-    if (!isContainerType(parentType))
-    {
-        return res;
-    }
+    return mpPKB->parentTSynSynTable[make_pair(parentType, childType)];
 
-    vector<PKBStatement::SharedPtr> parentStmts;
-    if (parentType == PKBDesignEntity::AllExceptProcedure)
-    {
-        addParentStmts(parentStmts);
-    }
-    else
-    {
-        // check these 'possible' parent statements
-        parentStmts = mpPKB->getStatements(parentType);
-    }
+    // Below is non-precomputed version
 
-    for (auto &stmt : parentStmts)
-    {
-        for (const int &x : getAllChildAndSubChildrenOfGivenType(stmt, childType))
-        {
-            pair<int, int> toAdd;
-            toAdd.first = stmt->getIndex();
-            toAdd.second = x;
-            res.insert(move(toAdd));
-        }
-    }
+    //set<pair<int, int>> res;
 
-    return move(res);
+    //if (!isContainerType(parentType))
+    //{
+    //    return res;
+    //}
+
+    //vector<PKBStatement::SharedPtr> parentStmts;
+    //if (parentType == PKBDesignEntity::AllExceptProcedure)
+    //{
+    //    addParentStmts(parentStmts);
+    //}
+    //else
+    //{
+    //    // check these 'possible' parent statements
+    //    parentStmts = mpPKB->getStatements(parentType);
+    //}
+
+    //for (auto &stmt : parentStmts)
+    //{
+    //    for (const int &x : getAllChildAndSubChildrenOfGivenType(stmt, childType))
+    //    {
+    //        pair<int, int> toAdd;
+    //        toAdd.first = stmt->getIndex();
+    //        toAdd.second = x;
+    //        res.insert(move(toAdd));
+    //    }
+    //}
+
+    //return move(res);
 }
 
 bool PQLEvaluator::getParentTUnderscoreInt(int childStatementNo)
@@ -1251,6 +1301,43 @@ bool PQLEvaluator::getFollowsTUnderscoreUnderscore()
     return false;
 }
 
+const unordered_set<string>& PQLEvaluator::getUsesIntSyn(int statementNo)
+{
+    return mpPKB->usesIntSynTable[statementNo];
+}
+
+bool PQLEvaluator::getUsesIntIdent(int statementNo, string ident)
+{
+    unordered_set<string>& temp = mpPKB->usesIntSynTable[statementNo];
+    return temp.find(ident) != temp.end();
+}
+
+bool PQLEvaluator::getUsesIntUnderscore(int statementNo)
+{
+    return !mpPKB->usesIntSynTable[statementNo].empty();
+}
+
+const vector<pair<int, string>>& PQLEvaluator::getUsesSynSynNonProc(PKBDesignEntity de)
+{
+    return mpPKB->usesSynSynTableNonProc[de];
+}
+
+const vector<pair<string, string>>& PQLEvaluator::getUsesSynSynProc()
+{
+    return mpPKB->usesSynSynTableProc;
+}
+
+const vector<int>& PQLEvaluator::getUsesSynUnderscoreNonProc(PKBDesignEntity de)
+{
+    return mpPKB->usesSynUnderscoreTableNonProc[de];
+}
+
+const vector<string>& PQLEvaluator::getUsesSynUnderscoreProc()
+{
+    return mpPKB->usesSynUnderscoreTableProc;
+}
+
+
 vector<string> PQLEvaluator::getUsed(int statementIndex)
 {
     set<PKBVariable::SharedPtr> res;
@@ -1262,6 +1349,8 @@ vector<string> PQLEvaluator::getUsed(int statementIndex)
     res = stmt->getUsedVariables();
     return varToString(move(res));
 }
+
+
 
 bool PQLEvaluator::checkUsed(int statementIndex)
 {
@@ -1329,15 +1418,9 @@ vector<string> PQLEvaluator::getUsedByProcName(string procname)
     PKBStatement::SharedPtr &procedure = mpPKB->getProcedureByName(procname);
 
     vector<PKBVariable::SharedPtr> vars;
-    const set<PKBVariable::SharedPtr> &varsUsed = procedure->getUsedVariables();
-    vars.reserve(varsUsed.size());
 
-    for (auto &v : varsUsed)
-    {
-        vars.emplace_back(v);
-    }
+    return procedure->getUsedVariablesAsString();
 
-    return varToString(move(vars));
 }
 
 bool PQLEvaluator::checkUsedByProcName(string procname)
@@ -1365,17 +1448,16 @@ bool PQLEvaluator::checkUsedByProcName(string procname, string ident)
     return varsUsed.find(targetVar) != varsUsed.end();
 }
 
-vector<int> PQLEvaluator::getUsers(string variableName)
+/* PRE-CONDITION: Variable Name exists in this program */
+const vector<int>& PQLEvaluator::getUsers(string variableName)
 {
     PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
 
-    if (v == nullptr)
-        return vector<int>();
-
-    return v->getUsers();
+    return v->getUsersByConstRef();
 }
 
-vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName)
+/* PRE-CONDITION: Variable Name exists in this program */
+const vector<int>& PQLEvaluator::getUsesSynIdentNonProc(PKBDesignEntity userType, string variableName)
 {
     // if we are looking for ALL users using the variable, call the other function
     if (userType == PKBDesignEntity::AllExceptProcedure)
@@ -1383,30 +1465,48 @@ vector<int> PQLEvaluator::getUsers(PKBDesignEntity userType, string variableName
         return getUsers(variableName);
     }
 
-    vector<int> res;
-    PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
 
-    if (v == nullptr)
-        return move(res);
+    return mpPKB->usesSynIdentTableNonProc[variableName][userType];
+    
+    //vector<int> users = v->getUsers();
 
-    vector<int> users = v->getUsers();
+    //// filter only the desired type
+    //for (int userIndex : users)
+    //{
+    //    PKBStatement::SharedPtr userStatement;
+    //    if (!mpPKB->getStatement(userIndex, userStatement))
+    //    {
+    //        return res;
+    //    }
+    //    if (userStatement->getType() == userType)
+    //    {
+    //        res.emplace_back(userIndex);
+    //    }
+    //}
 
-    // filter only the desired type
-    for (int userIndex : users)
-    {
-        PKBStatement::SharedPtr userStatement;
-        if (!mpPKB->getStatement(userIndex, userStatement))
-        {
-            return res;
-        }
-        if (userStatement->getType() == userType)
-        {
-            res.emplace_back(userIndex);
-        }
-    }
-
-    return move(res);
+    //return move(res);
 }
+
+/* PRE-CONDITION: Variable Name exists in this program */
+const vector<string>& PQLEvaluator::getUsesSynIdentProc(string ident)
+{
+    
+     return mpPKB->usesSynIdentTableProc[ident];
+    
+}
+
+bool PQLEvaluator::variableExists(string name)
+{
+    PKBVariable::SharedPtr& v = mpPKB->getVarByName(name);
+    return v != nullptr;
+}
+
+bool PQLEvaluator::procExists(string procname)
+{
+    if (mpPKB->getProcedureByName(procname) == nullptr) return false;
+    return true;
+}
+
 
 vector<int> PQLEvaluator::getUsers()
 {

@@ -8,6 +8,7 @@
 // include your other headers here
 #include "AbstractWrapper.h"
 #include "PKB.h"
+#include "PQLEvaluator.h"
 
 class TestWrapper : public AbstractWrapper {
  public:
@@ -25,8 +26,9 @@ class TestWrapper : public AbstractWrapper {
   virtual void evaluate(std::string query, std::list<std::string>& results);
 
 private:
-    // Yida: add PKB object
+    // Yida: add PKB object and evaluator object
     shared_ptr<PKB> pkb = nullptr;
+    shared_ptr<PQLEvaluator> evaluator = nullptr;
 };
 
 #endif

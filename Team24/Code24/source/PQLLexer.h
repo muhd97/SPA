@@ -5,6 +5,13 @@
 
 using namespace std;
 
+// Special keyowrds that can be followed by special characters like _, * and #
+const string SPECIAL_PARENT = "Parent";
+const string SPECIAL_FOLLOWS = "Follows";
+const string SPECIAL_CALLS = "Calls";
+const string SPECIAL_NEXT = "Next";
+const string SPECIAL_STMT = "stmt";
+
 enum class PQLTokenType
 {
     LEFT_PAREN,
@@ -15,7 +22,18 @@ enum class PQLTokenType
     NAME, // Name and Ident have some definition in grammar???
     INTEGER,
     STRING, // We introduce this new token type for anything within qoutes
-    STAR
+    DOT,
+    LT,
+    GT,
+    EQUAL,
+
+    // speical keywords that are not names
+    // all other keywords are handled in the parser
+    PARENT_T,
+    FOLLOWS_T,
+    NEXT_T,
+    CALLS_T,
+    STMT_NUMBER
 };
 
 const char END_TOKEN = '$'; // marker for EOF

@@ -24,9 +24,17 @@ class PKBVariable
     // dont think a variable will have so many users that it is necessary.
     vector<int> getUsers()
     {
-        cout << "PKBVariable mName: " << mName << ", No. Stmts that use this var = " << mUsers.size() << endl;
+        //cout << "PKBVariable mName: " << mName << ", No. Stmts that use this var = " << mUsers.size() << endl;
 
         return vector<int>(mUsers.begin(), mUsers.end());
+    }
+
+    const vector<int>& getUsersByConstRef() {
+        return mUsersVector;
+    }
+
+    const set<int>& getUsersAsSet() {
+        return mUsers;
     }
 
     vector<int> getModifiers()
@@ -36,7 +44,10 @@ class PKBVariable
 
     void addUserStatement(int userStatementIndex)
     {
-        mUsers.insert(userStatementIndex);
+        if (mUsers.find(userStatementIndex) == mUsers.end()) {
+            mUsers.insert(userStatementIndex);
+            mUsersVector.emplace_back(userStatementIndex);
+        }
     }
 
     void addModifierStatement(int userStatementIndex)
@@ -47,6 +58,9 @@ class PKBVariable
     string mName;
     // list of all the statements that use this variable
     set<int> mUsers;
+
+    vector<int> mUsersVector;
+
     vector<int> mModifiers;
 
   protected:

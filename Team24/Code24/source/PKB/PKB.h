@@ -39,6 +39,7 @@ class PKB
 
     void initialise();
     void extractDesigns(shared_ptr<Program> program);
+    void initializeRelationshipTables();
 
     // for all statements, use PKBDesignEntity::AllExceptProcedure, where position
     // corresponds to statement index
@@ -220,12 +221,68 @@ class PKB
 
     const unordered_map<string, PKBVariable::SharedPtr> &getAllVariablesMap() const;
 
+
+    /* ==================================== RELATIONSHIP TABLES ==================================== */
+
+    /* ======================== Uses ======================== */
+
+    /* Table that maps every statement to a set of all variables it uses (as a string). Use for Uses(INT, SYN), Uses(INT, "IDENT"), Uses(INT, _) */
+    unordered_map<int, unordered_set<string>> usesIntSynTable;
+
+    /* Table that maps DesignEntity to all pairs that satisfy Uses(DESIGN_ENTITY_SYN, VAR) */
+    unordered_map<PKBDesignEntity, vector<pair<int, string>>> usesSynSynTableNonProc;
+    
+    /* Table of all pairs that satisfy Uses(PROCEDURE_SYN, VAR) */
+    vector<pair<string, string>> usesSynSynTableProc;
+
+    /* Table that maps each DesignEntity to all statements that satisfy Uses(DESIGN_ENTITY_SYN, _) */
+    unordered_map<PKBDesignEntity, vector<int>> usesSynUnderscoreTableNonProc;
+
+    /* Table of all procedures that satisfy Uses(PROCEDURE_SYN, _) */
+    vector<string> usesSynUnderscoreTableProc;
+
+    /* Table that maps every var name, to a map of DesignEntity to Statements that use the given varname. Meant for Uses(STMT_SYN, "IDENT") */
+    unordered_map<string, unordered_map<PKBDesignEntity, vector<int>>> usesSynIdentTableNonProc;
+    /* Similar to above, but for var name to procedures that use the given var instead. Meant for Uses(PROC_SYN, "IDENT") */
+    unordered_map<string, vector<string>> usesSynIdentTableProc;
+
+    /* ======================== ParentT ======================== */
+
+    unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> parentTIntSynTable;
+
+    struct pair_hash {
+        inline std::size_t operator()(const std::pair<int, int>& v) const {
+            return v.first * 569 + v.second; // 569 is prime
+        }
+    };
+
+    struct PKBDesignEntityPairHash {
+        inline std::size_t operator()(const std::pair<PKBDesignEntity, PKBDesignEntity>& v) const {
+            return static_cast<size_t>(v.first) * 31 + static_cast<size_t>(v.second); // 31 is prime
+        }
+    };
+
+    /* Table of all ParentT(int, int) */
+    unordered_set<pair<int, int>, pair_hash> parentTIntIntTable;
+
+    /* Table of all ParentT(syn, syn) */
+    unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> parentTSynSynTable;
+
+    /* Table of all statement nos that are of type syn, and fulfill ParentT(syn, _) */
+    unordered_map<PKBDesignEntity, unordered_set<int>> parentTSynUnderscoreTable;
+
+    unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> parentTSynIntTable;
+
+
   protected:
     // cache of our results, can be prebuilt
     // using vector<int> as this stores results at the moment, can be returned
     // immediately
     map<Relation, map<PKBDesignEntity, map<PKBDesignEntity, vector<int>>>> cache;
     map<Relation, map<PKBDesignEntity, map<PKBDesignEntity, set<pair<int, int>>>>> cacheSet;
+
+    void initializeParentTTables();
+    void initializeUsesTables();
 
     void addStatement(PKBStatement::SharedPtr &statement, PKBDesignEntity designEntity);
     inline void addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr &variable);
