@@ -590,8 +590,8 @@ void PKB::initializeParentTTables()
             vector<PKBStmt::SharedPtr> parentStmts;
             if (deParent == PKBDesignEntity::AllStatements)
             {
-                vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-                vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+                const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+                const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
                 parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
                 parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
@@ -630,8 +630,8 @@ void PKB::initializeParentTTables()
         vector<PKBStmt::SharedPtr> parentStmts;
         if (deParent == PKBDesignEntity::AllStatements) 
         {
-            vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-            vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+            const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+            const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
             parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
             parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
@@ -677,8 +677,8 @@ void PKB::initializeParentTTables()
 
             if (de == PKBDesignEntity::AllStatements)
             {
-                vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-                vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+                const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+                const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
                 parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
                 parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());

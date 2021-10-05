@@ -5,7 +5,7 @@ title Running yida system acceptance test case!
 
 findstr "failed" out-test_3a.xml
 findstr "crash" out-test_3a.xml
-findstr "exception" out-test_3a.xml
+findstr "except" out-test_3a.xml
 
 
 echo The End!
