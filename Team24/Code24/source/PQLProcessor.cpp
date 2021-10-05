@@ -89,7 +89,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<Design
     }
     else if (s == PQL_STMT)
     {
-        return PKBDesignEntity::AllExceptProcedure; // ALL STATEMENTS
+        return PKBDesignEntity::AllStatements; // ALL STATEMENTS
     }
     else if (s == PQL_READ)
     {
@@ -107,13 +107,9 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<Design
     {
         return PKBDesignEntity::If;
     }
-    else if (s == PQL_PRINT)
+    else //(s == PQL_PRINT)
     {
         return PKBDesignEntity::Print;
-    }
-    else
-    { // s == PROCEDURE
-        return PKBDesignEntity::Procedure;
     }
 }
 
@@ -125,7 +121,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(string s)
     }
     else if (s == PQL_STMT)
     {
-        return PKBDesignEntity::AllExceptProcedure; // ALL STATEMENTS
+        return PKBDesignEntity::AllStatements; // ALL STATEMENTS
     }
     else if (s == PQL_READ)
     {
@@ -143,13 +139,9 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(string s)
     {
         return PKBDesignEntity::If;
     }
-    else if (s == PQL_PRINT)
+    else //(s == PQL_PRINT)
     {
         return PKBDesignEntity::Print;
-    }
-    else
-    { // s == PROCEDURE
-        return PKBDesignEntity::Procedure;
     }
 }
 
@@ -218,21 +210,21 @@ void PQLProcessor::getResultsByEntityType(vector<shared_ptr<Result>>& toReturn, 
 
     if (de->getEntityTypeName() == PQL_PROCEDURE)
     {
-        const vector<shared_ptr<PKBStatement>>& stmts =
-            evaluator->getStatementsByPKBDesignEntity(PKBDesignEntity::Procedure);
-        for (auto ptr : stmts) {
-            toReturn.emplace_back(make_shared<StringSingleResult>(ptr->mName));
-        }
+        const set<shared_ptr<PKBProcedure>> &procedures =
+            evaluator->getAllProcedures();
+        for (auto &ptr : procedures)
+            toReturn.emplace_back(make_shared<StringSingleResult>(ptr->getName()));
         return;
     }
 
     PKBDesignEntity pkbde = resolvePQLDesignEntityToPKBDesignEntity(de);
-    vector<shared_ptr<PKBStatement>> stmts;
+    vector<shared_ptr<PKBStmt>> stmts;
 
-    if (pkbde == PKBDesignEntity::AllExceptProcedure)
+    if (pkbde == PKBDesignEntity::AllStatements)
         stmts = evaluator->getAllStatements();
-    else
+    else {
         stmts = evaluator->getStatementsByPKBDesignEntity(pkbde);
+    }
 
     for (auto& ptr : stmts)
     {
@@ -437,7 +429,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
                             /* Map the value returned to this particular
                              * synonym. */
-                            tupleToAdd->insertKeyValuePair(leftSynonymKey, p->mName);
+                            tupleToAdd->insertKeyValuePair(leftSynonymKey, p->getName());
                             tupleToAdd->insertKeyValuePair(rightSynonymKey, v->getName());
 
                             toReturn.emplace_back(move(tupleToAdd));
@@ -483,7 +475,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
                         /* Map the value returned to this particular synonym.
                          */
-                        tupleToAdd->insertKeyValuePair(leftSynonymKey, p->mName);
+                        tupleToAdd->insertKeyValuePair(leftSynonymKey, p->getName());
 
                         toReturn.emplace_back(move(tupleToAdd));
                     }
@@ -522,7 +514,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
 
                         /* Map the value returned to this particular synonym.
                          */
-                        tupleToAdd->insertKeyValuePair(leftSynonymKey, p->mName);
+                        tupleToAdd->insertKeyValuePair(leftSynonymKey, p->getName());
 
                         toReturn.emplace_back(move(tupleToAdd));
                     }
@@ -663,7 +655,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         if (leftType == StmtRefType::INTEGER)
         {
             vector<int> statementsFollowedByStmtNo =
-                evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, stmtRef1->getIntVal());
+                evaluator->getAfter(PKBDesignEntity::AllStatements, stmtRef1->getIntVal());
 
             if (rightType == StmtRefType::SYNONYM)
             {
@@ -695,7 +687,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
             {
                 // if (evaluator->checkFollowed(stmtRef1->getIntVal())) {
                 /* Create the result tuple */
-                for (auto &s : evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, stmtRef1->getIntVal()))
+                for (auto &s : evaluator->getAfter(PKBDesignEntity::AllStatements, stmtRef1->getIntVal()))
                 {
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                     tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(s));
@@ -710,7 +702,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
             {
                 int s1 = stmtRef1->getIntVal();
                 int s2 = stmtRef2->getIntVal();
-                for (auto &s : evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, s1))
+                for (auto &s : evaluator->getAfter(PKBDesignEntity::AllStatements, s1))
                 {
                     if (s == s2)
                     {
@@ -803,7 +795,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
             {
                 shared_ptr<Declaration> &parentDecl1 = selectCl->synonymToParentDeclarationMap[leftSynonymKey];
                 PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
-                for (auto &s : evaluator->getBefore(pkbDe1, PKBDesignEntity::AllExceptProcedure))
+                for (auto &s : evaluator->getBefore(pkbDe1, PKBDesignEntity::AllStatements))
                 {
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
@@ -819,7 +811,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         {
             if (rightType == StmtRefType::INTEGER)
             {
-                for (auto &s : evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, stmtRef2->getIntVal()))
+                for (auto &s : evaluator->getBefore(PKBDesignEntity::AllStatements, stmtRef2->getIntVal()))
                 {
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                     tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(s));
@@ -832,7 +824,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
                 shared_ptr<Declaration> &parentDecl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
                 PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
-                for (auto &s : evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, pkbDe))
+                for (auto &s : evaluator->getAfter(PKBDesignEntity::AllStatements, pkbDe))
                 {
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
@@ -1223,11 +1215,11 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl> &selectCl, s
     /* Parent(1, _) Special case. No Synonym, left side is Integer. */
     if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
     {
-        PKBStatement::SharedPtr stmt = nullptr;
+        PKBStmt::SharedPtr stmt = nullptr;
 
         if (evaluator->mpPKB->getStatement(leftArgInteger, stmt))
         {
-            if (evaluator->getChildren(PKBDesignEntity::AllExceptProcedure, stmt->getIndex()).size() > 0u)
+            if (evaluator->getChildren(PKBDesignEntity::AllStatements, stmt->getIndex()).size() > 0u)
             {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                 /* Map the value returned to this particular synonym. */
@@ -1241,13 +1233,13 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl> &selectCl, s
     /* Parent(1, 2) Special Case. No Synonym, both args are Integer. */
     if (rightArg->getStmtRefType() == StmtRefType::INTEGER)
     {
-        PKBStatement::SharedPtr stmt = nullptr;
+        PKBStmt::SharedPtr stmt = nullptr;
 
         int rightArgInteger = rightArg->getIntVal();
 
         if (evaluator->mpPKB->getStatement(leftArgInteger, stmt))
         {
-            set<int> &childrenIds = evaluator->getChildren(PKBDesignEntity::AllExceptProcedure, stmt->getIndex());
+            set<int> &childrenIds = evaluator->getChildren(PKBDesignEntity::AllStatements, stmt->getIndex());
 
             if (childrenIds.size() > 0u && (childrenIds.find(rightArgInteger) != childrenIds.end()))
             {
@@ -1331,7 +1323,7 @@ void PQLProcessor::handleParentFirstArgSyn(shared_ptr<SelectCl> &selectCl, share
     /* Parent(syn, _) Special case. No Synonym, left side is Integer. */
     if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
     {
-        PKBStatement::SharedPtr stmt = nullptr;
+        PKBStmt::SharedPtr stmt = nullptr;
 
         for (const int &x : evaluator->getParentsSynUnderscore(leftArgType))
         {
@@ -1346,7 +1338,7 @@ void PQLProcessor::handleParentFirstArgSyn(shared_ptr<SelectCl> &selectCl, share
     /* Parent(syn, 2) Special Case. No Synonym, both args are Integer. */
     if (rightArg->getStmtRefType() == StmtRefType::INTEGER)
     {
-        PKBStatement::SharedPtr stmt = nullptr;
+        PKBStmt::SharedPtr stmt = nullptr;
 
         int rightArgInteger = rightArg->getIntVal();
 
@@ -1374,7 +1366,7 @@ void PQLProcessor::handleParentFirstArgUnderscore(shared_ptr<SelectCl> &selectCl
     {
         const int &rightArgInteger = rightArg->getIntVal();
 
-        if (!evaluator->getParents(PKBDesignEntity::AllExceptProcedure, rightArgInteger).empty())
+        if (!evaluator->getParents(PKBDesignEntity::AllStatements, rightArgInteger).empty())
         {
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -1469,7 +1461,7 @@ void PQLProcessor::handleParentTFirstArgInteger(shared_ptr<SelectCl> &selectCl, 
     /* ParentT(1, _) Special case. No Synonym, left side is Integer. */
     if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
     {
-        PKBStatement::SharedPtr stmt = nullptr;
+        PKBStmt::SharedPtr stmt = nullptr;
 
         if (evaluator->mpPKB->getStatement(leftArgInteger, stmt))
         {
@@ -1487,7 +1479,7 @@ void PQLProcessor::handleParentTFirstArgInteger(shared_ptr<SelectCl> &selectCl, 
     /* ParentT(1, 2) Special Case. No Synonym, both args are Integer. */
     if (rightArg->getStmtRefType() == StmtRefType::INTEGER)
     {
-        PKBStatement::SharedPtr stmt = nullptr;
+        PKBStmt::SharedPtr stmt = nullptr;
 
         int rightArgInteger = rightArg->getIntVal();
 
@@ -1575,7 +1567,7 @@ void PQLProcessor::handleParentTFirstArgSyn(shared_ptr<SelectCl> &selectCl, shar
     /* ParentT(syn, _) */
     if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
     {
-        PKBStatement::SharedPtr stmt = nullptr;
+        PKBStmt::SharedPtr stmt = nullptr;
 
         for (const int &x : evaluator->getParentTSynUnderscore(leftArgType))
         {

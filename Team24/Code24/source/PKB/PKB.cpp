@@ -7,7 +7,8 @@
 
 #include "../SimpleAST.h"
 #include "PKBGroup.h"
-#include "PKBStatement.h"
+#include "PKBStmt.h"
+#include "PKBProcedure.h"
 
 void PKB::initialise()
 {
@@ -21,6 +22,7 @@ void PKB::initialise()
     }
     // reset extracted Procedures
     procedureNameToProcedureMap.clear();
+    mAllProcedures = {};
 }
 
 void PKB::extractDesigns(shared_ptr<Program> program)
@@ -42,7 +44,7 @@ void PKB::extractDesigns(shared_ptr<Program> program)
     for (auto &vec : mStatements)
     {
         std::sort(vec.second.begin(), vec.second.end(),
-                  [](const PKBStatement::SharedPtr &a, const PKBStatement::SharedPtr &b) -> bool {
+                  [](const PKBStmt::SharedPtr &a, const PKBStmt::SharedPtr &b) -> bool {
                       return a->getIndex() < b->getIndex();
                   });
     }
@@ -57,7 +59,7 @@ void PKB::initializeRelationshipTables()
 
 }
 
-PKBStatement::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group)
+PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group)
 {
     // determine statement type
     PKBDesignEntity designEntity = simpleToPKBType(statement->getStatementType());
@@ -76,27 +78,24 @@ PKBStatement::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, 
         return extractWhileStatement(statement, group);
     case PKBDesignEntity::If:
         return extractIfStatement(statement, group);
-    case PKBDesignEntity::Procedure:
-        throw("procedure statement found in procedure, this should not occur");
-    case PKBDesignEntity::AllExceptProcedure:
+    case PKBDesignEntity::AllStatements:
         throw("_ statement found in procedure, this should not occur");
     default:
         throw("cannot recognise design entity");
     }
 }
 
-// return PKBStatement of the procedureSimple extracted. Procedure is not
-// actually a statement but we represent it with a PKBStatement of type
-// PKBDesignEntity::Procedure for now...
-PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSimple)
+// return PKBProcedure of the procedureSimple extracted
+PKBProcedure::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSimple)
 {
     // create procedureSimple statement
-    PKBStatement::SharedPtr res = PKBStatement::create(procedureSimple->getName(), PKBDesignEntity::Procedure);
+    PKBProcedure::SharedPtr res = PKBProcedure::create(procedureSimple->getName());
     // add this procedureCalled to the list of extracted simpleProcedures (used to
     // prevent repeat extraction during DesignExtraction)
     procedureNameToProcedureMap.insert({procedureSimple->getName(), res});
+    mAllProcedures.insert(res);
     // add this statement to our 'global' list of all simpleStatements
-    addStatement(res, PKBDesignEntity::Procedure);
+    addProcedure(res);
 
     // create and link group of procedureSimple (linking in createPKBGroup
     // function)
@@ -106,7 +105,7 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSi
 
     for (shared_ptr<Statement> ss : simpleStatements)
     {
-        PKBStatement::SharedPtr child = extractStatement(ss, group);
+        PKBStmt::SharedPtr child = extractStatement(ss, group);
 
         // add the statementIndex to our group member list
         group->addMember(child->getIndex(), child->getType());
@@ -161,11 +160,11 @@ PKBStatement::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSi
     return res;
 }
 
-PKBStatement::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
 {
     // 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles
     // PARENTS and FOLLOWS
-    PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+    PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
     shared_ptr<AssignStatement> assignStatement = static_pointer_cast<AssignStatement>(statement);
 
     // 2. MODIFY - process the variable specified by LHS identifier
@@ -213,11 +212,11 @@ PKBStatement::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement> &state
     return res;
 }
 
-PKBStatement::SharedPtr PKB::extractReadStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractReadStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
 {
     // 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles
     // PARENTS and FOLLOWS
-    PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+    PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
     shared_ptr<ReadStatement> readStatement = static_pointer_cast<ReadStatement>(statement);
 
     // 2. MODIFY - process the variable specified by the identifier
@@ -239,10 +238,10 @@ PKBStatement::SharedPtr PKB::extractReadStatement(shared_ptr<Statement> &stateme
     return res;
 }
 
-PKBStatement::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
 {
     // create the PKBStatement
-    PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+    PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
     shared_ptr<PrintStatement> printStatement = static_pointer_cast<PrintStatement>(statement);
 
     // 2. USE - handle the variable specified by the identifier
@@ -262,10 +261,10 @@ PKBStatement::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statem
     return res;
 }
 
-PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
 {
     // 1. create a PKBStatement
-    PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+    PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
     shared_ptr<IfStatement> ifStatement = static_pointer_cast<IfStatement>(statement);
 
     // 2. USE - process the variables mentioned by conditional statement
@@ -295,7 +294,7 @@ PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement
 
     for (shared_ptr<Statement> ss : consequentStatements)
     {
-        PKBStatement::SharedPtr child = extractStatement(ss, consequentGroup);
+        PKBStmt::SharedPtr child = extractStatement(ss, consequentGroup);
 
         // add the statementIndex to our group member list
         consequentGroup->addMember(child->getIndex(), child->getType());
@@ -307,7 +306,7 @@ PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement
 
     for (shared_ptr<Statement> ss : alternativeStatements)
     {
-        PKBStatement::SharedPtr child = extractStatement(ss, alternativeGroup);
+        PKBStmt::SharedPtr child = extractStatement(ss, alternativeGroup);
 
         // add the statementIndex to our group member list
         alternativeGroup->addMember(child->getIndex(), child->getType());
@@ -359,10 +358,10 @@ PKBStatement::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement
     return res;
 }
 
-PKBStatement::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
 {
     // 1. create a PKBStatement
-    PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+    PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
     shared_ptr<WhileStatement> whileStatement = static_pointer_cast<WhileStatement>(statement);
 
     // 2. USE - process the variables mentioned by conditional statement
@@ -395,7 +394,7 @@ PKBStatement::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statem
     vector<shared_ptr<Statement>> simpleStatements = whileStatement->getStatementList();
     for (shared_ptr<Statement> ss : simpleStatements)
     {
-        PKBStatement::SharedPtr child = extractStatement(ss, group);
+        PKBStmt::SharedPtr child = extractStatement(ss, group);
 
         // add the statementIndex to our group member list
         group->addMember(child->getIndex(), child->getType());
@@ -438,16 +437,16 @@ PKBStatement::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statem
     return res;
 }
 
-PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
 {
     // 1. create a PKBStatement
-    PKBStatement::SharedPtr res = createPKBStatement(statement, parentGroup);
+    PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
     shared_ptr<CallStatement> callStatement = static_pointer_cast<CallStatement>(statement);
 
     // 2. we need to either extract the called procedure if it hasnt been
     // extracted, or retrieve it if it has been
     string procedureName = callStatement->getProcId()->getName();
-    PKBStatement::SharedPtr procedureCalled;
+    PKBProcedure::SharedPtr procedureCalled;
     if (!procedureNameToProcedureMap.count(procedureName))
     {
         // we need to locate the simple node for called procedure
@@ -507,14 +506,14 @@ PKBStatement::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &stateme
 inline bool isContainerType(PKBDesignEntity s)
 {
     return s == PKBDesignEntity::If || s == PKBDesignEntity::While || s == PKBDesignEntity::Procedure ||
-        s == PKBDesignEntity::AllExceptProcedure;
+        s == PKBDesignEntity::AllStatements;
 }
 
 inline bool isStatementType(PKBDesignEntity de) {
     return de != PKBDesignEntity::Procedure;
 }
 
-unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStatement::SharedPtr targetParent,
+unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStmt::SharedPtr targetParent,
     PKBDesignEntity targetChildrenType)
 {
     unordered_set<int> toReturn;
@@ -541,7 +540,7 @@ unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStatement::SharedPtr 
 void PKB::initializeParentTTables()
 {
     // Initialize parentTIntSynTable and parentTIntIntTable
-    for (auto stmt : mStatements[PKBDesignEntity::AllExceptProcedure]) {
+    for (auto stmt : mStatements[PKBDesignEntity::AllStatements]) {
 
         parentTIntSynTable[stmt->getIndex()] = unordered_map<PKBDesignEntity, vector<int>>();
 
@@ -588,11 +587,11 @@ void PKB::initializeParentTTables()
 
             if (!isContainerType(deParent)) continue;
 
-            vector<PKBStatement::SharedPtr> parentStmts;
-            if (deParent == PKBDesignEntity::AllExceptProcedure)
+            vector<PKBStmt::SharedPtr> parentStmts;
+            if (deParent == PKBDesignEntity::AllStatements)
             {
-                const vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-                const vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+                const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+                const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
                 parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
                 parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
@@ -628,11 +627,11 @@ void PKB::initializeParentTTables()
 
         if (!isContainerType(deParent)) continue;
 
-        vector<PKBStatement::SharedPtr> parentStmts;
-        if (deParent == PKBDesignEntity::AllExceptProcedure) 
+        vector<PKBStmt::SharedPtr> parentStmts;
+        if (deParent == PKBDesignEntity::AllStatements) 
         {
-            const vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-            const vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+            const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+            const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
             parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
             parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
@@ -665,7 +664,7 @@ void PKB::initializeParentTTables()
 
     // Initialize parentTSynIntTable
     /* PRE-CONDITION, parentTIntIntTable is initialized already */
-    for (auto stmt : mStatements[PKBDesignEntity::AllExceptProcedure]) {
+    for (auto stmt : mStatements[PKBDesignEntity::AllStatements]) {
         int childStmtNo = stmt->getIndex();
         parentTSynIntTable[childStmtNo] = unordered_map<PKBDesignEntity, unordered_set<int>>();
         for (auto de : PKBDesignEntityIterator()) {
@@ -674,12 +673,12 @@ void PKB::initializeParentTTables()
             parentTSynIntTable[childStmtNo][de] = unordered_set<int>();
             if (!isContainerType(de)) continue;
 
-            vector<PKBStatement::SharedPtr> parentStmts;
+            vector<PKBStmt::SharedPtr> parentStmts;
 
-            if (de == PKBDesignEntity::AllExceptProcedure)
+            if (de == PKBDesignEntity::AllStatements)
             {
-                const vector<PKBStatement::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-                const vector<PKBStatement::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+                const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+                const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
                 parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
                 parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
@@ -710,7 +709,7 @@ void PKB::initializeParentTTables()
 void PKB::initializeUsesTables()
 {
     // Initialize UsesIntSynTable
-    for (auto& stmt : getStatements(PKBDesignEntity::AllExceptProcedure)) {
+    for (auto& stmt : getStatements(PKBDesignEntity::AllStatements)) {
         if (stmt->getType() == PKBDesignEntity::Procedure) continue;
 
         int stmtIdx = stmt->getIndex();
@@ -755,10 +754,10 @@ void PKB::initializeUsesTables()
     for (auto &proc : setOfProceduresThatUseVars) {
 
         auto& vars = proc->getUsedVariables();
-        if (!vars.empty()) usesSynUnderscoreTableProc.emplace_back(proc->mName);
+        if (!vars.empty()) usesSynUnderscoreTableProc.emplace_back(proc->getName());
 
         for (auto& v : proc->getUsedVariables()) {
-            usesSynSynTableProc.push_back(make_pair(proc->mName, v->getName()));
+            usesSynSynTableProc.push_back(make_pair(proc->getName(), v->getName()));
         }
     }
 
@@ -766,7 +765,7 @@ void PKB::initializeUsesTables()
     for (auto& keyVal : mVariables) {
         const string& varName = keyVal.first;
         for (int& stmtNo : keyVal.second->getUsers()) {
-            PKBStatement::SharedPtr userStatement;
+            PKBStmt::SharedPtr userStatement;
 
             if (getStatement(stmtNo, userStatement)) {
                 PKBDesignEntity type = userStatement->getType();
@@ -805,25 +804,31 @@ void PKB::initializeUsesTables()
         for (auto& ptr : setOfProcs) {
             if (usesSynIdentTableProc.find(varName) == usesSynIdentTableProc.end()) {
                 vector<string> procNames;
-                procNames.emplace_back(ptr->mName);
+                procNames.emplace_back(ptr->getName());
                 usesSynIdentTableProc[varName] = move(procNames);
             }
             else {
-                usesSynIdentTableProc[varName].emplace_back(ptr->mName);
+                usesSynIdentTableProc[varName].emplace_back(ptr->getName());
             }
         }
     }
 }
 
-void PKB::addStatement(PKBStatement::SharedPtr &statement, PKBDesignEntity designEntity)
+void PKB::addStatement(PKBStmt::SharedPtr &statement, PKBDesignEntity designEntity)
 {
     mStatements[designEntity].emplace_back(statement);
 
     // also put it in the global bucket list
-    if (designEntity != PKBDesignEntity::Procedure && designEntity != PKBDesignEntity::AllExceptProcedure)
+    if (designEntity != PKBDesignEntity::AllStatements)
     {
-        mStatements[PKBDesignEntity::AllExceptProcedure].emplace_back(statement);
+        mStatements[PKBDesignEntity::AllStatements].emplace_back(statement);
     }
+}
+
+void PKB::addProcedure(PKBProcedure::SharedPtr &procedure)
+{
+    procedureNameToProcedureMap[procedure->getName()] = procedure;
+    mAllProcedures.insert(procedure);
 }
 
 inline void PKB::addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr &variable)
@@ -831,9 +836,9 @@ inline void PKB::addUsedVariable(PKBDesignEntity designEntity, PKBVariable::Shar
     mUsedVariables[designEntity].insert(variable);
 
     // also put it in the global bucket list
-    if (designEntity != PKBDesignEntity::AllExceptProcedure)
+    if (designEntity != PKBDesignEntity::AllStatements)
     {
-        mUsedVariables[PKBDesignEntity::AllExceptProcedure].insert(variable);
+        mUsedVariables[PKBDesignEntity::AllStatements].insert(variable);
     }
 }
 
@@ -850,9 +855,9 @@ void PKB::addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedP
     mModifiedVariables[designEntity].insert(variable);
 
     // also put it in the global bucket list
-    if (designEntity != PKBDesignEntity::AllExceptProcedure)
+    if (designEntity != PKBDesignEntity::AllStatements)
     {
-        mModifiedVariables[PKBDesignEntity::AllExceptProcedure].insert(variable);
+        mModifiedVariables[PKBDesignEntity::AllStatements].insert(variable);
     }
 }
 
@@ -867,12 +872,12 @@ void PKB::addModifiedVariable(PKBDesignEntity designEntity, set<PKBVariable::Sha
 // this is a wrapper around PKBStatement::create()
 // we need a wrapper because there are administrative tasks after creating the
 // PKBStatement we need to perform
-PKBStatement::SharedPtr PKB::createPKBStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::createPKBStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
 {
     PKBDesignEntity de = simpleToPKBType(statement->getStatementType());
 
     // 1. create a PKBStatement
-    PKBStatement::SharedPtr res = PKBStatement::create(statement->getIndex(), de);
+    PKBStmt::SharedPtr res = PKBStmt::create(statement->getIndex(), de);
 
     // 2. add this statement to our 'global' list of all simpleStatements sorted
     // by type
@@ -886,7 +891,7 @@ PKBStatement::SharedPtr PKB::createPKBStatement(shared_ptr<Statement> &statement
 // this is a wrapper around PKBGroup::create()
 // we need a wrapper because there are administrative tasks after creating the
 // PKBGroup to handle child/parent group relationships
-PKBGroup::SharedPtr PKB::createPKBGroup(PKBStatement::SharedPtr &ownerStatement, PKBGroup::SharedPtr &parentGroup)
+PKBGroup::SharedPtr PKB::createPKBGroup(PKBStmt::SharedPtr &ownerStatement, PKBGroup::SharedPtr &parentGroup)
 {
     // create group
     PKBGroup::SharedPtr group = PKBGroup::create(ownerStatement->getIndex());
@@ -899,12 +904,12 @@ PKBGroup::SharedPtr PKB::createPKBGroup(PKBStatement::SharedPtr &ownerStatement,
 }
 
 // version for Procedure PKBGroup, it doesnt have a parentGroup
-PKBGroup::SharedPtr PKB::createPKBGroup(string &name, PKBStatement::SharedPtr &ownerStatement)
+PKBGroup::SharedPtr PKB::createPKBGroup(string &name, PKBProcedure::SharedPtr &ownerProcedure)
 {
     // create group
     PKBGroup::SharedPtr group = PKBGroup::create(name);
     // handle group-statement relationships
-    ownerStatement->addContainerGroup(group);
+    ownerProcedure->addContainerGroup(group);
     return group;
 }
 

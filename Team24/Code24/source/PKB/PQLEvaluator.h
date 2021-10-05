@@ -8,9 +8,8 @@
 
 #include "PKB.h"
 #include "PKBDesignEntity.h"
-#include "PKBGroup.h"
-#include "PKBStatement.h"
-#include "PKBVariable.h"
+#include "PKBStmt.h"
+#include "PKBProcedure.h"
 
 // for pattern
 #include "../SimpleLexer.h"
@@ -131,7 +130,7 @@ class PQLEvaluator
     // stmts
     set<pair<int, int>> getChildrenT(PKBDesignEntity parentType);
 
-    unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStatement::SharedPtr targetParent,
+    unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStmt::SharedPtr targetParent,
                                                             PKBDesignEntity targetChildrenType);
 
     /* Use for Parent*(INT, synonym) */
@@ -386,12 +385,18 @@ class PQLEvaluator
 
     // Pattern
 
-    // General: Access PKB's map<PKBDesignEntity, vector<PKBStatement::SharedPtr>>
+    // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
-    const vector<PKBStatement::SharedPtr> &getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;
+    const vector<PKBStmt::SharedPtr> &getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;
+
+    //General: Access any procedure's pointer with its name
+    const PKBProcedure::SharedPtr &getProcedureByName(string &procName) const;
 
     // General: Get all statements in the PKB
-    vector<PKBStatement::SharedPtr> getAllStatements();
+    vector<PKBStmt::SharedPtr> getAllStatements();
+
+    //General: Get all procedures
+    set<PKBProcedure::SharedPtr> getAllProcedures();
 
     // General: Access PKB's unordered_map<string, PKBVariable::SharedPtr>
     // mVariables;
@@ -416,8 +421,8 @@ class PQLEvaluator
         mpPKB = pPKB;
     }
 
-    // we want to return only vector<int>, not vector<PKBStatement::SharedPtr>
-    vector<int> stmtToInt(vector<PKBStatement::SharedPtr> &stmts)
+    // we want to return only vector<int>, not vector<PKBStmt::SharedPtr>
+    vector<int> stmtToInt(vector<PKBStmt::SharedPtr> &stmts)
     {
         vector<int> res;
         for (auto &stmt : stmts)
@@ -427,7 +432,7 @@ class PQLEvaluator
         return move(res);
     }
 
-    vector<int> stmtToInt(set<PKBStatement::SharedPtr> &stmts)
+    vector<int> stmtToInt(set<PKBStmt::SharedPtr> &stmts)
     {
         vector<int> res;
         for (auto &stmt : stmts)
@@ -459,35 +464,35 @@ class PQLEvaluator
         return move(res);
     }
 
-    vector<string> procedureToString(set<PKBStatement::SharedPtr> &procs)
+    vector<string> procedureToString(set<PKBProcedure::SharedPtr> &procs)
     {
         vector<string> res;
         res.reserve(procs.size());
         for (auto &p : procs)
-            res.emplace_back(p->mName);
+            res.emplace_back(p->getName());
         return move(res);
     }
 
     bool isContainerType(PKBDesignEntity s)
     {
         return s == PKBDesignEntity::If || s == PKBDesignEntity::While || s == PKBDesignEntity::Procedure ||
-               s == PKBDesignEntity::AllExceptProcedure;
+               s == PKBDesignEntity::AllStatements;
     }
 
-    bool getStatementBefore(PKBStatement::SharedPtr &statementAfter, PKBStatement::SharedPtr &result);
-    bool getStatementAfter(PKBStatement::SharedPtr &statementBefore, PKBStatement::SharedPtr &result);
+    bool getStatementBefore(PKBStmt::SharedPtr &statementAfter, PKBStmt::SharedPtr &result);
+    bool getStatementAfter(PKBStmt::SharedPtr &statementBefore, PKBStmt::SharedPtr &result);
 
-    void addParentStmts(vector<PKBStatement::SharedPtr> &stmts)
+    void addParentStmts(vector<PKBStmt::SharedPtr> &stmts)
     {
         // not sure if its faster, but we dont want to iterate over all types, just
         // If, While, Procedure(the container types)
-        vector<PKBStatement::SharedPtr> ifStmts = mpPKB->getStatements(PKBDesignEntity::If);
-        vector<PKBStatement::SharedPtr> whileStmts = mpPKB->getStatements(PKBDesignEntity::While);
+        vector<PKBStmt::SharedPtr> ifStmts = mpPKB->getStatements(PKBDesignEntity::If);
+        vector<PKBStmt::SharedPtr> whileStmts = mpPKB->getStatements(PKBDesignEntity::While);
 
         /* YIDA NOTE: PARENT IS NOT DEFINED FOR Procedures. A Procedure CANNOT be a
          * parent of another statement. */
 
-        // vector<PKBStatement::SharedPtr> procedures =
+        // vector<PKBStmt::SharedPtr> procedures =
         // mpPKB->getStatements(PKBDesignEntity::Procedure);
 
         stmts.insert(stmts.end(), ifStmts.begin(), ifStmts.end());

@@ -1,6 +1,4 @@
 #pragma once
-#include <type_traits>
-
 
 enum class PKBDesignEntity : unsigned int
 {
@@ -11,7 +9,7 @@ enum class PKBDesignEntity : unsigned int
     While = 4,
     If = 5,
     Procedure = 6,
-    AllExceptProcedure = 7
+    AllStatements = 7
 };
 
 // generic iterator over enums
@@ -51,4 +49,7 @@ template <typename C, C beginVal, C endVal> class Iterator
     }
 };
 
-typedef Iterator<PKBDesignEntity, PKBDesignEntity::Read, PKBDesignEntity::AllExceptProcedure> PKBDesignEntityIterator;
+
+
+typedef Iterator<PKBDesignEntity, PKBDesignEntity::Read, PKBDesignEntity::AllStatements> PKBDesignEntityIterator;
+
