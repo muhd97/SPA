@@ -240,19 +240,19 @@ class PQLEvaluator
     bool getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo);
 
     /* Use for Follows*(INT, s1) */
-    unordered_set<int> getFollowsTIntegerSyn(PKBDesignEntity childType, int parentStmtNo);
+    const vector<int>& getFollowsTIntegerSyn(PKBDesignEntity childType, int parentStmtNo);
 
     /* Use for Follows*(INT, _) */
     bool getFollowsTIntegerUnderscore(int leftStmtNo);
 
     /* Use for Follows*(s1, INT) */
-    unordered_set<int> getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo);
+    const unordered_set<int>& getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo);
 
     /* Use for Follows*(s1, s2) */
-    set<pair<int, int>> getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType);
+    const set<pair<int, int>>& getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType);
 
     /* Use for Follows*(s1, _) */
-    unordered_set<int> getFollowsTSynUnderscore(PKBDesignEntity leftType);
+    const unordered_set<int>& getFollowsTSynUnderscore(PKBDesignEntity leftType);
 
     /* Use for Follows*(_, INT) */
     bool getFollowsTUnderscoreInteger(int rightStmtNo);

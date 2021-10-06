@@ -1739,6 +1739,7 @@ void PQLProcessor::handleFollowsTFirstArgSyn(shared_ptr<SelectCl> &selectCl, sha
     if (rightArg->getStmtRefType() == StmtRefType::INTEGER)
     {
         int rightArgInteger = rightArg->getIntVal();
+        if (!evaluator->statementExists(rightArgInteger)) return;
 
         shared_ptr<Declaration> &parentDecl1 = selectCl->synonymToParentDeclarationMap[leftSynonymKey];
         PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
@@ -1764,6 +1765,7 @@ void PQLProcessor::handleFollowsTFirstArgInteger(shared_ptr<SelectCl> &selectCl,
     StmtRefType rightType = stmtRef2->getStmtRefType();
 
     assert(leftType == StmtRefType::INTEGER);
+    if (!evaluator->statementExists(stmtRef1->getIntVal())) return;
 
     if (rightType == StmtRefType::SYNONYM)
     {

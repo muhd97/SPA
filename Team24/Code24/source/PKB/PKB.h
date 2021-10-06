@@ -249,9 +249,9 @@ class PKB
     /* Similar to above, but for var name to procedures that use the given var instead. Meant for Uses(PROC_SYN, "IDENT") */
     unordered_map<string, vector<string>> usesSynIdentTableProc;
 
-    /* ======================== ParentT ======================== */
+    /* ======================== FollowsT ======================== */
 
-    unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> parentTIntSynTable;
+    unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> followsTIntSynTable;
 
     struct pair_hash {
         inline std::size_t operator()(const std::pair<int, int>& v) const {
@@ -264,6 +264,21 @@ class PKB
             return static_cast<size_t>(v.first) * 31 + static_cast<size_t>(v.second); // 31 is prime
         }
     };
+
+    /* Table of all FollowsT(int, int) */
+    unordered_set<pair<int, int>, pair_hash> followsTIntIntTable;
+
+    /* Table of all FollowsT(syn, syn) */
+    unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> followsTSynSynTable;
+
+    /* Table of all statement nos that are of type syn, and fulfill FollowsT(syn, _) */
+    unordered_map<PKBDesignEntity, unordered_set<int>> followsTSynUnderscoreTable;
+
+    unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> followsTSynIntTable;
+
+    /* ======================== ParentT ======================== */
+
+    unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> parentTIntSynTable;
 
     /* Table of all ParentT(int, int) */
     unordered_set<pair<int, int>, pair_hash> parentTIntIntTable;
@@ -286,6 +301,7 @@ class PKB
 
     void addStatement(PKBStmt::SharedPtr &statement, PKBDesignEntity designEntity);
     void addProcedure(PKBProcedure::SharedPtr &procedure);
+    void initializeFollowsTTables();
     void initializeParentTTables();
     void initializeUsesTables();
 
