@@ -1053,20 +1053,20 @@ vector<string> PKB::getIdentifiers(shared_ptr<ConditionalExpression> expr)
 }
 
 void PKB::insertCallsRelationship(string& caller, string& called) {
-    cout << "caller: " << caller << endl;
-    cout << "called: " << called << endl;
+    //cout << "caller: " << caller << endl;
+    //cout << "called: " << called << endl;
     pair<string, string> res = make_pair(caller, called);
 
     // add to CallsT upstream (upstream, called)
     for (auto& downstream : callsTTable[called]) {
-        cout << "downstream: " << downstream.first + ", " + downstream.second << endl;
+        //cout << "downstream: " << downstream.first + ", " + downstream.second << endl;
         pair<string, string> toAdd = make_pair(caller, downstream.second);
         calledTTable[downstream.second].insert(toAdd);
         callsTTable[caller].insert(toAdd);
     }
     // add to CallsT downstream (caller, downstream)
     for (auto& upstream : calledTTable[caller]) {
-        cout << "upstream: " << upstream.first + ", " + upstream.second << endl;
+        //cout << "upstream: " << upstream.first + ", " + upstream.second << endl;
         pair<string, string> toAdd = make_pair(upstream.first, called);
         callsTTable[upstream.first].insert(toAdd);
         calledTTable[called].insert(toAdd);
@@ -1075,8 +1075,8 @@ void PKB::insertCallsRelationship(string& caller, string& called) {
     // add to CallsT between upstream and downstream
     for (auto& downstream : callsTTable[called]) {
         for (auto& upstream : calledTTable[caller]) {
-            cout << "Tdownstream: " << downstream.first + ", " + downstream.second << endl;
-            cout << "Tupstream: " << upstream.first + ", " + upstream.second << endl;
+            //cout << "Tdownstream: " << downstream.first + ", " + downstream.second << endl;
+            //cout << "Tupstream: " << upstream.first + ", " + upstream.second << endl;
             pair<string, string> toAdd = make_pair(upstream.first, downstream.second);
             callsTTable[upstream.first].insert(toAdd);
             calledTTable[downstream.second].insert(toAdd);

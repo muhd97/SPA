@@ -882,14 +882,11 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         break;
     }
     case RelRefType::CALLS: {
-        cout << "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
-
         shared_ptr<Calls> callsCl = static_pointer_cast<Calls>(suchThatCl->relRef);
         handleCalls(selectCl, callsCl, toReturn);
         break;
     }
     case RelRefType::CALLS_T: {
-        cout << "AAAAAAAAAAAAAAAAAAAAAAAAA";
         shared_ptr<CallsT> callstCl = static_pointer_cast<CallsT>(suchThatCl->relRef);
         handleCallsT(selectCl, callstCl, toReturn);
         break;
