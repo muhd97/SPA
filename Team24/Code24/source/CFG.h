@@ -8,14 +8,17 @@ using namespace std;
 
 class BasicBlock {
 private:
-	int id;
+	int id = -100;
 	vector<shared_ptr<Statement>> statements;
-	// NULL if sink BB (no optional in our version of c++)
-	shared_ptr<BasicBlock> next;
+	vector<shared_ptr<BasicBlock>> next;
 public:
 	BasicBlock(int id) {
 		this->id = id;
 	}
+	int getId();
+	void addNext(shared_ptr<BasicBlock> bb);
+	vector<shared_ptr<BasicBlock>> getNext();
+	void addStatement(shared_ptr<Statement> statement);
 	// Todo add access methods
 	string format();
 };
