@@ -16,6 +16,7 @@ public:
 		this->id = id;
 	}
 	int getId();
+	bool isEmpty();
 	void addNext(shared_ptr<BasicBlock> bb);
 	vector<shared_ptr<BasicBlock>> getNext();
 	void addStatement(shared_ptr<Statement> statement);

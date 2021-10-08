@@ -69,6 +69,10 @@ vector<shared_ptr<BasicBlock>> BasicBlock::getNext() {
 	return next;
 }
 
+bool BasicBlock::isEmpty() {
+	return statements.size() == 0;
+}
+
 void BasicBlock::addStatement(shared_ptr<Statement> statement) {
 	statements.push_back(statement);
 }
@@ -76,15 +80,14 @@ void BasicBlock::addStatement(shared_ptr<Statement> statement) {
 void BasicBlock::addNext(shared_ptr<BasicBlock> bb) {
 	next.push_back(bb);
 }
+
 shared_ptr<BasicBlock> buildStatementListCFG(shared_ptr<StatementList> statementLst, shared_ptr<BasicBlock> current);
 
-shared_ptr<BasicBlock> buildIfCFG(shared_ptr<IfStatement> ifStatement, shared_ptr<BasicBlock> current) {
-	auto condBlock = make_shared<BasicBlock>(getNextBBId());
+shared_ptr<BasicBlock> buildIfCFG(shared_ptr<IfStatement> ifStatement, shared_ptr<BasicBlock> condBlock) {
 	auto consequentBlock = make_shared<BasicBlock>(getNextBBId());
 	auto alternativeBlock = make_shared<BasicBlock>(getNextBBId());
 	auto nextBlock = make_shared<BasicBlock>(getNextBBId());
 
-	current->addNext(condBlock);
 	condBlock->addStatement(ifStatement);
 
 	condBlock->addNext(consequentBlock);
@@ -99,16 +102,15 @@ shared_ptr<BasicBlock> buildIfCFG(shared_ptr<IfStatement> ifStatement, shared_pt
 	return nextBlock;
 }
 
-shared_ptr<BasicBlock> buildWhileCFG(shared_ptr<WhileStatement> whileStatement, shared_ptr<BasicBlock> current) {
-	auto condBlock = make_shared<BasicBlock>(getNextBBId());
+shared_ptr<BasicBlock> buildWhileCFG(shared_ptr<WhileStatement> whileStatement, shared_ptr<BasicBlock> condBlock) {
 	auto bodyBlock = make_shared<BasicBlock>(getNextBBId());
 	auto nextBlock = make_shared<BasicBlock>(getNextBBId());
 
-	current->addNext(condBlock);
 	condBlock->addStatement(whileStatement);
 	condBlock->addNext(bodyBlock);
 	condBlock->addNext(nextBlock);
 	bodyBlock = buildStatementListCFG(whileStatement->getBody(), bodyBlock);
+
 	bodyBlock->addNext(condBlock);
 
 	return nextBlock;
@@ -120,6 +122,12 @@ shared_ptr<BasicBlock> buildStatementListCFG(shared_ptr<StatementList> statement
 			current = buildIfCFG(dynamic_pointer_cast<IfStatement>(statement), current);
 		}
 		else if (statement->getStatementType() == StatementType::WHILE){
+			// if block is not empty create new one
+			if (!current->isEmpty()) {
+				auto condBlock = make_shared<BasicBlock>(getNextBBId());
+				current->addNext(condBlock);
+				current = condBlock;
+			}
 			current = buildWhileCFG(dynamic_pointer_cast<WhileStatement>(statement), current);
 		}
 		else {
