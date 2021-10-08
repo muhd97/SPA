@@ -276,6 +276,14 @@ class PKB
 
     unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> parentTSynIntTable;
 
+    /* ======================== Calls ======================== */
+    unordered_map<string, set<pair<string, string>>> callsTable;
+    unordered_map<string, set<pair<string, string>>> calledTable;
+
+    /* ======================== CallsT ======================== */
+    unordered_map<string, set<pair<string, string>>> callsTTable;
+    unordered_map<string, set<pair<string, string>>> calledTTable;
+
 
   protected:
     // cache of our results, can be prebuilt
@@ -318,4 +326,8 @@ class PKB
   private:
     // remembers the main program node
     shared_ptr<Program> programToExtract;
+    // remembers the procedure we are currently extracting, helper for calls
+    shared_ptr<PKBProcedure> currentProcedureToExtract;
+    // calls relationship table helper
+    void PKB::insertCallsRelationship(string& caller, string& called);
 };

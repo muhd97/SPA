@@ -201,6 +201,12 @@ class PQLProcessor
     void handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl,
                              vector<shared_ptr<ResultTuple>> &toReturn);
 
+    void handleCalls(shared_ptr<SelectCl> selectCl, shared_ptr<Calls> callsCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleCallsT(shared_ptr<SelectCl> selectCl, shared_ptr<CallsT> callsTCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
     void joinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
                           unordered_set<string> &joinKeys, vector<shared_ptr<ResultTuple>> &newResults);
     void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> leftResults,

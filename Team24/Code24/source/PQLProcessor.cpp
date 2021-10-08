@@ -881,6 +881,19 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_pt
         }
         break;
     }
+    case RelRefType::CALLS: {
+        cout << "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+
+        shared_ptr<Calls> callsCl = static_pointer_cast<Calls>(suchThatCl->relRef);
+        handleCalls(selectCl, callsCl, toReturn);
+        break;
+    }
+    case RelRefType::CALLS_T: {
+        cout << "AAAAAAAAAAAAAAAAAAAAAAAAA";
+        shared_ptr<CallsT> callstCl = static_pointer_cast<CallsT>(suchThatCl->relRef);
+        handleCallsT(selectCl, callstCl, toReturn);
+        break;
+    }
     default: {
         break;
     }
@@ -992,7 +1005,7 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared
 
             //        /* Map the value returned to this particular synonym. */
             //        tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s->getIndex()));
-            //        tupleToAdd->insertKeyValuePair(rightSynonymKey, v->getName());
+            //        tupleToAdd->insertKeyValuePair(rightProcedureKey, v->getName());
 
             //        toReturn.emplace_back(move(tupleToAdd));
             //    }
@@ -1939,6 +1952,292 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
         }
         /* Add this tuple into the vector to tuples to return. */
         toReturn.emplace_back(move(tupleToAdd));
+    }
+}
+
+void PQLProcessor::handleCalls(shared_ptr<SelectCl> selectCl, shared_ptr<Calls> callsCl, vector<shared_ptr<ResultTuple>>& toReturn)
+{
+    shared_ptr<EntRef>& entRefLeft = callsCl->entRef1;
+    shared_ptr<EntRef>& entRefRight = callsCl->entRef2;
+    EntRefType leftType = entRefLeft->getEntRefType();
+    EntRefType rightType = entRefRight->getEntRefType();
+
+    if (leftType == EntRefType::IDENT) {
+        string leftArg = entRefLeft->getStringVal();
+
+        if (rightType == EntRefType::IDENT) {
+            string rightArg = entRefRight->getStringVal();
+            if (evaluator->getCallsStringString(leftArg, rightArg)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, ResultTuple::IDENT_PLACEHOLDER);
+                toReturn.emplace_back(tupleToAdd);
+            }
+            return;
+        }
+
+        else if (rightType == EntRefType::SYNONYM) {
+            if (selectCl->getDesignEntityTypeBySynonym(entRefRight->getStringVal()) != DesignEntity::PROCEDURE) {
+                // invalid query
+                return;
+            }
+            const string& rightProcedureKey = entRefRight->getStringVal();
+
+            for (auto& s : evaluator->getCallsStringSyn(leftArg)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(rightProcedureKey, s);
+
+                /* Add this tuple into the vector to tuples to return. */
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+            return;
+        }
+
+        else if (rightType == EntRefType::UNDERSCORE) {
+            /* Create the result tuple */
+            if (evaluator->getCallsStringUnderscore(leftArg)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
+                toReturn.emplace_back(tupleToAdd);
+            }
+            return;
+        }
+    }
+    
+    if (leftType == EntRefType::SYNONYM) {
+        if (selectCl->getDesignEntityTypeBySynonym(entRefLeft->getStringVal()) != DesignEntity::PROCEDURE) {
+            // invalid query
+            return;
+        }
+        const string& leftProcedureKey = entRefLeft->getStringVal();
+
+        if (rightType == EntRefType::IDENT) {
+            string rightArg = entRefRight->getStringVal();
+            for (auto& s : evaluator->getCallsSynString(rightArg)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(leftProcedureKey, s);
+
+                /* Add this tuple into the vector to tuples to return. */
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+            return;
+        }
+        else if (rightType == EntRefType::SYNONYM) {
+            if (selectCl->getDesignEntityTypeBySynonym(entRefRight->getStringVal()) != DesignEntity::PROCEDURE) {
+                // invalid query
+                return;
+            }
+            const string& rightProcedureKey = entRefRight->getStringVal();
+
+            for (auto& p : evaluator->getCallsSynSyn())
+            {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(leftProcedureKey, p.first);
+                tupleToAdd->insertKeyValuePair(rightProcedureKey, p.second);
+
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+            return;
+        }
+        else if (rightType == EntRefType::UNDERSCORE) {
+            for (auto& s : evaluator->getCallsSynUnderscore())
+            {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(leftProcedureKey, s);
+
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+            return;
+        }
+    }
+
+    if (leftType == EntRefType::UNDERSCORE) {
+        if (rightType == EntRefType::IDENT) {
+            string rightArg = entRefRight->getStringVal();
+            if (evaluator->getCallsUnderscoreString(rightArg)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::IDENT_PLACEHOLDER);
+                toReturn.emplace_back(tupleToAdd);
+            }
+            return;
+        }
+        else if (rightType == EntRefType::SYNONYM) {
+            if (selectCl->getDesignEntityTypeBySynonym(entRefRight->getStringVal()) != DesignEntity::PROCEDURE) {
+                // invalid query
+                return;
+            }
+            const string& rightProcedureKey = entRefRight->getStringVal();
+
+            for (auto& s : evaluator->getCallsUnderscoreSyn())
+            {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(rightProcedureKey, s);
+
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+        }
+        else if (rightType == EntRefType::UNDERSCORE) {
+            if (evaluator->getCallsUnderscoreUnderscore())
+            {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
+
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+        }
+    }
+}
+
+void PQLProcessor::handleCallsT(shared_ptr<SelectCl> selectCl, shared_ptr<CallsT> callsTCl, vector<shared_ptr<ResultTuple>>& toReturn)
+{
+    shared_ptr<EntRef>& entRefLeft = callsTCl->entRef1;
+    shared_ptr<EntRef>& entRefRight = callsTCl->entRef2;
+    EntRefType leftType = entRefLeft->getEntRefType();
+    EntRefType rightType = entRefRight->getEntRefType();
+
+    if (leftType == EntRefType::IDENT) {
+        string leftArg = entRefLeft->getStringVal();
+
+        if (rightType == EntRefType::IDENT) {
+            string rightArg = entRefRight->getStringVal();
+            if (evaluator->getCallsTStringString(leftArg, rightArg)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, ResultTuple::IDENT_PLACEHOLDER);
+                toReturn.emplace_back(tupleToAdd);
+            }
+            return;
+        }
+
+        else if (rightType == EntRefType::SYNONYM) {
+            if (selectCl->getDesignEntityTypeBySynonym(entRefRight->getStringVal()) != DesignEntity::PROCEDURE) {
+                // invalid query
+                return;
+            }
+            const string& rightProcedureKey = entRefRight->getStringVal();
+
+            for (auto& s : evaluator->getCallsTStringSyn(leftArg)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(rightProcedureKey, s);
+
+                /* Add this tuple into the vector to tuples to return. */
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+            return;
+        }
+
+        else if (rightType == EntRefType::UNDERSCORE) {
+            /* Create the result tuple */
+            if (evaluator->getCallsTStringUnderscore(leftArg)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
+                toReturn.emplace_back(tupleToAdd);
+            }
+            return;
+        }
+    }
+
+    if (leftType == EntRefType::SYNONYM) {
+        if (selectCl->getDesignEntityTypeBySynonym(entRefLeft->getStringVal()) != DesignEntity::PROCEDURE) {
+            // invalid query
+            return;
+        }
+        const string& leftProcedureKey = entRefLeft->getStringVal();
+
+        if (rightType == EntRefType::IDENT) {
+            string rightArg = entRefRight->getStringVal();
+            for (auto& s : evaluator->getCallsTSynString(rightArg)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(leftProcedureKey, s);
+
+                /* Add this tuple into the vector to tuples to return. */
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+            return;
+        }
+        else if (rightType == EntRefType::SYNONYM) {
+            if (selectCl->getDesignEntityTypeBySynonym(entRefRight->getStringVal()) != DesignEntity::PROCEDURE) {
+                // invalid query
+                return;
+            }
+            const string& rightProcedureKey = entRefRight->getStringVal();
+
+            for (auto& p : evaluator->getCallsTSynSyn())
+            {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(leftProcedureKey, p.first);
+                tupleToAdd->insertKeyValuePair(rightProcedureKey, p.second);
+
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+            return;
+        }
+        else if (rightType == EntRefType::UNDERSCORE) {
+            for (auto& s : evaluator->getCallsTSynUnderscore())
+            {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(leftProcedureKey, s);
+
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+            return;
+        }
+    }
+
+    if (leftType == EntRefType::UNDERSCORE) {
+        if (rightType == EntRefType::IDENT) {
+            string rightArg = entRefRight->getStringVal();
+            if (evaluator->getCallsTUnderscoreString(rightArg)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::IDENT_PLACEHOLDER);
+                toReturn.emplace_back(tupleToAdd);
+            }
+            return;
+        }
+        else if (rightType == EntRefType::SYNONYM) {
+            if (selectCl->getDesignEntityTypeBySynonym(entRefRight->getStringVal()) != DesignEntity::PROCEDURE) {
+                // invalid query
+                return;
+            }
+            const string& rightProcedureKey = entRefRight->getStringVal();
+
+            for (auto& s : evaluator->getCallsTUnderscoreSyn())
+            {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(rightProcedureKey, s);
+
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+        }
+        else if (rightType == EntRefType::UNDERSCORE) {
+            if (evaluator->getCallsTUnderscoreUnderscore())
+            {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+
+                /* Map the value returned to this particular synonym. */
+                tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
+
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+        }
     }
 }
 

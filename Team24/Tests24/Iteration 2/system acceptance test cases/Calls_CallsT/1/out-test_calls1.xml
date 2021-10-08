@@ -1,0 +1,82 @@
+<?xml-stylesheet type="text/xsl" href="analysis.xsl"?>
+<test_results>
+<info>
+<name>1</name><parsing_time_taken>70.000000</parsing_time_taken>
+</info>
+<queries>
+<query>
+<id ReturnTuple="1" Calls="1" SuchThat="1" CondNum="3" RelNum="1" comment="calls(string, string)">1</id><querystr><![CDATA[procedure p; Select p such that Calls("Example", "p")]]></querystr>
+<stuans>Example,q,p,s,r,t</stuans>
+<correct>Example,r,t,q,p,s</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Calls="1" SuchThat="1" CondNum="3" RelNum="1" comment="calls(string, syn)">2</id><querystr><![CDATA[procedure p; Select p such that Calls("s", p)]]></querystr>
+<stuans>r,t</stuans>
+<correct>r,t</correct>
+<time_taken>14.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Calls="1" SuchThat="1" CondNum="3" RelNum="1" comment="calls(syn, syn)">3</id><querystr><![CDATA[procedure p1; procedure p2; Select p2 such that Calls(p1, p2)]]></querystr>
+<stuans>p,q,s,r,t</stuans>
+<correct>r,t,q,p,s</correct>
+<time_taken>14.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Calls="1" UnnamedVar="1" SuchThat="1" CondNum="4" RelNum="1" comment="calls(syn, _)">4</id><querystr><![CDATA[procedure p2; Select p2 such that Calls(p2, _)]]></querystr>
+<stuans>Example,p,s</stuans>
+<correct>Example,p,s</correct>
+<time_taken>13.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Callsstar="1" SuchThat="1" CondNum="3" RelNum="1" comment="calls*(string, string)">5</id><querystr><![CDATA[procedure p; Select p such that Calls*("Example", "r")]]></querystr>
+<stuans></stuans>
+<correct>Example,r,t,q,p,s</correct>
+<time_taken>16.000000</time_taken>
+<failed>
+<missing>Example,p,q,r,s,t</missing>
+<additional></additional>
+<summary>
+<expected>6</expected>
+<matched>0</matched>
+<missing>6</missing>
+<additional>0</additional>
+</summary>
+</failed>
+</query>
+<query>
+<id ReturnTuple="1" Callsstar="1" SuchThat="1" CondNum="3" RelNum="1" comment="calls*(syn, string)">6</id><querystr><![CDATA[procedure p; Select p such that Calls*(p, "r")]]></querystr>
+<stuans>s</stuans>
+<correct>Example,p,s</correct>
+<time_taken>19.000000</time_taken>
+<failed>
+<missing>Example,p</missing>
+<additional></additional>
+<summary>
+<expected>3</expected>
+<matched>1</matched>
+<missing>2</missing>
+<additional>0</additional>
+</summary>
+</failed>
+</query>
+<query>
+<id ReturnTuple="1" Callsstar="1" SuchThat="1" CondNum="3" RelNum="1" comment="calls*(syn, syn)">7</id><querystr><![CDATA[procedure p1; procedure p2; Select p2 such that Calls*(p1, p2)]]></querystr>
+<stuans>p,q,s,r,t</stuans>
+<correct>r,t,q,p,s</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Callsstar="1" UnnamedVar="1" SuchThat="1" CondNum="4" RelNum="1" comment="calls*(syn, _)">8</id><querystr><![CDATA[procedure p2; Select p2 such that Calls*(p2, _)]]></querystr>
+<stuans>Example,p,s</stuans>
+<correct>Example,p,s</correct>
+<time_taken>19.000000</time_taken>
+<passed/>
+</query>
+</queries>
+</test_results>
