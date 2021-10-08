@@ -6,6 +6,7 @@
 #include "PQLLexer.h"
 #include "PQLParser.h"
 #include "PQLProcessor.h"
+#include "CFG.h"
 #include <memory>
 
 using namespace std;
@@ -45,6 +46,11 @@ void TestWrapper::parse(std::string filename) {
 
         // for debugging
         cout << root->format();
+
+        cout << "\n==== Building CFG ====\n";
+        shared_ptr<CFG> cfg = buildCFG(root);
+        cout << cfg->format();
+
 
         cout << "\n==== Building PKB ====\n";
 
