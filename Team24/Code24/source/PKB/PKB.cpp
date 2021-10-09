@@ -515,28 +515,11 @@ inline bool isStatementType(PKBDesignEntity de) {
 }
 
 
-unordered_set<int> getAllAfterOfGivenType(PKBStmt::SharedPtr targetFollows,
+vector<int> getAllAfterOfGivenType(PKBStmt::SharedPtr targetFollows,
     PKBDesignEntity targetAfterType)
 {
-    unordered_set<int> toReturn;
-    queue<PKBGroup::SharedPtr> qOfGroups;
-
-    for (auto& grp : targetFollows->getContainerGroups())
-        qOfGroups.push(grp);
-
-    while (!qOfGroups.empty())
-    {
-        auto& currGroup = qOfGroups.front();
-        qOfGroups.pop();
-
-        for (int& i : currGroup->getMembers(targetAfterType))
-            toReturn.insert(i);
-
-        /*for (auto& subGrps : currGroup->getChildGroups())
-            qOfGroups.push(subGrps);*/
-    }
-
-    return toReturn;
+    return targetFollows->getGroup()->getMembers(targetAfterType);
+   
 }
 
 void PKB::initializeFollowsTTables()
@@ -548,31 +531,16 @@ void PKB::initializeFollowsTTables()
 
         for (auto de : PKBDesignEntityIterator()) {
             unordered_set<int> toReturn;
-            queue<PKBGroup::SharedPtr> qOfGroups;
             vector<int> toAdd;
             if (!isContainerType(stmt->getType())) {
                 followsTIntSynTable[stmt->getIndex()][de] = move(toAdd);
                 continue;
             }
-
-
-            for (auto grp : stmt->getContainerGroups())
-                qOfGroups.push(grp);
-
-            while (!qOfGroups.empty())
-            {
-                auto currGroup = qOfGroups.front();
-                qOfGroups.pop();
-
-                for (int i : currGroup->getMembers(de)) {
-                    toReturn.insert(i);
-                    followsTIntIntTable.insert(make_pair(stmt->getIndex(), i));
-                }
-
-                /*for (auto subGrps : currGroup->getChildGroups())
-                    qOfGroups.push(subGrps);*/
-            }
-
+            for (int i : stmt->getGroup()->getMembers(de)) {
+                 toReturn.insert(i);
+                 followsTIntIntTable.insert(make_pair(stmt->getIndex(), i));
+             }
+        
             toAdd.insert(toAdd.end(), toReturn.begin(), toReturn.end());
             followsTIntSynTable[stmt->getIndex()][de] = move(toAdd);
         }
@@ -627,7 +595,6 @@ void PKB::initializeFollowsTTables()
 
         followsTSynUnderscoreTable[deFollows] = unordered_set<int>();
 
-        if (!isContainerType(deFollows)) continue;
 
         vector<PKBStmt::SharedPtr> followsStmts;
         if (deFollows == PKBDesignEntity::AllStatements)
@@ -707,8 +674,6 @@ void PKB::initializeFollowsTTables()
 
     }
 }
-
-
 
 unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStmt::SharedPtr targetParent,
     PKBDesignEntity targetChildrenType)
