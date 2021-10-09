@@ -1008,7 +1008,7 @@ public:
 
     inline RelRefType getType()
     {
-        return RelRefType::CALLS;
+        return RelRefType::CALLS_T;
     }
 
     vector<string> getAllSynonymsAsString()
