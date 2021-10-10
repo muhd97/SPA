@@ -5,7 +5,9 @@ import glob
 source_query_test_cases = [
     ("01_1_follows_followsT_source", "01_1_follows_followsT_queries"), ("02_1_follows_followsT_source", "02_1_follows_followsT_t_queries"), ("03_1_follows_test_source", "03_1_follows_test_queries"), ("04_1_followsT_test_source", "04_1_followsT_test_queries"), ("05_1_mixed_first_source",
                                                                                                                                                                                                                                                                      "05_1_mixed_first_queries"), ("06_1_mixed_invalid_source", "06_1_mixed_queries"), ("07_1_mixed_second_source", "07_1_mixed_second_queries"), ("08_1_modifies_test_source", "08_1_modifies_test_queries"), ("09_1_mixed_first_source", "09_1_parent_only_first_queries"),
-    ("10_1_mixed_first_source", "10_1_uses_only_first_queries"), ("11_1_test_1a_source", "11_1_test_1a_queries"), ("12_1_test_1b_source", "12_1_test_1b_queries"), ("13_1_test_1c_source", "13_1_test_1c_queries"), ("14_1_test_1d_source", "14_1_test_1d_queries"), ("15_1_test_1t_source", "15_1_test_1t_queries"), ("16_1_test_2a_source", "16_1_test_2a_queries"), ("17_1_test_2b_source", "17_1_test_2b_queries"), ("18_1_test_3a_source", "18_1_test_3a_queries"), ("19_2_test_1_source", "19_2_test_1_uses_tup_boolean_queries")]
+    ("10_1_mixed_first_source", "10_1_uses_only_first_queries"), ("11_1_test_1a_source", "11_1_test_1a_queries"), ("12_1_test_1b_source", "12_1_test_1b_queries"), ("13_1_test_1c_source", "13_1_test_1c_queries"), ("14_1_test_1d_source", "14_1_test_1d_queries"), (
+        "15_1_test_1t_source", "15_1_test_1t_queries"), ("16_1_test_2a_source", "16_1_test_2a_queries"), ("17_1_test_2b_source", "17_1_test_2b_queries"), ("18_1_test_3a_source", "18_1_test_3a_queries"), ("19_2_test_1_source", "19_2_test_1_uses_tup_boolean_queries"),
+    ("20_2_test_1_attr_source", "20_2_test_1_attr_queries")]
 
 
 autotester_dir = ".\\Code24\\Debug\\"

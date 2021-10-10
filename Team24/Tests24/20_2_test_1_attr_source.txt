@@ -1,0 +1,26 @@
+procedure yida1 {
+    x = 1;
+    y = 2;
+	z = x + y;
+	read a;
+	print b;
+    print b;
+}
+
+procedure yida2 {
+	i = 3;
+    j = 4 + i;
+	p = z - x - y;
+	print q;
+    print q;
+	read w;
+}
+
+procedure yida3 {
+	call yida1;
+	call yida2;
+}
+
+procedure yida4 {
+
+}

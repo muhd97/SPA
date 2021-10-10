@@ -83,8 +83,3 @@ stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;pro
 Select <c, v> such that Uses(a, v) such that Uses(a, v) such that Uses(a, v) such that Uses(a, v) such that Uses(a, v) and Follows(_, c) such that Uses(a, v) such that Uses(a, v) and Follows(_, c) such that Uses(a, v) such that Uses(a, v) and Follows(_, c) such that Follows(_, c) such that Follows(_, c) such that Modifies(c, _) such that Modifies(c, _) such that Follows(_, c) such that Modifies(c, _) such that Modifies(c, _) such that Follows(_, c) such that Modifies(c, _) such that Modifies(c, _) such that Modifies(c, _) such that Modifies(c, _) such that Follows(_, c) such that Follows(_, c) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1)
 12 z, 12 x, 12 y, 12 i
 5000
-
-
-
-
-
