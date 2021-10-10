@@ -1,6 +1,6 @@
 #include "PKBProcedure.h"
 
-string PKBProcedure::getName() {
+const string& PKBProcedure::getName() {
     return mName;
 }
 

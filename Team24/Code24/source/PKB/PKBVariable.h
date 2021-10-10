@@ -15,7 +15,7 @@ class PKBVariable
         return SharedPtr(new PKBVariable(name));
     }
 
-    string getName()
+    const string& getName()
     {
         return mName;
     }

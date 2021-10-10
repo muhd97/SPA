@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\CFG.cpp" />
     <ClCompile Include="..\source\SimpleAST.cpp" />
     <ClCompile Include="..\source\SimpleLexer.cpp" />
     <ClCompile Include="..\source\SimpleParser.cpp" />
@@ -24,8 +25,10 @@
     <ClCompile Include="..\source\PQLProcessor.cpp" />
     <ClCompile Include="..\source\PKB\PKBStmt.cpp" />
     <ClCompile Include="..\source\PKB\PKBProcedure.cpp" />
+    <ClCompile Include="..\source\Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\source\CFG.h" />
     <ClInclude Include="..\source\PQLLexer.h" />
     <ClInclude Include="..\source\PQLParser.h" />
     <ClInclude Include="..\source\SimpleAST.h" />
@@ -38,6 +41,7 @@
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
     <ClInclude Include="..\source\PQLProcessor.h" />
+    <ClInclude Include="..\source\PQLProcessorUtils.h" />
     <ClInclude Include="..\source\PKB\PKBStmt.h" />
     <ClInclude Include="..\source\PKB\PKBProcedure.h" />
   </ItemGroup>

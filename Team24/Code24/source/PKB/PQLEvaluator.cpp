@@ -1838,7 +1838,7 @@ vector<PKBVariable::SharedPtr> PQLEvaluator::getAllVariables()
     vars.reserve(map.size());
     for (auto &kv : map)
     {
-        vars.emplace_back(kv.second);
+    vars.emplace_back(kv.second);
     }
 
     return move(vars);
@@ -1854,11 +1854,11 @@ unordered_set<string> PQLEvaluator::getAllConstants()
 // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 // if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern
 // instead
-vector<pair<int, string>> PQLEvaluator::matchAnyPattern(string &LHS)
+vector<pair<int, string>> PQLEvaluator::matchAnyPattern(string& LHS)
 {
     vector<PKBStmt::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
     vector<pair<int, string>> res;
-    for (auto &assignStmt : assignStmts)
+    for (auto& assignStmt : assignStmts)
     {
         // check LHS
         if (LHS == assignStmt->simpleAssignStatement->getId()->getName() || LHS == "_")
@@ -1874,7 +1874,7 @@ vector<pair<int, string>> PQLEvaluator::matchAnyPattern(string &LHS)
 // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 // if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern
 // instead
-vector<pair<int, string>> PQLEvaluator::matchPartialPattern(string &LHS, shared_ptr<Expression> &RHS)
+vector<pair<int, string>> PQLEvaluator::matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS)
 {
     vector<PKBStmt::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
     vector<pair<int, string>> res;
@@ -1883,7 +1883,7 @@ vector<pair<int, string>> PQLEvaluator::matchPartialPattern(string &LHS, shared_
     vector<string> queryInOrder = inOrderTraversalHelper(RHS);
     vector<string> queryPreOrder = preOrderTraversalHelper(RHS);
 
-    for (auto &assignStmt : assignStmts)
+    for (auto& assignStmt : assignStmts)
     {
         // check LHS
         if (LHS != assignStmt->simpleAssignStatement->getId()->getName() && LHS != "_")
@@ -1906,7 +1906,7 @@ vector<pair<int, string>> PQLEvaluator::matchPartialPattern(string &LHS, shared_
 // For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
 // if you want to use a("_", _EXPR_) or a(IDENT, _EXPR_), use matchPattern
 // instead
-vector<pair<int, string>> PQLEvaluator::matchExactPattern(string &LHS, shared_ptr<Expression> &RHS)
+vector<pair<int, string>> PQLEvaluator::matchExactPattern(string& LHS, shared_ptr<Expression>& RHS)
 {
     vector<PKBStmt::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
     vector<pair<int, string>> res;
@@ -1915,7 +1915,7 @@ vector<pair<int, string>> PQLEvaluator::matchExactPattern(string &LHS, shared_pt
     vector<string> queryInOrder = inOrderTraversalHelper(RHS);
     vector<string> queryPreOrder = preOrderTraversalHelper(RHS);
 
-    for (auto &assignStmt : assignStmts)
+    for (auto& assignStmt : assignStmts)
     {
         // check LHS
         if (LHS != assignStmt->simpleAssignStatement->getId()->getName() && LHS != "_")
@@ -1933,6 +1933,154 @@ vector<pair<int, string>> PQLEvaluator::matchExactPattern(string &LHS, shared_pt
         }
     }
     return res;
+}
+
+bool PQLEvaluator::getCallsStringString(string& caller, string& called)
+{
+    for (auto& p : mpPKB->callsTable[caller]) {
+        if (p.second == called) {
+            return true;
+        }
+    }
+    return false;
+}
+
+unordered_set<string> PQLEvaluator::getCallsStringSyn(string& caller)
+{
+    unordered_set<string> toReturn;
+    for (auto& p : mpPKB->callsTable[caller]) {
+        toReturn.insert(p.second);
+    }
+    return toReturn;
+}
+
+bool PQLEvaluator::getCallsStringUnderscore(string& caller)
+{
+    return mpPKB->callsTable[caller].size() > 0;
+}
+
+unordered_set<string> PQLEvaluator::getCallsSynString(string& called)
+{
+    unordered_set<string> toReturn;
+    for (auto& p : mpPKB->calledTable[called]) {
+        toReturn.insert(p.first);
+    }
+    return toReturn;
+}
+
+set<pair<string, string>> PQLEvaluator::getCallsSynSyn()
+{
+    set<pair<string, string>> toReturn;
+    for (auto const& [procName, pairs] : mpPKB->callsTable) {
+        toReturn.insert(pairs.begin(), pairs.end());
+    }
+    return toReturn;
+}
+
+unordered_set<string> PQLEvaluator::getCallsSynUnderscore()
+{
+    unordered_set<string> toReturn;
+    for (auto const& [procName, pairs] : mpPKB->callsTable) {
+        if (pairs.size() > 0) {
+            toReturn.insert(procName);
+        }
+    }
+    return toReturn;
+}
+
+bool PQLEvaluator::getCallsUnderscoreString(string& called)
+{
+    return mpPKB->calledTable[called].size() > 0;
+}
+
+unordered_set<string> PQLEvaluator::getCallsUnderscoreSyn()
+{
+    unordered_set<string> toReturn;
+    for (auto const& [procName, pairs] : mpPKB->calledTable) {
+        if (pairs.size() > 0) {
+            toReturn.insert(procName);
+        }
+    }
+    return toReturn;
+}
+
+bool PQLEvaluator::getCallsUnderscoreUnderscore()
+{
+    return mpPKB->callsTable.size() > 0;
+}
+
+bool PQLEvaluator::getCallsTStringString(string& caller, string& called)
+{
+    for (auto& p : mpPKB->callsTTable[caller]) {
+        if (p.second == called) {
+            return true;
+        }
+    }
+    return false;
+}
+
+unordered_set<string> PQLEvaluator::getCallsTStringSyn(string& caller)
+{
+    unordered_set<string> toReturn;
+    for (auto& p : mpPKB->callsTTable[caller]) {
+        toReturn.insert(p.second);
+    }
+    return toReturn;
+}
+
+bool PQLEvaluator::getCallsTStringUnderscore(string& caller)
+{
+    return mpPKB->callsTTable[caller].size() > 0;
+}
+
+unordered_set<string> PQLEvaluator::getCallsTSynString(string& called)
+{
+    unordered_set<string> toReturn;
+    for (auto& p : mpPKB->calledTTable[called]) {
+        toReturn.insert(p.first);
+    }
+    return toReturn;
+}
+
+set<pair<string, string>> PQLEvaluator::getCallsTSynSyn()
+{
+    set<pair<string, string>> toReturn;
+    for (auto const& [procName, pairs] : mpPKB->callsTTable) {
+        toReturn.insert(pairs.begin(), pairs.end());
+    }
+    return toReturn;
+}
+
+unordered_set<string> PQLEvaluator::getCallsTSynUnderscore()
+{
+    unordered_set<string> toReturn;
+    for (auto const& [procName, pairs] : mpPKB->callsTTable) {
+        if (pairs.size() > 0) {
+            toReturn.insert(procName);
+        }
+    }
+    return toReturn;
+}
+
+bool PQLEvaluator::getCallsTUnderscoreString(string& called)
+{
+    return mpPKB->calledTTable[called].size() > 0;
+}
+
+unordered_set<string> PQLEvaluator::getCallsTUnderscoreSyn()
+{
+    unordered_set<string> toReturn;
+    for (auto const& [procName, pairs] : mpPKB->calledTTable) {
+        if (pairs.size() > 0) {
+            toReturn.insert(procName);
+        }
+    }
+    return toReturn;
+}
+
+bool PQLEvaluator::getCallsTUnderscoreUnderscore()
+{
+    return mpPKB->callsTTable.size() > 0;
 }
 
 vector<string> PQLEvaluator::inOrderTraversalHelper(shared_ptr<Expression> expr)

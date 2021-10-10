@@ -75,7 +75,7 @@ class ResultTuple
         synonymKeyToValMap[key] = value;
     }
 
-    inline string get(string key)
+    inline const string& get(string key)
     {
         return synonymKeyToValMap[key];
     }
@@ -201,13 +201,28 @@ class PQLProcessor
     void handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl,
                              vector<shared_ptr<ResultTuple>> &toReturn);
 
+    void handleCalls(shared_ptr<SelectCl> selectCl, shared_ptr<Calls> callsCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleCallsT(shared_ptr<SelectCl> selectCl, shared_ptr<CallsT> callsTCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
     void joinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
                           unordered_set<string> &joinKeys, vector<shared_ptr<ResultTuple>> &newResults);
     void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> leftResults,
                                       vector<shared_ptr<ResultTuple>> rightResults,
                                       vector<shared_ptr<ResultTuple>> &newResults);
 
-    void getResultsByEntityType(vector<shared_ptr<Result>> &toPopulate, shared_ptr<DesignEntity> de);
+    void getResultsByEntityType(vector<shared_ptr<Result>> &toPopulate, shared_ptr<DesignEntity>& de, shared_ptr<Element>& elem);
+
+    void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl> resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);
+
+    const string& resolveAttrRef(const string& syn, shared_ptr<AttrRef>& attrRef, shared_ptr<SelectCl>& selectCl, shared_ptr<ResultTuple>& tup);
+
+    const string& resolveAttrRef(const string& rawSynVal, shared_ptr<AttrRef>& attrRef, shared_ptr<DesignEntity>& de);
+
+    void extractAllTuplesForSingleElement(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, shared_ptr<Element>& elem);
+
 };
 
 /*

@@ -44,20 +44,29 @@ const string PQL_VALUE = "value";
 const string PQL_STMT_NUMBER = "stmt#";
 const string PQL_AND = "and";
 
+enum class ElementType {
+    Synonym,
+    AttrRef
+};
+
 class Element
 {
 public:
     virtual string format() {
         return "element";
     }
+
+    virtual ElementType getElementType() = 0;
+
+    virtual const string& getSynonymString() = 0;
 };
 
-class Synonym : public Element
+class Synonym : public Element, public enable_shared_from_this<Synonym>
 {
-  private:
+private:
     string value;
 
-  public:
+public:
     Synonym(string value) : value(move(value))
     {
     }
@@ -66,9 +75,17 @@ class Synonym : public Element
         return value;
     }
 
+    const string& getSynonymString() {
+        return getValue();
+    }
+
     string format() override
     {
         return "$" + value;
+    }
+
+    ElementType getElementType() {
+        return ElementType::Synonym;
     }
 };
 
@@ -103,6 +120,10 @@ public:
         }
         return "";
     }
+
+    inline AttrNameType getAttrNameType() {
+        return name;
+    }
 };
 
 class AttrRef : public Element {
@@ -118,14 +139,31 @@ public:
     string format() override {
         return synonym->format() + "." + attrName->format();
     }
+
+    ElementType getElementType() {
+        return ElementType::AttrRef;
+    }
+
+    const string& getSynonymString() {
+        return synonym->getValue();
+    }
+
+    const shared_ptr<Synonym>& getSynonym() {
+        return synonym;
+    }
+
+    const shared_ptr<AttrName>& getAttrName() {
+        return attrName;
+    }
+
 };
 
 class DesignEntity
 {
-  private:
+private:
     string entityTypeName;
 
-  public:
+public:
     static string STMT;
     static string READ;
     static string PRINT;
@@ -142,12 +180,12 @@ class DesignEntity
     {
     }
 
-    DesignEntity(const DesignEntity &other)
+    DesignEntity(const DesignEntity& other)
     { // copy constructor
         entityTypeName = other.entityTypeName;
     }
 
-    const string &getEntityTypeName() const
+    const string& getEntityTypeName() const
     {
         return entityTypeName;
     }
@@ -164,7 +202,7 @@ class DesignEntity
 
 class Declaration
 {
-  public:
+public:
     vector<shared_ptr<Synonym>> synonyms;
     shared_ptr<DesignEntity> de;
 
@@ -172,7 +210,7 @@ class Declaration
     {
     }
 
-    const vector<shared_ptr<Synonym>> &getSynonyms() const
+    const vector<shared_ptr<Synonym>>& getSynonyms() const
     {
         return synonyms;
     }
@@ -211,7 +249,7 @@ enum class StmtRefType
 // TODO: @jiachen247 use inheritence to model this
 class StmtRef
 {
-  public:
+public:
     StmtRef(StmtRefType type)
     {
         stmtRefType = type;
@@ -228,7 +266,7 @@ class StmtRef
         stmtRefType = type;
     }
 
-    StmtRef(const StmtRef &other)
+    StmtRef(const StmtRef& other)
     {
         intValue = other.intValue;
         stringValue = other.stringValue;
@@ -254,7 +292,7 @@ class StmtRef
         return "";
     }
 
-    const string &getStringVal() const
+    const string& getStringVal() const
     {
         return stringValue;
     }
@@ -273,7 +311,7 @@ class StmtRef
         }
     }
 
-  private:
+private:
     string stringValue;
     StmtRefType stmtRefType;
     int intValue = 0;
@@ -288,11 +326,11 @@ enum class EntRefType
 
 class EntRef
 {
-  private:
+private:
     string stringValue;
     EntRefType entRefType;
 
-  public:
+public:
     EntRef(EntRefType type)
     {
         entRefType = type;
@@ -303,7 +341,7 @@ class EntRef
         entRefType = type;
     }
 
-    const string &getStringVal() const
+    const string& getStringVal() const
     {
         return stringValue;
     }
@@ -327,7 +365,7 @@ class EntRef
         return "";
     }
 
-    EntRef(const EntRef &other)
+    EntRef(const EntRef& other)
     {
         stringValue = other.stringValue;
         entRefType = other.entRefType;
@@ -443,13 +481,14 @@ enum class RelRefType
 
 class RelRef
 {
-  public:
+public:
     virtual inline string format()
     {
         return "RelRef THIS SHOULD NOT BE PRINTED";
     }
 
-    virtual inline bool containsSynonym(shared_ptr<Synonym> s) = 0;
+    virtual inline bool containsSynonym(shared_ptr<Element> s) = 0;
+
 
     virtual inline RelRefType getType() = 0;
 
@@ -458,7 +497,7 @@ class RelRef
 
 class UsesS : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef;
     shared_ptr<EntRef> entRef;
 
@@ -480,19 +519,19 @@ class UsesS : public RelRef
         }
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef->getStringVal() == s->getValue();
+            flag = stmtRef->getStringVal() == s->getSynonymString();
             if (flag)
                 return flag;
         }
 
         if (entRef->getEntRefType() == EntRefType::SYNONYM)
         {
-            flag = entRef->getStringVal() == s->getValue();
+            flag = entRef->getStringVal() == s->getSynonymString();
         }
 
         return flag;
@@ -518,7 +557,7 @@ class UsesS : public RelRef
 
 class UsesP : public RelRef
 {
-  public:
+public:
     shared_ptr<EntRef> entRef1;
     shared_ptr<EntRef> entRef2;
 
@@ -531,19 +570,19 @@ class UsesP : public RelRef
         return "UsesP(" + entRef1->getEntRefTypeName() + ", " + entRef2->getEntRefTypeName() + ")";
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (entRef1->getEntRefType() == EntRefType::SYNONYM)
         {
-            flag = entRef1->getStringVal() == s->getValue();
+            flag = entRef1->getStringVal() == s->getSynonymString();
             if (flag)
                 return flag;
         }
 
         if (entRef2->getEntRefType() == EntRefType::SYNONYM)
         {
-            flag = entRef2->getStringVal() == s->getValue();
+            flag = entRef2->getStringVal() == s->getSynonymString();
         }
 
         return flag;
@@ -569,7 +608,7 @@ class UsesP : public RelRef
 
 class ModifiesS : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef;
     shared_ptr<EntRef> entRef;
 
@@ -590,17 +629,17 @@ class ModifiesS : public RelRef
         }
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef->getStringVal() == s->getValue();
+            flag = stmtRef->getStringVal() == s->getSynonymString();
         }
 
         if (entRef->getEntRefType() == EntRefType::SYNONYM)
         {
-            flag = flag || (entRef->getStringVal() == s->getValue());
+            flag = flag || (entRef->getStringVal() == s->getSynonymString());
         }
         return flag;
     }
@@ -625,7 +664,7 @@ class ModifiesS : public RelRef
 
 class ModifiesP : public RelRef
 {
-  public:
+public:
     shared_ptr<EntRef> entRef1;
     shared_ptr<EntRef> entRef2;
 
@@ -633,17 +672,17 @@ class ModifiesP : public RelRef
     {
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (entRef1->getEntRefType() == EntRefType::SYNONYM)
         {
-            flag = entRef1->getStringVal() == s->getValue();
+            flag = entRef1->getStringVal() == s->getSynonymString();
         }
 
         if (entRef2->getEntRefType() == EntRefType::SYNONYM)
         {
-            flag = flag || (entRef2->getStringVal() == s->getValue());
+            flag = flag || (entRef2->getStringVal() == s->getSynonymString());
         }
 
         return flag;
@@ -674,7 +713,7 @@ class ModifiesP : public RelRef
 
 class Parent : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -695,19 +734,19 @@ class Parent : public RelRef
         }
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef1->getStringVal() == s->getValue();
+            flag = stmtRef1->getStringVal() == s->getSynonymString();
             if (flag)
                 return flag;
         }
 
         if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef2->getStringVal() == s->getValue();
+            flag = stmtRef2->getStringVal() == s->getSynonymString();
         }
 
         return flag;
@@ -733,7 +772,7 @@ class Parent : public RelRef
 
 class ParentT : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -754,19 +793,19 @@ class ParentT : public RelRef
         }
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef1->getStringVal() == s->getValue();
+            flag = stmtRef1->getStringVal() == s->getSynonymString();
             if (flag)
                 return flag;
         }
 
         if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef2->getStringVal() == s->getValue();
+            flag = stmtRef2->getStringVal() == s->getSynonymString();
         }
 
         return flag;
@@ -792,7 +831,7 @@ class ParentT : public RelRef
 
 class Follows : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -813,19 +852,19 @@ class Follows : public RelRef
         }
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef1->getStringVal() == s->getValue();
+            flag = stmtRef1->getStringVal() == s->getSynonymString();
             if (flag)
                 return flag;
         }
 
         if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef2->getStringVal() == s->getValue();
+            flag = stmtRef2->getStringVal() == s->getSynonymString();
         }
 
         return flag;
@@ -851,7 +890,7 @@ class Follows : public RelRef
 
 class FollowsT : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -872,19 +911,19 @@ class FollowsT : public RelRef
         }
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef1->getStringVal() == s->getValue();
+            flag = stmtRef1->getStringVal() == s->getSynonymString();
             if (flag)
                 return flag;
         }
 
         if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef2->getStringVal() == s->getValue();
+            flag = stmtRef2->getStringVal() == s->getSynonymString();
         }
 
         return flag;
@@ -930,19 +969,19 @@ public:
         }
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (entRef1->getEntRefType() == EntRefType::SYNONYM)
         {
-            flag = entRef1->getStringVal() == s->getValue();
+            flag = entRef1->getStringVal() == s->getSynonymString();
             if (flag)
                 return flag;
         }
 
         if (entRef2->getEntRefType() == EntRefType::SYNONYM)
         {
-            flag = entRef2->getStringVal() == s->getValue();
+            flag = entRef2->getStringVal() == s->getSynonymString();
         }
 
         return flag;
@@ -988,19 +1027,19 @@ public:
         }
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (entRef1->getEntRefType() == EntRefType::SYNONYM)
         {
-            flag = entRef1->getStringVal() == s->getValue();
+            flag = entRef1->getStringVal() == s->getSynonymString();
             if (flag)
                 return flag;
         }
 
         if (entRef2->getEntRefType() == EntRefType::SYNONYM)
         {
-            flag = entRef2->getStringVal() == s->getValue();
+            flag = entRef2->getStringVal() == s->getSynonymString();
         }
 
         return flag;
@@ -1008,7 +1047,7 @@ public:
 
     inline RelRefType getType()
     {
-        return RelRefType::CALLS;
+        return RelRefType::CALLS_T;
     }
 
     vector<string> getAllSynonymsAsString()
@@ -1047,19 +1086,19 @@ public:
         }
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef1->getStringVal() == s->getValue();
+            flag = stmtRef1->getStringVal() == s->getSynonymString();
             if (flag)
                 return flag;
         }
 
         if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef2->getStringVal() == s->getValue();
+            flag = stmtRef2->getStringVal() == s->getSynonymString();
         }
 
         return flag;
@@ -1106,19 +1145,19 @@ public:
         }
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
         if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef1->getStringVal() == s->getValue();
+            flag = stmtRef1->getStringVal() == s->getSynonymString();
             if (flag)
                 return flag;
         }
 
         if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            flag = stmtRef2->getStringVal() == s->getValue();
+            flag = stmtRef2->getStringVal() == s->getSynonymString();
         }
 
         return flag;
@@ -1144,7 +1183,7 @@ public:
 
 class SuchThatCl
 {
-  public:
+public:
     shared_ptr<RelRef> relRef;
 
     SuchThatCl(shared_ptr<RelRef> ref) : relRef(move(ref))
@@ -1164,10 +1203,12 @@ class SuchThatCl
         return "\nSUCHTHAT " + relRef->format();
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         return relRef->containsSynonym(s);
     }
+
+
 
     inline vector<string> getAllSynonymsAsString()
     {
@@ -1177,7 +1218,7 @@ class SuchThatCl
 
 class ExpressionSpec
 {
-  public:
+public:
     bool isAnything;
     bool isPartialMatch;
     shared_ptr<Expression> expression;
@@ -1273,7 +1314,7 @@ public:
 
 class PatternCl
 {
-  public:
+public:
     shared_ptr<Synonym> synonym;
     shared_ptr<EntRef> entRef;
     shared_ptr<ExpressionSpec> exprSpec;
@@ -1296,10 +1337,10 @@ class PatternCl
         return "\nPATTERN " + synonym->format() + " (" + entRef->format() + ", " + exprSpec->format() + ")";
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
-        return synonym->getValue() == s->getValue() ||
-               (entRef->getEntRefType() == EntRefType::SYNONYM && entRef->getStringVal() == s->getValue());
+        return synonym->getSynonymString() == s->getSynonymString() ||
+            (entRef->getEntRefType() == EntRefType::SYNONYM && entRef->getStringVal() == s->getSynonymString());
     }
 
     inline vector<string> getAllSynonymsAsString()
@@ -1339,11 +1380,11 @@ public:
         return "\nWITH (" + lhs->format() + ") = (" + rhs->format() + ")\n";
     }
 
-    inline bool containsSynonym(shared_ptr<Synonym> s)
+    inline bool containsSynonym(shared_ptr<Element> s)
     {
         // TODO (@jiachen247) does attrRef syn.attr counts as containing a syn?
-        return (lhs->getRefType() == RefType::SYNONYM && lhs->getStringVal() == s->getValue()) ||
-            (rhs->getRefType() == RefType::SYNONYM && rhs->getStringVal() == s->getValue());
+        return (lhs->getRefType() == RefType::SYNONYM && lhs->getStringVal() == s->getSynonymString()) ||
+            (rhs->getRefType() == RefType::SYNONYM && rhs->getStringVal() == s->getSynonymString());
     }
 
     inline vector<string> getAllSynonymsAsString()
@@ -1361,7 +1402,7 @@ public:
 
 class SelectCl
 {
-  public:
+public:
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
@@ -1370,10 +1411,10 @@ class SelectCl
     unordered_map<string, shared_ptr<Declaration>> synonymToParentDeclarationMap;
 
     SelectCl(shared_ptr<ResultCl> target, vector<shared_ptr<Declaration>> decl, vector<shared_ptr<SuchThatCl>> stht,
-             vector<shared_ptr<PatternCl>> pttn, vector<shared_ptr<WithCl>> with)
+        vector<shared_ptr<PatternCl>> pttn, vector<shared_ptr<WithCl>> with)
         : target(move(target)), declarations(move(decl)), suchThatClauses(move(stht)), patternClauses(move(pttn)), withClauses(move(with))
     {
-        for (auto &d : declarations)
+        for (auto& d : declarations)
         {
             for (auto syn : d->synonyms)
             {
@@ -1391,7 +1432,18 @@ class SelectCl
         }
     }
 
-    shared_ptr<Declaration> &getParentDeclarationForSynonym(shared_ptr<Synonym> s)
+    shared_ptr<Declaration>& getParentDeclarationForSynonym(const string& s)
+    {
+        if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end())
+        {
+            throw "Warning: requested synonym of value [" + s +
+                "] is NOT declared in this SelectCl. Null DesignEntityType is "
+                "returned.\n";
+        }
+        return synonymToParentDeclarationMap[s];
+    }
+
+    shared_ptr<Declaration>& getParentDeclarationForSynonym(shared_ptr<Synonym> s)
     {
         if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end())
         {
@@ -1407,27 +1459,27 @@ class SelectCl
         return synonymToParentDeclarationMap.find(toTest) != synonymToParentDeclarationMap.end();
     }
 
-    inline string getDesignEntityTypeBySynonym(string s)
+    inline const string& getDesignEntityTypeBySynonym(const string& s)
     {
         if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end())
         {
             string toThrow = "Warning: requested synonym of value [" + s +
-                             "] is NOT declared in this SelectCl. Null "
-                             "DesignEntityType is returned.\n";
+                "] is NOT declared in this SelectCl. Null "
+                "DesignEntityType is returned.\n";
             throw toThrow;
         }
 
         return synonymToParentDeclarationMap[s]->getDesignEntity()->getEntityTypeName();
     }
 
-    inline string getDesignEntityTypeBySynonym(shared_ptr<Synonym> &s)
+    inline const string& getDesignEntityTypeBySynonym(shared_ptr<Synonym>& s)
     {
         if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end())
         {
             cout << "Warning: requested synonym of value [" << s->getValue()
-                 << "] is NOT declared in this SelectCl. Null DesignEntityType is "
-                    "returned.\n";
-            return "";
+                << "] is NOT declared in this SelectCl. Null DesignEntityType is "
+                "returned.\n";
+            throw "Synonym " + s->getValue() + " not declared, cannot resolve it's DesignEntityType";
         }
 
         return synonymToParentDeclarationMap[s->getValue()]->getDesignEntity()->getEntityTypeName();
@@ -1436,19 +1488,19 @@ class SelectCl
     string format()
     {
         string builder = "";
-        for (auto &d : declarations)
+        for (auto& d : declarations)
         {
             builder += d->format() + ", ";
         }
 
         builder += "\nSELECT " + target->format();
 
-        for (auto &st : suchThatClauses)
+        for (auto& st : suchThatClauses)
         {
             builder += st->format();
         }
 
-        for (auto &pt : patternClauses)
+        for (auto& pt : patternClauses)
         {
             builder += pt->format();
         }
@@ -1479,10 +1531,10 @@ class SelectCl
         return patternClauses.size() > 0;
     }
 
-    inline bool suchThatContainsSynonym(shared_ptr<Synonym> s)
+    inline bool suchThatContainsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
-        for (auto &st : this->suchThatClauses)
+        for (auto& st : this->suchThatClauses)
         {
             flag = st->containsSynonym(s);
             if (flag)
@@ -1491,10 +1543,10 @@ class SelectCl
         return flag;
     }
 
-    inline bool patternContainsSynonym(shared_ptr<Synonym> s)
+    inline bool patternContainsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
-        for (auto &pt : this->patternClauses)
+        for (auto& pt : this->patternClauses)
         {
             flag = pt->containsSynonym(s);
             if (flag)
@@ -1506,12 +1558,12 @@ class SelectCl
 
 class PQLParser
 {
-  private:
+private:
     vector<PQLToken> tokens;
     int index;
     int size;
 
-  public:
+public:
     PQLParser(vector<PQLToken> tok) : tokens(move(tok)), index(0)
     {
         size = tokens.size();

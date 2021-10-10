@@ -503,6 +503,7 @@ class SimpleParser
         else
         {
             error({SimpleTokenType::NOT, SimpleTokenType::LEFT_PAREN, SimpleTokenType::NAME}, peek());
+            return NULL;
         }
     }
 
@@ -664,6 +665,7 @@ class SimpleParser
         else
         {
             error({SimpleTokenType::NAME, SimpleTokenType::INTEGER, SimpleTokenType::LEFT_PAREN}, peek());
+            return NULL;
         }
     }
 };
