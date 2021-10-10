@@ -334,6 +334,7 @@ vector<shared_ptr<SuchThatCl>> PQLParser::parseSuchThat()
     vector<shared_ptr<SuchThatCl>> clauses;
     eatKeyword(PQL_SUCH);
     eatKeyword(PQL_THAT);
+
     auto r = parseRelRef();
     clauses.push_back(make_shared<SuchThatCl>(r));
 
@@ -342,6 +343,7 @@ vector<shared_ptr<SuchThatCl>> PQLParser::parseSuchThat()
         eatKeyword(PQL_AND);
         auto r = parseRelRef();
         clauses.push_back(make_shared<SuchThatCl>(r));
+
     }
 
 
@@ -489,14 +491,17 @@ shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
 
 vector<shared_ptr<PatternCl>> PQLParser::parsePatternCl()
 {
+
     vector<shared_ptr<PatternCl>> clauses;
     eatKeyword(PQL_PATTERN);
     clauses.push_back(parsePatternClCond());
+
 
     if (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
         eatKeyword(PQL_AND);
         clauses.push_back(parsePatternClCond());
     }
+
     return clauses;
 }
 
@@ -636,6 +641,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
     {
         if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_SUCH)
         { 
+
             vector<shared_ptr<SuchThatCl>> clauses = parseSuchThat();
 
             for (auto ptr : clauses) {
@@ -646,11 +652,14 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
                 }
             }
 
+
             //suchThatClauses.insert(end(suchThatClauses), begin(clauses), end(clauses));
         }
         else if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_PATTERN)
         {
+
             vector<shared_ptr<PatternCl>> clauses = parsePatternCl();
+
 
             for (auto ptr : clauses) {
                 string& format = ptr->format();
@@ -660,10 +669,12 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
                 }
             }
 
+
             //patternClauses.insert(end(patternClauses), begin(clauses), end(clauses));
         }
         else if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_WITH)
         {
+
             vector<shared_ptr<WithCl>> clauses = parseWithCl();
             for (auto ptr : clauses) {
                 string& format = ptr->format();
@@ -672,6 +683,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
                     clausesAlreadySeen.insert(format);
                 }
             }
+
             
             //withClauses.insert(end(withClauses), begin(clauses), end(clauses));
         }
@@ -681,6 +693,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
             break;
         }
     }
+
 
     return make_shared<SelectCl>(move(result), move(declarations), move(suchThatClauses), move(patternClauses), move(withClauses));
 }
