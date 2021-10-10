@@ -13,18 +13,48 @@ stmt s; assign a; variable v; call c; print p;
 Select <c.procName, v.varName, p.varName> such that Uses(c, v) such that Uses(p, _)
 yida1 b b,yida1 b q,yida1 x b,yida1 x q,yida1 y b,yida1 y q,yida2 i b,yida2 i q,yida2 q b,yida2 q q,yida2 x b,yida2 x q,yida2 y b,yida2 y q,yida2 z b,yida2 z q
 1000
-4 - Select <print.varName, v>
+4 - Select <print.varName, v> such that Uses(p, v>
 print p; variable v;
 Select <p.varName, v> such that Uses(p, v)
 b b, q q
 1000
-5 - Select <p, v>
+5 - Select <p, v> such that Uses(p, v)
 print p; variable v;
 Select <p, v> such that Uses(p, v)
 5 b, 6 b, 10 q, 11 q
 1000
-
-
-
-
-
+6 - Select <c, p, r>
+print p; call c; read r;
+Select <c, p, r> 
+13 5 4,13 5 12,13 6 4,13 6 12,13 10 4,13 10 12,13 11 4,13 11 12,14 5 4,14 5 12,14 6 4,14 6 12,14 10 4,14 10 12,14 11 4,14 11 12
+1000
+7 - Select <c.procName, p.varName, r.stmt#>
+print p; call c; read r;
+Select <c.procName, p.varName, r.stmt#> 
+yida1 b 4, yida1 b 12, yida1 q 4, yida1 q 12, yida2 b 4, yida2 b 12, yida2 q 4, yida2 q 12
+1000
+8 - Select <c.stmt#, p.stmt#, r.stmt#>
+print p; call c; read r;
+Select <c.stmt#, p.stmt#, r.stmt#> 
+13 5 4,13 5 12,13 6 4,13 6 12,13 10 4,13 10 12,13 11 4,13 11 12,14 5 4,14 5 12,14 6 4,14 6 12,14 10 4,14 10 12,14 11 4,14 11 12
+1000
+9 - Select <p.stmt#, r.stmt#>
+print p; call c; read r;
+Select <p.stmt#, r.stmt#> 
+5 4,5 12,6 4,6 12,10 4,10 12,11 4,11 12
+1000
+10 - Select <p.varName, r.stmt#>
+print p; call c; read r;
+Select <p.varName, r.stmt#> 
+b 4, b 12, q 4, q 12
+1000
+11 - Select <p.varName, r.stmt#, k.value>
+print p; call c; read r; constant k;
+Select <p.varName, r.stmt#, k.value> 
+b 4 1,b 4 2,b 4 3,b 4 4,b 12 1,b 12 2,b 12 3,b 12 4,q 4 1,q 4 2,q 4 3,q 4 4,q 12 1,q 12 2,q 12 3,q 12 4
+1000
+12 - Select <p.varName, r.stmt#, k.value>
+print p; call c; read r; constant k;
+Select <p.varName, r, k.value> 
+b 4 1,b 4 2,b 4 3,b 4 4,b 12 1,b 12 2,b 12 3,b 12 4,q 4 1,q 4 2,q 4 3,q 4 4,q 12 1,q 12 2,q 12 3,q 12 4
+1000

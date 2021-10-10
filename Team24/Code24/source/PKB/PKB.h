@@ -336,5 +336,5 @@ class PKB
     // remembers the procedure we are currently extracting, helper for calls
     shared_ptr<PKBProcedure> currentProcedureToExtract;
     // calls relationship table helper
-    void PKB::insertCallsRelationship(string& caller, string& called);
+    void PKB::insertCallsRelationship(const string& caller, string& called);
 };

@@ -759,7 +759,8 @@ void PKB::initializeUsesTables()
             }
 
             for (auto& v : stmt->getUsedVariables()) {
-                pairs.emplace_back<int, string>(stmt->getIndex(), v->getName());
+                const string& varName = v->getName();
+                pairs.push_back(make_pair(stmt->getIndex(), varName));
             }
         }
         usesSynSynTableNonProc[de] = move(pairs);
@@ -1058,7 +1059,7 @@ vector<string> PKB::getIdentifiers(shared_ptr<ConditionalExpression> expr)
     return vector<string>(res.begin(), res.end());
 }
 
-void PKB::insertCallsRelationship(string& caller, string& called) {
+void PKB::insertCallsRelationship(const string& caller, string& called) {
     //cout << "caller: " << caller << endl;
     //cout << "called: " << called << endl;
     pair<string, string> res = make_pair(caller, called);

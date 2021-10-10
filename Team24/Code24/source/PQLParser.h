@@ -63,10 +63,10 @@ public:
 
 class Synonym : public Element, public enable_shared_from_this<Synonym>
 {
-  private:
+private:
     string value;
 
-  public:
+public:
     Synonym(string value) : value(move(value))
     {
     }
@@ -86,10 +86,6 @@ class Synonym : public Element, public enable_shared_from_this<Synonym>
 
     ElementType getElementType() {
         return ElementType::Synonym;
-    }
-
-    shared_ptr<Synonym> getSynonymSharedPtr() {
-        return shared_from_this();
     }
 };
 
@@ -160,17 +156,14 @@ public:
         return attrName;
     }
 
-    shared_ptr<Synonym> getSynonymSharedPtr() {
-        return synonym;
-    }
 };
 
 class DesignEntity
 {
-  private:
+private:
     string entityTypeName;
 
-  public:
+public:
     static string STMT;
     static string READ;
     static string PRINT;
@@ -187,12 +180,12 @@ class DesignEntity
     {
     }
 
-    DesignEntity(const DesignEntity &other)
+    DesignEntity(const DesignEntity& other)
     { // copy constructor
         entityTypeName = other.entityTypeName;
     }
 
-    const string &getEntityTypeName() const
+    const string& getEntityTypeName() const
     {
         return entityTypeName;
     }
@@ -209,7 +202,7 @@ class DesignEntity
 
 class Declaration
 {
-  public:
+public:
     vector<shared_ptr<Synonym>> synonyms;
     shared_ptr<DesignEntity> de;
 
@@ -217,7 +210,7 @@ class Declaration
     {
     }
 
-    const vector<shared_ptr<Synonym>> &getSynonyms() const
+    const vector<shared_ptr<Synonym>>& getSynonyms() const
     {
         return synonyms;
     }
@@ -256,7 +249,7 @@ enum class StmtRefType
 // TODO: @jiachen247 use inheritence to model this
 class StmtRef
 {
-  public:
+public:
     StmtRef(StmtRefType type)
     {
         stmtRefType = type;
@@ -273,7 +266,7 @@ class StmtRef
         stmtRefType = type;
     }
 
-    StmtRef(const StmtRef &other)
+    StmtRef(const StmtRef& other)
     {
         intValue = other.intValue;
         stringValue = other.stringValue;
@@ -299,7 +292,7 @@ class StmtRef
         return "";
     }
 
-    const string &getStringVal() const
+    const string& getStringVal() const
     {
         return stringValue;
     }
@@ -318,7 +311,7 @@ class StmtRef
         }
     }
 
-  private:
+private:
     string stringValue;
     StmtRefType stmtRefType;
     int intValue = 0;
@@ -333,11 +326,11 @@ enum class EntRefType
 
 class EntRef
 {
-  private:
+private:
     string stringValue;
     EntRefType entRefType;
 
-  public:
+public:
     EntRef(EntRefType type)
     {
         entRefType = type;
@@ -348,7 +341,7 @@ class EntRef
         entRefType = type;
     }
 
-    const string &getStringVal() const
+    const string& getStringVal() const
     {
         return stringValue;
     }
@@ -372,7 +365,7 @@ class EntRef
         return "";
     }
 
-    EntRef(const EntRef &other)
+    EntRef(const EntRef& other)
     {
         stringValue = other.stringValue;
         entRefType = other.entRefType;
@@ -488,7 +481,7 @@ enum class RelRefType
 
 class RelRef
 {
-  public:
+public:
     virtual inline string format()
     {
         return "RelRef THIS SHOULD NOT BE PRINTED";
@@ -504,7 +497,7 @@ class RelRef
 
 class UsesS : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef;
     shared_ptr<EntRef> entRef;
 
@@ -564,7 +557,7 @@ class UsesS : public RelRef
 
 class UsesP : public RelRef
 {
-  public:
+public:
     shared_ptr<EntRef> entRef1;
     shared_ptr<EntRef> entRef2;
 
@@ -615,7 +608,7 @@ class UsesP : public RelRef
 
 class ModifiesS : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef;
     shared_ptr<EntRef> entRef;
 
@@ -671,7 +664,7 @@ class ModifiesS : public RelRef
 
 class ModifiesP : public RelRef
 {
-  public:
+public:
     shared_ptr<EntRef> entRef1;
     shared_ptr<EntRef> entRef2;
 
@@ -720,7 +713,7 @@ class ModifiesP : public RelRef
 
 class Parent : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -779,7 +772,7 @@ class Parent : public RelRef
 
 class ParentT : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -838,7 +831,7 @@ class ParentT : public RelRef
 
 class Follows : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -897,7 +890,7 @@ class Follows : public RelRef
 
 class FollowsT : public RelRef
 {
-  public:
+public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -1190,7 +1183,7 @@ public:
 
 class SuchThatCl
 {
-  public:
+public:
     shared_ptr<RelRef> relRef;
 
     SuchThatCl(shared_ptr<RelRef> ref) : relRef(move(ref))
@@ -1225,7 +1218,7 @@ class SuchThatCl
 
 class ExpressionSpec
 {
-  public:
+public:
     bool isAnything;
     bool isPartialMatch;
     shared_ptr<Expression> expression;
@@ -1321,7 +1314,7 @@ public:
 
 class PatternCl
 {
-  public:
+public:
     shared_ptr<Synonym> synonym;
     shared_ptr<EntRef> entRef;
     shared_ptr<ExpressionSpec> exprSpec;
@@ -1347,7 +1340,7 @@ class PatternCl
     inline bool containsSynonym(shared_ptr<Element> s)
     {
         return synonym->getSynonymString() == s->getSynonymString() ||
-               (entRef->getEntRefType() == EntRefType::SYNONYM && entRef->getStringVal() == s->getSynonymString());
+            (entRef->getEntRefType() == EntRefType::SYNONYM && entRef->getStringVal() == s->getSynonymString());
     }
 
     inline vector<string> getAllSynonymsAsString()
@@ -1409,7 +1402,7 @@ public:
 
 class SelectCl
 {
-  public:
+public:
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
@@ -1418,10 +1411,10 @@ class SelectCl
     unordered_map<string, shared_ptr<Declaration>> synonymToParentDeclarationMap;
 
     SelectCl(shared_ptr<ResultCl> target, vector<shared_ptr<Declaration>> decl, vector<shared_ptr<SuchThatCl>> stht,
-             vector<shared_ptr<PatternCl>> pttn, vector<shared_ptr<WithCl>> with)
+        vector<shared_ptr<PatternCl>> pttn, vector<shared_ptr<WithCl>> with)
         : target(move(target)), declarations(move(decl)), suchThatClauses(move(stht)), patternClauses(move(pttn)), withClauses(move(with))
     {
-        for (auto &d : declarations)
+        for (auto& d : declarations)
         {
             for (auto syn : d->synonyms)
             {
@@ -1439,7 +1432,18 @@ class SelectCl
         }
     }
 
-    shared_ptr<Declaration> &getParentDeclarationForSynonym(shared_ptr<Synonym> s)
+    shared_ptr<Declaration>& getParentDeclarationForSynonym(const string& s)
+    {
+        if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end())
+        {
+            throw "Warning: requested synonym of value [" + s +
+                "] is NOT declared in this SelectCl. Null DesignEntityType is "
+                "returned.\n";
+        }
+        return synonymToParentDeclarationMap[s];
+    }
+
+    shared_ptr<Declaration>& getParentDeclarationForSynonym(shared_ptr<Synonym> s)
     {
         if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end())
         {
@@ -1455,26 +1459,26 @@ class SelectCl
         return synonymToParentDeclarationMap.find(toTest) != synonymToParentDeclarationMap.end();
     }
 
-    inline const string& getDesignEntityTypeBySynonym(string s)
+    inline const string& getDesignEntityTypeBySynonym(const string& s)
     {
         if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end())
         {
             string toThrow = "Warning: requested synonym of value [" + s +
-                             "] is NOT declared in this SelectCl. Null "
-                             "DesignEntityType is returned.\n";
+                "] is NOT declared in this SelectCl. Null "
+                "DesignEntityType is returned.\n";
             throw toThrow;
         }
 
         return synonymToParentDeclarationMap[s]->getDesignEntity()->getEntityTypeName();
     }
 
-    inline const string& getDesignEntityTypeBySynonym(shared_ptr<Synonym> &s)
+    inline const string& getDesignEntityTypeBySynonym(shared_ptr<Synonym>& s)
     {
         if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end())
         {
             cout << "Warning: requested synonym of value [" << s->getValue()
-                 << "] is NOT declared in this SelectCl. Null DesignEntityType is "
-                    "returned.\n";
+                << "] is NOT declared in this SelectCl. Null DesignEntityType is "
+                "returned.\n";
             throw "Synonym " + s->getValue() + " not declared, cannot resolve it's DesignEntityType";
         }
 
@@ -1484,19 +1488,19 @@ class SelectCl
     string format()
     {
         string builder = "";
-        for (auto &d : declarations)
+        for (auto& d : declarations)
         {
             builder += d->format() + ", ";
         }
 
         builder += "\nSELECT " + target->format();
 
-        for (auto &st : suchThatClauses)
+        for (auto& st : suchThatClauses)
         {
             builder += st->format();
         }
 
-        for (auto &pt : patternClauses)
+        for (auto& pt : patternClauses)
         {
             builder += pt->format();
         }
@@ -1530,7 +1534,7 @@ class SelectCl
     inline bool suchThatContainsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
-        for (auto &st : this->suchThatClauses)
+        for (auto& st : this->suchThatClauses)
         {
             flag = st->containsSynonym(s);
             if (flag)
@@ -1542,7 +1546,7 @@ class SelectCl
     inline bool patternContainsSynonym(shared_ptr<Element> s)
     {
         bool flag = false;
-        for (auto &pt : this->patternClauses)
+        for (auto& pt : this->patternClauses)
         {
             flag = pt->containsSynonym(s);
             if (flag)
@@ -1554,12 +1558,12 @@ class SelectCl
 
 class PQLParser
 {
-  private:
+private:
     vector<PQLToken> tokens;
     int index;
     int size;
 
-  public:
+public:
     PQLParser(vector<PQLToken> tok) : tokens(move(tok)), index(0)
     {
         size = tokens.size();
