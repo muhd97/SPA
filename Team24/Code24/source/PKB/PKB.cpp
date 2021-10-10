@@ -229,6 +229,8 @@ PKBStmt::SharedPtr PKB::extractReadStatement(shared_ptr<Statement> &statement, P
     // variable is modified by this statementa
     var->addModifierStatement(res->getIndex());
 
+    readStmtToVarNameTable[to_string(res->getIndex())] = var->getName();
+
     // every read modifies variable
     designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::Read].insert(res);
     mAllModifyStmts.insert(res);
@@ -253,6 +255,8 @@ PKBStmt::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statement, 
     res->addUsedVariable(var);
     // variable is modified by this statement
     var->addUserStatement(res->getIndex());
+
+    printStmtToVarNameTable[to_string(res->getIndex())] = var->getName();
 
     // YIDA: For the var Used by this PRINT statement, we need to add it to the
     // pkb's mUsedVariables map.
@@ -448,6 +452,8 @@ PKBStmt::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &statement, P
     string procedureName = callStatement->getProcId()->getName();
     PKBProcedure::SharedPtr procedureCalled;
     
+    callStmtToProcNameTable[to_string(res->getIndex())] = procedureName;
+
     // 2. insert calls relationship
     shared_ptr<PKBProcedure> currentProcedure = currentProcedureToExtract; // store the currently extracted procedure to revert back to
     insertCallsRelationship(currentProcedure->getName(), procedureName);

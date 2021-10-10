@@ -214,6 +214,11 @@ class PQLProcessor
                                       vector<shared_ptr<ResultTuple>> &newResults);
 
     void getResultsByEntityType(vector<shared_ptr<Result>> &toPopulate, shared_ptr<DesignEntity> de);
+
+    void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl> resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);
+
+    string resolveAttrRef(const string& syn, shared_ptr<AttrRef>& attrRef, shared_ptr<SelectCl>& selectCl, shared_ptr<ResultTuple>& tup);
+
 };
 
 /*

@@ -16,16 +16,16 @@ string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 inline bool targetSynonymMatchesType(shared_ptr<SelectCl> selectCl, string targetType)
 {
     // @jiachen247: Add support for other result types
-    shared_ptr<Synonym> firstElem = dynamic_pointer_cast<Synonym>(selectCl->target->getElements()[0]);
-    return selectCl->getDesignEntityTypeBySynonym(firstElem) == targetType;
+    shared_ptr<Element> firstElem = selectCl->target->getElements()[0];
+    return selectCl->getDesignEntityTypeBySynonym(firstElem->getSynonymString()) == targetType;
 }
 
 /* Method to check if the target synonym of the select clause is declared */
 inline bool targetSynonymNotDeclared(shared_ptr<SelectCl> selectCl)
 {
     // @jiachen247: Add support for other result types
-    shared_ptr<Synonym> firstElem = dynamic_pointer_cast<Synonym>(selectCl->target->getElements()[0]);
-    return selectCl->synonymToParentDeclarationMap.find(firstElem->getValue()) ==
+    shared_ptr<Element> firstElem = selectCl->target->getElements()[0];
+    return selectCl->synonymToParentDeclarationMap.find(firstElem->getSynonymString()) ==
            selectCl->synonymToParentDeclarationMap.end();
 }
 
@@ -34,10 +34,10 @@ inline bool targetSynonymNotDeclared(shared_ptr<SelectCl> selectCl)
 inline bool targetSynonymMatchesMultipleTypes(shared_ptr<SelectCl> selectCl, initializer_list<string> list)
 {
     // @jiachen247: Add support for other result types
-    shared_ptr<Synonym> firstElem = dynamic_pointer_cast<Synonym>(selectCl->target->getElements()[0]);
+    shared_ptr<Element> firstElem =selectCl->target->getElements()[0];
 
     bool flag = false;
-    string toMatch = selectCl->getDesignEntityTypeBySynonym(firstElem->getValue());
+    string toMatch = selectCl->getDesignEntityTypeBySynonym(firstElem->getSynonymString());
 
     for (auto &s : list)
     {
@@ -53,7 +53,7 @@ inline bool targetSynonymMatchesMultipleTypes(shared_ptr<SelectCl> selectCl, ini
 inline bool targetSynonymIsInClauses(shared_ptr<SelectCl> selectCl)
 {
     // @jiachen247: Add support for other result types
-    shared_ptr<Synonym> firstElem = dynamic_pointer_cast<Synonym>(selectCl->target->getElements()[0]);
+    shared_ptr<Element> firstElem = selectCl->target->getElements()[0];
     return selectCl->suchThatContainsSynonym(firstElem) || selectCl->patternContainsSynonym(firstElem);
 }
 
@@ -1084,7 +1084,7 @@ void PQLProcessor::handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared
             return;
         }
 
-        cout << "VARIABLE EXISTS!\n";
+        //cout << "VARIABLE EXISTS!\n";
 
         /* Uses (syn, "IDENT") -> syn is NOT a procedure. */
         if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) != DesignEntity::PROCEDURE)
@@ -2405,8 +2405,7 @@ inline bool isTargetSynonymDeclared(shared_ptr<SelectCl> &selectCl)
     if (selectCl->target->isBooleanReturnType()) return true;
 
     for (auto ptr : selectCl->target->getElements()) {
-        shared_ptr<Synonym> elem = dynamic_pointer_cast<Synonym>(ptr);
-        if (!selectCl->isSynonymDeclared(elem->getValue())) return false;
+        if (!selectCl->isSynonymDeclared(ptr->getSynonymString())) return false;
     }
 
     return true;
@@ -2444,12 +2443,15 @@ inline void validateSelectCl(shared_ptr<SelectCl> selectCl)
         throw "Bad PQL Query. The target synonym is NOT declared\n";
     }
 
+    //cout << "Validate0 ================= \n";
 
     if (!allSynonymsInSuchThatClausesAreDeclared(selectCl))
     {
         throw "BAD PQL Query. Some synonyms in the such-that clauses were NOT "
               "declared\n";
     }
+
+    //out << "Validate1 ================= \n";
 
 
     if (!allSynonymsInPatternClausesAreDeclared(selectCl))
@@ -2458,18 +2460,20 @@ inline void validateSelectCl(shared_ptr<SelectCl> selectCl)
               "declared\n";
     }
 
+    //cout << "Validate2 ================= \n";
+
 }
 
-inline bool allTargetSynonymsExistInTuple(vector<shared_ptr<Synonym>>& synonyms, shared_ptr<ResultTuple> tuple) {
+inline bool allTargetSynonymsExistInTuple(const vector<shared_ptr<Element>>& synonyms, shared_ptr<ResultTuple> tuple) {
     
     for (auto& synPtr : synonyms) {
-        if (!tuple->synonymKeyAlreadyExists(synPtr->getValue())) return false;
+        if (!tuple->synonymKeyAlreadyExists(synPtr->getSynonymString())) return false;
     }
     
     return true;
 }
 
-void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl> resultCl, vector<shared_ptr<ResultTuple>>& tuples) {
+void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl> resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl) {
     
     // Debugging
     //for (auto& ptr : tuples) cout << ptr->toString() << endl;
@@ -2482,14 +2486,25 @@ void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<Resu
 
     if (resultCl->isSingleValReturnType()) {
 
-        shared_ptr<Synonym> firstElem = static_pointer_cast<Synonym>(resultCl->getElements()[0]);
-        const string& targetSynonymVal = firstElem->getValue();
+        //cout << "hello =================================== 1\n";
 
+        shared_ptr<Element> firstElem = resultCl->getElements()[0];
+        shared_ptr<AttrRef> attrRef = nullptr;
+
+        const string& targetSynonymVal = firstElem->getSynonymString();
+
+        bool isAttrRef = firstElem->getElementType() == ElementType::AttrRef;
+
+        if (isAttrRef) attrRef = static_pointer_cast<AttrRef>(firstElem);
+
+        
         unordered_set<string> existingResults;
         for (auto tuple : tuples)
         {
             if (tuple->synonymKeyAlreadyExists(targetSynonymVal)) {
-                string& val = tuple->get(targetSynonymVal);
+                string& val = isAttrRef 
+                    ? resolveAttrRef(targetSynonymVal, attrRef, selectCl, tuple) 
+                    : tuple->get(targetSynonymVal);
                 if (!stringIsInsideSet(existingResults, val))
                 {
                     toReturn.emplace_back(make_shared<StringSingleResult>(val));
@@ -2502,16 +2517,13 @@ void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<Resu
 
     if (resultCl->isMultiTupleReturnType()) {
 
-        int numTargetSynonyms = resultCl->getElements().size();
-        vector<shared_ptr<Synonym>> targetSynonyms;
-        targetSynonyms.reserve(numTargetSynonyms);
-        
-        for (auto& ptr : resultCl->getElements()) targetSynonyms.emplace_back(static_pointer_cast<Synonym>(ptr));
+        int numTargetElements = resultCl->getElements().size();
+        const vector<shared_ptr<Element>>& targetElems = resultCl->getElements();
         unordered_set<string> existingResults;
 
         for (auto tuple : tuples)
         {
-            if (allTargetSynonymsExistInTuple(targetSynonyms, tuple)) {
+            if (allTargetSynonymsExistInTuple(targetElems, tuple)) {
                 string temp = "";
                 /*vector<string> orderedStrings;
                 orderedStrings.reserve(numTargetSynonyms);
@@ -2519,10 +2531,19 @@ void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<Resu
                     orderedStrings.emplace_back(tuple->get(synPtr->getValue()));
                 }*/
 
-                for (unsigned int i = 0; i < targetSynonyms.size(); i++) {
-                    auto& curr = targetSynonyms[i];
-                    temp += i != targetSynonyms.size() - 1 ? tuple->get(curr->getValue()) + " " : tuple->get(curr->getValue());
+                for (unsigned int i = 0; i < targetElems.size(); i++) {
+                    auto& curr = targetElems[i];
+                    const string& targetSynonymVal = curr->getSynonymString();
+
+                    string& val = curr->getElementType() == ElementType::AttrRef
+                        ? resolveAttrRef(targetSynonymVal, static_pointer_cast<AttrRef>(curr), selectCl, tuple)
+                        : tuple->get(targetSynonymVal);
+
+                    temp += val;
+                    if (i != targetElems.size() - 1) temp.push_back(' ');
                 }
+
+                //cout << "CurrTuple = " << temp << endl;
 
                 if (existingResults.find(temp) == existingResults.end()) {
                     //toReturn.emplace_back(make_shared<OrderedStringTupleResult>(move(orderedStrings)));
@@ -2537,6 +2558,53 @@ void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<Resu
 
 }
 
+/* PRE-CONDITION: TargetSynonym exists as one of the keys of the ResultTuple. */
+string PQLProcessor::resolveAttrRef(const string& syn, shared_ptr<AttrRef>& attrRef, shared_ptr<SelectCl>& selectCl, shared_ptr<ResultTuple>& tup)
+{
+
+    //cout << "Resolve attrRef ================================2\n";
+
+    // TODO: @kohyida1997 validate the attrRef (no illegal attrRef like procedure.varName)
+
+    if (attrRef == nullptr) {
+        throw "Critical error: AttrRef to resolve is nullptr!";
+    }
+
+    if (attrRef->getAttrName()->getAttrNameType() == AttrNameType::PROC_NAME) {
+
+        if (selectCl->getDesignEntityTypeBySynonym(syn) == DesignEntity::PROCEDURE) {
+            return tup->get(syn);
+        }
+
+        if (selectCl->getDesignEntityTypeBySynonym(syn) == DesignEntity::CALL) {
+            return evaluator->mpPKB->callStmtToProcNameTable[tup->get(syn)];
+        }
+    }
+
+    if (attrRef->getAttrName()->getAttrNameType() == AttrNameType::VAR_NAME) {
+        if (selectCl->getDesignEntityTypeBySynonym(syn) == DesignEntity::READ) {
+            evaluator->mpPKB->readStmtToVarNameTable[tup->get(syn)];
+        }
+
+        if (selectCl->getDesignEntityTypeBySynonym(syn) == DesignEntity::PRINT) {
+            return evaluator->mpPKB->printStmtToVarNameTable[tup->get(syn)];
+        }
+
+        if (selectCl->getDesignEntityTypeBySynonym(syn) == DesignEntity::VARIABLE) {
+            return tup->get(syn);
+        }
+    }
+
+    if (attrRef->getAttrName()->getAttrNameType() == AttrNameType::VALUE) {
+        return tup->get(syn);
+    }
+
+    //if (attrName->getAttrNameType() == AttrNameType::STMT_NUMBER) {
+    return tup->get(syn);
+    //}
+
+}
+
 /* YIDA: Can only handle queries that return statement numbers, procedure names
  * and variables for now. */
 vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> selectCl)
@@ -2544,6 +2612,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     /* Pre-Validate PQLQuery first to catch simple errors like a synonym not
      * being declared first. */
 
+
+    //cout << "======================================================================00000\n";
 
     validateSelectCl(selectCl);
 
@@ -2558,6 +2628,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     //}
 
 
+    //cout << "======================================================================1111\n";
+
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses())
     {
@@ -2567,6 +2639,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
 
     /* Standard case 0: Evaluate the such-that clause first to get the statement
      * numbers out from there. Then evaluate Pattern clauses */
+
+    //cout << "Test ======================================0\n";
 
     /* STEP 1: Evaluate SuchThat clauses first, get all the tuples. */
     vector<shared_ptr<ResultTuple>> suchThatReturnTuples;
@@ -2684,7 +2758,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
         //    }
         //}
 
-        extractTargetSynonyms(res, selectCl->target, combinedTuples);
+        extractTargetSynonyms(res, selectCl->target, combinedTuples, selectCl);
 
         return move(res);
     }
@@ -2718,7 +2792,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     //        }
     //    }
     //}
-    extractTargetSynonyms(res, selectCl->target, finalTuples);
+    extractTargetSynonyms(res, selectCl->target, finalTuples, selectCl);
 
     return move(res);
 }

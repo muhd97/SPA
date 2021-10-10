@@ -1,0 +1,30 @@
+1 - Select Call.procName
+stmt s; assign a; variable v; call c;
+Select c.procName such that Uses(c, v)
+yida1, yida2
+1000
+2 - Select Call.stnt#
+stmt s; assign a; variable v; call c;
+Select c.stmt# such that Uses(c, v)
+13, 14
+1000
+3 - Select <c.procName, v.varName, p.varName> such that Uses(c, v) such that Uses(p, _)
+stmt s; assign a; variable v; call c; print p;
+Select <c.procName, v.varName, p.varName> such that Uses(c, v) such that Uses(p, _)
+yida1 b b,yida1 b q,yida1 x b,yida1 x q,yida1 y b,yida1 y q,yida2 i b,yida2 i q,yida2 q b,yida2 q q,yida2 x b,yida2 x q,yida2 y b,yida2 y q,yida2 z b,yida2 z q
+1000
+4 - Select <print.varName, v>
+print p; variable v;
+Select <p.varName, v> such that Uses(p, v)
+b b, q q
+1000
+5 - Select <p, v>
+print p; variable v;
+Select <p, v> such that Uses(p, v)
+5 b, 6 b, 10 q, 11 q
+1000
+
+
+
+
+

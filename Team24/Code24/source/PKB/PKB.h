@@ -224,6 +224,13 @@ class PKB
 
     const unordered_map<string, PKBVariable::SharedPtr> &getAllVariablesMap() const;
 
+    /* ==================================== UTILITY TABLES ==================================== */
+
+    unordered_map<string, string> callStmtToProcNameTable;
+
+    unordered_map<string, string> readStmtToVarNameTable;
+
+    unordered_map<string, string> printStmtToVarNameTable;
 
     /* ==================================== RELATIONSHIP TABLES ==================================== */
 
