@@ -1,3 +1,4 @@
+#pragma optimize( "gty", on )
 #pragma once
 #include "PQLProcessor.h"
 

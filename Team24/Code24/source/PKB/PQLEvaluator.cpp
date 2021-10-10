@@ -1,3 +1,4 @@
+#pragma optimize( "gty", on )
 #include "PQLEvaluator.h"
 
 #include <queue>

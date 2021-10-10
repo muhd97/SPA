@@ -1,3 +1,5 @@
+#pragma optimize( "gty", on )
+
 #include "TestWrapper.h"
 #include "SimpleAST.h"
 #include "SimpleLexer.h"
@@ -72,25 +74,25 @@ void TestWrapper::parse(std::string filename) {
 
 // method to evaluating a query
 void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
-    cout << "\n==== Parsing queries ====\n";
+    //cout << "\n==== Parsing queries ====\n";
 
     try {
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
-        cout << "\n==== Printing Parsed Query ====\n";
-        cout << sel->format() << endl;
+        //cout << "\n==== Printing Parsed Query ====\n";
+        //cout << sel->format() << endl;
         
-        cout << "\n==== Processing PQL Query ====\n";
+        //cout << "\n==== Processing PQL Query ====\n";
 
         
 
-        cout << "\n==== Created PQLEvaluator using PKB ====\n";
+       //cout << "\n==== Created PQLEvaluator using PKB ====\n";
 
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
 
-        cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
+        //cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
 
-        vector<shared_ptr<Result>> res = pqlProcessor->processPQLQuery(sel);
+        vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
 
         for (auto& r : res) {
             results.emplace_back(r->getResultAsString());

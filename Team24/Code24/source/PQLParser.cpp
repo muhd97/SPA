@@ -1,3 +1,4 @@
+#pragma optimize( "gty", on )
 #include "PQLParser.h"
 
 #include <iostream>

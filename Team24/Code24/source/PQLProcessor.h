@@ -1,4 +1,6 @@
 #pragma once
+#pragma optimize( "gty", on )
+
 
 #include ".\PKB\PQLEvaluator.h"
 #include "PQLParser.h"

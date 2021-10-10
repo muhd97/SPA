@@ -1,3 +1,6 @@
+#pragma optimize( "gty", on )
+
+
 #include "PQLProcessor.h"
 #include "PQLProcessorUtils.h"
 #include "PQLLexer.h"
@@ -2580,7 +2583,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl> se
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses())
     {
-        return handleNoSuchThatOrPatternCase(move(selectCl));
+        return move(handleNoSuchThatOrPatternCase(move(selectCl)));
     }
 
 

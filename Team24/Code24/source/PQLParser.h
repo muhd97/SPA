@@ -1,4 +1,5 @@
 #pragma once
+#pragma optimize( "gty", on )
 
 #include <iostream>
 #include <unordered_map>

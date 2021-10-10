@@ -1,3 +1,5 @@
+#pragma optimize( "gty", on )
+
 #include "PKB.h"
 
 #include <iostream>
