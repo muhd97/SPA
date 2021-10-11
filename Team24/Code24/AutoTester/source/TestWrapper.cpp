@@ -1,5 +1,8 @@
 #pragma optimize( "gty", on )
 
+#define DEBUG 0
+#define PRINT_FINISHED_HEADER 0
+
 #include "TestWrapper.h"
 #include "SimpleAST.h"
 #include "SimpleLexer.h"
@@ -74,37 +77,47 @@ void TestWrapper::parse(std::string filename) {
 
 // method to evaluating a query
 void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
-    //cout << "\n==== Parsing queries ====\n";
+#if DEBUG
+    cout << "\n==== Parsing queries ====\n";
+#endif
 
     try {
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
-        //cout << "\n==== Printing Parsed Query ====\n";
-        //cout << sel->format() << endl;
+#if DEBUG
+        cout << "\n==== Printing Parsed Query ====\n";
+        cout << sel->format() << endl;
         
-        //cout << "\n==== Processing PQL Query ====\n";
+        cout << "\n==== Processing PQL Query ====\n";
 
         
 
-       //cout << "\n==== Created PQLEvaluator using PKB ====\n";
-
+       cout << "\n==== Created PQLEvaluator using PKB ====\n";
+#endif
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
 
-        //cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
+#if DEBUG
+        cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
 
+#endif
         vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
 
         for (auto& r : res) {
             results.emplace_back(r->getResultAsString());
         }
     }
-    catch (std::exception& ex) {
+    catch (const exception& ex) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
-        cout << "Error message: " << ex.what() << endl;;
+        cout << "Error message: " << ex.what() << endl;
+    }
+    catch (const string& e) {
+        cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
+        cout << "Error message: " << e << endl;;
     }
     catch (...) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
     }
-
+#if PRINT_FINISHED_HEADER
     cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";
+#endif
 }
