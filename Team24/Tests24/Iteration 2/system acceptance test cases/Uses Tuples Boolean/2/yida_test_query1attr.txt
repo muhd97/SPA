@@ -98,3 +98,23 @@ stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedu
 Select <procedure.procName, f, c.procName> such that Uses(c, v) 
 yida1 13 yida1,yida1 13 yida2,yida1 14 yida1,yida1 14 yida2,yida2 13 yida1,yida2 13 yida2,yida2 14 yida1,yida2 14 yida2,yida4 13 yida1,yida4 13 yida2,yida4 14 yida1,yida4 14 yida2,yida3 13 yida1,yida3 13 yida2,yida3 14 yida1,yida3 14 yida2
 1000
+21 - Select <c.stmt#, c.procName> - SAME SYNONYM, DIFF ATTRREF
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <c.stmt#, c.procName> such that Uses(s, _)
+13 yida1,13 yida2,14 yida1,14 yida2
+1000
+22 - Select <c.stmt#, c.procName> - SAME SYNONYM, DIFF ATTRREF, NEGATIVE CASE
+stmt s; assign a; variable v; call c; print p; call f;if ifs; read r; procedure procedure;
+Select <c.stmt#, c.procName> such that Parent*(ifs, _)
+
+1000
+23 - Select <c, c> - SAME SYNONYM, SAME ATTRREF
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <c, c> such that Uses(s, _)
+13 14, 13 13, 14 13, 14 14
+1000
+24 - Select <c.procName, c.procName> - SAME SYNONYM, SAME ATTRREF
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <c.procName, c.procName> such that Uses(s, _)
+yida1 yida2, yida1 yida1, yida2 yida1, yida2 yida2
+1000
