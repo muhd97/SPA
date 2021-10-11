@@ -1,4 +1,5 @@
 #pragma once
+#pragma optimize( "gty", on )
 
 #include <iostream>
 #include <unordered_map>
@@ -1183,11 +1184,15 @@ public:
 
 class SuchThatCl
 {
+private:
+    vector<string> synonymsUsed;
+
 public:
     shared_ptr<RelRef> relRef;
 
     SuchThatCl(shared_ptr<RelRef> ref) : relRef(move(ref))
     {
+        synonymsUsed = this->relRef->getAllSynonymsAsString();
     }
 
     ~SuchThatCl()
@@ -1208,11 +1213,9 @@ public:
         return relRef->containsSynonym(s);
     }
 
-
-
-    inline vector<string> getAllSynonymsAsString()
+    inline const vector<string>& getAllSynonymsAsString()
     {
-        return relRef->getAllSynonymsAsString();
+        return synonymsUsed;
     }
 };
 
@@ -1314,14 +1317,23 @@ public:
 
 class PatternCl
 {
+private:
+    vector<string> synonymsUsed;
+
 public:
     shared_ptr<Synonym> synonym;
     shared_ptr<EntRef> entRef;
     shared_ptr<ExpressionSpec> exprSpec;
 
-    PatternCl(shared_ptr<Synonym> synonym, shared_ptr<EntRef> entRef, shared_ptr<ExpressionSpec> expression)
-        : synonym(move(synonym)), entRef(move(entRef)), exprSpec(move(expression))
+    PatternCl(shared_ptr<Synonym> s, shared_ptr<EntRef> e, shared_ptr<ExpressionSpec> exp)
+        : synonym(move(s)), entRef(move(e)), exprSpec(move(exp))
     {
+        synonymsUsed.push_back(this->synonym->getValue());
+        if (this->entRef->getEntRefType() == EntRefType::SYNONYM)
+        {
+            synonymsUsed.emplace_back(this->entRef->getStringVal());
+        }
+
     }
 
     ~PatternCl()
@@ -1343,28 +1355,30 @@ public:
             (entRef->getEntRefType() == EntRefType::SYNONYM && entRef->getStringVal() == s->getSynonymString());
     }
 
-    inline vector<string> getAllSynonymsAsString()
+    inline const vector<string>& getAllSynonymsAsString()
     {
-        vector<string> toReturn;
-        toReturn.push_back(synonym->getValue());
-        if (entRef->getEntRefType() == EntRefType::SYNONYM)
-        {
-            toReturn.emplace_back(entRef->getStringVal());
-        }
-
-        return toReturn;
+        return synonymsUsed;
     }
 };
 
 class WithCl
 {
+private:
+    vector<string> synonymsUsed;
+
 public:
     shared_ptr<Ref> lhs;
     shared_ptr<Ref> rhs;
 
-    WithCl(shared_ptr<Ref> lhs, shared_ptr<Ref> rhs)
-        : lhs(move(lhs)), rhs(move(rhs))
+    WithCl(shared_ptr<Ref> l, shared_ptr<Ref> r)
+        : lhs(move(l)), rhs(move(r))
     {
+
+        if (this->lhs->getRefType() == RefType::SYNONYM)
+            synonymsUsed.emplace_back(this->lhs->getStringVal());
+        if (this->rhs->getRefType() == RefType::SYNONYM)
+            synonymsUsed.emplace_back(this->rhs->getStringVal());
+
     }
 
     ~WithCl()
@@ -1387,16 +1401,9 @@ public:
             (rhs->getRefType() == RefType::SYNONYM && rhs->getStringVal() == s->getSynonymString());
     }
 
-    inline vector<string> getAllSynonymsAsString()
+    inline const vector<string>& getAllSynonymsAsString()
     {
-        vector<string> toReturn;
-
-        if (lhs->getRefType() == RefType::SYNONYM)
-            toReturn.emplace_back(lhs->getStringVal());
-        if (rhs->getRefType() == RefType::SYNONYM)
-            toReturn.emplace_back(rhs->getStringVal());
-
-        return toReturn;
+        return synonymsUsed;
     }
 };
 
@@ -1553,6 +1560,21 @@ public:
                 break;
         }
         return flag;
+    }
+
+    inline bool withContainsSynonym(shared_ptr<Element> e) {
+        bool flag = false;
+        for (auto& pt : this->withClauses)
+        {
+            flag = pt->containsSynonym(e);
+            if (flag)
+                break;
+        }
+        return flag;
+    }
+
+    inline const shared_ptr<ResultCl>& getTarget() {
+        return target;
     }
 };
 

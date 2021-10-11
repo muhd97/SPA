@@ -1,3 +1,5 @@
+#pragma optimize( "gty", on )
+
 #pragma once
 
 #include <iostream>

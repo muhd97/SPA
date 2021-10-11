@@ -4,6 +4,7 @@ procedure yida1 {
 	z = x + y;
 	read a;
 	print b;
+    print b;
 }
 
 procedure yida2 {
@@ -11,6 +12,7 @@ procedure yida2 {
     j = 4 + i;
 	p = z - x - y;
 	print q;
+    print q;
 	read w;
 }
 
@@ -20,5 +22,7 @@ procedure yida3 {
 }
 
 procedure yida4 {
-
+	while(i == 2147483649) {
+		
+	}
 }

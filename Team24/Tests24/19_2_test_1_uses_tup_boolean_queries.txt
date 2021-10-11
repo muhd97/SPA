@@ -77,9 +77,18 @@ Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, _)
 stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
 Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, _) pattern a(_, "q")
 
-500
+2000
 15 - Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, "a") - MANY DUPLICATES OF SAME CLAUSE
 stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
 Select <c, v> such that Uses(a, v) such that Uses(a, v) such that Uses(a, v) such that Uses(a, v) such that Uses(a, v) and Follows(_, c) such that Uses(a, v) such that Uses(a, v) and Follows(_, c) such that Uses(a, v) such that Uses(a, v) and Follows(_, c) such that Follows(_, c) such that Follows(_, c) such that Modifies(c, _) such that Modifies(c, _) such that Follows(_, c) such that Modifies(c, _) such that Modifies(c, _) such that Follows(_, c) such that Modifies(c, _) such that Modifies(c, _) such that Modifies(c, _) such that Modifies(c, _) such that Follows(_, c) such that Follows(_, c) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1)
 12 z, 12 x, 12 y, 12 i
-5000
+2000
+16 - Select <r, p, v> - One of the synonyms in tuple is independent
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select <r, p, v> such that Uses(p, v)
+10 5 b,10 9 q,4 5 b,4 9 q
+2000
+
+
+
+

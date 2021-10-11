@@ -1,3 +1,4 @@
+#pragma optimize( "gty", on )
 #pragma once
 #include "PQLProcessor.h"
 
@@ -21,11 +22,15 @@ inline bool targetSynonymNotDeclared(shared_ptr<SelectCl> selectCl)
 
 /* Method to check if the target synonym in the select statement is found in
  * its suchThat OR pattern clauses */
-inline bool targetSynonymIsInClauses(shared_ptr<SelectCl> selectCl)
+inline bool atLeastOneTargetSynonymIsInClauses(shared_ptr<SelectCl> selectCl)
 {
     // @jiachen247: Add support for other result types
-    shared_ptr<Element> firstElem = selectCl->target->getElements()[0];
-    return selectCl->suchThatContainsSynonym(firstElem) || selectCl->patternContainsSynonym(firstElem);
+
+    for (const auto& x : selectCl->target->getElements()) {
+        if (selectCl->suchThatContainsSynonym(x) || selectCl->patternContainsSynonym(x) || selectCl->withContainsSynonym(x)) return true;
+    }
+
+    return false;
 }
 
 template <typename Ref>
@@ -120,18 +125,18 @@ unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<SuchThatCl> suchThatCl
 {
     unordered_set<string> toReturn;
     toReturn.reserve(4); /* At most 4 keys to join on */
-    vector<string> suchThatSynonyms = suchThatCl->getAllSynonymsAsString();
-    vector<string> patternSynonyms = patternCl->getAllSynonymsAsString();
+    const vector<string>& suchThatSynonyms = suchThatCl->getAllSynonymsAsString();
+    const vector<string>& patternSynonyms = patternCl->getAllSynonymsAsString();
 
     unordered_set<string> hashMap;
     hashMap.reserve(suchThatSynonyms.size() + patternSynonyms.size());
 
-    for (string& s1 : suchThatSynonyms)
+    for (const string& s1 : suchThatSynonyms)
     {
         hashMap.insert(s1);
     }
 
-    for (string& s2 : patternSynonyms)
+    for (const string& s2 : patternSynonyms)
     {
         if (hashMap.find(s2) != hashMap.end())
         {
@@ -146,18 +151,18 @@ unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<SuchThatCl> suchThatCl
 {
     unordered_set<string> toReturn;
     toReturn.reserve(4); /* At most 4 keys to join on */
-    vector<string> suchThatSynonyms1 = suchThatCl1->getAllSynonymsAsString();
-    vector<string> suchThatSynonyms2 = suchThatCl2->getAllSynonymsAsString();
+    const vector<string>& suchThatSynonyms1 = suchThatCl1->getAllSynonymsAsString();
+    const vector<string>& suchThatSynonyms2 = suchThatCl2->getAllSynonymsAsString();
 
     unordered_set<string> hashMap;
     hashMap.reserve(suchThatSynonyms1.size() + suchThatSynonyms2.size());
 
-    for (string& s1 : suchThatSynonyms1)
+    for (const string& s1 : suchThatSynonyms1)
     {
         hashMap.insert(s1);
     }
 
-    for (string& s2 : suchThatSynonyms2)
+    for (const string& s2 : suchThatSynonyms2)
     {
         if (hashMap.find(s2) != hashMap.end())
         {
@@ -190,7 +195,7 @@ inline bool allSynonymsInSuchThatClausesAreDeclared(shared_ptr<SelectCl>& select
 {
     for (auto& suchThatClause : selectCl->suchThatClauses)
     {
-        for (string& s : suchThatClause->relRef->getAllSynonymsAsString())
+        for (const string& s : suchThatClause->getAllSynonymsAsString())
         {
             if (!selectCl->isSynonymDeclared(s))
                 return false;
@@ -243,6 +248,54 @@ inline bool allTargetSynonymsExistInTuple(const vector<shared_ptr<Element>>& syn
 
     for (auto& synPtr : synonyms) {
         if (!tuple->synonymKeyAlreadyExists(synPtr->getSynonymString())) return false;
+    }
+
+    return true;
+}
+
+/* A synonym that is independent is one that is inside the TargetSynonym set, but does not appear in any SuchThat, With or Pattern clauses. */
+unordered_set<shared_ptr<Element>> getSetOfIndependentSynonymsInTargetSynonyms(const shared_ptr<SelectCl>& selectCl) {
+    const auto& temp = selectCl->getTarget()->getElements();
+    unordered_set<string> allowedSynonyms;
+    unordered_set<shared_ptr<Element>> independentElements;
+    for (const auto& elemPtr : temp) allowedSynonyms.insert(elemPtr->getSynonymString());
+
+    for (const auto& ptr : selectCl->suchThatClauses) {
+        for (const auto& s : ptr->getAllSynonymsAsString()) {
+            if (allowedSynonyms.find(s) != allowedSynonyms.end()) allowedSynonyms.erase(s);
+            if (allowedSynonyms.empty()) return move(independentElements);
+        }
+    }
+
+    for (const auto& ptr : selectCl->patternClauses) {
+        for (const auto& s : ptr->getAllSynonymsAsString()) {
+            if (allowedSynonyms.find(s) != allowedSynonyms.end()) allowedSynonyms.erase(s);
+            if (allowedSynonyms.empty()) return move(independentElements);;
+        }
+    }
+
+    for (const auto& ptr : selectCl->withClauses) {
+        for (const auto& s : ptr->getAllSynonymsAsString()) {
+            if (allowedSynonyms.find(s) != allowedSynonyms.end()) allowedSynonyms.erase(s);
+            if (allowedSynonyms.empty()) return move(independentElements);;
+        }
+    }
+
+    for (const auto& ptr : temp) {
+        if (stringIsInsideSet(allowedSynonyms, ptr->getSynonymString())) independentElements.insert(ptr);
+    }
+
+    return move(independentElements);
+
+}
+
+bool dependentElementsAllExistInTupleKeys(const vector<shared_ptr<ResultTuple>>& tuples, const unordered_set<shared_ptr<Element>>& independentElements, const vector<shared_ptr<Element>>& allTargetElements) {
+    const auto& sampleTuple = tuples[0];
+    
+    for (const auto& ptr : allTargetElements) {
+        if (independentElements.find(ptr) != independentElements.end()) continue;
+
+        if (!sampleTuple->synonymKeyAlreadyExists(ptr->getSynonymString())) return false;
     }
 
     return true;
