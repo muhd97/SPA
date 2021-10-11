@@ -73,7 +73,7 @@ variable v; stmt v; assign a; print a;
 Select v such that Modifies(4, v)
 
 500
-16 - NEGATIVE CASE: Synonym was not defined. BAD query (throws exception)
+16 - NEGATIVE CASE: Synonym was not defined. BAD query
 variable v;
 Select v such that Uses(4, x)
 

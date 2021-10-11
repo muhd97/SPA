@@ -1,0 +1,150 @@
+1 - Select Call.procName
+stmt s; assign a; variable v; call c;
+Select c.procName such that Uses(c, v)
+yida1, yida2
+1000
+2 - Select Call.stnt#
+stmt s; assign a; variable v; call c;
+Select c.stmt# such that Uses(c, v)
+13, 14
+1000
+3 - Select <c.procName, v.varName, p.varName> such that Uses(c, v) such that Uses(p, _)
+stmt s; assign a; variable v; call c; print p;
+Select <c.procName, v.varName, p.varName> such that Uses(c, v) such that Uses(p, _)
+yida1 b b,yida1 b q,yida1 x b,yida1 x q,yida1 y b,yida1 y q,yida2 i b,yida2 i q,yida2 q b,yida2 q q,yida2 x b,yida2 x q,yida2 y b,yida2 y q,yida2 z b,yida2 z q
+1000
+4 - Select <print.varName, v> such that Uses(p, v>
+print p; variable v;
+Select <p.varName, v> such that Uses(p, v)
+b b, q q
+1000
+5 - Select <p, v> such that Uses(p, v)
+print p; variable v;
+Select <p, v> such that Uses(p, v)
+5 b, 6 b, 10 q, 11 q
+1000
+6 - Select <c, p, r>
+print p; call c; read r;
+Select <c, p, r> 
+13 5 4,13 5 12,13 6 4,13 6 12,13 10 4,13 10 12,13 11 4,13 11 12,14 5 4,14 5 12,14 6 4,14 6 12,14 10 4,14 10 12,14 11 4,14 11 12
+1000
+7 - Select <c.procName, p.varName, r.stmt#>
+print p; call c; read r;
+Select <c.procName, p.varName, r.stmt#> 
+yida1 b 4, yida1 b 12, yida1 q 4, yida1 q 12, yida2 b 4, yida2 b 12, yida2 q 4, yida2 q 12
+1000
+8 - Select <c.stmt#, p.stmt#, r.stmt#>
+print p; call c; read r;
+Select <c.stmt#, p.stmt#, r.stmt#> 
+13 5 4,13 5 12,13 6 4,13 6 12,13 10 4,13 10 12,13 11 4,13 11 12,14 5 4,14 5 12,14 6 4,14 6 12,14 10 4,14 10 12,14 11 4,14 11 12
+1000
+9 - Select <p.stmt#, r.stmt#>
+print p; call c; read r;
+Select <p.stmt#, r.stmt#> 
+5 4,5 12,6 4,6 12,10 4,10 12,11 4,11 12
+1000
+10 - Select <p.varName, r.stmt#>
+print p; call c; read r;
+Select <p.varName, r.stmt#> 
+b 4, b 12, q 4, q 12
+1000
+11 - Select <p.varName, r.stmt#, k.value>
+print p; call c; read r; constant k;
+Select <p.varName, r.stmt#, k.value> 
+b 4 1,b 4 2,b 4 3,b 4 4,b 4 2147483649,b 12 1,b 12 2,b 12 3,b 12 4,b 12 2147483649,q 4 1,q 4 2,q 4 3,q 4 4,q 4 2147483649,q 12 1,q 12 2,q 12 3,q 12 4,q 12 2147483649
+1000
+12 - Select <p.varName, r.stmt#, k.value>
+print p; call c; read r; constant k;
+Select <p.varName, r, k.value> 
+b 4 1,b 4 2,b 4 3,b 4 4,b 4 2147483649,b 12 1,b 12 2,b 12 3,b 12 4,b 12 2147483649,q 4 1,q 4 2,q 4 3,q 4 4,q 4 2147483649,q 12 1,q 12 2,q 12 3,q 12 4,q 12 2147483649
+1000
+13 - Select <c, r, v> - One of the synonyms in tuple is independent
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select <c, r.stmt#, v.varName> such that Modifies(r, v)
+13 12 w,13 4 a,14 12 w,14 4 a
+2000
+14 - Select <c.procName, r, v> - One of the synonyms in tuple is independent
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select <c.procName, r.stmt#, v.varName> such that Modifies(r, v)
+yida2 12 w,yida2 4 a,yida1 12 w,yida1 4 a
+2000
+15 - Select <c.procName, r, v> - One of the synonyms in tuple is independent
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select <c.procName, r.varName, v.varName> such that Modifies(r, v)
+yida2 w w,yida2 a a,yida1 w w,yida1 a a
+2000
+16 - Select <f, c.procName, v.varName, p.varName> such that Uses(c, v) such that Uses(p, _) One of the synonyms in tuple is independent
+stmt s; assign a; variable v; call c; print p; call f;
+Select <f, c.procName, v.varName, p.varName> such that Uses(c, v) such that Uses(p, _)
+13 yida2 y b,13 yida2 y q,13 yida2 z b,13 yida2 z q,13 yida2 x b,13 yida2 x q,13 yida2 q b,13 yida2 q q,13 yida2 i b,13 yida2 i q,13 yida1 b b,13 yida1 b q,13 yida1 y b,13 yida1 y q,13 yida1 x b,13 yida1 x q,14 yida2 y b,14 yida2 y q,14 yida2 z b,14 yida2 z q,14 yida2 x b,14 yida2 x q,14 yida2 q b,14 yida2 q q,14 yida2 i b,14 yida2 i q,14 yida1 b b,14 yida1 b q,14 yida1 y b,14 yida1 y q,14 yida1 x b,14 yida1 x q
+1000
+17 - Select <r.varName, f, c.procName> such that Uses(c, v) - MULTIPLE INDEPENDENT SYNONYMS
+stmt s; assign a; variable v; call c; print p; call f; read r;
+Select <r.varName, f, c.procName> such that Uses(c, v) 
+a 13 yida1,a 13 yida2,a 14 yida1,a 14 yida2,w 13 yida1,w 13 yida2,w 14 yida1,w 14 yida2
+1000
+18 - Select <r.varName, f, c.procName, w.stmt#> such that Uses(c, v) and Parent(s, w) - NEGATIVE CASE, MULTIPLE INDEPENDENT SYNONYMS
+stmt s; assign a; variable v; call c; print p; call f; read r; while w;
+Select <r.varName, f, c.procName, w.stmt#> such that Uses(c, v) and Parent(s, w) and Parent*(a, w)
+
+1000
+19 - Select <w, f, c.procName> such that Uses(c, v) - NEGATIVE CASE, MULTIPLE INDEPENDENT SYNONYMS
+stmt s; constant z;assign a; variable v; call c; print p; call f; read r; while w; if ifs;
+Select <w, f, c.procName, z> such that Uses(c, v) and Parent(s, w) and Parent*(a, w)
+
+1000
+20 - Select <procedure.procName, procedure.procName, f, c.procName> such that Uses(c, v) - MULTIPLE INDEPENDENT SYNONYMS
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <procedure.procName, procedure.procName, f, c.procName> such that Uses(c, v) 
+yida1 yida1 13 yida2,yida1 yida1 13 yida1,yida1 yida1 14 yida2,yida1 yida1 14 yida1,yida2 yida2 13 yida2,yida2 yida2 13 yida1,yida2 yida2 14 yida2,yida2 yida2 14 yida1,yida4 yida4 13 yida2,yida4 yida4 13 yida1,yida4 yida4 14 yida2,yida4 yida4 14 yida1,yida3 yida3 13 yida2,yida3 yida3 13 yida1,yida3 yida3 14 yida2,yida3 yida3 14 yida1
+1000
+21 - Select <c.stmt#, c.procName> - SAME SYNONYM, DIFF ATTRREF (independent)
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <c.stmt#, c.procName> such that Uses(s, _)
+13 yida1, 14 yida2
+1000
+22 - Select <c.stmt#, c.procName> - SAME SYNONYM, DIFF ATTRREF, NEGATIVE CASE
+stmt s; assign a; variable v; call c; print p; call f;if ifs; read r; procedure procedure;
+Select <c.stmt#, c.procName> such that Parent*(ifs, _)
+
+1000
+23 - Select <c, c> - SAME SYNONYM, SAME ATTRREF (independent)
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <c, c> such that Uses(s, _)
+13 13, 14 14
+1000
+24 - Select <c.procName, c.procName> - SAME SYNONYM, SAME ATTRREF (independent)
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <c.procName, c.procName> such that Uses(s, _)
+yida1 yida1, yida2 yida2
+1000
+25 - Select <c, c> such that Uses (c, _) - SAME SYNONYM, SAME ATTRREF
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <c, c> such that Uses(c, _)
+13 13, 14 14
+1000
+26 - Select <c, c.procName> such that Uses (c, _) - SAME SYNONYM, SAME ATTRREF
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <c, c.procName> such that Uses(c, _)
+13 yida1, 14 yida2
+1000
+27 - Select <c, c> - SAME SYNONYM, SAME ATTRREF (independent)
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <c, c>
+13 13, 14 14
+1000
+28 - Select <c, c.procName> such that Uses (c, _) - SAME SYNONYM, SAME ATTRREF
+stmt s; assign a; variable v; call c; print p; call f; read r; procedure procedure;
+Select <c, c.procName, c.stmt#, c.procName, c> such that Uses(c, _)
+13 yida1 13 yida1 13, 14 yida2 14 yida2 14
+1000
+29 - Select <w, c.stmt#, c.procName> such that Uses (w, _) - SAME SYNONYM, SAME ATTRREF (some independent)
+stmt s; assign a; variable v; call c; print p; call f; read r; while w;procedure procedure;
+Select <w, c, c.procName> such that Uses(w, _)
+15 13 yida1,15 14 yida2
+1000
+30 - Select <c, c, proc, proc> - SAME SYNONYM, SAME ATTRREF (independent)
+stmt s; assign a; variable v;while w; call c; print p; call f; read r; procedure procedure;
+Select <c, c, proc, proc, w.stmt#,w>
+
+1000

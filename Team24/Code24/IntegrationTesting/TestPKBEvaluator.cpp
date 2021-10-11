@@ -183,78 +183,78 @@ void TestPKBEvaluator::printResult(int testIndex, vector<string> res) {
 
 void TestPKBEvaluator::runFollowsTests1() {
     //0
-    vector<int> res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, 1);
+    vector<int> res = evaluator->getAfter(PKBDesignEntity::AllStatements, 1);
     vector<int> expected = {2};
     checkResult(0, res, expected);
     //1
-    res = evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, 8);
+    res = evaluator->getBefore(PKBDesignEntity::AllStatements, 8);
     expected = { 4 };
     checkResult(1, res, expected);
     //2
-    res = evaluator->getBefore(PKBDesignEntity::Assign, PKBDesignEntity::AllExceptProcedure);
+    res = evaluator->getBefore(PKBDesignEntity::Assign, PKBDesignEntity::AllStatements);
     expected = { 1, 2, 3, 5, 6, 10 };
     checkResult(2, res, expected);
     //3
-    res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, PKBDesignEntity::Assign);
+    res = evaluator->getAfter(PKBDesignEntity::AllStatements, PKBDesignEntity::Assign);
     expected = { 2, 3, 6, 7, 11, 12 };
     checkResult(3, res, expected);
     //4
-    res = evaluator->getBefore(PKBDesignEntity::Assign, PKBDesignEntity::AllExceptProcedure);
+    res = evaluator->getBefore(PKBDesignEntity::Assign, PKBDesignEntity::AllStatements);
     expected = { 1, 2, 3, 5, 6, 10 };
     checkResult(4, res, expected);
     //5
-    res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, PKBDesignEntity::AllExceptProcedure);
+    res = evaluator->getAfter(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements);
     expected = { 2, 3, 4, 6, 7, 8, 11, 12 };
     checkResult(5, res, expected);
     //6
-    res = evaluator->getBefore(PKBDesignEntity::Read, PKBDesignEntity::AllExceptProcedure);
+    res = evaluator->getBefore(PKBDesignEntity::Read, PKBDesignEntity::AllStatements);
     expected = { }; 
     checkResult(6, res, expected);
     //7
-    res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, 7);
+    res = evaluator->getAfter(PKBDesignEntity::AllStatements, 7);
     expected = { }; 
     checkResult(7, res, expected);
     //8
-    res = evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, 10);
+    res = evaluator->getBefore(PKBDesignEntity::AllStatements, 10);
     expected = { }; 
     checkResult(8, res, expected);
-    res = evaluator->getAfter(PKBDesignEntity::AllExceptProcedure, 8);
+    res = evaluator->getAfter(PKBDesignEntity::AllStatements, 8);
     expected = { 12 }; 
     checkResult(8, res, expected);
     //9
-    res = evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, 26);
+    res = evaluator->getBefore(PKBDesignEntity::AllStatements, 26);
     expected = { }; 
     checkResult(9, res, expected);
     //10
-    res = evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, 17);
+    res = evaluator->getBefore(PKBDesignEntity::AllStatements, 17);
     expected = { }; 
     checkResult(10, res, expected);
 
     //14
-    res = evaluator->getAfterT(PKBDesignEntity::AllExceptProcedure, 4);
+    res = evaluator->getAfterT(PKBDesignEntity::AllStatements, 4);
     expected = { 8, 12 }; 
     checkResult(14, res, expected);
     //15
-    res = evaluator->getBeforeT(PKBDesignEntity::AllExceptProcedure, 8);
+    res = evaluator->getBeforeT(PKBDesignEntity::AllStatements, 8);
     expected = { 1, 2, 3, 4 };
     checkResult(15, res, expected);
     //16
-    res = evaluator->getAfterT(PKBDesignEntity::AllExceptProcedure, 6);
+    res = evaluator->getAfterT(PKBDesignEntity::AllStatements, 6);
     expected = { 7 };
     checkResult(16, res, expected);
     //17
-    res = evaluator->getBeforeT(PKBDesignEntity::AllExceptProcedure, PKBDesignEntity::AllExceptProcedure);
+    res = evaluator->getBeforeT(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements);
     expected = { 1, 2, 3, 4, 5, 6, 8, 10 };
     checkResult(17, res, expected);
-    res = evaluator->getBeforeT(PKBDesignEntity::AllExceptProcedure);
+    res = evaluator->getBeforeT(PKBDesignEntity::AllStatements);
     expected = { 1, 2, 3, 4, 5, 6, 8, 10 };
     checkResult(17, res, expected);
     //18
-    res = evaluator->getBeforeT(PKBDesignEntity::AllExceptProcedure, 1);
+    res = evaluator->getBeforeT(PKBDesignEntity::AllStatements, 1);
     expected = { }; 
     checkResult(18, res, expected);
     //19
-    res = evaluator->getAfterT(PKBDesignEntity::AllExceptProcedure, 12);
+    res = evaluator->getAfterT(PKBDesignEntity::AllStatements, 12);
     expected = { }; 
     checkResult(19, res, expected);
     //20
@@ -262,14 +262,14 @@ void TestPKBEvaluator::runFollowsTests1() {
     expected = { }; 
     checkResult(20, res, expected);
     //21
-    res = evaluator->getBeforeT(PKBDesignEntity::AllExceptProcedure, 17);
+    res = evaluator->getBeforeT(PKBDesignEntity::AllStatements, 17);
     expected = { }; 
     checkResult(21, res, expected);
-    res = evaluator->getAfterT(PKBDesignEntity::AllExceptProcedure, 9);
+    res = evaluator->getAfterT(PKBDesignEntity::AllStatements, 9);
     expected = { }; 
     checkResult(21, res, expected);
     //22
-    res = evaluator->getAfterT(PKBDesignEntity::AllExceptProcedure, PKBDesignEntity::While);
+    res = evaluator->getAfterT(PKBDesignEntity::AllStatements, PKBDesignEntity::While);
     expected = { 4 }; 
     checkResult(22, res, expected);
     res = evaluator->getBeforeT(PKBDesignEntity::While, PKBDesignEntity::Print);
@@ -317,8 +317,8 @@ void TestPKBEvaluator::runFollowsTests2() {
         { },
     };
     cout << pkb->mStatements.size() << endl;
-    for (auto i = 0; i < pkb->mStatements[PKBDesignEntity::AllExceptProcedure].size(); i++) {
-        res = evaluator->getBefore(PKBDesignEntity::AllExceptProcedure, i+1);
+    for (auto i = 0; i < pkb->mStatements[PKBDesignEntity::AllStatements].size(); i++) {
+        res = evaluator->getBefore(PKBDesignEntity::AllStatements, i+1);
         expected = expectedArray[i];
         checkResult(testCounter, res, expected);
         testCounter++;

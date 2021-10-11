@@ -1,13 +1,11 @@
 #pragma once
 #include <memory>
 #include <vector>
-
-#include "../SimpleAST.h"
-#include "PKBDesignEntity.h"
 #include "PKBGroup.h"
 
 using namespace std;
 
+//Old PKBStatement class with combined meaning of Stmt and Procedure
 class PKBStatement
 {
   public:

@@ -1,4 +1,6 @@
 #pragma once
+#pragma optimize( "gty", on )
+
 
 #include ".\PKB\PQLEvaluator.h"
 #include "PQLParser.h"
@@ -25,21 +27,20 @@ class to extend from.
 */
 enum class ResultType
 {
-    StmtLineSingleResult,
-    ProcedureNameSingleResult,
-    VariableNameSingleResult,
-    ConstantValueSingleResult,
-    StringSingleResult
+    StringSingleResult,
+    OrderedStringTupleResult
 };
 
 class Result
 {
   public:
     static string dummy;
+    static string TRUE_STRING;
+    static string FALSE_STRING;
 
     virtual ResultType getResultType()
     {
-        return ResultType::StmtLineSingleResult;
+        return ResultType::StringSingleResult;
     }
     virtual const string &getResultAsString() const
     {
@@ -76,7 +77,7 @@ class ResultTuple
         synonymKeyToValMap[key] = value;
     }
 
-    inline string get(string key)
+    inline const string& get(string key)
     {
         return synonymKeyToValMap[key];
     }
@@ -90,47 +91,22 @@ class ResultTuple
     {
         return synonymKeyToValMap;
     }
-};
 
-class VariableNameSingleResult : public Result
-{
-  public:
-    string variableName;
+    string toString() {
+        string s = "[";
 
-    VariableNameSingleResult(string varName) : variableName(move(varName))
-    {
-    }
+        for (const auto& kv : synonymKeyToValMap) {
+            s += "(";
+            s += kv.first + ", " + kv.second;
+            s += ") ";
+        }
 
-    ResultType getResultType()
-    {
-        return ResultType::ProcedureNameSingleResult;
-    }
+        s += "]";
+        return move(s);
 
-    const string &getResultAsString() const override
-    {
-        return variableName;
     }
 };
 
-class ProcedureNameSingleResult : public Result
-{
-  public:
-    string procedureName;
-
-    ProcedureNameSingleResult(string procName) : procedureName(move(procName))
-    {
-    }
-
-    ResultType getResultType()
-    {
-        return ResultType::ProcedureNameSingleResult;
-    }
-
-    const string &getResultAsString() const override
-    {
-        return procedureName;
-    }
-};
 
 class StringSingleResult : public Result
 {
@@ -152,30 +128,31 @@ class StringSingleResult : public Result
     }
 };
 
-class StmtLineSingleResult : public Result
+class OrderedStringTupleResult : public Result
 {
-  public:
-    int stmtLine = -1;
-    string stmtLineString;
+public:
+    vector<string> orderedStrings;
+    string formattedStrings;
 
-    StmtLineSingleResult(int line) : stmtLine(line), stmtLineString(to_string(stmtLine))
+    OrderedStringTupleResult(vector<string> s) : orderedStrings(move(s)) 
     {
+        formattedStrings = "";
+        for (unsigned int i = 0; i < orderedStrings.size(); i++) {
+            formattedStrings += orderedStrings[i];
+            if (i != orderedStrings.size() - 1) formattedStrings += " ";
+        }
     }
 
     ResultType getResultType()
     {
-        return ResultType::StmtLineSingleResult;
+        return ResultType::OrderedStringTupleResult;
     }
 
-    int getStmtLine()
+    const string& getResultAsString() const override
     {
-        return stmtLine;
+        return formattedStrings;
     }
 
-    const string &getResultAsString() const override
-    {
-        return stmtLineString;
-    }
 };
 
 class PQLProcessor
@@ -183,20 +160,19 @@ class PQLProcessor
   public:
     shared_ptr<PQLEvaluator> evaluator = nullptr;
 
-    // NOTE: DO NOT USE THIS CONSTRUCTOR, FOR UNIT TESTING ONLY.
-    PQLProcessor()
-    {
-    }
 
     PQLProcessor(shared_ptr<PQLEvaluator> eval) : evaluator(move(eval))
     {
     }
 
-    vector<shared_ptr<Result>> processPQLQuery(shared_ptr<SelectCl> selectCl);
+    vector<shared_ptr<Result>> processPQLQuery(shared_ptr<SelectCl>& selectCl);
 
   private:
     vector<shared_ptr<Result>> handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl);
-    void handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl,
+
+    void extractResultsForIndependentElements(const shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<Element>>& elems, vector<shared_ptr<Result>>& results);
+
+    void handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
                               vector<shared_ptr<ResultTuple>> &toReturn);
 
     void handleUsesSFirstArgInteger(shared_ptr<SelectCl> &selectCl, shared_ptr<UsesS> &usesCl,
@@ -230,11 +206,32 @@ class PQLProcessor
     void handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl,
                              vector<shared_ptr<ResultTuple>> &toReturn);
 
-    void joinResultTuples(vector<shared_ptr<ResultTuple>> leftResults, vector<shared_ptr<ResultTuple>> rightResults,
+    void handleCalls(shared_ptr<SelectCl> selectCl, shared_ptr<Calls> callsCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleCallsT(shared_ptr<SelectCl> selectCl, shared_ptr<CallsT> callsTCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void joinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
                           unordered_set<string> &joinKeys, vector<shared_ptr<ResultTuple>> &newResults);
-    void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> leftResults,
-                                      vector<shared_ptr<ResultTuple>> rightResults,
+    void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftResults,
+                                      vector<shared_ptr<ResultTuple>>& rightResults,
                                       vector<shared_ptr<ResultTuple>> &newResults);
+
+    void getResultsByEntityType(vector<shared_ptr<Result>> &toPopulate, const shared_ptr<DesignEntity>& de, const shared_ptr<Element>& elem);
+
+    void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl> resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);
+
+
+    const string& resolveAttrRef(const string& syn, shared_ptr<AttrRef>& attrRef, const shared_ptr<SelectCl>& selectCl, shared_ptr<ResultTuple>& tup);
+
+    const string& resolveAttrRef(const string& rawSynVal, shared_ptr<AttrRef>& attrRef, const shared_ptr<DesignEntity>& de);
+
+    const string& resolveAttrRef(const string& rawSynVal, shared_ptr<AttrRef>& attrRef, const string& de);
+
+
+    void extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<Element>& elem);
+
 };
 
 /*
