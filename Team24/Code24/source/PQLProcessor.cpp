@@ -2460,6 +2460,39 @@ inline void validateSelectCl(shared_ptr<SelectCl> selectCl)
 
 }
 
+inline void validateWithClause(shared_ptr<SelectCl> selectCl, shared_ptr<WithCl> withCl)
+{
+    shared_ptr<Ref> lhs = withCl->lhs;
+    shared_ptr<Ref> rhs = withCl->rhs;
+    bool isLhsInt = false;
+    bool isRhsInt = false;
+
+    if (!isLhsInt && lhs->getRefType() == RefType::INTEGER) {
+        isLhsInt = true;
+    }
+    if (!isRhsInt && rhs->getRefType() == RefType::INTEGER) {
+        isRhsInt = true;
+    }
+    if (!isLhsInt && lhs->getRefType() == RefType::SYNONYM) {
+        isLhsInt = givenSynonymMatchesMultipleTypes(selectCl, move(lhs->getStringVal()), {DesignEntity::CONSTANT, DesignEntity::PROG_LINE, DesignEntity::STMT});
+    }
+    if (!isRhsInt && rhs->getRefType() == RefType::SYNONYM) {
+        isRhsInt = givenSynonymMatchesMultipleTypes(selectCl, move(rhs->getStringVal()), { DesignEntity::CONSTANT, DesignEntity::PROG_LINE, DesignEntity::STMT });
+    }
+    if (!isLhsInt && lhs->getRefType() == RefType::ATTR) {
+        AttrNameType attrType = lhs->getAttrRef()->getAttrName()->getType();
+        isLhsInt = attrType == AttrNameType::STMT_NUMBER || attrType == AttrNameType::VALUE;
+    }
+    if (!isRhsInt && rhs->getRefType() == RefType::ATTR) {
+        AttrNameType attrType = rhs->getAttrRef()->getAttrName()->getType();
+        isRhsInt = attrType == AttrNameType::STMT_NUMBER || attrType == AttrNameType::VALUE;
+    }
+
+    if (isLhsInt != isRhsInt) {
+        throw "Bad PQL Query: The with clause is checking equality on different types.\n";
+    }
+}
+
 inline bool allTargetSynonymsExistInTuple(vector<shared_ptr<Synonym>>& synonyms, shared_ptr<ResultTuple> tuple) {
     
     for (auto& synPtr : synonyms) {
