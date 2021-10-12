@@ -551,13 +551,12 @@ void PKB::initializeFollowsTTables()
             //}
 
             for (int i : stmt->getGroup()->getMembers(de)) {
-                /*if (i <= stmt->getIndex()) {
-                    break;
-                }*/
-                cout << "the following indices are for stmt  " << stmt->getIndex() << " are " << i << endl;
-                 toReturn.insert(i);
-                 followsTIntIntTable.insert(make_pair(stmt->getIndex(), i));
-             }
+                if (i <= stmt->getIndex()) {
+                    continue;
+                }
+                toReturn.insert(i);
+                followsTIntIntTable.insert(make_pair(stmt->getIndex(), i));
+            }
         
             toAdd.insert(toAdd.end(), toReturn.begin(), toReturn.end());
             
@@ -571,10 +570,7 @@ void PKB::initializeFollowsTTables()
                 followsTIntSynTable[stmt->getIndex()][PKBDesignEntity::AllStatements].insert(
                     followsTIntSynTable[stmt->getIndex()][PKBDesignEntity::AllStatements].end(), toAdd.begin(), toAdd.end()
                 );
-                cout << "the size of IntSyn table is " << followsTIntSynTable[stmt->getIndex()][de].size() << " stmt index is " << stmt->getIndex() << endl;
             }
-
-            cout << "the size of all statement in int syn table is " << followsTIntSynTable[stmt->getIndex()][PKBDesignEntity::AllStatements].size() << " stmt index is " << stmt->getIndex() << endl;
         }
     }
 
