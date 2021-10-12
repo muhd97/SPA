@@ -923,14 +923,163 @@ stmt s; variable v; print pn;
 Select w such that Uses(x, v)
 
 5000
-- Select BOOLEAN such that Modifies(#, v) = True for given a and v
-- Select pn such that Modifies(#, v) = True for given pn and v
-- Select w such that Modifies(#, v) = True for given s and v
-- Select <p1, p2> such that Modifies(#, v) = True for given c and v
-- Select v such that Modifies(p, v) = True for given p and v
+185 - Select BOOLEAN such that Modifies(#, v) = True for given a and v
 
-- Select print statements such that Modifies(#, v) = False (General False)
-- Select BOOLEAN such that Modifies(v, #) = False (Wrong order)
-- Select print statements such that Modifies(#, v) = False (Invalid variable - Procedure name used instead)
-- Select read statements such that Modifies(#, v) = False (Invalid stmt number - 0)
-- Select <if, while> such that Modifies(#, v) = False (Out of range stmt number)
+Select BOOLEAN such that Modifies(1, "a")
+TRUE
+5000
+186 - Select r such that Modifies(#, v) = True for given r and v
+read r;
+Select r such that Modifies(2, "a")
+2, 4, 8, 26, 36, 46, 71, 75, 84, 85, 86, 87, 89, 96, 100
+5000
+187 - Select w such that Modifies(#, v) = True for given s and v
+while w;
+Select w such that Modifies(6, "p")
+22, 27, 39, 45, 49, 63, 64, 90, 104, 111
+5000
+188 - Select if, w such that Modifies(#, v) = True for given c and v
+if ifs; while w;
+Select <ifs, w> such that Modifies(70, "a")
+16 104,16 111,16 22,16 27,16 39,16 45,16 49,16 63,16 64,16 90,18 104,18 111,18 22,18 27,18 39,18 45,18 49,18 63,18 64,18 90,32 104,32 111,32 22,32 27,32 39,32 45,32 49,32 63,32 64,32 90,34 104,34 111,34 22,34 27,34 39,34 45,34 49,34 63,34 64,34 90,50 104,50 111,50 22,50 27,50 39,50 45,50 49,50 63,50 64,50 90,6 104,6 111,6 22,6 27,6 39,6 45,6 49,6 63,6 64,6 90,65 104,65 111,65 22,65 27,65 39,65 45,65 49,65 63,65 64,65 90,70 104,70 111,70 22,70 27,70 39,70 45,70 49,70 63,70 64,70 90,92 104,92 111,92 22,92 27,92 39,92 45,92 49,92 63,92 64,92 90,93 104,93 111,93 22,93 27,93 39,93 45,93 49,93 63,93 64,93 90
+5000
+189 - Select v.varName such that Modifies(p, v) = True for given p and v
+variable y;
+Select y such that Modifies("ReadY", "y")
+a, b, c, d, i, j, p, q, x, y, z
+5000
+190 - Select r such that Modifies(#, v) = False (General False; a)
+read r;
+Select r such that Modifies(3, "a")
+
+5000
+191 - Select v.varName such that Modifies(#, v) = False (General False; r)
+variable v;
+Select v.varName such that Modifies(4, "b")
+
+5000
+192 - Select p.procName such that Modifies(#, v) = False (General False; if)
+procedure p;
+Select p.procName such that Modifies(16, "i")
+
+5000
+193 - Select r.stmt# such that Modifies(#, v) = False (General False; w)
+read r;
+Select r.stmt# such that Modifies(22, "a")
+
+5000
+194 - Select r such that Modifies(#, v) = False (General False; p)
+read r;
+Select r such that Modifies("F", "y")
+
+5000
+195 - Select r such that Modifies(#, v) = False (General False; c)
+read r;
+Select r such that Modifies(37, "x")
+
+5000
+196 - Select BOOLEAN such that Modifies(v, #) (Wrong order; Error)
+procedure p;
+Select BOOLEAN such that Modifies("p", 6)
+
+5000
+197 - Select pn such that Modifies(#, v) = False (Invalid variable - Procedure name used instead)
+print pn;
+Select pn such that Modifies(3, "B")
+
+5000
+198 - Select r such that Modifies(#, v) = False (Invalid stmt number - 0)
+read r; variable v;
+Select r such that Modifies(0, v)
+
+5000
+199 - Select if, while such that Modifies(#, v) = False (Out of range stmt number)
+variable v; while w; if ifs;
+Select <ifs, w> such that Modifies(114, "x")
+
+5000
+200 - Select a, v such that Modifies(a, v)
+assign a; variable v;
+Select <a, v> such that Modifies(a, v)
+1 a,101 y,103 p,105 x,106 x,108 j,11 a,14 x,17 a,19 y,21 z,23 z,24 b,25 c,28 d,3 b,30 x,33 a,35 y,38 z,40 y,42 b,43 c,47 d,5 d,51 x,53 z,54 x,56 z,57 i,59 j,60 p,62 a,66 p,67 q,68 p,78 x,79 y,91 i,94 i,95 d,97 c,98 x
+5000
+201 - Select r, v such that Modifies(r, v)
+read r; variable v;
+Select <r, v> such that Modifies(r, v)
+2 a, 4 c, 8 p, 26 c, 36 z, 46 d, 71 b, 75 d, 84 a, 85 b, 86 x, 87 y, 89 j, 96 d, 100 x
+5000
+202 - Select if, v such that Modifies(s, v) (if)
+if ifs; variable v;
+Select <ifs, v> such that Modifies(ifs, v)
+16 a,16 b,16 c,16 d,16 y,16 z,18 b,18 y,18 z,32 a,32 b,32 c,32 d,32 y,32 z,34 b,34 y,34 z,50 x,50 y,50 z,6 a,6 b,6 c,6 d,6 i,6 j,6 p,6 q,6 x,6 y,6 z,65 a,65 b,65 c,65 d,65 i,65 j,65 p,65 q,65 x,65 y,70 a,70 b,70 c,70 d,70 i,70 j,70 p,70 x,70 y,92 a,92 b,92 c,92 d,92 i,92 p,92 x,92 y,93 c,93 d,93 i,93 x,93 y
+5000
+203 - Select w, v such that Modifies(s, v) (w)
+while w; variable v;
+Select <w.stmt#, v> such that Modifies(w, v)
+104 x,22 z,27 d,39 y,45 d,49 i,49 j,49 x,49 y,49 z,63 a,63 b,63 c,63 d,63 i,63 j,63 p,63 q,63 x,63 y,64 a,64 b,64 c,64 d,64 i,64 j,64 p,64 q,64 x,64 y,90 a,90 b,90 c,90 d,90 i,90 j,90 p,90 x,90 y
+5000
+204 - Select p, v such that Modifies(p, v)
+procedure p; variable v;
+Select <p.procName, v> such that Modifies(p, v)
+A a,A b,A c,A d,A i,A j,A p,A q,A x,A y,A z,Assign x,AssignY y,B a,B b,B c,B d,B i,B j,B p,B x,B y,B z,C a,C i,C j,C p,C x,C y,C z,Call a,Call b,Call c,Call d,Call i,Call j,Call p,Call q,Call x,Call y,D a,D b,D c,D d,D i,D j,D p,D q,D x,D y,E a,E b,E c,E d,E i,E j,E p,E x,E y,F a,F b,F x,Main a,Main b,Main c,Main d,Main i,Main j,Main p,Main q,Main x,Main y,Main z,Read a,Read b,Read x,ReadY y
+5000
+205 - Select c, v such that Modifies(c, v)
+call c; variable v;
+Select <c, v> such that Modifies(c, v)
+10 a,10 b,10 c,10 d,10 i,10 j,10 p,10 x,10 y,10 z,107 a,107 b,107 x,109 a,109 b,109 x,15 a,15 b,15 x,29 a,29 b,29 c,29 d,29 i,29 j,29 p,29 q,29 x,29 y,31 y,48 a,48 i,48 j,48 p,48 x,48 y,48 z,52 x,55 y,7 a,7 b,7 c,7 d,7 i,7 j,7 p,7 q,7 x,7 y,7 z,73 a,73 b,73 x,74 a,74 b,74 c,74 d,74 i,74 j,74 p,74 x,74 y,76 a,76 b,76 c,76 d,76 i,76 j,76 p,76 q,76 x,76 y
+5000
+206 - Select v such that Modifies(_, _) (Not Allowed)
+variable v;
+Select v such that Modifies(_, _)
+
+5000
+207 - Select v.varName such that Modifies(_, v) (Not Allowed)
+variable v;
+Select v.stmt# such that Modifies(_, v)
+
+5000
+208 - Select a such that Modifies(a, _)
+assign a;
+Select a such that Modifies(a, _)
+1,3,5,11,14,17,19,21,23,24,25,28,30,33,35,38,40,42,43,47,51,53,54,56,57,59,60,62,66,67,68,78,79,91,94,95,97,98,101,103,105,106,108
+5000
+209 - Select r such that Modifies(r, _)
+read r;
+Select r such that Modifies(r, _)
+2, 4, 8, 26, 36, 46, 71, 75, 84, 85, 86, 87, 89, 96, 100
+5000
+210 - Select ifs.stmt# such that Modifies(ifs, _)
+if ifs;
+Select ifs.stmt# such that Modifies(ifs, _)
+6, 16, 18, 32, 34, 50, 65, 70, 92, 93
+5000
+211 - Select w.stmt# such that Modifies(w, _)
+while w;
+Select w.stmt# such that Modifies(w, _)
+22, 27, 39, 45, 49, 63, 64, 90, 104
+5000
+212 - Select p such that Modifies(p, _)
+procedure p;
+Select p such that Modifies(p, _)
+Main, A, B, C, D, E, F, Call, Assign, AssignY, Read, ReadY
+5000
+213 - Select c such that Modifies(c, _)
+call c;
+Select c such that Modifies(c, _)
+7, 10, 15, 29, 31, 48, 52, 55, 73, 74, 76, 107, 109
+5000
+214 - Select pn such that Modifies(#, _) = False (# is out of range).
+print pn;
+Select pn such that Modifies(114, _)
+
+5000
+215 - Error
+stmt s; variable v; call c; 
+Select x such that Modifies(c, v)
+
+5000
+216 - Error
+stmt s; variable v; print pn; 
+Select w such that Modifies(x, v)
+
+5000
