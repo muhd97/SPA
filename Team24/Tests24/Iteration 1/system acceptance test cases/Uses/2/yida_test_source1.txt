@@ -8,7 +8,7 @@ procedure yida1 {
 
 procedure yida2 {
 	i = 3;
-    j = 4 + i;
+    j = 4;
 	p = z - x - y;
 	print q;
 	read w;

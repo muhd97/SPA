@@ -1,0 +1,80 @@
+1 - Select all Assign statements
+assign a;
+Select a
+1, 2, 3, 6, 7, 8
+500
+2 - Select all Read statements
+read r;
+Select r
+4, 10
+500
+3 - Select all Print statements
+print p;
+Select p
+5, 9
+500
+4 - Negative Case: Procedure spelled wrongly
+procecure kz;
+Select kz
+
+500
+5 - Select all Procedures
+procedure kz;
+Select kz
+yida1, yida2, yida3, yida4
+500
+6 - Select all Variables
+variable vsew;
+Select vsew
+x, y, z, a, b, i, j, p, q, w
+500
+7 - Select all Variables, but with redundant declaration
+variable vsew, k; assign a; stmt x;
+Select vsew
+x, y, z, a, b, i, j, p, q, w
+500
+8 - Select all Assign, but with redundant declaration
+variable vsew, k; assign a; stmt x; procedure sd; print p; read r;
+Select a
+1, 2, 3, 6, 7, 8
+500
+9 - Select all Procedures, but with redundant declaration
+variable vsew, k; assign a; stmt x; procedure sd; print p; read r;
+Select sd
+yida1, yida3, yida2, yida4
+500
+10 - Select all Statements
+stmt s;
+Select s
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11
+500
+11 - Select all Statements that modify a variable (both synonyms)
+stmt s; variable v;
+Select s such that Modifies(s, v)
+1, 2, 3, 4, 6, 7, 8, 10, 11, 12
+500
+12 - Select all variables that are modified by a statement (both synonyms)
+stmt s; variable v;
+Select v such that Modifies(s, v)
+x, y, z, a, i, j, p, w
+500
+13 - Select all variables modified by a specific statement number
+variable v;
+Select v such that Modifies(4, v)
+a
+500
+14 - NEGATIVE CASE: Duplicate synonym, BAD query
+stmt v; variable v;
+Select v such that Modifies(4, v)
+
+500
+15 - NEGATIVE CASE: Duplicate synonym, BAD query
+variable v; stmt v; assign a; print a;
+Select v such that Modifies(4, v)
+
+500
+16 - NEGATIVE CASE: Synonym was not defined. BAD query (throws exception)
+variable v;
+Select v such that Uses(4, x)
+
+500
