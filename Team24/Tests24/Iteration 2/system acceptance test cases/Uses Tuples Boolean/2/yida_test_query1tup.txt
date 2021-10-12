@@ -1,0 +1,95 @@
+1 - Select BOOLEAN such that Uses(a, v) == TRUE
+stmt s; assign a; variable v;
+Select BOOLEAN such that Uses(a, v)
+TRUE
+500
+2 - Select BOOLEAN such that Uses(w, v) == FALSE
+stmt s; assign a; variable v; while w;
+Select BOOLEAN such that Uses(w, v)
+FALSE
+500
+3 - Select <a, v> such that Uses(a, v)
+stmt s; assign a; variable v; while w;
+Select <a, v> such that Uses(a, v)
+3 x, 3 y, 8 z, 8 x, 8 y, 7 i
+500
+4 - Select a such that Uses(a, v)
+stmt s; assign a; variable v; while w;
+Select a such that Uses(a, v)
+3, 8, 7
+500
+5 - Select v such that Uses(a, v)
+stmt s; assign a; variable v; while w;
+Select v such that Uses(a, v)
+x, y, z, i
+500
+4 - Select <w, v> such that Uses(w, v) - NEGATIVE CASE
+stmt s; assign a; variable v; while w;
+Select <w, v> such that Uses(w, v)
+
+500
+5 - Select <a, v> such that Uses(a, v) such that Modifies(a2, v)
+stmt s; assign a, a2; variable v; while w; print p;
+Select <a, v> such that Uses(a, v) such that Follows(a, p)
+8 z, 8 x, 8 y
+500
+6 - Select <a, v> such that Uses(a, v) AND Modifies(a2, v)
+stmt s; assign a, a2; variable v; while w; print p;
+Select <a, v> such that Uses(a, v) and Follows(a, p)
+8 z, 8 x, 8 y
+500
+7 - Select all Procedures - TargetSynonym Not in Uses (pr, v)
+variable vsew, k; assign a; stmt x; procedure sd; print p; read r;
+Select sd such that Uses(p, vsew)
+yida1, yida3, yida2, yida4
+500
+8 - Select <p, q> such that Uses(a, v) - TUPLE SYNONYMS NOT IN SUCH THAT CLAUSE
+stmt s; assign a, a1; variable v, v1; while w; print p, q;
+Select <p, q> such that Uses(a1, v1)
+5 5, 9 5, 9 9, 5 9
+500
+9 - Select <r, p, c> such that Uses(a, v) - TUPLE SYNONYMS NOT IN SUCH THAT CLAUSE
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;
+Select <r, p, c> such that Uses(a1, v1)
+4 5 11,4 5 12,4 9 11,4 9 12,10 5 11,10 5 12,10 9 11,10 9 12
+500
+10 - Select <constant, print, proc> such that Uses(a, v) - TUPLE SYNONYMS NOT IN SUCH THAT CLAUSE
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select <kc, p, proc> such that Uses(a1, v1)
+1 5 yida1,1 5 yida2,1 5 yida3,1 5 yida4,1 9 yida1,1 9 yida2,1 9 yida3,1 9 yida4,2 5 yida1,2 5 yida2,2 5 yida3,2 5 yida4,2 9 yida1,2 9 yida2,2 9 yida3,2 9 yida4,3 5 yida1,3 5 yida2,3 5 yida3,3 5 yida4,3 9 yida1,3 9 yida2,3 9 yida3,3 9 yida4,4 5 yida1,4 5 yida2,4 5 yida3,4 5 yida4,4 9 yida1,4 9 yida2,4 9 yida3,4 9 yida4
+500
+11 - Select BOOLEAN with NOTHING
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select BOOLEAN
+FALSE
+500
+12 - Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, "a") - NEGATIVE CASE: One of the such-that is empty
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, "a")
+
+500
+13 - Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, "a") 
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, _)
+12 z, 12 x, 12 y, 12 i
+500
+14 - Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, "a") - NEGATIVE CASE: One of the pattern is empty
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, _) pattern a(_, "q")
+
+2000
+15 - Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, "a") - MANY DUPLICATES OF SAME CLAUSE
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select <c, v> such that Uses(a, v) such that Uses(a, v) such that Uses(a, v) such that Uses(a, v) such that Uses(a, v) and Follows(_, c) such that Uses(a, v) such that Uses(a, v) and Follows(_, c) such that Uses(a, v) such that Uses(a, v) and Follows(_, c) such that Follows(_, c) such that Follows(_, c) such that Modifies(c, _) such that Modifies(c, _) such that Follows(_, c) such that Modifies(c, _) such that Modifies(c, _) such that Follows(_, c) such that Modifies(c, _) such that Modifies(c, _) such that Modifies(c, _) such that Modifies(c, _) such that Follows(_, c) such that Follows(_, c) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1) such that Uses(a1, v1)
+12 z, 12 x, 12 y, 12 i
+2000
+16 - Select <r, p, v> - One of the synonyms in tuple is independent
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
+Select <r, p, v> such that Uses(p, v)
+10 5 b,10 9 q,4 5 b,4 9 q
+2000
+
+
+
+
+

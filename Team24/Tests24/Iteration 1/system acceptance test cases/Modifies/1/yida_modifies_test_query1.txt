@@ -1,0 +1,135 @@
+1 - Select all procedures that modify a variable
+procedure p; variable v;
+Select p such that Modifies(p, v)
+yida1, yida2, yida3
+25
+2 - Select all procedures that modify a specific variable
+procedure p;
+Select p such that Modifies(p, "p")
+yida2, yida3
+25
+3 - Select all procedures that modify any variable (underscore)
+procedure p;
+Select p such that Modifies(p, _)
+yida1, yida2, yida3
+25
+4 - Select all variables modified by "yida1" (procedure ident)
+variable v;
+Select v such that Modifies("yida1", v)
+x, y, z, a
+25
+5 - Select all statements that modify a variable (syn, syn)
+stmt s; variable v;
+Select s such that Modifies(s, v)
+1, 2, 3, 4, 6, 7, 8, 10, 11, 12
+25
+6 - Select all statements that modify variable "j" (syn, ident)
+stmt s;
+Select s such that Modifies(s, "j")
+7, 12
+25
+7 - Select all statements that modify a variable (syn, underscore)
+stmt s;
+Select s such that Modifies(s, _)
+1, 2, 3, 4, 6, 7, 8, 10, 11, 12
+25
+8 - Select all variables modified by statement number 3 (num, syn)
+variable v;
+Select v such that Modifies(3, v)
+z
+25
+9 - Select all variables modified by statement number 11 (for proc call)
+variable v;
+Select v such that Modifies(11, v)
+x, y, z, a
+25
+10 - Select all variables that are modified by a statement
+variable v; stmt s;
+Select v such that Modifies(s, v)
+x, y, z, a, i, j, p, w
+25
+11 - NO TARGET SYNONYM (syn, syn) - Get all variables
+variable v; stmt s1; variable v1;
+Select v such that Modifies(s1, v1)
+x, y, z, a, b, i, j, p, q, w
+25
+12 - NO TARGET SYNONYM (syn, "ident") - Get all variables
+variable v; stmt s1; variable v1;
+Select v such that Modifies(s1, "j")
+x, y, z, a, b, i, j, p, q, w
+25
+13 - NO TARGET SYNONYM (syn, _) - Get all variables
+variable v; stmt s1; variable v1;
+Select v such that Modifies(s1, _)
+x, y, z, a, b, i, j, p, q, w
+25
+14 - NO TARGET SYNONYM (syn, "ident") - Empty result becuase false
+variable v; stmt s1;
+Select v such that Modifies(s1, "b")
+
+25
+15 - NO TARGET SYNONYM (num, syn) - Get all variables
+variable v; variable v1;
+Select v such that Modifies(6, v1)
+x, y, z, a, b, i, j, p, q, w
+25
+16 - NO TARGET SYNONYM (syn, syn) - Get all statements
+stmt s; stmt s1; variable v1;
+Select s such that Modifies(s1, v1)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+25
+17 - NO TARGET SYNONYM (num, _) - Get all variables
+variable v; variable v1;
+Select v such that Modifies(7, _)
+x, y, z, a, b, i, j, p, q, w
+25
+18 - NO TARGET SYNONYM (num, "ident") - Get all variables
+variable v; variable v1;
+Select v such that Modifies(8, "p")
+x, y, z, a, b, i, j, p, q, w
+25
+19 - NO TARGET SYNONYM (num, "ident") - Get all variables but through proc call
+variable v; variable v1;
+Select v such that Modifies(12, "p")
+x, y, z, a, b, i, j, p, q, w
+25
+20 - NO TARGET SYNONYM (from ModifiesP) ("ident", "ident") - Get all statements
+stmt s; variable v;
+Select s such that Modifies("yida2", "p")
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+25
+21 - NO TARGET SYNONYM (from ModifiesP) ("ident", syn) - Get all statements
+stmt s; variable v;
+Select s such that Modifies("yida1", v)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+25
+22 - NO TARGET SYNONYM (from ModifiesP and through proc calls) ("ident", _) - Get all statements
+stmt s; variable v;
+Select s such that Modifies("yida3", _)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+25
+23 - NO TARGET SYNONYM (proc_syn, syn) - Get all procedures
+procedure p; procedure p1; variable v1;
+Select p such that Modifies(p1, v1)
+yida1, yida2, yida3, yida4
+25
+24 - NO TARGET SYNONYM (proc_syn, "ident") - Get all variables
+procedure p; stmt s1; variable v1;
+Select v1 such that Modifies(p, "j")
+x, y, z, a, b, i, j, p, q, w
+25
+25 - NO TARGET SYNONYM (proc_syn, _) - Get all variables
+variable v; stmt s1; procedure p;
+Select v such that Modifies(p, _)
+x, y, z, a, b, i, j, p, q, w
+25
+26 - NO TARGET SYNONYM (syn, _) - Get all procedures
+procedure p; stmt s1; variable v1;
+Select p such that Modifies(s1, _)
+yida1, yida2, yida3, yida4
+25
+27 - NO TARGET SYNONYM ("ident", syn) - Empty result becuase false
+variable v; stmt s1;
+Select v such that Modifies("yida4", "b")
+
+25

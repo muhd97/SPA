@@ -1,0 +1,180 @@
+0 - valid query Follows
+stmt s; 
+Select s such that Follows(1, s)
+2
+5000
+1 - valid query Follows
+stmt s;
+Select s such that Follows (s, 8)
+4
+5000
+2 -  - valid query Follows
+assign a;
+Select a such that Follows(a, _)
+1, 2, 3, 5, 6, 10
+5000
+3 - valid query Follows
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select a such that Follows(s, a)
+2, 3, 6, 7, 11, 12
+5000
+4 - valid query Follows (syn, _)
+assign a;
+Select a such that Follows(a, _)
+1, 2, 3, 5, 6, 10
+5000
+5 - valid query Follows (stmt, stmt)
+stmt s1, s2;
+Select s2 such that Follows(s1, s2)
+2, 3, 4, 6, 7, 8, 11, 12
+5000
+6 - valid query Follows (read)
+read re;
+Select r such that Follows(re, _)
+none
+5000
+7 - valid query Follows
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select s such that Follows(7, s)
+none
+5000
+8 - valid query Follows
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select s such that Follows(s, 10) such that Follows(8, s)
+none
+5000
+9 - valid query Follows
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select s such that Follows(s, 26)
+none
+5000
+10 - valid query Follows
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select s such that Follows(s, 17)
+none
+5000
+11 - valid query Follows (_, 2)
+stmt s1;
+Select s such that Follows(_, 2)
+none
+5000
+12 - invalid query Follows (var)
+variable v;
+Select v such that Follows(v, _)
+none
+5000
+13 - invalid query Follows (constant)
+variable v; constant c;
+Select v such that Follows(v, 6)
+none
+5000
+14 - valid query Follows* 
+stmt s;
+Select s such that Follows* (4, s)
+8, 12
+5000
+15 - valid query Follows*
+stmt s;
+Select s such that Follows* (s, 8)
+1, 2, 3, 4
+5000
+16 - valid query Follows* (stmt)
+stmt s;
+Select s such that Follows*(6, s)
+7
+5000
+17 - valid query Follows*
+stmt s1, s2; 
+Select s1 such that Follows*(s1, s2)
+1, 2, 3, 4, 5, 6, 8, 10
+5000
+18 - valid query Follows* (_)
+stmt s;
+Select s such that Follows*(_, 1)
+none
+5000
+19 - valid query Follows*
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select s such that Follows*(12, s)
+none
+5000
+20 - valid query Follows*
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select s such that Follows*(12, s)
+none
+5000
+21 - valid query Follows*
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select s such that Follows*(s, 17) such that Follows*(9, s)
+none
+5000
+22 - valid query Follows*
+stmt s, s1, s2; assign a, a1; while w; if ifs; variable v; procedure p, q; constant c; call cl; print pr; read r;
+Select w such that Follows(s, w) such that Follows*(w, pr)
+none
+5000
+23 - invalid query with Follows* Clause()
+variable v; stmt s;
+Select s such that Follows*(v, s)
+none
+5000
+24 - Select all statements following stmt number 2 (int, syn)
+stmt s;
+Select s such that Follows(2, s)
+3
+250
+25 - Select all statements s such that stmt number 7 follows it (syn, int)
+stmt s;
+Select s such that Follows(s, 7)
+6
+250
+26 - Select all statements s such that stmt number 8 follows it (syn, int) [with jump]
+stmt s;
+Select s such that Follows(s, 8)
+4
+250
+27 - Select all assignment statements a such that there is a statement following it (syn, syn)
+stmt s; assign a;
+Select a such that Follows(a, s)
+1, 2, 3, 5, 6, 10
+250
+27 - Select all assignment statements a such that there is a while statement following it (syn, syn)
+stmt s; assign a; while w;
+Select a such that Follows(a, w)
+3
+250
+28 - Select all assignment statements a following if (syn, syn)
+stmt s; assign a; if ifs;
+Select a such that Follows(ifs, a)
+12
+250
+29 - Select all assignment statements that follow another statement (_, syn)
+assign a;
+Select a such that Follows(_, a)
+2, 3, 6, 7, 11, 12
+250
+30 - Select all while statements that follow another statement (_, syn)
+while w;
+Select w such that Follows(_, w)
+4
+250
+31 - Select all assignment statements following a specific statement number 3 (int, syn) - Empty
+assign a;
+Select a such that Follows(3, a)
+none
+250
+32 - Select all while statements following a specific statement number 3 (int, syn) - Not empty
+while w;
+Select w such that Follows(3, w)
+4
+250
+33 - Select all statements that follow itself - Empty
+stmt s;
+Select s such that Follows(s, s)
+none
+250
+34 - Select all read statements that follow itself - Empty
+read s;
+Select s such that Follows(s, s)
+none
+250
