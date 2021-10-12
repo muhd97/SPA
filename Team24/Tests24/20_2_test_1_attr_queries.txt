@@ -143,8 +143,8 @@ stmt s; assign a; variable v; call c; print p; call f; read r; while w;procedure
 Select <w, c, c.procName> such that Uses(w, _)
 15 13 yida1,15 14 yida2
 1000
-30 - Select <c, c, proc, proc, w.stmt#,w> - SAME SYNONYM, SAME ATTRREF (independent)
-stmt s; assign a; variable v;while w; call c; print p; call f; read r; procedure proc;
+30 - Select <c, c, proc, proc> - SAME SYNONYM, SAME ATTRREF (independent)
+stmt s; assign a; variable v;while w; call c; print p; call f; read r; procedure procedure;
 Select <c, c, proc, proc, w.stmt#,w>
-13 13 yida1 yida1 15 15,13 13 yida2 yida2 15 15,13 13 yida4 yida4 15 15,13 13 yida3 yida3 15 15,14 14 yida1 yida1 15 15,14 14 yida2 yida2 15 15,14 14 yida4 yida4 15 15,14 14 yida3 yida3 15 15
+
 1000

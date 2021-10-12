@@ -233,9 +233,8 @@ shared_ptr<Ref> PQLParser::parseRef()
 {
     switch (peek().type)
     {
-    case PQLTokenType::UNDERSCORE: {
-        eat(PQLTokenType::UNDERSCORE);
-        return make_shared<Ref>(RefType::UNDERSCORE);
+    case PQLTokenType::INTEGER: {
+        return make_shared<Ref>(parseInteger());
     }
     case PQLTokenType::NAME: {
         auto syn = parseSynonym();
@@ -255,8 +254,10 @@ shared_ptr<Ref> PQLParser::parseRef()
         auto str = eat(PQLTokenType::STRING);
         return make_shared<Ref>(RefType::IDENT, parseIdent(str.stringValue));
     }
+    default: {
+        throw "Failed to parse ref: " + getPQLTokenLabel(peek());
     }
-    throw "Faild to parse ref: " + getPQLTokenLabel(peek());
+    }
 }
 
 shared_ptr<RelRef> PQLParser::parseUses()
@@ -528,7 +529,7 @@ vector<shared_ptr<WithCl>> PQLParser::parseWithCl()
     clauses.push_back(parseAttrCompare());
     
 
-    if (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+    while (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
         eatKeyword(PQL_AND);
         clauses.push_back(parseAttrCompare());
     }

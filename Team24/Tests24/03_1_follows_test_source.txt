@@ -1,0 +1,50 @@
+procedure main {
+    read x;
+    y = 2;
+    print x;
+    z = y * 6;
+    if (x == y) then {
+        y = y + 123;
+        while (y > x) {
+            if (y != 50) then {
+                read p;
+                q = p + y / 5 - 9 + z;
+                y = q;
+                print y;
+            } else {
+                if ((x < 10) || (x > 345)) then {
+                    read a;
+                    print a;
+                    b = a * 7 + y / 3 - 25;
+                    y = y - a;
+                } else {
+                    y = y - 30;
+                }
+            }
+        }
+   } else {
+        while ((y > 0) && (y <= x)) {
+            while (z >= y) {
+                read i;
+                z = i + z;
+               print z;
+            }
+        }
+        read I;
+        x = I + 222;
+        print x;
+    }
+    while ((r % 2) != 0) {
+        read r;
+        read s;
+        if (r == 0) then {
+            print s;
+        } else {
+            r = r * (x + y);
+        }
+        print r;
+        r = 121;
+    }
+    y = y * 40;
+    print y;
+}
