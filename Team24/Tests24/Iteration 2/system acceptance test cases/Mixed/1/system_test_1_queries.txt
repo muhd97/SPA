@@ -1,4 +1,4 @@
-1 - Select all procedure
+1 - Select all procedure // answers not updated
 procedure p;
 Select p
 Main, A, B, C, D, Call, Assign, AssignY, Print, PrintX, Read, ReadY
@@ -6,12 +6,12 @@ Main, A, B, C, D, Call, Assign, AssignY, Print, PrintX, Read, ReadY
 2 - Select all assignments
 assign a;
 Select a
-1, 3, 5, 10, 13, 15, 17, 19, 20, 21, 24, 26, 29, 31, 34, 36, 38, 39, 43, 47, 49, 50, 52, 53, 55,56, 58, 62, 63, 64, 73, 74
+
 5000
 3 - Select all variables
 variable v;
 Select v
-a, b, c, d, i, j, p, q, x, y, z
+
 5000
 4 - Select all constants
 constant cs;
@@ -21,27 +21,27 @@ Select cs
 5 - Select all call statements
 call c;
 Select c
-7, 8, 9, 11, 16, 25, 27, 33, 44, 48, 51, 69, 71
+
 5000
 6 - Select all read statements
 read r;
 Select r
-2, 4, 22, 32, 42, 67, 70, 79, 80, 81, 82
+
 5000
 7 - Select all print statements
 print pn;
 Select pn
-37, 40, 54, 57, 65, 68, 72, 75, 76, 77, 78
+
 5000
 8 - Select all while statements
 while w;
 Select w
-18, 23, 35, 41, 45, 59, 60
+
 5000
 9 - Select all if statements
 if ifs;
 Select ifs
-6, 12, 14, 28, 30, 46, 61, 66
+
 5000
 10 - Select BOOLEAN such that Parent(#, #) = True (Direct nesting if)
 stmt s;
@@ -111,27 +111,110 @@ Select s such that Parent(27, s)
 23 - Select s.stmt# such that Parent(#, s) where # is a if stmt - first level (TRUE)
 stmt s;
 Select s such that Parent(12, s)
-13, 14, 21, 22, 23
+
 5000
 24 - Select s such that Parent(#, s) where # is a while stmt - second level (TRUE)
 stmt s;
 Select s such that Parent(60, s)
-61
+
 5000
 25 - Select BOOLEAN such that Parent(r, a) (FALSE)
+stmt s;
+Select s such that Parent(r, a)
 
+5000
 26 - Select a such that Parent(a, if) (FALSE)
+stmt s;
+Select s such that Parent(a, if)
 
-27 - Select if such that Parent(if, a)
+5000
+27 - Select if such that Parent(if, a) 
+stmt s;
+Select s sucht that Parent(if, a) 
 
+5000
 28 - Select <r, w> such that Parent(r, w) (FALSE)
+stmt s; read r; while w;
+Select s such that Parent(r, w)
 
+5000
 29 - Select a such that Parent(w, a)
+while w; assign a; stmt s;
+Select s such that Parent(w, a)
 
+5000
 30 - Select w such that Parent(w, if)
+while w; if ifs; stmt s;
+Select s such that Parent(w, if)
 
+5000
 31 - Select w such that Parent(w, if)
+while w; if ifs; stmt s;
+Select s such that Parent(w, ifs)
 
+5000
 32 - Select <w1, w2> such that Parent(w1, w2)
+while w1, w2; stmt s;
+Select s such that Parent(w1, w2)
 
+5000
 33 - Select <if1, if2> such that Parent(if1, if2)
+if if1, if2; stmt s;
+Select s such that Parent(if1, if2)
+
+5000
+34 - Select BOOLEAN such that Parent(_, _) (TRUE; Meaningless query)
+stmt s;
+Select BOOLEAN such that Parent(_, _)
+
+5000
+35 - Select w such that Parent(w, _)
+while w;
+Select w such that Parent(w, _)
+
+5000
+36 - Select if such that Parent(if, _)
+if ifs;
+Select ifs such that Parent(ifs, _)
+
+5000
+37 - Select w such that Parent(_, w)
+while w;
+Select w such that Parent(_, w)
+
+5000
+38 - Select if such that Parent(_, if)
+if ifs;
+Select ifs such that Parent(_, ifs)
+
+5000
+39 - Select a such that Parent(_, a)
+assign a;
+Select a such that Parent(_, a)
+
+5000
+40 - Select a such that Parent(a, _) = False
+assign a;
+Select a such that Parent(a, _)
+
+5000
+41 - Select pn such that Parent(#, _) = False
+print pn;
+Select pn such that Parent(pn, _)
+
+5000
+42 - Select cs such that Parent(#, _) = True
+constant cs;
+Select cs such that Parent(cs, _)
+
+5000
+43 - Error
+stmt s; while w; if ifs;
+Select x such that Parent(w, _)
+
+5000
+44 - Error
+stmt s; while w; if ifs; 
+Select w such that Parent(#, x)
+
+5000

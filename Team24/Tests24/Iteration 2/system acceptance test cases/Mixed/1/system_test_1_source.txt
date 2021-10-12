@@ -143,3 +143,38 @@ procedure Read {
 procedure ReadY {
     read y;
 }
+
+procedure E {
+    print i;
+    read j;
+    while (((i > 0) && (j == 3 + i)) || (i < j)) {
+        i = i + 5;
+        if (i > 0) then {
+            if (i <= j) then {
+                i = j / (2 * c);
+                d = i * (j / 2);
+                read d;
+                c = (d + 4) * ((j / 2) - (2 * c));
+            } else {
+                x = j / 2;
+                call PrintX;
+                read x;
+                y = x + 2;
+                print y;
+            }
+        } else {
+            p = ((c * 2) - 2) / i;
+            while (p >= i) {
+                x = 2;
+                x = x + 5;
+            }
+            call F;
+        }
+        j = j / 2;
+    }
+}
+
+procedure F {
+    call Read;
+    call Print;
+}
