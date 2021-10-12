@@ -1,0 +1,137 @@
+1 - Select all procedure
+procedure p;
+Select p
+Main, A, B, C, D, Call, Assign, AssignY, Print, PrintX, Read, ReadY
+5000
+2 - Select all assignments
+assign a;
+Select a
+1, 3, 5, 10, 13, 15, 17, 19, 20, 21, 24, 26, 29, 31, 34, 36, 38, 39, 43, 47, 49, 50, 52, 53, 55,56, 58, 62, 63, 64, 73, 74
+5000
+3 - Select all variables
+variable v;
+Select v
+a, b, c, d, i, j, p, q, x, y, z
+5000
+4 - Select all constants
+constant cs;
+Select cs
+0, 1, 2, 3, 4, 5, 6, 8, 10, 20
+5000
+5 - Select all call statements
+call c;
+Select c
+7, 8, 9, 11, 16, 25, 27, 33, 44, 48, 51, 69, 71
+5000
+6 - Select all read statements
+read r;
+Select r
+2, 4, 22, 32, 42, 67, 70, 79, 80, 81, 82
+5000
+7 - Select all print statements
+print pn;
+Select pn
+37, 40, 54, 57, 65, 68, 72, 75, 76, 77, 78
+5000
+8 - Select all while statements
+while w;
+Select w
+18, 23, 35, 41, 45, 59, 60
+5000
+9 - Select all if statements
+if ifs;
+Select ifs
+6, 12, 14, 28, 30, 46, 61, 66
+5000
+10 - Select BOOLEAN such that Parent(#, #) = True (Direct nesting if)
+stmt s;
+Select BOOLEAN such that Parent(12, 13)
+TRUE
+5000
+11 - Select procedure such that Parent(#, #) = True (Direct nesting while)
+procedure p;
+Select p such that Parent(35, 37)
+Main, A, B, C, D, Call, Assign, AssignY, Print, PrintX, Read, ReadY
+5000
+12 - Select BOOLEAN such that Parent(#, #) = False (True if Parent* - Multiple Nesting if)
+stmt s;
+Select BOOLEAN such that Parent(28, 31)
+FALSE
+5000
+13 - Select cs such that Parent(#, #) = False (True if Parent* - Multiple Nesting while)
+constant cs;
+Select cs such that Parent(59, 61)
+
+5000
+14 - Select BOOLEAN such that Parent(#, #) = False (Wrong order)
+stmt s;
+Select BOOLEAN such that Parent(13, 12)
+FALSE
+5000
+15 - Select print statements such that Parent(#, #) = False (Within same levels)
+print pn;
+Select pn such that Parent(1, 6)
+
+5000
+16 - Select print statements such that Parent(#, #) = False (Within same levels; if-else)
+print pn;
+Select pn such that Parent(7, 8)
+
+5000
+17 - Select read statements such that Parent(#, #) = False (Invalid stmt number - 0)
+read r;
+Select r such that Parent(0, 1)
+
+5000
+18 - Select <if, while> such that Parent(#, #) = False (Out of range stmt number)
+if ifs; while w;
+Select <ifs, w> such that Parent(82, 83)
+
+5000
+19 - Select BOOLEAN such that Parent(s, #) where # is a top level stmt (FALSE)
+stmt s; 
+Select BOOLEAN such that Parent(s, 28)
+FALSE
+5000
+20 - Select <if, w> such that Parent(if, #) where # is a stmt in if block - second level block (TRUE)
+if ifs; while w;
+Select <if, w> such that Parent(ifs, 16)
+14 18, 14 23, 14 35, 14 41, 14 45, 14 59, 14 60
+5000
+21 - Select s such that Parent(s, #) where # is a stmt in while block - third level block (TRUE)
+stmt s;
+Select s such that Parent(s, 19)
+18
+5000
+22 - Select s such that Parent(#, s) where # is not if/while (FALSE)
+stmt s;
+Select s such that Parent(27, s)
+
+5000
+23 - Select s.stmt# such that Parent(#, s) where # is a if stmt - first level (TRUE)
+stmt s;
+Select s such that Parent(12, s)
+13, 14, 21, 22, 23
+5000
+24 - Select s such that Parent(#, s) where # is a while stmt - second level (TRUE)
+stmt s;
+Select s such that Parent(60, s)
+61
+5000
+25 - Select BOOLEAN such that Parent(r, a) (FALSE)
+
+26 - Select a such that Parent(a, if) (FALSE)
+
+27 - Select if such that Parent(if, a)
+
+28 - Select <r, w> such that Parent(r, w) (FALSE)
+
+29 - Select a such that Parent(w, a)
+
+30 - Select w such that Parent(w, if)
+
+31 - Select w such that Parent(w, if)
+
+32 - Select <w1, w2> such that Parent(w1, w2)
+
+33 - Select <if1, if2> such that Parent(if1, if2)
