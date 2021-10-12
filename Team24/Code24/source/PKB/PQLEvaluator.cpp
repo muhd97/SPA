@@ -1136,7 +1136,7 @@ bool PQLEvaluator::getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo)
 }
 
 // getAfterT
-const vector<int>& PQLEvaluator::getFollowsTIntegerSyn(PKBDesignEntity rightType, int leftStmtNo)
+const vector<int> PQLEvaluator::getFollowsTIntegerSyn(PKBDesignEntity rightType, int leftStmtNo)
 {
 
     return mpPKB->followsTIntSynTable[leftStmtNo][rightType];

@@ -240,7 +240,7 @@ class PQLEvaluator
     bool getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo);
 
     /* Use for Follows*(INT, s1) */
-    const vector<int>& getFollowsTIntegerSyn(PKBDesignEntity childType, int parentStmtNo);
+    const vector<int> getFollowsTIntegerSyn(PKBDesignEntity childType, int parentStmtNo);
 
     /* Use for Follows*(INT, _) */
     bool getFollowsTIntegerUnderscore(int leftStmtNo);

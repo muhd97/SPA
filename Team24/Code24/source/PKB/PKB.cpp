@@ -545,11 +545,14 @@ void PKB::initializeFollowsTTables()
         for (auto de : PKBDesignEntityIterator()) {
             unordered_set<int> toReturn;
             vector<int> toAdd;
-            if (!isContainerType(stmt->getType())) {
+            //if (!isContainerType(stmt->getType())) {
                 followsTIntSynTable[stmt->getIndex()][de] = move(toAdd);
-                continue;
-            }
+                
+            //}
             for (int i : stmt->getGroup()->getMembers(de)) {
+                if (i <= stmt->getIndex()) {
+                    break;
+                }
                  toReturn.insert(i);
                  followsTIntIntTable.insert(make_pair(stmt->getIndex(), i));
              }
