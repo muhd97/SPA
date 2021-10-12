@@ -664,42 +664,34 @@ void PKB::initializeFollowsTTables()
     for (auto stmt : mStatements[PKBDesignEntity::AllStatements]) {
         int afterStmtNo = stmt->getIndex();
         followsTSynIntTable[afterStmtNo] = unordered_map<PKBDesignEntity, unordered_set<int>>();
+        followsTSynIntTable[afterStmtNo][PKBDesignEntity::AllStatements] = unordered_set<int>();
         for (auto de : PKBDesignEntityIterator()) {
             if (!isStatementType(de)) continue;
 
-            followsTSynIntTable[afterStmtNo][de] = unordered_set<int>();
+            if (de != PKBDesignEntity::AllStatements)
+                followsTSynIntTable[afterStmtNo][de] = unordered_set<int>();
             /*if (isContainerType(de)) continue;*/
 
             vector<PKBStmt::SharedPtr> followsStmts;
 
-            if (de == PKBDesignEntity::AllStatements)
-            {
-                const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-                const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
-
-                followsStmts.insert(followsStmts.end(), ifStmts.begin(), ifStmts.end());
-                followsStmts.insert(followsStmts.end(), whileStmts.begin(), whileStmts.end());
-            }
-            else
+            //may need to change this and utilize how getStatements works with AllStatements
+            if (de != PKBDesignEntity::AllStatements)
             {
                 // check these 'possible' follows statements
                 followsStmts = getStatements(de);
             }
-            for (auto& parStmt : followsStmts)
+            for (auto& beforeStmt : followsStmts)
             {
-                bool isValidFollowsStmt = true;
-                if (followsTIntIntTable.find(make_pair(parStmt->getIndex(), afterStmtNo)) == followsTIntIntTable.end()) {
-                    isValidFollowsStmt = false;
-                }
-
-                if (isValidFollowsStmt)
+                if (followsTIntIntTable.find(make_pair(beforeStmt->getIndex(), afterStmtNo)) != followsTIntIntTable.end())
                 {
-                    followsTSynIntTable[afterStmtNo][de].insert(parStmt->getIndex());
+                    followsTSynIntTable[afterStmtNo][de].insert(beforeStmt->getIndex());
+                    if (de != PKBDesignEntity::AllStatements) {
+                        followsTSynIntTable[afterStmtNo][PKBDesignEntity::AllStatements].insert(beforeStmt->getIndex());
+                    }
                 }
             }
 
         }
-
     }
 }
 
