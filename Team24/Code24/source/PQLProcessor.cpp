@@ -2474,10 +2474,10 @@ inline void validateWithClause(shared_ptr<SelectCl> selectCl, shared_ptr<WithCl>
         isRhsInt = true;
     }
     if (!isLhsInt && lhs->getRefType() == RefType::SYNONYM) {
-        isLhsInt = givenSynonymMatchesMultipleTypes(selectCl, move(lhs->getStringVal()), {DesignEntity::CONSTANT, DesignEntity::PROG_LINE, DesignEntity::STMT});
+        isLhsInt = selectCl->getDesignEntityTypeBySynonym(lhs->getStringVal()) == DesignEntity::PROG_LINE;
     }
     if (!isRhsInt && rhs->getRefType() == RefType::SYNONYM) {
-        isRhsInt = givenSynonymMatchesMultipleTypes(selectCl, move(rhs->getStringVal()), { DesignEntity::CONSTANT, DesignEntity::PROG_LINE, DesignEntity::STMT });
+        isRhsInt = selectCl->getDesignEntityTypeBySynonym(rhs->getStringVal()) == DesignEntity::PROG_LINE;
     }
     if (!isLhsInt && lhs->getRefType() == RefType::ATTR) {
         AttrNameType attrType = lhs->getAttrRef()->getAttrName()->getType();
