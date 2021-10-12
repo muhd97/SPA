@@ -249,10 +249,6 @@ class PKB
     /* Similar to above, but for var name to procedures that use the given var instead. Meant for Uses(PROC_SYN, "IDENT") */
     unordered_map<string, vector<string>> usesSynIdentTableProc;
 
-    /* ======================== FollowsT ======================== */
-
-    unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> followsTIntSynTable;
-
     struct pair_hash {
         inline std::size_t operator()(const std::pair<int, int>& v) const {
             return v.first * 569 + v.second; // 569 is prime
@@ -265,8 +261,12 @@ class PKB
         }
     };
 
+    /* ======================== FollowsT ======================== */
+
     /* Table of all FollowsT(int, int) */
     unordered_set<pair<int, int>, pair_hash> followsTIntIntTable;
+
+    unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> followsTIntSynTable;
 
     /* Table of all FollowsT(syn, syn) */
     unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> followsTSynSynTable;
