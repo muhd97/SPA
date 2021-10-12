@@ -141,11 +141,6 @@ public:
     {
     }
 
-    shared_ptr<AttrName> getAttrName()
-    {
-        return attrName;
-    }
-
     string format() override {
         return synonym->format() + "." + attrName->format();
     }
