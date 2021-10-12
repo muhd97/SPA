@@ -165,7 +165,7 @@ class PQLProcessor
     {
     }
 
-    vector<shared_ptr<Result>> processPQLQuery(shared_ptr<SelectCl> selectCl);
+    vector<shared_ptr<Result>> processPQLQuery(shared_ptr<SelectCl>& selectCl);
 
   private:
     vector<shared_ptr<Result>> handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl);
@@ -230,7 +230,7 @@ class PQLProcessor
     const string& resolveAttrRef(const string& rawSynVal, shared_ptr<AttrRef>& attrRef, const string& de);
 
 
-    void extractAllTuplesForSingleElement(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<Element>& elem);
+    void extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<Element>& elem);
 
 };
 
