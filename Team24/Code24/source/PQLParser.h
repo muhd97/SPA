@@ -89,6 +89,10 @@ public:
         this->name = name;
     }
 
+    AttrNameType getType() {
+        return this->name;
+    }
+
     string format() {
         switch (name)
         {
@@ -113,6 +117,11 @@ public:
     AttrRef(shared_ptr<Synonym> synonym, shared_ptr<AttrName> attrName)
         : synonym(move(synonym)), attrName(move(attrName))
     {
+    }
+
+    shared_ptr<AttrName> getAttrName()
+    {
+        return attrName;
     }
 
     string format() override {
@@ -350,7 +359,7 @@ class EntRef
 enum class RefType
 {
     SYNONYM,
-    UNDERSCORE,
+    INTEGER,
     IDENT,
     ATTR
 };
@@ -361,6 +370,7 @@ private:
     string stringValue;
     RefType refType;
     shared_ptr<AttrRef> attrRef;
+    int intValue = 0;
 
 public:
     Ref(RefType type)
@@ -379,14 +389,32 @@ public:
         refType = RefType::ATTR;
     }
 
+    Ref(int intVal)
+    {
+        intValue = intVal;
+        refType = RefType::INTEGER;
+        stringValue = "";
+        attrRef = NULL;
+    }
+
     const string& getStringVal() const
     {
         return stringValue;
     }
 
+    int getIntVal()
+    {
+        return intValue;
+    }
+
     RefType getRefType()
     {
         return refType;
+    }
+
+    shared_ptr<AttrRef> getAttrRef()
+    {
+        return attrRef;
     }
 
     string format()
@@ -397,8 +425,8 @@ public:
             return "ident(" + getStringVal() + ")";
         case RefType::SYNONYM:
             return "syn(" + getStringVal() + ")";
-        case RefType::UNDERSCORE:
-            return "_";
+        case RefType::INTEGER:
+            return "int(" + to_string(getIntVal()) + ")";
         case RefType::ATTR:
             return attrRef->format();
         }
