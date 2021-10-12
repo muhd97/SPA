@@ -546,19 +546,35 @@ void PKB::initializeFollowsTTables()
             unordered_set<int> toReturn;
             vector<int> toAdd;
             //if (!isContainerType(stmt->getType())) {
-                followsTIntSynTable[stmt->getIndex()][de] = move(toAdd);
+                /*followsTIntSynTable[stmt->getIndex()][de] = move(toAdd);*/
                 
             //}
+
             for (int i : stmt->getGroup()->getMembers(de)) {
-                if (i <= stmt->getIndex()) {
+                /*if (i <= stmt->getIndex()) {
                     break;
-                }
+                }*/
+                cout << "the following indices are for stmt  " << stmt->getIndex() << " are " << i << endl;
                  toReturn.insert(i);
                  followsTIntIntTable.insert(make_pair(stmt->getIndex(), i));
              }
         
             toAdd.insert(toAdd.end(), toReturn.begin(), toReturn.end());
-            followsTIntSynTable[stmt->getIndex()][de] = move(toAdd);
+            
+            followsTIntSynTable[stmt->getIndex()][de].insert(
+                followsTIntSynTable[stmt->getIndex()][de].end(), toAdd.begin(), toAdd.end()
+            );
+
+            //followsTIntSynTable[stmt->getIndex()][de] = move(toAdd);
+
+            if (de != PKBDesignEntity::AllStatements) {
+                followsTIntSynTable[stmt->getIndex()][PKBDesignEntity::AllStatements].insert(
+                    followsTIntSynTable[stmt->getIndex()][PKBDesignEntity::AllStatements].end(), toAdd.begin(), toAdd.end()
+                );
+                cout << "the size of IntSyn table is " << followsTIntSynTable[stmt->getIndex()][de].size() << " stmt index is " << stmt->getIndex() << endl;
+            }
+
+            cout << "the size of all statement in int syn table is " << followsTIntSynTable[stmt->getIndex()][PKBDesignEntity::AllStatements].size() << " stmt index is " << stmt->getIndex() << endl;
         }
     }
 
