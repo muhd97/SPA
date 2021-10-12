@@ -177,4 +177,8 @@ procedure E {
 procedure F {
     call Read;
     call Print;
+    while (i > 0) {
+        print i;
+    }
+    print x;
 }

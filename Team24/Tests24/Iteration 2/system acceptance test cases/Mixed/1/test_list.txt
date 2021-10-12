@@ -57,7 +57,7 @@
 - Syntax Error: stmt s; while w; if ifs; Select x such that Follows(#, _)
 - Syntax Error: stmt s; while w; if ifs; Select w such that Follows(#, x)
 
-/********* Follows* *********/
+/********* Follows* (from 117) *********/
 - Select BOOLEAN such that Follows*(#, #) = True (consecutive)
 - Select p.procName such that Follows*(#, #) = True (within blocks)
 - Select <variable, while> such that Follows*(#, #) = True (next stmt after if/while)
@@ -188,7 +188,8 @@
 - Syntax Error: stmt s; while w; if ifs; Select x such that Parent*(#, _)
 - Syntax Error: stmt s; while w; if ifs; Select w such that Parent*(#, x)
 
-/********* Uses *********/
+/********* Uses (from 154) *********/
+
 // Uses(#, #) = True where # is given
 - Select BOOLEAN such that Uses(#, v) = True for given a and v
 - Select pn.stmt# such that Uses(#, v) = True for given pn and v
@@ -202,7 +203,7 @@
 - Select read statements such that Uses(#, v) = False (Invalid stmt number - 0)
 - Select <if, while> such that Uses(#, v) = False (Out of range stmt number)
 
-// Uses(s, #) or Uses(#, v)
+// Uses(s, #) or Uses(#, v) //
 - Select BOOLEAN such that Uses(#, v) = True for given a and v
 - Select pn such that Uses(#, v) = True for given pn and v
 - Select w such that Uses(#, v) = True for given s and v
@@ -223,8 +224,8 @@
 - Select <c, v> such that Uses(c, v)
 
 // Uses(_, _)
-- Select BOOLEAN such that Uses(_, _) (TRUE; Meaningless query)
-- Select v such that Uses(_, v)
+- Select BOOLEAN such that Uses(_, _) (NOT ALLOWED)
+- Select v such that Uses(_, v) (NOT ALLOWED)
 - Select a.stmt# such that Uses(a, _)
 - Select pn such that Uses(pn, _)
 - Select s.stmt# such that Uses(s, _)
