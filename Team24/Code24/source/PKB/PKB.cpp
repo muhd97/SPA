@@ -1,3 +1,5 @@
+#pragma optimize( "gty", on )
+
 #include "PKB.h"
 
 #include <iostream>
@@ -229,6 +231,8 @@ PKBStmt::SharedPtr PKB::extractReadStatement(shared_ptr<Statement> &statement, P
     // variable is modified by this statementa
     var->addModifierStatement(res->getIndex());
 
+    readStmtToVarNameTable[to_string(res->getIndex())] = var->getName();
+
     // every read modifies variable
     designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::Read].insert(res);
     mAllModifyStmts.insert(res);
@@ -253,6 +257,8 @@ PKBStmt::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statement, 
     res->addUsedVariable(var);
     // variable is modified by this statement
     var->addUserStatement(res->getIndex());
+
+    printStmtToVarNameTable[to_string(res->getIndex())] = var->getName();
 
     // YIDA: For the var Used by this PRINT statement, we need to add it to the
     // pkb's mUsedVariables map.
@@ -448,6 +454,8 @@ PKBStmt::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &statement, P
     string procedureName = callStatement->getProcId()->getName();
     PKBProcedure::SharedPtr procedureCalled;
     
+    callStmtToProcNameTable[to_string(res->getIndex())] = procedureName;
+
     // 2. insert calls relationship
     shared_ptr<PKBProcedure> currentProcedure = currentProcedureToExtract; // store the currently extracted procedure to revert back to
     insertCallsRelationship(currentProcedure->getName(), procedureName);
@@ -753,7 +761,8 @@ void PKB::initializeUsesTables()
             }
 
             for (auto& v : stmt->getUsedVariables()) {
-                pairs.emplace_back<int, string>(stmt->getIndex(), v->getName());
+                const string& varName = v->getName();
+                pairs.push_back(make_pair(stmt->getIndex(), varName));
             }
         }
         usesSynSynTableNonProc[de] = move(pairs);
@@ -1052,7 +1061,7 @@ vector<string> PKB::getIdentifiers(shared_ptr<ConditionalExpression> expr)
     return vector<string>(res.begin(), res.end());
 }
 
-void PKB::insertCallsRelationship(string& caller, string& called) {
+void PKB::insertCallsRelationship(const string& caller, string& called) {
     //cout << "caller: " << caller << endl;
     //cout << "called: " << called << endl;
     pair<string, string> res = make_pair(caller, called);

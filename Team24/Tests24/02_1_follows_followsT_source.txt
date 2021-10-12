@@ -1,0 +1,18 @@
+procedure main{
+  track = 0;
+  aB= 0;
+  bA= 0;
+  while ((x != 0) && (y != 0)) {
+    track = track + 1;
+    aB= aB+ x;
+    bA= bA+ y;
+  }
+  if (track == 0) then {
+    signal = 1;
+  } 
+  else {
+    aB= aB/ track;
+    bA= bA/ track;
+  }
+  square = aB* aB+ bA* bA;
+}
