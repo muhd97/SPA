@@ -46,6 +46,10 @@ def run_tests():
     for t in source_query_test_cases:
         source_file = t[0]
         query_file = t[1]
+        # os.system("{}autotester.exe {}{}.txt {}{}.txt {}{}_output.xml".format(autotester_dir, 
+        # test_cases_dir, source_file, 
+        # test_cases_dir, query_file, 
+        # output_dir, query_file))
         os.popen("{}AutoTester.exe {}{}.txt {}{}.txt {}{}_output.xml".format(autotester_dir,
                                                                              test_cases_dir, source_file,
                                                                              test_cases_dir, query_file,

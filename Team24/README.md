@@ -5,3 +5,6 @@ How to add test cases and run them via RunAllTests.bat: -
 3) Add both the <TEST CASE N0._ITERATION NO._DESCRIPTION>_source and <TEST CASE N0._ITERATION NO._DESCRIPTION>_queries as ("<TEST CASE N0._ITERATION NO._DESCRIPTION>_source", "<TEST CASE N0._ITERATION NO._DESCRIPTION>_queries") inside source_query_test_cases in RunAllTests.py 
 4) Run RunAllTests.bat by double clicking on it
 
+To run only a specific test case, comment out the remaining on line 5 in source_query_test_cases in RunAllTests.py
+
+To view output to console, uncomment line 49 and comment line 53
