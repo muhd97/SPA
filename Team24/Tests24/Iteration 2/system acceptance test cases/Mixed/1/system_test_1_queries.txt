@@ -85,7 +85,7 @@ Select r such that Parent(0, 1)
 5000
 18 - Select <if, while> such that Parent(#, #) = False (Out of range stmt number)
 if ifs; while w;
-Select <ifs, w> such that Parent(82, 83)
+Select <ifs, w> such that Parent(110, 111)
 
 5000
 19 - Select BOOLEAN such that Parent(s, #) where # is a top level stmt (FALSE)
@@ -216,5 +216,178 @@ Select x such that Parent(w, _)
 44 - Error
 stmt s; while w; if ifs; 
 Select w such that Parent(#, x)
+
+5000
+45 - Select BOOLEAN such that Parent*(#, #) = True (Direct nesting if)
+stmt s;
+Select BOOLEAN such that Parent*(6, 7)
+
+5000
+46 - Select procedure such that Parent*(#, #) = True (Direct nesting while)
+procedure p;
+Select p such that Parent*(22, 23)
+
+5000
+47 - Select variables such that Parent*(#, #) = True (False if Parent - Multiple Nesting - 4 levels)
+variable v;
+Select variables such that Parent*(16, 23)
+
+5000
+48 - Select c.stmt# such that Parent*(#, #) = True (False if Parent - Multiple Nesting - 3 levels)
+call c;
+Select c.stmt# such that Parent*(16, 19)
+
+5000
+49 - Select BOOLEAN such that Parent*(#, #) = False (Wrong order)
+stmt s;
+Select BOOLEAN such that Parent*(19, 16)
+FALSE
+5000
+50 - Select print statements such that Parent*(#, #) = False (Within same levels)
+print pn;
+Select pn such that Parent*(1, 6)
+
+5000
+51 - Select print statements such that Parent*(#, #) = False (Within same levels; if-else)
+print pn;
+Select pn such that Parent*(7, 8)
+
+5000
+52 - Select read statements such that Parent*(#, #) = False (Invalid stmt number - 0)
+read r;
+Select r such that Parent*(0, 1)
+
+5000
+53 - Select <if, while> such that Parent*(#, #) = False (Out of range stmt number)
+if ifs; while w;
+Select <ifs, w> such that Parent*(110, 111)
+
+5000
+54 - Select BOOLEAN such that Parent*(s, #) where # is a top level stmt (FALSE)
+stmt s;
+Select BOOLEAN such that Parent*(s, 2)
+FALSE
+5000
+55 - Select <p1, p2> such that Parent*(s, #) where # is a stmt in if block - second level block (TRUE)
+procedure p1, p2; stmt s;
+Select <p1, p2> such that Parent*(s, 93)
+
+5000
+56 - Select s such that Parent*(s, #) where # is a stmt in while block - third level block (TRUE)
+stmt s;
+Select s such that Parent*(s, 105)
+
+5000
+57 - Select s such that Parent*(#, s) where # is not if/while (FALSE)
+stmt s;
+Select s such that Parent*(#, s)
+
+5000
+58 - Select s such that Parent*(#, s) where # is a if stmt - first level (TRUE)
+stmt s;
+Select s such that Parent*(32, s)
+
+5000
+59 - Select s such that Parent*(#, s) where # is a while stmt - second level (TRUE)
+stmt s;
+Select s such that Parent*(64, s)
+
+5000
+60 - Select BOOLEAN such that Parent*(r, a) (FALSE)
+read r; assign a;
+Select BOOLEAN such that Parent*(r, a)
+FALSE
+5000
+61 - Select a such that Parent*(a, if) (FALSE)
+assign a; if ifs;
+Select a such that Parent*(a, if)
+
+5000
+62 - Select if such that Parent*(if, a)
+assign a; if ifs;
+Select a such that Parent*(if, a)
+
+5000
+63 - Select <w, pn> such that Parent*(pn, w) (FALSE)
+while w; print pn;
+Select <w, pn> such that Parent*(pn, w)
+
+5000
+64 - Select a such that Parent*(w, a)
+while w; assign a;
+Select a such that Parent*(w, a)
+
+5000
+65 - Select w such that Parent*(w, if)
+while w; if ifs;
+Select w such that Parent*(w, ifs)
+
+5000
+66 - Select if such that Parent*(if, w)
+while w; if ifs;
+Select ifs such that Parent*(ifs, w)
+
+5000
+67 - Select <w1, w2> such that Parent*(w1, w2)
+while w1, w2;
+Select <w1, w2> such that Parent*(w1, w2)
+
+5000
+68 - Select <if1, if2> such that Parent*(if1, if2)
+if if1, if2;
+Select <if1, if2> such that Parent*(if1, if2)
+
+5000
+69 - Select BOOLEAN such that Parent*(_, _) (TRUE; Meaningless query)
+stmt s;
+Select BOOLEAN such that Parent*(_, _)
+
+5000
+70 - Select w such that Parent*(w, _)
+while w;
+Select w such that Parent*(w, _)
+
+5000
+71 - Select if such that Parent*(if, _)
+if ifs;
+Select ifs such that Parent*(ifs, _)
+
+5000
+72 - Select w such that Parent*(_, w)
+while w;
+Select w such that Parent*(_, w)
+
+5000
+73 - Select if such that Parent*(_, if)
+if ifs;
+Select ifs such that Parent*(_, ifs)
+74 - Select a such that Parent*(_, a)
+assign a;
+Select a such that Parent*(_, a)
+
+5000
+75 - Select a such that Parent*(a, _) = False
+assign a;
+Select a such that Parent*(a, _)
+
+5000
+76 - Select pn such that Parent*(#, _) = False
+print pn;
+Select pn such that Parent*(pn, _)
+
+5000
+77 - Select cs such that Parent*(#, _) = True
+constant cs;
+Select cs such that Parent*(cs, _)
+
+5000
+78 - Error
+stmt s; while w; if ifs; 
+Select x such that Parent*(#, _)
+
+5000
+79 - Error
+stmt s; while w; if ifs; 
+Select w such that Parent*(#, x)
 
 5000
