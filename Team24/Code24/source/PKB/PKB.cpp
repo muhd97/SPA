@@ -582,34 +582,41 @@ void PKB::initializeFollowsTTables()
             if (!isStatementType(deAfter)) continue;
 
             followsTSynSynTable[make_pair(deFollows, deAfter)] = set<pair<int, int>>();
+            followsTSynSynTable[make_pair(deFollows, PKBDesignEntity::AllStatements)] = set<pair<int, int>>();
 
-            /*if (isContainerType(deFollows)) continue;*/
 
             vector<PKBStmt::SharedPtr> followsStmts;
-            if (deFollows == PKBDesignEntity::AllStatements)
-            {
-                const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-                const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+            //if (deFollows == PKBDesignEntity::AllStatements)
+            //{
+            //    const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+            //    const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
-                followsStmts.insert(followsStmts.end(), ifStmts.begin(), ifStmts.end());
-                followsStmts.insert(followsStmts.end(), whileStmts.begin(), whileStmts.end());
+            //    followsStmts.insert(followsStmts.end(), ifStmts.begin(), ifStmts.end());
+            //    followsStmts.insert(followsStmts.end(), whileStmts.begin(), whileStmts.end());
 
-                //addFollowsStmts(followsStmts);
-            }
-            else
-            {
+            //    //addFollowsStmts(followsStmts);
+            //}
+            //else
+            //{
                 // check these 'possible' follows statements
                 followsStmts = getStatements(deFollows);
-            }
+            //}
 
             for (auto& stmt : followsStmts)
             {
                 for (const int& x : getAllAfterOfGivenType(stmt, deAfter))
                 {
+                    if (x <= stmt->getIndex()) {
+                        continue;
+                    }
                     pair<int, int> toAdd;
                     toAdd.first = stmt->getIndex();
                     toAdd.second = x;
                     followsTSynSynTable[make_pair(deFollows, deAfter)].insert(move(toAdd));
+                    if (deAfter != PKBDesignEntity::AllStatements) {
+                        followsTSynSynTable[make_pair(deFollows, PKBDesignEntity::AllStatements)].insert(move(toAdd));
+                    }
+
                 }
             }
 
