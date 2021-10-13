@@ -418,6 +418,10 @@ class WhileStatement : public Statement
         return block->getStatements();
     }
 
+    shared_ptr<StatementList> getBody() {
+        return block;
+    }
+
     shared_ptr<ConditionalExpression> getConditional()
     {
         return cond;

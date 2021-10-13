@@ -1,0 +1,64 @@
+procedure yidaIfEmpty {
+    if (x > 0) then {
+	
+	} else {
+	
+	}
+}
+
+procedure yidaIfStmt {
+    if (p > 0) then {
+		y = y + 1;
+	} else {
+		z = z + 1;
+	}
+	
+	if (1 == 2) then {
+	
+	} else {
+	
+	}
+}
+
+procedure yidaWhileEmpty {
+    while (a > 0) {
+	
+	}
+	
+	while (3 == 4) {
+	
+	}
+}
+
+procedure yidaWhileStmt {
+    while (a > 0) {
+		a = b + 1;
+	}
+}
+
+procedure yidaWhileInsideIf {
+	if (xx <= 10) then {
+		while (yy >= 20) {
+			zz = aa + 30;
+		}
+	} else {
+		while (kk >= 40) {
+			ll = bb + 50;
+		}
+	}
+	call yidaProcToCall;
+}
+
+procedure yidaProcToCall {
+	if (calledX <= calledY) then {
+		calledA = calledB + 60;
+		call yidaWhileEmpty;
+	} else {
+		calledB = calledA + 70;
+		call yidaIfEmpty;
+	}
+	
+	while (calledA != calledB) {
+		call yidaWhileEmpty;
+	}
+}

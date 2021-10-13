@@ -1,3 +1,5 @@
+#pragma optimize( "gty", on )
+
 #pragma once
 
 #include <iostream>
@@ -384,6 +386,69 @@ class PQLEvaluator
                                                              that modify variable(s) */
 
     // Pattern
+    // For pattern a("_", "_") or pattern a(IDENT, "_")
+    vector<pair<int, string>> matchAnyPattern(string& LHS);
+    // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
+    vector<pair<int, string>> matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS);
+    // For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
+    vector<pair<int, string>> matchExactPattern(string& LHS, shared_ptr<Expression>& RHS);
+
+    // Calls
+    /* Use for Calls(proc, proc) */
+    bool getCallsStringString(string& caller, string& called);
+
+    /* Use for Calls(proc, syn) */
+    unordered_set<string> getCallsStringSyn(string& caller);
+
+    /* Use for Calls(proc, _) */
+    bool getCallsStringUnderscore(string& caller);
+
+    /* Use for Calls(syn, proc) */
+    unordered_set<string> getCallsSynString(string& called);
+
+    /* Use for Calls(syn, syn) */
+    set<pair<string, string>> getCallsSynSyn();
+
+    /* Use for Calls(syn, _) */
+    unordered_set<string> getCallsSynUnderscore();
+
+    /* Use for Calls(_, proc) */
+    bool getCallsUnderscoreString(string& called);
+
+    /* Use for Calls(_, syn) */
+    unordered_set<string> getCallsUnderscoreSyn();
+
+    /* Use for Calls(_, _) */
+    bool getCallsUnderscoreUnderscore();
+
+    // CallsT
+/* Use for CallsT(proc, proc) */
+    bool getCallsTStringString(string& caller, string& called);
+
+    /* Use for CallsT(proc, syn) */
+    unordered_set<string> getCallsTStringSyn(string& caller);
+
+    /* Use for CallsT(proc, _) */
+    bool getCallsTStringUnderscore(string& caller);
+
+    /* Use for CallsT(syn, proc) */
+    unordered_set<string> getCallsTSynString(string& called);
+
+    /* Use for CallsT(syn, syn) */
+    set<pair<string, string>> getCallsTSynSyn();
+
+    /* Use for CallsT(syn, _) */
+    unordered_set<string> getCallsTSynUnderscore();
+
+    /* Use for CallsT(_, proc) */
+    bool getCallsTUnderscoreString(string& called);
+
+    /* Use for CallsT(_, syn) */
+    unordered_set<string> getCallsTUnderscoreSyn();
+
+    /* Use for CallsT(_, _) */
+    bool getCallsTUnderscoreUnderscore();
+    
 
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
@@ -405,13 +470,6 @@ class PQLEvaluator
     /* TODO: @nicholasnge Provide function to return all Constants in the program.
      */
     unordered_set<string> getAllConstants();
-
-    // For pattern a("_", "_") or pattern a(IDENT, "_")
-    vector<pair<int, string>> matchAnyPattern(string &LHS);
-    // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
-    vector<pair<int, string>> matchPartialPattern(string &LHS, shared_ptr<Expression> &RHS);
-    // For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
-    vector<pair<int, string>> matchExactPattern(string &LHS, shared_ptr<Expression> &RHS);
 
   protected:
 

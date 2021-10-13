@@ -1,0 +1,17 @@
+procedure yidaIfEmpty {
+    if (a > 0) then {
+    
+    } else {
+        while (1 == 1) {
+        print j;
+		while(2==2) {
+		print k;
+			if (3==4) then {
+				print z;
+			} else {
+				print print;
+			}
+		}
+        }
+    }
+}

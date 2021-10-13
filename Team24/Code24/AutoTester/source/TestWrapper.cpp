@@ -1,3 +1,8 @@
+#pragma optimize( "gty", on )
+
+#define DEBUG 0
+#define PRINT_FINISHED_HEADER 0
+
 #include "TestWrapper.h"
 #include "SimpleAST.h"
 #include "SimpleLexer.h"
@@ -6,6 +11,7 @@
 #include "PQLLexer.h"
 #include "PQLParser.h"
 #include "PQLProcessor.h"
+#include "CFG.h"
 #include <memory>
 
 using namespace std;
@@ -46,6 +52,11 @@ void TestWrapper::parse(std::string filename) {
         // for debugging
         cout << root->format();
 
+        cout << "\n==== Building CFG ====\n";
+        shared_ptr<CFG> cfg = buildCFG(root);
+        cout << cfg->format();
+
+
         cout << "\n==== Building PKB ====\n";
 
         this->pkb->initialise();
@@ -66,11 +77,14 @@ void TestWrapper::parse(std::string filename) {
 
 // method to evaluating a query
 void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
+#if DEBUG
     cout << "\n==== Parsing queries ====\n";
+#endif
 
     try {
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
+#if DEBUG
         cout << "\n==== Printing Parsed Query ====\n";
         cout << sel->format() << endl;
         
@@ -78,25 +92,32 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
 
         
 
-        cout << "\n==== Created PQLEvaluator using PKB ====\n";
-
+       cout << "\n==== Created PQLEvaluator using PKB ====\n";
+#endif
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
 
+#if DEBUG
         cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
 
-        vector<shared_ptr<Result>> res = pqlProcessor->processPQLQuery(sel);
+#endif
+        vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
 
         for (auto& r : res) {
             results.emplace_back(r->getResultAsString());
         }
     }
-    catch (std::exception& ex) {
+    catch (const exception& ex) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
-        cout << "Error message: " << ex.what() << endl;;
+        cout << "Error message: " << ex.what() << endl;
+    }
+    catch (const string& e) {
+        cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
+        cout << "Error message: " << e << endl;;
     }
     catch (...) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
     }
-
+#if PRINT_FINISHED_HEADER
     cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";
+#endif
 }

@@ -1,3 +1,5 @@
+#pragma optimize( "gty", on )
+
 #include "PKB.h"
 
 #include <iostream>
@@ -97,6 +99,8 @@ PKBProcedure::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSi
     mAllProcedures.insert(res);
     // add this statement to our 'global' list of all simpleStatements
     addProcedure(res);
+    // remember it temporarily as the procedure we are currently extracting
+    currentProcedureToExtract = res;
 
     // create and link group of procedureSimple (linking in createPKBGroup
     // function)
@@ -228,6 +232,8 @@ PKBStmt::SharedPtr PKB::extractReadStatement(shared_ptr<Statement> &statement, P
     // variable is modified by this statementa
     var->addModifierStatement(res->getIndex());
 
+    readStmtToVarNameTable[to_string(res->getIndex())] = var->getName();
+
     // every read modifies variable
     designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::Read].insert(res);
     mAllModifyStmts.insert(res);
@@ -252,6 +258,8 @@ PKBStmt::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statement, 
     res->addUsedVariable(var);
     // variable is modified by this statement
     var->addUserStatement(res->getIndex());
+
+    printStmtToVarNameTable[to_string(res->getIndex())] = var->getName();
 
     // YIDA: For the var Used by this PRINT statement, we need to add it to the
     // pkb's mUsedVariables map.
@@ -444,10 +452,17 @@ PKBStmt::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &statement, P
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
     shared_ptr<CallStatement> callStatement = static_pointer_cast<CallStatement>(statement);
 
-    // 2. we need to either extract the called procedure if it hasnt been
-    // extracted, or retrieve it if it has been
     string procedureName = callStatement->getProcId()->getName();
     PKBProcedure::SharedPtr procedureCalled;
+    
+    callStmtToProcNameTable[to_string(res->getIndex())] = procedureName;
+
+    // 2. insert calls relationship
+    shared_ptr<PKBProcedure> currentProcedure = currentProcedureToExtract; // store the currently extracted procedure to revert back to
+    insertCallsRelationship(currentProcedure->getName(), procedureName);
+
+    // 3. we need to either extract the called procedure if it hasnt been
+    // extracted, or retrieve it if it has been
     if (!procedureNameToProcedureMap.count(procedureName))
     {
         // we need to locate the simple node for called procedure
@@ -469,6 +484,9 @@ PKBStmt::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &statement, P
         // it
         procedureCalled = procedureNameToProcedureMap[procedureName];
     }
+
+    currentProcedureToExtract = currentProcedure; // restore the current procedure being extracted
+
 
     // now the call statement inherits from the procedure
     res->addUsedVariables(procedureCalled->getUsedVariables());
@@ -932,7 +950,8 @@ void PKB::initializeUsesTables()
             }
 
             for (auto& v : stmt->getUsedVariables()) {
-                pairs.emplace_back<int, string>(stmt->getIndex(), v->getName());
+                const string& varName = v->getName();
+                pairs.push_back(make_pair(stmt->getIndex(), varName));
             }
         }
         usesSynSynTableNonProc[de] = move(pairs);
@@ -1229,4 +1248,42 @@ vector<string> PKB::getIdentifiers(shared_ptr<ConditionalExpression> expr)
 
     // return a vector instead of a set
     return vector<string>(res.begin(), res.end());
+}
+
+void PKB::insertCallsRelationship(const string& caller, string& called) {
+    //cout << "caller: " << caller << endl;
+    //cout << "called: " << called << endl;
+    pair<string, string> res = make_pair(caller, called);
+
+    // add to CallsT upstream (upstream, called)
+    for (auto& downstream : callsTTable[called]) {
+        //cout << "downstream: " << downstream.first + ", " + downstream.second << endl;
+        pair<string, string> toAdd = make_pair(caller, downstream.second);
+        calledTTable[downstream.second].insert(toAdd);
+        callsTTable[caller].insert(toAdd);
+    }
+    // add to CallsT downstream (caller, downstream)
+    for (auto& upstream : calledTTable[caller]) {
+        //cout << "upstream: " << upstream.first + ", " + upstream.second << endl;
+        pair<string, string> toAdd = make_pair(upstream.first, called);
+        callsTTable[upstream.first].insert(toAdd);
+        calledTTable[called].insert(toAdd);
+    }
+
+    // add to CallsT between upstream and downstream
+    for (auto& downstream : callsTTable[called]) {
+        for (auto& upstream : calledTTable[caller]) {
+            //cout << "Tdownstream: " << downstream.first + ", " + downstream.second << endl;
+            //cout << "Tupstream: " << upstream.first + ", " + upstream.second << endl;
+            pair<string, string> toAdd = make_pair(upstream.first, downstream.second);
+            callsTTable[upstream.first].insert(toAdd);
+            calledTTable[downstream.second].insert(toAdd);
+        }
+    }
+
+    // add the direct relationships
+    callsTable[caller].insert(res);
+    calledTable[called].insert(res);
+    callsTTable[caller].insert(res);
+    calledTTable[called].insert(res);
 }

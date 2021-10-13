@@ -1,4 +1,6 @@
 #pragma once
+#pragma optimize( "gty", on )
+
 
 #include ".\PKB\PQLEvaluator.h"
 #include "PQLParser.h"
@@ -75,7 +77,7 @@ class ResultTuple
         synonymKeyToValMap[key] = value;
     }
 
-    inline string get(string key)
+    inline const string& get(string key)
     {
         return synonymKeyToValMap[key];
     }
@@ -163,11 +165,14 @@ class PQLProcessor
     {
     }
 
-    vector<shared_ptr<Result>> processPQLQuery(shared_ptr<SelectCl> selectCl);
+    vector<shared_ptr<Result>> processPQLQuery(shared_ptr<SelectCl>& selectCl);
 
   private:
     vector<shared_ptr<Result>> handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl);
-    void handleSuchThatClause(shared_ptr<SelectCl> selectCl, shared_ptr<SuchThatCl> suchThatCl,
+
+    void extractResultsForIndependentElements(const shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<Element>>& elems, vector<shared_ptr<Result>>& results);
+
+    void handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
                               vector<shared_ptr<ResultTuple>> &toReturn);
 
     void handleUsesSFirstArgInteger(shared_ptr<SelectCl> &selectCl, shared_ptr<UsesS> &usesCl,
@@ -201,13 +206,32 @@ class PQLProcessor
     void handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl,
                              vector<shared_ptr<ResultTuple>> &toReturn);
 
+    void handleCalls(shared_ptr<SelectCl> selectCl, shared_ptr<Calls> callsCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleCallsT(shared_ptr<SelectCl> selectCl, shared_ptr<CallsT> callsTCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
     void joinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
                           unordered_set<string> &joinKeys, vector<shared_ptr<ResultTuple>> &newResults);
-    void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>> leftResults,
-                                      vector<shared_ptr<ResultTuple>> rightResults,
+    void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftResults,
+                                      vector<shared_ptr<ResultTuple>>& rightResults,
                                       vector<shared_ptr<ResultTuple>> &newResults);
 
-    void getResultsByEntityType(vector<shared_ptr<Result>> &toPopulate, shared_ptr<DesignEntity> de);
+    void getResultsByEntityType(vector<shared_ptr<Result>> &toPopulate, const shared_ptr<DesignEntity>& de, const shared_ptr<Element>& elem);
+
+    void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl> resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);
+
+
+    const string& resolveAttrRef(const string& syn, shared_ptr<AttrRef>& attrRef, const shared_ptr<SelectCl>& selectCl, shared_ptr<ResultTuple>& tup);
+
+    const string& resolveAttrRef(const string& rawSynVal, shared_ptr<AttrRef>& attrRef, const shared_ptr<DesignEntity>& de);
+
+    const string& resolveAttrRef(const string& rawSynVal, shared_ptr<AttrRef>& attrRef, const string& de);
+
+
+    void extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<Element>& elem);
+
 };
 
 /*
