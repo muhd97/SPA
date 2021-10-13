@@ -56,6 +56,7 @@ void PKB::initializeRelationshipTables()
 {
 
     initializeUsesTables();
+    initializeFollowsTTables();
     initializeParentTTables();
 
 
@@ -529,6 +530,194 @@ inline bool isContainerType(PKBDesignEntity s)
 
 inline bool isStatementType(PKBDesignEntity de) {
     return de != PKBDesignEntity::Procedure;
+}
+
+
+//    /* Table of all FollowsT(int, int) */
+//unordered_set<pair<int, int>, pair_hash> followsTIntIntTable;
+// 
+// unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> followsTIntSynTable;
+//
+///* Table of all FollowsT(syn, syn) */
+//unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> followsTSynSynTable;
+//
+///* Table of all statement nos that are of type syn, and fulfill FollowsT(syn, _) */
+//unordered_map<PKBDesignEntity, unordered_set<int>> followsTSynUnderscoreTable;
+//
+//unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> followsTSynIntTable;
+
+vector<int> getAllAfterOfGivenType(PKBStmt::SharedPtr targetFollows,
+    PKBDesignEntity targetAfterType)
+{
+    return targetFollows->getGroup()->getMembers(targetAfterType);
+   
+}
+
+void PKB::initializeFollowsTTables()
+{
+    // Initialize followsTIntSynTable and followsTIntIntTable
+    for (auto stmt : mStatements[PKBDesignEntity::AllStatements]) {
+
+        followsTIntSynTable[stmt->getIndex()] = unordered_map<PKBDesignEntity, vector<int>>();
+
+        for (auto de : PKBDesignEntityIterator()) {
+            unordered_set<int> toReturn;
+            vector<int> toAdd;
+            //if (!isContainerType(stmt->getType())) {
+                /*followsTIntSynTable[stmt->getIndex()][de] = move(toAdd);*/
+                
+            //}
+
+            for (int i : stmt->getGroup()->getMembers(de)) {
+                if (i <= stmt->getIndex()) {
+                    continue;
+                }
+                toReturn.insert(i);
+                followsTIntIntTable.insert(make_pair(stmt->getIndex(), i));
+            }
+        
+            toAdd.insert(toAdd.end(), toReturn.begin(), toReturn.end());
+            
+            followsTIntSynTable[stmt->getIndex()][de].insert(
+                followsTIntSynTable[stmt->getIndex()][de].end(), toAdd.begin(), toAdd.end()
+            );
+
+            //followsTIntSynTable[stmt->getIndex()][de] = move(toAdd);
+
+            if (de != PKBDesignEntity::AllStatements) {
+                followsTIntSynTable[stmt->getIndex()][PKBDesignEntity::AllStatements].insert(
+                    followsTIntSynTable[stmt->getIndex()][PKBDesignEntity::AllStatements].end(), toAdd.begin(), toAdd.end()
+                );
+            }
+        }
+    }
+
+    // Initialize followsTSynSynTable
+    for (auto deFollows : PKBDesignEntityIterator()) {
+        if (!isStatementType(deFollows)) continue;
+
+        for (auto deAfter : PKBDesignEntityIterator()) {
+            if (!isStatementType(deAfter)) continue;
+
+            followsTSynSynTable[make_pair(deFollows, deAfter)] = set<pair<int, int>>();
+            followsTSynSynTable[make_pair(deFollows, PKBDesignEntity::AllStatements)] = set<pair<int, int>>();
+
+
+            vector<PKBStmt::SharedPtr> followsStmts;
+            //if (deFollows == PKBDesignEntity::AllStatements)
+            //{
+            //    const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+            //    const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+
+            //    followsStmts.insert(followsStmts.end(), ifStmts.begin(), ifStmts.end());
+            //    followsStmts.insert(followsStmts.end(), whileStmts.begin(), whileStmts.end());
+
+            //    //addFollowsStmts(followsStmts);
+            //}
+            //else
+            //{
+                // check these 'possible' follows statements
+                followsStmts = getStatements(deFollows);
+            //}
+
+            for (auto& stmt : followsStmts)
+            {
+                for (const int& x : getAllAfterOfGivenType(stmt, deAfter))
+                {
+                    if (x <= stmt->getIndex()) {
+                        continue;
+                    }
+                    pair<int, int> toAdd;
+                    toAdd.first = stmt->getIndex();
+                    toAdd.second = x;
+                    followsTSynSynTable[make_pair(deFollows, deAfter)].insert(move(toAdd));
+                    if (deAfter != PKBDesignEntity::AllStatements) {
+                        followsTSynSynTable[make_pair(deFollows, PKBDesignEntity::AllStatements)].insert(move(toAdd));
+                    }
+
+                }
+            }
+
+        }
+    }
+
+    // Initialize followsTSynUnderscoreTable
+    /* PRE-CONDITION: followsTIntSynTable is initialize already */
+    for (auto deFollows : PKBDesignEntityIterator()) {
+        if (!isStatementType(deFollows)) continue;
+
+        followsTSynUnderscoreTable[deFollows] = unordered_set<int>();
+
+
+        vector<PKBStmt::SharedPtr> followsStmts;
+        if (deFollows == PKBDesignEntity::AllStatements)
+        {
+            const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
+            const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
+
+            followsStmts.insert(followsStmts.end(), ifStmts.begin(), ifStmts.end());
+            followsStmts.insert(followsStmts.end(), whileStmts.begin(), whileStmts.end());
+
+            //addFollowsStmts(followsStmts);
+        }
+        else
+        {
+            // check these 'possible' follows statements
+            followsStmts = getStatements(deFollows);
+        }
+
+        for (auto& stmt : followsStmts)
+        {
+            bool flag = false;
+            const auto& innerMap = followsTIntSynTable[stmt->getIndex()];
+
+            for (auto& pair : innerMap) {
+                if (!pair.second.empty()) flag = true;
+            }
+
+            if (flag)
+            {
+                followsTSynUnderscoreTable[deFollows].insert(stmt->getIndex());
+            }
+        }
+
+
+    }
+
+    // Initialize followsTSynIntTable
+    /* PRE-CONDITION, followsTIntIntTable is initialized already */
+    for (auto stmt : mStatements[PKBDesignEntity::AllStatements]) {
+        int afterStmtNo = stmt->getIndex();
+        followsTSynIntTable[afterStmtNo] = unordered_map<PKBDesignEntity, unordered_set<int>>();
+        followsTSynIntTable[afterStmtNo][PKBDesignEntity::AllStatements] = unordered_set<int>();
+        for (auto de : PKBDesignEntityIterator()) {
+            if (!isStatementType(de)) continue;
+
+            if (de != PKBDesignEntity::AllStatements)
+                followsTSynIntTable[afterStmtNo][de] = unordered_set<int>();
+            /*if (isContainerType(de)) continue;*/
+
+            vector<PKBStmt::SharedPtr> followsStmts;
+
+            //may need to change this and utilize how getStatements works with AllStatements
+            if (de != PKBDesignEntity::AllStatements)
+            {
+                // check these 'possible' follows statements
+                followsStmts = getStatements(de);
+            }
+            for (auto& beforeStmt : followsStmts)
+            {
+                if (followsTIntIntTable.find(make_pair(beforeStmt->getIndex(), afterStmtNo)) != followsTIntIntTable.end())
+                {
+                    followsTSynIntTable[afterStmtNo][de].insert(beforeStmt->getIndex());
+                    if (de != PKBDesignEntity::AllStatements) {
+                        followsTSynIntTable[afterStmtNo][PKBDesignEntity::AllStatements].insert(beforeStmt->getIndex());
+                    }
+                }
+            }
+
+        }
+    }
 }
 
 unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStmt::SharedPtr targetParent,
