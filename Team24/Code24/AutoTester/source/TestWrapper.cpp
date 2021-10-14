@@ -1,7 +1,7 @@
 #pragma optimize( "gty", on )
 
 #define DEBUG 0
-#define PRINT_FINISHED_HEADER 1
+#define PRINT_FINISHED_HEADER 0
 #define PRINT_EXCEPTION_STATEMENTS 0
 
 #include "TestWrapper.h"
@@ -47,8 +47,9 @@ void TestWrapper::parse(std::string filename) {
         }
 
         vector<SimpleToken> tokens = simpleLex(program);
+#if DEBUG
         printSimpleTokens(tokens);
-
+#endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
         
 #if DEBUG
