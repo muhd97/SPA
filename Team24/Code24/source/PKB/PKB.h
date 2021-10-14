@@ -87,7 +87,6 @@ class PKB
     {
         if (stmtNumber < 1 || stmtNumber > (int)mStatements[PKBDesignEntity::AllStatements].size())
         {
-            cout << "getStatement(int): FATAL: INVALID STATEMENT NUMBER QUERIED\n";
             return false;
         }
         // get the stmt from list of ALL statements
@@ -95,8 +94,6 @@ class PKB
          * to subtract 1. */
         int targetIndexInMStatementsVector = stmtNumber - 1;
         stmt = mStatements[PKBDesignEntity::AllStatements][targetIndexInMStatementsVector];
-        // cout << "getStatement(int), STMT = " << stmtNumber << endl;
-
         assert(stmt->getIndex() == stmtNumber);
         return true;
     }
@@ -228,9 +225,15 @@ class PKB
 
     unordered_map<string, string> callStmtToProcNameTable;
 
+    unordered_map<string, unordered_set<string>> procNameToCallStmtTable;
+
     unordered_map<string, string> readStmtToVarNameTable;
 
+    unordered_map<string, unordered_set<string>> varNameToReadStmtTable;
+
     unordered_map<string, string> printStmtToVarNameTable;
+
+    unordered_map<string, unordered_set<string>> varNameToPrintStmtTable;
 
     /* ==================================== RELATIONSHIP TABLES ==================================== */
 

@@ -232,7 +232,18 @@ PKBStmt::SharedPtr PKB::extractReadStatement(shared_ptr<Statement> &statement, P
     // variable is modified by this statementa
     var->addModifierStatement(res->getIndex());
 
-    readStmtToVarNameTable[to_string(res->getIndex())] = var->getName();
+    string indexToString = to_string(res->getIndex());
+    const string& varName = var->getName();
+    readStmtToVarNameTable[indexToString] = varName;
+    if (varNameToReadStmtTable.find(varName) == varNameToReadStmtTable.end()) {
+        unordered_set<string> toAdd;
+        toAdd.insert(indexToString);
+        varNameToReadStmtTable[varName] = move(toAdd);
+    }
+    else {
+        varNameToReadStmtTable[varName].insert(indexToString);
+    }
+
 
     // every read modifies variable
     designEntityToStatementsThatModifyVarsMap[PKBDesignEntity::Read].insert(res);
@@ -259,7 +270,17 @@ PKBStmt::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statement, 
     // variable is modified by this statement
     var->addUserStatement(res->getIndex());
 
-    printStmtToVarNameTable[to_string(res->getIndex())] = var->getName();
+    string indexToString = to_string(res->getIndex());
+    const string& varName = var->getName();
+    printStmtToVarNameTable[indexToString] = varName;
+    if (varNameToPrintStmtTable.find(varName) == varNameToPrintStmtTable.end()) {
+        unordered_set<string> toAdd;
+        toAdd.insert(indexToString);
+        varNameToPrintStmtTable[varName] = move(toAdd);
+    }
+    else {
+        varNameToPrintStmtTable[varName].insert(indexToString);
+    }
 
     // YIDA: For the var Used by this PRINT statement, we need to add it to the
     // pkb's mUsedVariables map.
@@ -455,7 +476,17 @@ PKBStmt::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &statement, P
     string procedureName = callStatement->getProcId()->getName();
     PKBProcedure::SharedPtr procedureCalled;
     
-    callStmtToProcNameTable[to_string(res->getIndex())] = procedureName;
+    string indexToString = to_string(res->getIndex());
+    callStmtToProcNameTable[indexToString] = procedureName;
+
+    if (procNameToCallStmtTable.find(procedureName) == procNameToCallStmtTable.end()) {
+        unordered_set<string> toAdd;
+        toAdd.insert(indexToString);
+        procNameToCallStmtTable[procedureName] = move(toAdd);
+    }
+    else {
+        procNameToCallStmtTable[procedureName].insert(indexToString);
+    }
 
     // 2. insert calls relationship
     shared_ptr<PKBProcedure> currentProcedure = currentProcedureToExtract; // store the currently extracted procedure to revert back to

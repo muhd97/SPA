@@ -446,7 +446,7 @@ public:
         return refType;
     }
 
-    shared_ptr<AttrRef> getAttrRef()
+    const shared_ptr<AttrRef>& getAttrRef()
     {
         return attrRef;
     }
@@ -1502,7 +1502,7 @@ public:
         return synonymToParentDeclarationMap[s]->getDesignEntity()->getEntityTypeName();
     }
 
-    inline const string& getDesignEntityTypeBySynonym(shared_ptr<Synonym>& s)
+    inline const string& getDesignEntityTypeBySynonym(const shared_ptr<Synonym>& s)
     {
         if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end())
         {
