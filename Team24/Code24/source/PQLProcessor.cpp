@@ -2524,8 +2524,7 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
 
     if (resultCl->isSingleValReturnType()) {
 
-        //cout << "hello =================================== 1\n";
-
+        
         if (tuples.empty()) return;
         
         shared_ptr<Element> firstElem = resultCl->getElements()[0];
@@ -2560,11 +2559,11 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
 
     if (resultCl->isMultiTupleReturnType()) {
 
+        if (tuples.empty()) return;
+
         int numTargetElements = resultCl->getElements().size();
         const vector<shared_ptr<Element>>& targetElems = resultCl->getElements();
         unordered_set<string> existingResults;
-
-        if (tuples.size() <= 0) return;
 
         const auto& independentElements = getSetOfIndependentSynonymsInTargetSynonyms(selectCl);
 
@@ -3026,15 +3025,10 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
      * being declared first. */
 
 
-     //cout << "======================================================================00000\n";
-
     validateSelectCl(selectCl);
 
     /* Final Results to Return */
     vector<shared_ptr<Result>> res;
-
-
-    //cout << "======================================================================1111\n";
 
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses() && !selectCl->hasWithClauses())
@@ -3043,82 +3037,101 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     }
 
 
+    vector<shared_ptr<ResultTuple>> currTups;
+
      /* STEP 1: Evaluate SuchThat clauses first, get all the tuples. */
     vector<shared_ptr<ResultTuple>> suchThatReturnTuples;
     if (selectCl->hasSuchThatClauses())
     {
         handleAllSuchThatClauses(selectCl, selectCl->suchThatClauses, suchThatReturnTuples);
+        if (!suchThatReturnTuples.empty()) currTups = move(suchThatReturnTuples);
+        else {
+            currTups.clear();
+            extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
+            return res;
+        }
     }
 
+    //
+    //cout << "After suchThat done =========== \n";
+    //for (auto& tup : currTups) cout << "tup = " << tup->toString() << endl;
 
     /* STEP 2: Then evaluate Pattern clauses, get all the tuples. */
     vector<shared_ptr<ResultTuple>> patternReturnTuples;
     if (selectCl->hasPatternClauses())
     {
         handleAllPatternClauses(selectCl, selectCl->patternClauses, patternReturnTuples);
+
+        if (!patternReturnTuples.empty()) {
+            if (currTups.empty()) currTups = move(patternReturnTuples);
+            else {
+                vector<shared_ptr<ResultTuple>> combinedTuples;
+
+                unordered_set<string>& setOfSynonymsToJoinOn =
+                    getSetOfSynonymsToJoinOn(currTups, patternReturnTuples);
+
+                if (setOfSynonymsToJoinOn.empty())
+                { // no need to join, take cartesian product
+                    cartesianProductResultTuples(currTups, patternReturnTuples, combinedTuples);
+                }
+                else
+                {
+                    joinResultTuples(currTups, patternReturnTuples, setOfSynonymsToJoinOn, combinedTuples);
+                }
+                currTups = move(combinedTuples);
+            }
+        }
+        else {
+            currTups.clear();
+            extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
+            return res;
+        }
+
     }
 
-
-    /* STEP 3: If Needed, join SuchThat and PatternResults */
-    if (selectCl->hasPatternClauses() && selectCl->hasSuchThatClauses())
-    {
-
-        vector<shared_ptr<ResultTuple>> combinedTuples;
-
-        unordered_set<string>& setOfSynonymsToJoinOn =
-            getSetOfSynonymsToJoinOn(selectCl->suchThatClauses[0], selectCl->patternClauses[0]);
-
-        if (setOfSynonymsToJoinOn.empty())
-        { // no need to join, take cartesian product
-            cartesianProductResultTuples(suchThatReturnTuples, patternReturnTuples, combinedTuples);
-        }
-        else
-        {
-            joinResultTuples(suchThatReturnTuples, patternReturnTuples, setOfSynonymsToJoinOn, combinedTuples);
-        }
-
-
-
-        if (!selectCl->target->isBooleanReturnType() && !atLeastOneTargetSynonymIsInClauses(selectCl))
-        {
-            return combinedTuples.size() <= 0 ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
-        }
-
-
-        /* STEP 4a: After joining or taking cartesian product, find values for
-         * the target synonym and return. */
-
-         // @jiachen247: Add support for other result types
-
-        extractTargetSynonyms(res, selectCl->target, combinedTuples, selectCl);
-
-        return move(res);
-    }
+    //cout << "After pattern done =========== \n";
+    //for (auto& tup : currTups) cout << "tup = " << tup->toString() << endl;
 
     vector<shared_ptr<ResultTuple>> withReturnClauseTuples;
     if (selectCl->hasWithClauses()) {
 
         handleAllWithClauses(selectCl, selectCl->withClauses, withReturnClauseTuples);
 
-        extractTargetSynonyms(res, selectCl->target, withReturnClauseTuples, selectCl);
+        if (!withReturnClauseTuples.empty()) {
+            if (currTups.empty()) currTups = move(withReturnClauseTuples);
+            else {
+                vector<shared_ptr<ResultTuple>> combinedTuples;
 
-        // PLACEHOLDER
-        return move(res);
+                unordered_set<string>& setOfSynonymsToJoinOn =
+                    getSetOfSynonymsToJoinOn(currTups, withReturnClauseTuples);
+
+                if (setOfSynonymsToJoinOn.empty())
+                { // no need to join, take cartesian product
+                    cartesianProductResultTuples(currTups, withReturnClauseTuples, combinedTuples);
+                }
+                else
+                {
+                    joinResultTuples(currTups, withReturnClauseTuples, setOfSynonymsToJoinOn, combinedTuples);
+                }
+                currTups = move(combinedTuples);
+            }
+        }
+        else {
+            currTups.clear();
+            extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
+            return res;
+        }
+
     }
-    
 
-    /* STEP 4b: We didn't need to join or take cartesian product, find values for
-     * the target synonym and return. */
-    vector<shared_ptr<ResultTuple>>& finalTuples =
-        !selectCl->hasPatternClauses() ? suchThatReturnTuples : patternReturnTuples;
+
+    vector<shared_ptr<ResultTuple>>& finalTuples = currTups;
 
     if (!selectCl->target->isBooleanReturnType() && !atLeastOneTargetSynonymIsInClauses(selectCl))
     {
+        
         return finalTuples.empty() ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
     }
-
-
-
 
 
     extractTargetSynonyms(res, selectCl->target, finalTuples, selectCl);

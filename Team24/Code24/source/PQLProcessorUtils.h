@@ -30,6 +30,7 @@ inline bool atLeastOneTargetSynonymIsInClauses(shared_ptr<SelectCl> selectCl)
         if (selectCl->suchThatContainsSynonym(x) || selectCl->patternContainsSynonym(x) || selectCl->withContainsSynonym(x)) return true;
     }
 
+
     return false;
 }
 
@@ -228,6 +229,32 @@ unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<T> cl1, shared_ptr<R> 
 
     return move(toReturn);
 }
+
+unordered_set<string> getSetOfSynonymsToJoinOn(const vector<shared_ptr<ResultTuple>>& leftRes, const vector<shared_ptr<ResultTuple>>& rightRes)
+{
+    unordered_set<string> toReturn;
+    const auto& suchThatSynonyms1 = leftRes[0]->getMap();
+    const auto& suchThatSynonyms2 = rightRes[0]->getMap();
+
+    unordered_set<string> hashMap;
+    hashMap.reserve(suchThatSynonyms1.size() + suchThatSynonyms2.size());
+
+    for (const auto& s1 : suchThatSynonyms1)
+    {
+        hashMap.insert(s1.first);
+    }
+
+    for (const auto& s2 : suchThatSynonyms2)
+    {
+        if (hashMap.find(s2.first) != hashMap.end())
+        {
+            toReturn.insert(s2.first);
+        }
+    }
+
+    return move(toReturn);
+}
+
 
 inline bool stringIsInsideSet(unordered_set<string>& set, const string& toCheck)
 {
