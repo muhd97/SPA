@@ -1108,6 +1108,14 @@ bool PQLEvaluator::getFollowsUnderscoreUnderscore()
 
 bool PQLEvaluator::getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo)
 {
+
+    if (mpPKB->followsTIntIntTable.find(make_pair(leftStmtNo, rightStmtNo)) == mpPKB->followsTIntIntTable.end()) {
+        return false;
+    }
+
+    return true;
+
+    /*
     PKBStmt::SharedPtr leftStatement;
     PKBStmt::SharedPtr rightStatement;
 
@@ -1125,13 +1133,19 @@ bool PQLEvaluator::getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo)
     {
         return true;
     }
-    return false;
+    return false;*/
 }
 
 // getAfterT
-unordered_set<int> PQLEvaluator::getFollowsTIntegerSyn(PKBDesignEntity rightType, int leftStmtNo)
+const vector<int> PQLEvaluator::getFollowsTIntegerSyn(PKBDesignEntity rightType, int leftStmtNo)
 {
-    unordered_set<int> res;
+
+    return mpPKB->followsTIntSynTable[leftStmtNo][rightType];
+
+    // Below is non pre-compute version.
+
+    /*unordered_set<int> res;
+
     PKBStmt::SharedPtr rightStatement;
     if (!mpPKB->getStatement(leftStmtNo, rightStatement))
     {
@@ -1152,102 +1166,127 @@ unordered_set<int> PQLEvaluator::getFollowsTIntegerSyn(PKBDesignEntity rightType
         res.insert(*rightStmtNo);
     }
 
-    return res;
+    return res;*/
 }
 
 bool PQLEvaluator::getFollowsTIntegerUnderscore(int leftStmtNo)
 {
-    PKBStmt::SharedPtr leftStatement;
+ 
+    const auto& innerMap = mpPKB->followsTIntSynTable[leftStmtNo];
+
+    for (auto& pair : innerMap) {
+        if (!pair.second.empty()) return true;
+    }
+
+    return false;
+
+    // Below is non-precomputed version.
+
+    /*PKBStmt::SharedPtr leftStatement;
     if (!mpPKB->getStatement(leftStmtNo, leftStatement))
     {
         return false;
     }
 
     vector<int> members = leftStatement->getGroup()->getMembers(PKBDesignEntity::AllStatements);
-    return leftStmtNo < members.back();
+    return leftStmtNo < members.back();*/
 }
 
 // getBeforeT
-unordered_set<int> PQLEvaluator::getFollowsTSynInteger(PKBDesignEntity leftType, int rightStmtNo)
+
+/* PRE-CONDITION: TargetFollowType IS a container and statement type type. */
+const unordered_set<int>& PQLEvaluator::getFollowsTSynInteger(PKBDesignEntity leftType, int rightStmtNo)
 {
-    unordered_set<int> toReturn;
-    PKBStmt::SharedPtr rightStatement;
+    return mpPKB->followsTSynIntTable[rightStmtNo][leftType];
 
-    if (!mpPKB->getStatement(rightStmtNo, rightStatement))
-    {
-        return toReturn;
-    }
+    // Below is non-precomputed version
 
-    PKBGroup::SharedPtr grp = rightStatement->getGroup();
-    vector<int> grpStatements = grp->getMembers(leftType);
+    //unordered_set<int> toReturn;
+    //PKBStmt::SharedPtr rightStatement;
 
-    // assume ascending order of line numbers
-    for (int statementIndex : grpStatements)
-    {
-        // we've seen past ourself, we can stop now (we could search past since we
-        // are searching specific type only)
-        if (statementIndex >= rightStmtNo)
-        {
-            return toReturn;
-        }
-        toReturn.insert(statementIndex);
-    }
+    //if (!mpPKB->getStatement(rightStmtNo, rightStatement))
+    //{
+    //    return toReturn;
+    //}
 
-    return move(toReturn);
+    //PKBGroup::SharedPtr grp = rightStatement->getGroup();
+    //vector<int> grpStatements = grp->getMembers(leftType);
+
+    //// assume ascending order of line numbers
+    //for (int statementIndex : grpStatements)
+    //{
+    //    // we've seen past ourself, we can stop now (we could search past since we
+    //    // are searching specific type only)
+    //    if (statementIndex >= rightStmtNo)
+    //    {
+    //        return toReturn;
+    //    }
+    //    toReturn.insert(statementIndex);
+    //}
+
+    //return move(toReturn);
 }
 
-set<pair<int, int>> PQLEvaluator::getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType)
+/* PRE-CONDITION: Both leftType and rightTypes are STATEMENT types (not procedure or variable or others) */
+const set<pair<int, int>>& PQLEvaluator::getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType)
 {
-    set<pair<int, int>> toReturn;
-    // get results manually
-    // get all the 'before' users first
-    vector<PKBStmt::SharedPtr> beforeStatements = mpPKB->getStatements(leftType);
+    return mpPKB->followsTSynSynTable[make_pair(leftType, rightType)];
 
-    // count from the back, using rbegin and rend
-    for (int i = beforeStatements.size() - 1; i >= 0; i--)
-    {
-        auto &currStmt = beforeStatements[i];
-        PKBGroup::SharedPtr grp = currStmt->getGroup();
-        vector<int> afterStatements = grp->getMembers(rightType);
+    // Below is non-precomputed version
 
-        for (int j = afterStatements.size() - 1; j >= 0; j--)
-        { // count from back again
-            if (afterStatements[j] <= currStmt->getIndex())
-            {
-                break; // this should break back into the outer loop
-            }
-            pair<int, int> toAdd;
-            toAdd.first = currStmt->getIndex();
-            toAdd.second = afterStatements[j];
-            toReturn.insert(move(toAdd));
-        }
-    }
+    //set<pair<int, int>> toReturn;
+    //// get results manually
+    //// get all the 'before' users first
+    //vector<PKBStmt::SharedPtr> beforeStatements = mpPKB->getStatements(leftType);
 
-    return move(toReturn);
+    //// count from the back, using rbegin and rend
+    //for (int i = beforeStatements.size() - 1; i >= 0; i--)
+    //{
+    //    auto &currStmt = beforeStatements[i];
+    //    PKBGroup::SharedPtr grp = currStmt->getGroup();
+    //    vector<int> afterStatements = grp->getMembers(rightType);
+
+    //    for (int j = afterStatements.size() - 1; j >= 0; j--)
+    //    { // count from back again
+    //        if (afterStatements[j] <= currStmt->getIndex())
+    //        {
+    //            break; // this should break back into the outer loop
+    //        }
+    //        pair<int, int> toAdd;
+    //        toAdd.first = currStmt->getIndex();
+    //        toAdd.second = afterStatements[j];
+    //        toReturn.insert(move(toAdd));
+    //    }
+    //}
+
+    //return move(toReturn);
 }
 
-unordered_set<int> PQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity leftType)
+/* PRE-CONDITION: TargetFolllowsType IS a container type. */
+const unordered_set<int>& PQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity leftType)
 {
-    unordered_set<int> toReturn;
+    return mpPKB->followsTSynUnderscoreTable[leftType];
 
-    // get results manually
-    // get all the 'before' users first
-    vector<PKBStmt::SharedPtr> beforeStatements = mpPKB->getStatements(leftType);
+    //unordered_set<int> toReturn;
 
-    // count from the back, using rbegin and rend
-    for (int i = beforeStatements.size() - 1; i >= 0; i--)
-    {
-        auto &currStmt = beforeStatements[i];
-        PKBGroup::SharedPtr grp = currStmt->getGroup();
-        vector<int> afterStatements = grp->getMembers(PKBDesignEntity::AllStatements);
+    //// get results manually
+    //// get all the 'before' users first
+    //vector<PKBStmt::SharedPtr> beforeStatements = mpPKB->getStatements(leftType);
 
-        if (currStmt->getIndex() < afterStatements[afterStatements.size() - 1])
-        {
-            toReturn.insert(currStmt->getIndex());
-        }
-    }
+    //// count from the back, using rbegin and rend
+    //for (int i = beforeStatements.size() - 1; i >= 0; i--)
+    //{
+    //    auto &currStmt = beforeStatements[i];
+    //    PKBGroup::SharedPtr grp = currStmt->getGroup();
+    //    vector<int> afterStatements = grp->getMembers(PKBDesignEntity::AllStatements);
 
-    return move(toReturn);
+    //    if (currStmt->getIndex() < afterStatements[afterStatements.size() - 1])
+    //    {
+    //        toReturn.insert(currStmt->getIndex());
+    //    }
+    //}
+
+    //return move(toReturn);
 }
 
 /* Use for Follows*(_, INT) */

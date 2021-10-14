@@ -60,10 +60,7 @@ class ResultTuple
      * Generally, there are only two keys. */
     unordered_map<string, string> synonymKeyToValMap;
 
-    ResultTuple()
-    {
-        synonymKeyToValMap.reserve(2);
-    }
+    ResultTuple() = default;
 
     ResultTuple(int sizeToReserve)
     {
@@ -175,6 +172,21 @@ class PQLProcessor
     void handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
                               vector<shared_ptr<ResultTuple>> &toReturn);
 
+    void handleWithClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleWithFirstArgIdent(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleWithFirstArgInt(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleWithFirstArgAttrRef(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleWithFirstArgSyn(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
     void handleUsesSFirstArgInteger(shared_ptr<SelectCl> &selectCl, shared_ptr<UsesS> &usesCl,
                                     vector<shared_ptr<ResultTuple>> &toReturn);
     void handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared_ptr<UsesS> &usesCl,
@@ -206,10 +218,10 @@ class PQLProcessor
     void handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl,
                              vector<shared_ptr<ResultTuple>> &toReturn);
 
-    void handleCalls(shared_ptr<SelectCl> selectCl, shared_ptr<Calls> callsCl,
+    void handleCalls(shared_ptr<SelectCl> &selectCl, shared_ptr<Calls> &callsCl,
         vector<shared_ptr<ResultTuple>>& toReturn);
 
-    void handleCallsT(shared_ptr<SelectCl> selectCl, shared_ptr<CallsT> callsTCl,
+    void handleCallsT(shared_ptr<SelectCl> &selectCl, shared_ptr<CallsT> &callsTCl,
         vector<shared_ptr<ResultTuple>>& toReturn);
 
     void joinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
@@ -228,7 +240,6 @@ class PQLProcessor
     const string& resolveAttrRef(const string& rawSynVal, shared_ptr<AttrRef>& attrRef, const shared_ptr<DesignEntity>& de);
 
     const string& resolveAttrRef(const string& rawSynVal, shared_ptr<AttrRef>& attrRef, const string& de);
-
 
     void extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<Element>& elem);
 

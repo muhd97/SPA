@@ -300,3 +300,57 @@ bool dependentElementsAllExistInTupleKeys(const vector<shared_ptr<ResultTuple>>&
 
     return true;
 }
+
+inline void validateWithClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl)
+{
+    shared_ptr<Ref> lhs = withCl->lhs;
+    shared_ptr<Ref> rhs = withCl->rhs;
+    bool isLhsInt = false;
+    bool isRhsInt = false;
+
+    if (lhs->getRefType() == RefType::SYNONYM) {
+        if (selectCl->getDesignEntityTypeBySynonym(lhs->getStringVal()) != DesignEntity::PROG_LINE) {
+            throw "Synonym types in with-clauses MUST be of type 'prog_line'\n";
+        }
+    }
+
+    if (rhs->getRefType() == RefType::SYNONYM) {
+        if (selectCl->getDesignEntityTypeBySynonym(rhs->getStringVal()) != DesignEntity::PROG_LINE) {
+            throw "Synonym types in with-clauses MUST be of type 'prog_line'\n";
+        }
+    }
+
+    if (!isLhsInt && lhs->getRefType() == RefType::INTEGER) {
+        isLhsInt = true;
+    }
+    if (!isRhsInt && rhs->getRefType() == RefType::INTEGER) {
+        isRhsInt = true;
+    }
+    if (!isLhsInt && lhs->getRefType() == RefType::SYNONYM) {
+        isLhsInt = selectCl->getDesignEntityTypeBySynonym(lhs->getStringVal()) == DesignEntity::PROG_LINE;
+    }
+    if (!isRhsInt && rhs->getRefType() == RefType::SYNONYM) {
+        isRhsInt = selectCl->getDesignEntityTypeBySynonym(rhs->getStringVal()) == DesignEntity::PROG_LINE;
+    }
+    if (!isLhsInt && lhs->getRefType() == RefType::ATTR) {
+        AttrNameType attrType = lhs->getAttrRef()->getAttrName()->getType();
+        isLhsInt = attrType == AttrNameType::STMT_NUMBER || attrType == AttrNameType::VALUE;
+    }
+    if (!isRhsInt && rhs->getRefType() == RefType::ATTR) {
+        AttrNameType attrType = rhs->getAttrRef()->getAttrName()->getType();
+        isRhsInt = attrType == AttrNameType::STMT_NUMBER || attrType == AttrNameType::VALUE;
+    }
+
+    if (isLhsInt != isRhsInt) {
+        throw "Bad PQL Query: The with-clause is checking equality on different types.\n";
+    }
+}
+
+inline bool allTargetSynonymsExistInTuple(vector<shared_ptr<Synonym>>& synonyms, const shared_ptr<ResultTuple>& tuple) {
+
+    for (auto& synPtr : synonyms) {
+        if (!tuple->synonymKeyAlreadyExists(synPtr->getValue())) return false;
+    }
+
+    return true;
+}
