@@ -14,6 +14,121 @@ string ResultTuple::SYNONYM_PLACEHOLDER = "$synonym";
 string ResultTuple::INTEGER_PLACEHOLDER = "$int";
 string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
+/* ======================== HANDLE-ALL CLAUSE METHODS ======================== */
+
+void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<SuchThatCl>>& suchThatClauses, vector<shared_ptr<ResultTuple>>& suchThatReturnTuples)
+{
+    shared_ptr<SuchThatCl> previousSelectCl = selectCl->suchThatClauses[0];
+
+    /* TODO: @kohyida1997 current order of resolving such-that clauses is in
+     * order of their appearance. This needs to change in iteraton 2 and 3 */
+    for (unsigned int i = 0; i < selectCl->suchThatClauses.size(); i++)
+    {
+        if (i == 0)
+        {
+            handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
+        }
+        else
+        {
+            vector<shared_ptr<ResultTuple>> currSuchThatRes;
+            vector<shared_ptr<ResultTuple>> joinedRes;
+            joinedRes.reserve(suchThatReturnTuples.size());
+
+            handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
+
+            if (currSuchThatRes.size() == 0) { // Early termination
+                suchThatReturnTuples = move(currSuchThatRes);
+                break;
+            }
+
+            unordered_set<string>& setOfSynonymsToJoinOn =
+                getSetOfSynonymsToJoinOn(previousSelectCl, selectCl->suchThatClauses[i]);
+
+            if (!setOfSynonymsToJoinOn.empty())
+                joinResultTuples(suchThatReturnTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
+            else
+                cartesianProductResultTuples(suchThatReturnTuples, currSuchThatRes, joinedRes);
+
+            previousSelectCl = selectCl->suchThatClauses[i];
+            suchThatReturnTuples = move(joinedRes);
+        }
+    }
+}
+
+void PQLProcessor::handleAllPatternClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<PatternCl>>& patternClauses, vector<shared_ptr<ResultTuple>>& patternTuples)
+{
+    shared_ptr<PatternCl> previousSelectCl = patternClauses[0];
+
+    for (unsigned int i = 0; i < patternClauses.size(); i++)
+    {
+        if (i == 0)
+        {
+            handlePatternClause(selectCl, patternClauses[i], patternTuples);
+        }
+        else
+        {
+            vector<shared_ptr<ResultTuple>> currSuchThatRes;
+            vector<shared_ptr<ResultTuple>> joinedRes;
+            joinedRes.reserve(patternTuples.size());
+
+            handlePatternClause(selectCl, patternClauses[i], currSuchThatRes);
+
+            if (currSuchThatRes.size() == 0) { // Early termination
+                patternTuples = move(currSuchThatRes);
+                break;
+            }
+
+            unordered_set<string>& setOfSynonymsToJoinOn =
+                getSetOfSynonymsToJoinOn(previousSelectCl, patternClauses[i]);
+
+            if (!setOfSynonymsToJoinOn.empty())
+                joinResultTuples(patternTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
+            else
+                cartesianProductResultTuples(patternTuples, currSuchThatRes, joinedRes);
+
+            previousSelectCl = selectCl->patternClauses[i];
+            patternTuples = move(joinedRes);
+        }
+    }
+}
+
+void PQLProcessor::handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<WithCl>>& withClauses, vector<shared_ptr<ResultTuple>>& withClauseTuples)
+{
+    auto& previousWithCl = selectCl->withClauses[0];
+
+    for (unsigned int i = 0; i < selectCl->withClauses.size(); i++)
+    {
+        if (i == 0)
+        {
+            handleWithClause(selectCl, selectCl->withClauses[i], withClauseTuples);
+        }
+        else
+        {
+            vector<shared_ptr<ResultTuple>> currWithRes;
+            vector<shared_ptr<ResultTuple>> joinedRes;
+            joinedRes.reserve(withClauseTuples.size());
+
+            handleWithClause(selectCl, selectCl->withClauses[i], currWithRes);
+
+            if (currWithRes.size() == 0) { // Early termination
+                withClauseTuples = move(currWithRes);
+                break;
+            }
+
+            unordered_set<string>& setOfSynonymsToJoinOn =
+                getSetOfSynonymsToJoinOn(previousWithCl, selectCl->withClauses[i]);
+
+            if (!setOfSynonymsToJoinOn.empty())
+                joinResultTuples(withClauseTuples, currWithRes, setOfSynonymsToJoinOn, joinedRes);
+            else
+                cartesianProductResultTuples(withClauseTuples, currWithRes, joinedRes);
+
+            previousWithCl = selectCl->withClauses[i];
+            withClauseTuples = move(joinedRes);
+        }
+    }
+}
+
 /* ======================== PATTERN CLAUSE ======================== */
 
 // currently for assign statements only
@@ -985,6 +1100,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
     }
     return;
 }
+
 
 void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
@@ -2899,6 +3015,7 @@ void PQLProcessor::getResultsByEntityType(vector<shared_ptr<Result>>& toReturn, 
     }
 }
 
+
 /* ======================== EXPOSED PUBLIC METHODS ======================== */
 
 /* YIDA: Can only handle queries that return statement numbers, procedure names
@@ -2930,41 +3047,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     vector<shared_ptr<ResultTuple>> suchThatReturnTuples;
     if (selectCl->hasSuchThatClauses())
     {
-        shared_ptr<SuchThatCl> previousSelectCl = selectCl->suchThatClauses[0];
-
-        /* TODO: @kohyida1997 current order of resolving such-that clauses is in
-         * order of their appearance. This needs to change in iteraton 2 and 3 */
-        for (unsigned int i = 0; i < selectCl->suchThatClauses.size(); i++)
-        {
-            if (i == 0)
-            {
-                handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
-            }
-            else
-            {
-                vector<shared_ptr<ResultTuple>> currSuchThatRes;
-                vector<shared_ptr<ResultTuple>> joinedRes;
-                joinedRes.reserve(suchThatReturnTuples.size());
-
-                handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
-
-                if (currSuchThatRes.size() == 0) { // Early termination
-                    suchThatReturnTuples = move(currSuchThatRes);
-                    break;
-                }
-
-                unordered_set<string>& setOfSynonymsToJoinOn =
-                    getSetOfSynonymsToJoinOn(previousSelectCl, selectCl->suchThatClauses[i]);
-
-                if (!setOfSynonymsToJoinOn.empty())
-                    joinResultTuples(suchThatReturnTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
-                else
-                    cartesianProductResultTuples(suchThatReturnTuples, currSuchThatRes, joinedRes);
-
-                previousSelectCl = selectCl->suchThatClauses[i];
-                suchThatReturnTuples = move(joinedRes);
-            }
-        }
+        handleAllSuchThatClauses(selectCl, selectCl->suchThatClauses, suchThatReturnTuples);
     }
 
 
@@ -2972,10 +3055,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     vector<shared_ptr<ResultTuple>> patternReturnTuples;
     if (selectCl->hasPatternClauses())
     {
-        //cout << "eval pattern\n";
-        for (auto& cl : selectCl->patternClauses)
-            handlePatternClause(selectCl, cl, patternReturnTuples);
-
+        handleAllPatternClauses(selectCl, selectCl->patternClauses, patternReturnTuples);
     }
 
 
@@ -3015,50 +3095,14 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         return move(res);
     }
 
+    vector<shared_ptr<ResultTuple>> withReturnClauseTuples;
     if (selectCl->hasWithClauses()) {
 
-        vector<shared_ptr<ResultTuple>> withClauseTuples;
-        // evaluate first withCl only
-        auto& previousWithCl = selectCl->withClauses[0];
+        handleAllWithClauses(selectCl, selectCl->withClauses, withReturnClauseTuples);
 
-
-        for (unsigned int i = 0; i < selectCl->withClauses.size(); i++)
-        {
-            if (i == 0)
-            {
-                handleWithClause(selectCl, selectCl->withClauses[i], withClauseTuples);
-            }
-            else
-            {
-                vector<shared_ptr<ResultTuple>> currWithRes;
-                vector<shared_ptr<ResultTuple>> joinedRes;
-                joinedRes.reserve(withClauseTuples.size());
-
-                handleWithClause(selectCl, selectCl->withClauses[i], currWithRes);
-
-                if (currWithRes.size() == 0) { // Early termination
-                    withClauseTuples = move(currWithRes);
-                    break;
-                }
-
-                unordered_set<string>& setOfSynonymsToJoinOn =
-                    getSetOfSynonymsToJoinOn(previousWithCl, selectCl->withClauses[i]);
-
-                if (!setOfSynonymsToJoinOn.empty())
-                    joinResultTuples(suchThatReturnTuples, currWithRes, setOfSynonymsToJoinOn, joinedRes);
-                else
-                    cartesianProductResultTuples(suchThatReturnTuples, currWithRes, joinedRes);
-
-                previousWithCl = selectCl->withClauses[i];
-                suchThatReturnTuples = move(joinedRes);
-            }
-        }
-
-
-        extractTargetSynonyms(res, selectCl->target, withClauseTuples, selectCl);
+        extractTargetSynonyms(res, selectCl->target, withReturnClauseTuples, selectCl);
 
         // PLACEHOLDER
-
         return move(res);
     }
     

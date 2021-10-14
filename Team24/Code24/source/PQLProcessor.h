@@ -172,6 +172,15 @@ class PQLProcessor
     void handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
                               vector<shared_ptr<ResultTuple>> &toReturn);
 
+    void handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<SuchThatCl>>& suchThatClauses,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleAllPatternClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<PatternCl>>& patternClauses,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<WithCl>>& withClauses,
+        vector<shared_ptr<ResultTuple>>& toReturn);
+
     void handleWithClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
         vector<shared_ptr<ResultTuple>>& toReturn);
 

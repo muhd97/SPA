@@ -629,19 +629,6 @@ inline bool isStatementType(PKBDesignEntity de) {
 }
 
 
-//    /* Table of all FollowsT(int, int) */
-//unordered_set<pair<int, int>, pair_hash> followsTIntIntTable;
-// 
-// unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> followsTIntSynTable;
-//
-///* Table of all FollowsT(syn, syn) */
-//unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> followsTSynSynTable;
-//
-///* Table of all statement nos that are of type syn, and fulfill FollowsT(syn, _) */
-//unordered_map<PKBDesignEntity, unordered_set<int>> followsTSynUnderscoreTable;
-//
-//unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> followsTSynIntTable;
-
 vector<int> getAllAfterOfGivenType(PKBStmt::SharedPtr targetFollows,
     PKBDesignEntity targetAfterType)
 {
