@@ -205,7 +205,7 @@ void PQLProcessor::handleWithFirstArgIdent(const shared_ptr<SelectCl>& selectCl,
             return;
         }
 
-        return;
+        throw "Could not match any valid with-clause format\n";
     }
 
 }
@@ -273,11 +273,50 @@ void PQLProcessor::handleWithFirstArgInt(const shared_ptr<SelectCl>& selectCl, c
         return;
     }
 
-    return;
+    throw "Could not match any valid with-clause format\n";
 }
 
+/* PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both integers OR both strings) */
 void PQLProcessor::handleWithFirstArgAttrRef(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
+    const shared_ptr<Ref> lhs = withCl->lhs;
+    assert(lhs->getRefType() == RefType::ATTR);
+    const auto& leftAttrRef = lhs->getAttrRef();
+    const shared_ptr<Ref> rhs = withCl->rhs;
+    const RefType rightType = rhs->getRefType();
+
+    if (rightType == RefType::ATTR) {
+
+        /* By the pre-condiiton, we are guaranteed both attrRef are of same type */
+        auto attrNameType = leftAttrRef->getAttrName()->getAttrNameType();
+        const auto& rightAttrRef = rhs->getAttrRef();
+
+        const auto& leftSynKey = leftAttrRef->getSynonymString();
+        const auto& rightSynKey = rightAttrRef->getSynonymString();
+
+        if (attrNameType == AttrNameType::VAR_NAME || attrNameType == AttrNameType::PROC_NAME) {
+            const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(leftAttrRef->getSynonymString());
+            const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
+            auto leftDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
+            auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp2);
+
+
+            //if (evaluator->mpPKB->attrRefMatchingNameTable[leftDesignEntity][rightDesignEntity].empty()) {
+            //    cout << "EMPTY!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+            //}
+
+            for (const auto& p : evaluator->mpPKB->attrRefMatchingNameTable[leftDesignEntity][rightDesignEntity]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(leftSynKey, p.first);
+                toAdd->insertKeyValuePair(rightSynKey, p.second);
+                //cout << "Added tuple: " << toAdd->toString() << endl;
+                toReturn.emplace_back(move(toAdd));
+            }
+        }
+
+        return;
+    }
+
 }
 
 void PQLProcessor::handleWithFirstArgSyn(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
@@ -2418,12 +2457,14 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
         /* If there are some elements that are not used in the suchThat/pattern/with clauses, we need to resolve them separately. */
         if (!independentElements.empty()) {
             // supplement
+
+            for (const auto& e : independentElements) cout << e->getSynonymString() << " ";
+            putchar('\n');
            
             vector<shared_ptr<ResultTuple>> res;
 
             bool isFirst = true;
 
-            //out << "INDEPENDENT ................\n";
 
             for (const auto& x : independentElements) {
                 if (isFirst) {
@@ -2431,7 +2472,6 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
                     extractAllTuplesForSingleElement(selectCl, res, x);
                     if (res.empty()) return;
 
-                    //for (auto& tup : res) cout << "Tup (FIRST) = " << tup->toString() << endl;
                 }
                 else {
                     vector<shared_ptr<ResultTuple>> curr;
@@ -2441,7 +2481,6 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
                     cartesianProductResultTuples(res, curr, productRes);
                     res = move(productRes);
 
-                    //for (auto& tup : res) cout << "Tup (SECOND) = " << tup->toString() << endl;
                 }
                 
             }
@@ -2881,16 +2920,11 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     //cout << "======================================================================1111\n";
 
     /* Special case 0: There are no RelRef or Pattern clauses*/
-    if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses())
+    if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses() && !selectCl->hasWithClauses())
     {
         return move(handleNoSuchThatOrPatternCase(move(selectCl)));
     }
 
-
-    /* Standard case 0: Evaluate the such-that clause first to get the statement
-     * numbers out from there. Then evaluate Pattern clauses */
-
-     //cout << "Test ======================================0\n";
 
      /* STEP 1: Evaluate SuchThat clauses first, get all the tuples. */
     vector<shared_ptr<ResultTuple>> suchThatReturnTuples;
@@ -2936,7 +2970,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
 
     /* STEP 2: Then evaluate Pattern clauses, get all the tuples. */
     vector<shared_ptr<ResultTuple>> patternReturnTuples;
-
     if (selectCl->hasPatternClauses())
     {
         //cout << "eval pattern\n";
@@ -2982,6 +3015,53 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         return move(res);
     }
 
+    if (selectCl->hasWithClauses()) {
+
+        vector<shared_ptr<ResultTuple>> withClauseTuples;
+        // evaluate first withCl only
+        auto& previousWithCl = selectCl->withClauses[0];
+
+
+        for (unsigned int i = 0; i < selectCl->withClauses.size(); i++)
+        {
+            if (i == 0)
+            {
+                handleWithClause(selectCl, selectCl->withClauses[i], withClauseTuples);
+            }
+            else
+            {
+                vector<shared_ptr<ResultTuple>> currWithRes;
+                vector<shared_ptr<ResultTuple>> joinedRes;
+                joinedRes.reserve(withClauseTuples.size());
+
+                handleWithClause(selectCl, selectCl->withClauses[i], currWithRes);
+
+                if (currWithRes.size() == 0) { // Early termination
+                    withClauseTuples = move(currWithRes);
+                    break;
+                }
+
+                unordered_set<string>& setOfSynonymsToJoinOn =
+                    getSetOfSynonymsToJoinOn(previousWithCl, selectCl->withClauses[i]);
+
+                if (!setOfSynonymsToJoinOn.empty())
+                    joinResultTuples(suchThatReturnTuples, currWithRes, setOfSynonymsToJoinOn, joinedRes);
+                else
+                    cartesianProductResultTuples(suchThatReturnTuples, currWithRes, joinedRes);
+
+                previousWithCl = selectCl->withClauses[i];
+                suchThatReturnTuples = move(joinedRes);
+            }
+        }
+
+
+        extractTargetSynonyms(res, selectCl->target, withClauseTuples, selectCl);
+
+        // PLACEHOLDER
+
+        return move(res);
+    }
+    
 
     /* STEP 4b: We didn't need to join or take cartesian product, find values for
      * the target synonym and return. */
@@ -2993,19 +3073,14 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         return finalTuples.empty() ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
     }
 
-    // @jiachen247: Add support for other result types
 
-    //for (auto &tuple : finalTuples)
-    //{
-    //    if (tuple->synonymKeyAlreadyExists(targetSynonymVal)) {
-    //        if (!stringIsInsideSet(combinedResults, tuple->get(targetSynonymVal)))
-    //        {
-    //            res.emplace_back(make_shared<StringSingleResult>(tuple->get(targetSynonymVal)));
-    //            combinedResults.insert(tuple->get(targetSynonymVal));
-    //        }
-    //    }
-    //}
+
+
+
     extractTargetSynonyms(res, selectCl->target, finalTuples, selectCl);
 
     return move(res);
 }
+
+
+

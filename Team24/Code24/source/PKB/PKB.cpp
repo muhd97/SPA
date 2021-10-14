@@ -1,6 +1,7 @@
 #pragma optimize( "gty", on )
 
 #include "PKB.h"
+#include "PKBDesignEntity.h"
 
 #include <iostream>
 #include <memory>
@@ -61,6 +62,70 @@ void PKB::initializeRelationshipTables()
 
 
 }
+
+void PKB::initializeWithTables()
+{
+    vector<PKBDesignEntity> entitiesWithName = {
+        PKBDesignEntity::Procedure,
+        PKBDesignEntity::Call,
+        PKBDesignEntity::Variable,
+        PKBDesignEntity::Read,
+        PKBDesignEntity::Print
+    };
+
+    unordered_map<string, string> procKeyToName;
+    for (auto& [procName, procPtr] : procedureNameToProcedureMap) procKeyToName[procName] = procName;
+
+    unordered_map<string, string> varKeyToVarName;
+    for (auto& [varName, varPtr] : mVariables) varKeyToVarName[varName] = varName;
+
+    unordered_map<string, string> callKeyToName;
+    for (auto& ptr : getStatements(PKBDesignEntity::Call)) {
+        string idxToString = to_string(ptr->getIndex());
+        callKeyToName[idxToString] = callStmtToProcNameTable[idxToString];
+    }
+
+    unordered_map<string, string> readKeyToName;
+    for (auto& ptr : getStatements(PKBDesignEntity::Read)) {
+        string idxToString = to_string(ptr->getIndex());
+        readKeyToName[idxToString] = readStmtToVarNameTable[idxToString];
+    }
+
+    unordered_map<string, string> printKeyToName;
+    for (auto& ptr : getStatements(PKBDesignEntity::Print)) {
+        string idxToString = to_string(ptr->getIndex());
+        printKeyToName[idxToString] = printStmtToVarNameTable[idxToString];
+    }
+
+    unordered_map<PKBDesignEntity, unordered_map<string, string>> entityToKeyNameMap;
+    entityToKeyNameMap[PKBDesignEntity::Procedure] = move(procKeyToName);
+    entityToKeyNameMap[PKBDesignEntity::Variable] = move(varKeyToVarName);
+    entityToKeyNameMap[PKBDesignEntity::Call] = move(callKeyToName);
+    entityToKeyNameMap[PKBDesignEntity::Read] = move(readKeyToName);
+    entityToKeyNameMap[PKBDesignEntity::Print] = move(printKeyToName);
+
+    for (auto& de : entitiesWithName) {
+        attrRefMatchingNameTable[de] = unordered_map<PKBDesignEntity, set<pair<string, string>>>();
+        const auto& keyToNameMap = entityToKeyNameMap[de];
+        for (auto& otherDe : entitiesWithName) {
+            //if (otherDe == de) continue;
+
+            attrRefMatchingNameTable[de][otherDe] = set<pair<string, string>>();
+            const auto& otherKeyToNameMap = entityToKeyNameMap[otherDe];
+
+            for (auto& [key1, name1] : keyToNameMap) {
+                for (auto& [key2, name2] : otherKeyToNameMap) {
+                    if (name1 == name2) {
+                        attrRefMatchingNameTable[de][otherDe].insert(make_pair(key1, key2));
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+
 
 PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group)
 {

@@ -1396,12 +1396,17 @@ public:
     WithCl(shared_ptr<Ref> l, shared_ptr<Ref> r)
         : lhs(move(l)), rhs(move(r))
     {
+        if (lhs->getRefType() == RefType::SYNONYM)
+            synonymsUsed.emplace_back(lhs->getStringVal());
+        if (rhs->getRefType() == RefType::SYNONYM)
+            synonymsUsed.emplace_back(rhs->getStringVal());
 
-        if (this->lhs->getRefType() == RefType::SYNONYM)
-            synonymsUsed.emplace_back(this->lhs->getStringVal());
-        if (this->rhs->getRefType() == RefType::SYNONYM)
-            synonymsUsed.emplace_back(this->rhs->getStringVal());
-
+        if (lhs->getRefType() == RefType::ATTR) {
+            synonymsUsed.emplace_back(lhs->getAttrRef()->getSynonymString());
+        }
+        if (rhs->getRefType() == RefType::ATTR) {
+            synonymsUsed.emplace_back(rhs->getAttrRef()->getSynonymString());
+        }
     }
 
     ~WithCl()
@@ -1559,6 +1564,11 @@ public:
     inline bool hasPatternClauses()
     {
         return patternClauses.size() > 0;
+    }
+
+    inline bool hasWithClauses()
+    {
+        return withClauses.size() > 0;
     }
 
     inline bool suchThatContainsSynonym(shared_ptr<Element> s)

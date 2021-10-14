@@ -9,7 +9,8 @@ enum class PKBDesignEntity : unsigned int
     While = 4,
     If = 5,
     Procedure = 6,
-    AllStatements = 7
+    AllStatements = 7,
+    Variable = 8
 };
 
 // generic iterator over enums

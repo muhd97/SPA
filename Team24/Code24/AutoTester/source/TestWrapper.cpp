@@ -1,7 +1,8 @@
 #pragma optimize( "gty", on )
 
 #define DEBUG 0
-#define PRINT_FINISHED_HEADER 0
+#define PRINT_FINISHED_HEADER 1
+#define PRINT_EXCEPTION_STATEMENTS 0
 
 #include "TestWrapper.h"
 #include "SimpleAST.h"
@@ -49,30 +50,38 @@ void TestWrapper::parse(std::string filename) {
         printSimpleTokens(tokens);
 
         shared_ptr<Program> root = parseSimpleProgram(tokens);
-
-        // for debugging
+        
+#if DEBUG
         cout << root->format();
-
         cout << "\n==== Building CFG ====\n";
+#endif
         shared_ptr<CFG> cfg = buildCFG(root);
+        
+
+#if DEBUG
         cout << cfg->format();
-
-
         cout << "\n==== Building PKB ====\n";
-
+#endif
         this->pkb->initialise();
         this->pkb->extractDesigns(root);
         this->pkb->initializeRelationshipTables();
+        this->pkb->initializeWithTables();
         this->evaluator = PQLEvaluator::create(this->pkb);
 
+#if DEBUG
         cout << "\n==== PKB has been populated. ====\n";
+#endif
     }
     catch (const std::exception& ex) {
+#if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to parsing simple code.\n";
         cout << "Error message: " << ex.what() << endl;;
+#endif
     }
     catch (...) {
+#if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to parsing simple code.\n";
+#endif
     }
 }
 
@@ -87,19 +96,14 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
         auto sel = p.parseSelectCl();
 #if DEBUG
         cout << "\n==== Printing Parsed Query ====\n";
-        cout << sel->format() << endl;
-        
-        cout << "\n==== Processing PQL Query ====\n";
-
-        
-
+        cout << sel->format() << endl;   
+        cout << "\n==== Processing PQL Query ====\n";      
        cout << "\n==== Created PQLEvaluator using PKB ====\n";
 #endif
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
 
 #if DEBUG
         cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
-
 #endif
         vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
 
@@ -108,15 +112,21 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
         }
     }
     catch (const exception& ex) {
+#if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
         cout << "Error message: " << ex.what() << endl;
+#endif
     }
     catch (const string& e) {
+#if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
-        cout << "Error message: " << e << endl;;
+        cout << "Error message: " << e << endl;
+#endif
     }
     catch (...) {
+#if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
+#endif
     }
 #if PRINT_FINISHED_HEADER
     cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";

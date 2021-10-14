@@ -1,0 +1,20 @@
+1 - Select c with c.procName = proc.procName
+assign a; call c; procedure proc;
+Select c with c.procName = proc.procName
+11, 12
+500
+2 - Select c with c.procName = proc.procName
+assign a; call c; procedure proc;
+Select c with proc.procName = c.procName
+11, 12
+500
+3 - Select c with c.procName = proc.procName
+assign a; call c; procedure proc;
+Select <c, proc> with c.procName = proc.procName
+11 yida1, 12 yida2
+500
+4 - Select c with c.procName = proc.procName
+assign a; call c; procedure proc;
+Select <c.procName, proc> with c.procName = proc.procName
+yida1 yida1, yida2 yida2
+500

@@ -41,6 +41,7 @@ class PKB
     void initialise();
     void extractDesigns(shared_ptr<Program> program);
     void initializeRelationshipTables();
+    void initializeWithTables();
 
     // for all statements, use PKBDesignEntity::AllStatements, where position
     // corresponds to statement index
@@ -234,6 +235,8 @@ class PKB
     unordered_map<string, string> printStmtToVarNameTable;
 
     unordered_map<string, unordered_set<string>> varNameToPrintStmtTable;
+
+    unordered_map <PKBDesignEntity, unordered_map<PKBDesignEntity, set<pair<string, string>>>> attrRefMatchingNameTable;
 
     /* ==================================== RELATIONSHIP TABLES ==================================== */
 
