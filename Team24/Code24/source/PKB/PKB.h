@@ -312,6 +312,18 @@ class PKB
     unordered_map<string, set<pair<string, string>>> callsTTable;
     unordered_map<string, set<pair<string, string>>> calledTTable;
 
+    /* ======================== Next ======================== */
+    /* Table of all Next(int, int) */
+    unordered_set<pair<int, int>, pair_hash> nextIntIntTable;
+
+    /* Table of all Next(syn, syn) */
+    unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> nextSynSynTable;
+
+    /* Table of all Next(syn, int) */
+    unordered_map<PKBDesignEntity, set<pair<int, int>>, PKBDesignEntityPairHash> nextSynIntTable;
+
+    /* Table of all Next(int, syn) */
+    unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> nextIntSynTable;
 
   protected:
     // cache of our results, can be prebuilt
