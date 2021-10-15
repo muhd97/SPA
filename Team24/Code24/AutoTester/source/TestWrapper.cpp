@@ -51,20 +51,14 @@ void TestWrapper::parse(std::string filename) {
         printSimpleTokens(tokens);
 #endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
-        
+       
 #if DEBUG
         cout << root->format();
-        cout << "\n==== Building CFG ====\n";
-#endif
-        shared_ptr<CFG> cfg = buildCFG(root);
-        
-
-#if DEBUG
-        cout << cfg->format();
         cout << "\n==== Building PKB ====\n";
 #endif
         this->pkb->initialise();
         this->pkb->extractDesigns(root);
+        this->pkb->initializeCFG(root);
         this->pkb->initializeRelationshipTables();
         this->pkb->initializeWithTables();
         this->evaluator = PQLEvaluator::create(this->pkb);

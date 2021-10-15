@@ -5,11 +5,10 @@
 #include <set>
 #include <unordered_map>
 
-#include "../SimpleAST.h"
-#include "PKBDesignEntity.h"
 #include "PKBProcedure.h"
 #include "PKBVariable.h"
 #include "PKBStmt.h"
+#include "../CFG.h"
 
 using namespace std;
 
@@ -40,6 +39,7 @@ class PKB
 
     void initialise();
     void extractDesigns(shared_ptr<Program> program);
+    void initializeCFG(shared_ptr<Program> program);
     void initializeRelationshipTables();
     void initializeWithTables();
 
@@ -58,8 +58,10 @@ class PKB
     // set of all constants
     unordered_set<string> mConstants;
 
-    // maps
+    // CFG
+    shared_ptr<CFG> cfg;
 
+    // maps
     set<PKBStmt::SharedPtr> mAllUseStmts; // entities that use a variable
     unordered_map<PKBDesignEntity, set<PKBStmt::SharedPtr>> designEntityToStatementsThatUseVarsMap;
 
@@ -337,6 +339,7 @@ class PKB
     void initializeFollowsTTables();
     void initializeParentTTables();
     void initializeUsesTables();
+    void initializeNextTables();
 
     inline void addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr &variable);
     void addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr> &variables);

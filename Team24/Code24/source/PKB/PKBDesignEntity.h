@@ -1,4 +1,5 @@
 #pragma once
+#include "../SimpleAST.h"
 
 enum class PKBDesignEntity : unsigned int
 {

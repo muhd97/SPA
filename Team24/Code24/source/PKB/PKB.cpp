@@ -1,14 +1,12 @@
 #pragma optimize( "gty", on )
 
 #include "PKB.h"
-#include "PKBDesignEntity.h"
 
 #include <iostream>
 #include <memory>
 #include <queue>
 #include <vector>
 
-#include "../SimpleAST.h"
 #include "PKBGroup.h"
 #include "PKBStmt.h"
 #include "PKBProcedure.h"
@@ -26,6 +24,10 @@ void PKB::initialise()
     // reset extracted Procedures
     procedureNameToProcedureMap.clear();
     mAllProcedures = {};
+}
+
+void PKB::initializeCFG(shared_ptr<Program> program) {
+    this->cfg = buildCFG(program);
 }
 
 void PKB::extractDesigns(shared_ptr<Program> program)
@@ -51,16 +53,16 @@ void PKB::extractDesigns(shared_ptr<Program> program)
                       return a->getIndex() < b->getIndex();
                   });
     }
+
+
 }
 
 void PKB::initializeRelationshipTables()
 {
-
     initializeUsesTables();
     initializeFollowsTTables();
     initializeParentTTables();
-
-
+    initializeNextTables();
 }
 
 void PKB::initializeWithTables()
@@ -1102,6 +1104,53 @@ void PKB::initializeUsesTables()
                 usesSynIdentTableProc[varName].emplace_back(ptr->getName());
             }
         }
+    }
+}
+
+void PKB::initializeNextTables() {
+    cout << cfg->format();
+    for (auto proc : mAllProcedures) {
+        auto root = cfg->getCFG(proc->getName());
+        cout << endl << endl << "INIT NEXT TABLE FOR " << proc->getName() << endl;
+
+        if (root == NULL) {
+            throw "Cannot find CFG for " + proc->getName();
+        }
+
+        queue<shared_ptr<BasicBlock>> frontier;
+        unordered_set<int> seen;
+        frontier.push(root);
+
+        while (!frontier.empty()) {
+            shared_ptr<BasicBlock> curr = frontier.front();
+            frontier.pop();
+
+            auto statements = curr->getStatements();
+
+            for (auto i = 0; i < statements.size(); i++) {
+                // is not last statement
+                if (i < statements.size() - 1) {
+                    cout << "Next(" << statements[i]->index << ", " << statements[i + 1]->index << ")" << endl;
+                }
+                // is last statement in bb
+                else {
+                    auto following = curr->getNextImmediateStatements();
+                    for (auto statement : following) {
+                        cout << "Next(" << statements[i]->index << ", " << statement->index << ")" << endl;
+                    }
+                    
+                }
+            }
+
+            for (auto n : curr->getNext()) {
+                if (seen.find(n->getId()) == seen.end()) {
+                    seen.insert(n->getId());
+                    frontier.push(n);
+                }
+            }
+        }
+
+
     }
 }
 
