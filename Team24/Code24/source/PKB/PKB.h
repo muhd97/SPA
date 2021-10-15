@@ -322,10 +322,10 @@ class PKB
     unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> nextSynSynTable;
 
     /* Table of all Next(syn, int) */
-    unordered_map<PKBDesignEntity, set<pair<int, int>>, PKBDesignEntityPairHash> nextSynIntTable;
+    unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextSynIntTable;
 
     /* Table of all Next(int, syn) */
-    unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> nextIntSynTable;
+    unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextIntSynTable;
 
   protected:
     // cache of our results, can be prebuilt

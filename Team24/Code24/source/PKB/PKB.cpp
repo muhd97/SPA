@@ -1109,6 +1109,16 @@ void PKB::initializeUsesTables()
 
 void PKB::initializeNextTables() {
     cout << cfg->format();
+
+    // do i even need this?
+    /*
+    for (PKBDesignEntity deFrom : PKBDesignEntityIterator()) {
+        for (PKBDesignEntity deTo : PKBDesignEntityIterator()) {
+            nextSynSynTable[make_pair(deFrom, deTo)] = {};
+        }
+    }
+    */
+
     for (auto proc : mAllProcedures) {
         auto root = cfg->getCFG(proc->getName());
         cout << endl << endl << "INIT NEXT TABLE FOR " << proc->getName() << endl;
@@ -1127,19 +1137,32 @@ void PKB::initializeNextTables() {
 
             auto statements = curr->getStatements();
 
-            for (auto i = 0; i < statements.size(); i++) {
+            vector<pair<shared_ptr<CFGStatement>, shared_ptr<CFGStatement>>> relationships = {};
+
+            for (unsigned int i = 0; i < statements.size(); i++) {
                 // is not last statement
                 if (i < statements.size() - 1) {
-                    cout << "Next(" << statements[i]->index << ", " << statements[i + 1]->index << ")" << endl;
+                    relationships.push_back(make_pair(statements[i], statements[i + 1]));
                 }
                 // is last statement in bb
                 else {
                     auto following = curr->getNextImmediateStatements();
-                    for (auto statement : following) {
-                        cout << "Next(" << statements[i]->index << ", " << statement->index << ")" << endl;
+                    for (auto toStatement : following) {
+                        relationships.push_back(make_pair(statements[i], toStatement));
                     }
-                    
                 }
+            }
+
+            for (auto p : relationships) {
+                cout << "Next(" << p.first->index << ", " << p.second->index << ")" << endl;
+                nextIntIntTable.insert(make_pair(p.first->index, p.second->index));
+                nextSynIntTable[p.second->index][p.first->type].insert(p.first->index);
+                nextIntSynTable[p.first->index][p.second->type].insert(p.second->index);
+
+                nextSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(make_pair(p.first->index, p.second->index));
+                nextSynSynTable[make_pair(p.first->type, p.second->type)].insert(make_pair(p.first->index, p.second->index));
+                nextSynSynTable[make_pair(PKBDesignEntity::AllStatements, p.second->type)].insert(make_pair(p.first->index, p.second->index));
+                nextSynSynTable[make_pair(p.first->type, PKBDesignEntity::AllStatements)].insert(make_pair(p.first->index, p.second->index));
             }
 
             for (auto n : curr->getNext()) {
