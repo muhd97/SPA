@@ -1347,6 +1347,7 @@ public:
     shared_ptr<Synonym> synonym;
     shared_ptr<EntRef> entRef;
     shared_ptr<ExpressionSpec> exprSpec;
+    bool hasThirdArg = false;
 
     PatternCl(shared_ptr<Synonym> s, shared_ptr<EntRef> e, shared_ptr<ExpressionSpec> exp)
         : synonym(move(s)), entRef(move(e)), exprSpec(move(exp))

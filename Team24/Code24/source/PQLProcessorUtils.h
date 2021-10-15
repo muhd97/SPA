@@ -448,3 +448,13 @@ inline bool allTargetSynonymsExistInTuple(vector<shared_ptr<Synonym>>& synonyms,
 
     return true;
 }
+
+inline bool isStatementDesignEntity(PKBDesignEntity ent) {
+    return ent == PKBDesignEntity::Read
+        || ent == PKBDesignEntity::Print
+        || ent == PKBDesignEntity::Assign
+        || ent == PKBDesignEntity::Call
+        || ent == PKBDesignEntity::While
+        || ent == PKBDesignEntity::If
+        || ent == PKBDesignEntity::AllStatements;
+}

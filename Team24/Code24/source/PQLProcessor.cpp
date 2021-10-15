@@ -206,11 +206,23 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
 
 void PQLProcessor::handleWhileAndIfPatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, vector<shared_ptr<ResultTuple>>& toReturn, const string& DesignEntityType)
 {
+
+
     const shared_ptr<EntRef>& entRef = patternCl->entRef;
     const auto& entRefType = entRef->getEntRefType();
     const auto& patternSyn = patternCl->synonym->getSynonymString();
 
-    // validate the 2nd and 3rd args must be (_,_) ??
+    if (!patternCl->exprSpec->isAnything) {
+        throw "Invalid pattern clause. 2nd and 3rd arguments of pattern with WHILE and IFS must be UNDERSCORE\n";
+    }
+
+    if (DesignEntityType == DesignEntity::WHILE && patternCl->hasThirdArg) {
+        throw "Invalid pattern clause. Pattern with WHILE only has 2 arguments.\n";
+    }
+
+    if (DesignEntityType == DesignEntity::IF && !patternCl->hasThirdArg) {
+        throw "Invalid pattern clause. Pattern with IF needs to have 3 arguments.\n";
+    }
 
     const auto& patternTable = DesignEntityType == DesignEntity::WHILE ? evaluator->mpPKB->whilePatternTable : evaluator->mpPKB->ifPatternTable;
 
@@ -2472,16 +2484,6 @@ void PQLProcessor::handleCallsT(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls
 }
 
 /* ======================== NEXT ======================== */
-
-bool isStatementDesignEntity(PKBDesignEntity ent) {
-    return ent == PKBDesignEntity::Read
-        || ent == PKBDesignEntity::Print
-        || ent == PKBDesignEntity::Assign
-        || ent == PKBDesignEntity::Call
-        || ent == PKBDesignEntity::While
-        || ent == PKBDesignEntity::If
-        || ent == PKBDesignEntity::AllStatements;
-}
 
 void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl, shared_ptr<Next>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn) {
     auto firstRef = nextCl->stmtRef1->getStmtRefType();

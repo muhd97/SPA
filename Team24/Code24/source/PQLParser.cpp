@@ -495,7 +495,11 @@ vector<shared_ptr<PatternCl>> PQLParser::parsePatternCl()
 {
 
     vector<shared_ptr<PatternCl>> clauses;
+
     eatKeyword(PQL_PATTERN);
+
+
+
     clauses.push_back(parsePatternClCond());
 
 
@@ -503,6 +507,7 @@ vector<shared_ptr<PatternCl>> PQLParser::parsePatternCl()
         eatKeyword(PQL_AND);
         clauses.push_back(parsePatternClCond());
     }
+
 
     return clauses;
 }
@@ -518,8 +523,22 @@ shared_ptr<PatternCl> PQLParser::parsePatternClCond()
     string rawExpression;
     auto exprSpec = parseExpressionSpec();
 
+    /* Account for case where pattern w(?, _, _) */
+    int hasThirdArg = false;
+    if (!tokens.empty() && peek().type == PQLTokenType::COMMA) { /* There is a third argument in this pattern! */
+        hasThirdArg = true;
+        eat(PQLTokenType::COMMA);
+        if (!exprSpec->isAnything) {
+            throw "Detected third argument for Pattern clause. It is required for 2nd and 3rd argument for these type of Pattern clauses to be UNDERSCORE";
+        }
+        /* Expect third argument to be UNDERSCORE */
+        eat(PQLTokenType::UNDERSCORE);
+    }
+
     eat(PQLTokenType::RIGHT_PAREN);
-    return make_shared<PatternCl>(syn, entRef, exprSpec);
+    auto toReturn = make_shared<PatternCl>(syn, entRef, exprSpec);
+    toReturn->hasThirdArg = hasThirdArg;
+    return toReturn;
 }
 
 vector<shared_ptr<WithCl>> PQLParser::parseWithCl()

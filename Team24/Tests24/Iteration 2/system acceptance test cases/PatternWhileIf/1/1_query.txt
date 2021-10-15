@@ -1,0 +1,20 @@
+1 - Pattern ifs
+if ifs; while w; 
+Select ifs pattern ifs(_,_,_)
+4
+2000
+2 - Pattern while
+if ifs; while w; 
+Select w pattern w(_,_)
+5
+2000
+3 - Pattern IFS tuple <ifs, v>
+if ifs; while w; variable v;
+Select <ifs, v> pattern ifs(v,_,_)
+4 x
+2000
+4 - Pattern WHILE tuple <w, v>
+if ifs; while w; variable v;
+Select <w, v> pattern w(v,_)
+5 x, 5 y
+2000
