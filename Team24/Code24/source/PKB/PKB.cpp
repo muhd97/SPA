@@ -1110,15 +1110,6 @@ void PKB::initializeUsesTables()
 void PKB::initializeNextTables() {
     cout << cfg->format();
 
-    // do i even need this?
-    /*
-    for (PKBDesignEntity deFrom : PKBDesignEntityIterator()) {
-        for (PKBDesignEntity deTo : PKBDesignEntityIterator()) {
-            nextSynSynTable[make_pair(deFrom, deTo)] = {};
-        }
-    }
-    */
-
     for (auto proc : mAllProcedures) {
         auto root = cfg->getCFG(proc->getName());
         cout << endl << endl << "INIT NEXT TABLE FOR " << proc->getName() << endl;
@@ -1159,7 +1150,6 @@ void PKB::initializeNextTables() {
                 nextSynIntTable[p.second->index][p.first->type].insert(p.first->index);
                 nextIntSynTable[p.first->index][p.second->type].insert(p.second->index);
 
-                nextSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(make_pair(p.first->index, p.second->index));
                 nextSynSynTable[make_pair(p.first->type, p.second->type)].insert(make_pair(p.first->index, p.second->index));
                 nextSynSynTable[make_pair(PKBDesignEntity::AllStatements, p.second->type)].insert(make_pair(p.first->index, p.second->index));
                 nextSynSynTable[make_pair(p.first->type, PKBDesignEntity::AllStatements)].insert(make_pair(p.first->index, p.second->index));

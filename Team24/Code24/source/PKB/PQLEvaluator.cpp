@@ -2280,8 +2280,7 @@ bool PQLEvaluator::checkForExactTree(vector<string> &queryInOrder, vector<string
 // Next
 // Use for Next(_, _)
 bool PQLEvaluator::getNextUnderscoreUnderscore() {
-    auto typePair = make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements);
-    return mpPKB->nextSynSynTable.find(typePair) != mpPKB->nextSynSynTable.end();
+    return mpPKB->nextIntIntTable.begin() != mpPKB->nextIntIntTable.end();
 }
 
 // Case 2: Next(_, syn) 
