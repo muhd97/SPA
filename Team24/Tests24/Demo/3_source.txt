@@ -1,0 +1,351 @@
+procedure Main {
+    a = 0;
+    read a; 
+    b = a;
+    read c;
+    d = (a * (b + 2)) * (c - 3);
+    if (d > 0) then {
+        call A;
+        read p;
+        print p;
+    } else {
+        call B;
+        a = (b + 2) * (c - 3);
+        print p;
+    }
+    call Print;
+}
+
+procedure A {
+    x = (a * b) + (2 * c);
+    call Read;
+    if ((a > b) && (a == 0)) then {
+        a = a + 4;
+        if (a < 20) then {
+            y = 6;
+            call Print;
+            z = (y / 3) * (b + 2) * (c - 3);
+            while ((z != 0) || (z < a)) {
+                z = z - a;
+            }
+        } else {
+            b = b + 1;
+        }
+    } else {
+        c = 4;
+        read c;
+        while (a + b > c) {
+            d = c;
+        }
+    }
+    call Call;
+}
+
+procedure B {
+    x = a * (b + 2) * (c + 8);
+    call ReadY;
+    if (((a <= 10) && (a != 0)) && (3 >= x)) then {
+        a = 4;
+        if (a < 20 - x) then {
+            y = y / 6;
+            read z;
+            call PrintX;
+            z = 3 * (b + 2) * c;
+            while (y != a) {
+                y = y / 6;
+                print y;
+            }
+        } else {
+            b = 1;
+        }
+    } else {
+        c = 4;
+        print c;
+        while (a + b > c) {
+            read d;
+            d = c;
+        }
+    }
+    call C;
+}
+
+procedure C {
+    while (a > 0) {
+        if (a > b) then {
+            x = 0;
+            call Assign;
+            z = x;
+        } else {
+            x = 0;
+            call AssignY;
+            z = x;
+        }
+        i = 0;
+        print i;
+        j = i;
+    }
+    p = 0;
+    print a;
+    a = p + 3;
+}
+
+procedure D {
+    while ((p + q > x - y) || ((a > x) && (p > x))) {
+        while (a > x) {
+            if (p > x) then {
+                p = 4 + 5;
+                q = p / (a / 3);
+                p = q;
+                print p;
+            } else {
+                if (a < x + 20) then {
+                    read b;
+                    print b;
+                } else {
+                    call Read;
+                    call E;
+                }
+            }
+        }
+    }
+}
+
+procedure Call {
+    read d;
+    call D;
+    print d;
+}
+
+procedure Assign {
+    x = (a * b) + (2 * (c - 2));
+}
+
+procedure AssignY {
+    y = (a * b) + ((2 * c) - 2);
+}
+
+procedure Print {
+    print a;
+    print b;
+    print y;
+}
+
+procedure PrintX {
+    print x;
+}
+
+procedure Read {
+    read a;
+    read b;
+    read x;
+}
+
+procedure ReadY {
+    read y;
+}
+
+procedure E {
+    print i;
+    read j;
+    while (((i > 0) && (j == 3 + i)) || (i < j)) {
+        i = i + 5;
+        if (i > 0) then {
+            if (i <= j) then {
+                i = j / (2 * c);
+                d = i * (j / 2);
+                read d;
+                c = (d + 4) * ((j / 2) - (2 * c));
+            } else {
+                x = j / 2;
+                call PrintX;
+                read x;
+                y = x + 2;
+                print y;
+            }
+        } else {
+            p = ((c * 2) - 2) / i;
+            while (p >= i) {
+                x = 2;
+                x = x + 5;
+            }
+            call F;
+        }
+        j = j / 2;
+    }
+}
+
+procedure F {
+    call Read;
+    call Print;
+    call WhileLoop;
+    call IfElse;
+    call IfWhile;
+}
+
+procedure WhileLoop {
+    while (a + 1 > b) {
+        while (a + 1 > b + 1) {
+            while (a + 1 > b) {
+                while (a + 1 > b) {
+                    while (a + 1 > b + 1) {
+                        while (a + 1 > b) {
+                            while (a + 1 > b) {
+                                while (a + 1 > b + 1) {
+                                    while (a + 1 > b) {
+                                        while (a + 1 > b) {
+                                            while (a + 1 > b + 1) {
+                                                while (a + 1 > b) {
+                                                    while (a + 1 > b + 1) {
+                                                        while (a + 1 > b) {
+                                                            while (a + 1 > b) {
+                                                                while (a + 1 > b + 1) {
+                                                                    while (a + 1 > b) {
+                                                                        while (a + 1 > b) {
+                                                                            while (a + 1 > b + 1) {
+                                                                                while (a + 1 > b) {
+                                                                                    a = a + 3;
+                                                                                    b = b + 2;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+procedure IfElse {
+    if (a > b + 1) then {
+        if (a > b + 1) then {
+            print a;
+        } else {
+            if (a > b + 1) then {
+                if (a > b + 1) then {
+                    print a;   
+                } else {
+                    if (a > b + 1) then {
+                        if (a > b + 1) then {
+                            print a;
+                        } else {
+                            if (a > b + 1) then {
+                                if (a > b + 1) then {
+                                    print a;
+                                } else {
+                                    if (a > b + 1) then {
+                                          if (a > b + 1) then {
+                                            print a;
+                                        } else {
+                                            print a;
+                                        }
+                                    } else {
+                                        print a;
+                                    }
+                                }
+                            } else {
+                                print a;
+                            }
+                        }
+                    } else {
+                        print a;
+                    }
+                }
+            } else {
+                print a;
+            }
+        }
+    } else {
+        print a;
+    }
+}
+
+procedure IfWhile {
+    if (a + 3 > b / 4) then {
+        while (a > b / 4) {
+            if (a < b) then {
+                while (a > b / 5) {
+                    read a;
+                    if (a == b) then {
+                        while (a > b / 6) {
+                            if (a != b) then {.
+                                print b;
+                            } else {
+                                print a;
+                            }
+                        }
+                    } else {
+                        if (a > b / 6) then {
+                            print a;
+                        } else {
+                            print b;
+                        }
+                    }
+                    print a;
+                }
+            } else {
+                while (a < b * 5) {
+                    read a;
+                    if (a == b) then {
+                        read a;
+                    } else {
+                        read b;
+                    }
+                }
+            }
+        }
+    } else {
+        while (a > b / 4) {
+            if (a > b) then {
+                while (a > b / 5) {
+                    if (a == b) then {
+                        while (a > b / 6) {
+                            if (a > b) then {
+                                while (a > b / 5) {
+                                    if (a == b) then {
+                                        while (a > b / 6) {
+                                            read a;
+                                        }
+                                    } else {
+                                        read b;
+                                    }
+                                    print a;
+                                }
+                            } else {
+                                while (a < b * 5) {
+                                    if (a == b) then {
+                                        a = a + 5;
+                                    } else {
+                                        a = 20;
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        call Print;
+                    }
+                    print a;
+                }
+            } else {
+                while (a < b * 5) {
+                    if (a == b) then {
+                        b = 5;
+                    } else {
+                        b = b;
+                    }
+                }
+            }
+        }
+    }
+}
