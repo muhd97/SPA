@@ -1,12 +1,12 @@
 @echo off
-title Running system acceptance test case 1!
+title Running demo system acceptance test case 2!
 
 ..\..\Code24\Debug\AutoTester.exe 2_source.txt 2_queries.txt 2_out.xml
 
-findstr "failed" out-first_test.xml
-findstr "exception" out-first_test.xml
-findstr "crash" out-first_test.xml
-findstr "timeout" out-first_test.xml
+findstr "failed" 2_out.xml
+findstr "exception" 2_out.xml
+findstr "crash" 2_out.xml
+findstr "timeout" 2_out.xml
 
 echo The End!
 pause
