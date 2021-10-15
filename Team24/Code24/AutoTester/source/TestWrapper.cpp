@@ -67,12 +67,12 @@ void TestWrapper::parse(std::string filename) {
         cout << "\n==== PKB has been populated. ====\n";
 #endif
     }
-    catch (const std::exception& ex) {
 #if PRINT_EXCEPTION_STATEMENTS
+    catch (const std::exception& ex) {
         cout << "Exception was thrown while trying to parsing simple code.\n";
-        cout << "Error message: " << ex.what() << endl;;
-#endif
+        cout << "Error message: " << ex.what() << endl;
     }
+#endif
     catch (...) {
 #if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to parsing simple code.\n";
@@ -81,7 +81,7 @@ void TestWrapper::parse(std::string filename) {
 }
 
 // method to evaluating a query
-void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
+void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
 #if DEBUG
     cout << "\n==== Parsing queries ====\n";
 #endif
@@ -91,9 +91,9 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
         auto sel = p.parseSelectCl();
 #if DEBUG
         cout << "\n==== Printing Parsed Query ====\n";
-        cout << sel->format() << endl;   
-        cout << "\n==== Processing PQL Query ====\n";      
-       cout << "\n==== Created PQLEvaluator using PKB ====\n";
+        cout << sel->format() << endl;
+        cout << "\n==== Processing PQL Query ====\n";
+        cout << "\n==== Created PQLEvaluator using PKB ====\n";
 #endif
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
 
@@ -106,18 +106,19 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
             results.emplace_back(r->getResultAsString());
         }
     }
-    catch (const exception& ex) {
+
 #if PRINT_EXCEPTION_STATEMENTS
+    catch (const exception& ex) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
         cout << "Error message: " << ex.what() << endl;
-#endif
     }
-    catch (const string& e) {
+#endif
 #if PRINT_EXCEPTION_STATEMENTS
+    catch (const string& e) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
         cout << "Error message: " << e << endl;
-#endif
     }
+#endif
     catch (...) {
 #if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";

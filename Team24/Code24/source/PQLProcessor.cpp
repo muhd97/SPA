@@ -2401,8 +2401,6 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl, shared_ptr<Next>& 
     auto firstRef = nextCl->stmtRef1->getStmtRefType();
     auto secondRef = nextCl->stmtRef2->getStmtRefType();
 
-
-
     // Semantic checks (refs must be of statement Type)
     if (firstRef == StmtRefType::SYNONYM) {
         string syn = nextCl->stmtRef1->getStringVal();
