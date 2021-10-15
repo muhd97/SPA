@@ -1189,7 +1189,7 @@ public:
 
     inline RelRefType getType()
     {
-        return RelRefType::FOLLOWS_T;
+        return RelRefType::NEXT;
     }
 
     vector<string> getAllSynonymsAsString()

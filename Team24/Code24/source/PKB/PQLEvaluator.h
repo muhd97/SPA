@@ -422,7 +422,7 @@ class PQLEvaluator
     bool getCallsUnderscoreUnderscore();
 
     // CallsT
-/* Use for CallsT(proc, proc) */
+    /* Use for CallsT(proc, proc) */
     bool getCallsTStringString(string& caller, string& called);
 
     /* Use for CallsT(proc, syn) */
@@ -448,8 +448,35 @@ class PQLEvaluator
 
     /* Use for CallsT(_, _) */
     bool getCallsTUnderscoreUnderscore();
-    
 
+    // Next
+    // Use for Next(_, _)
+    bool getNextUnderscoreUnderscore();
+
+    // Case 2: Next(_, syn) 
+    unordered_set<int> getNextUnderscoreSyn(PKBDesignEntity to);
+
+    // Case 3: Next(_, int) 
+    bool getNextUnderscoreInt(int toIndex);
+
+    // Case 4: Next(syn, syn) 
+    set<pair<int, int>> getNextSynSyn(PKBDesignEntity from, PKBDesignEntity to);
+
+    // Case 5: Next(syn, _) 
+    unordered_set<int> getNextSynUnderscore(PKBDesignEntity from);
+
+    // Case 6: Next(syn, int) 
+    unordered_set<int> getNextSynInt(PKBDesignEntity from, int toIndex);
+
+    // Case 7: Next(int, int) 
+    bool getNextIntInt(int fromIndex, int toIndex);
+
+    // Case 8: Next(int, _)
+    bool getNextIntUnderscore(int fromIndex);
+
+    // Case 9: Next(int, syn) 
+    unordered_set<int> getNextIntSyn(int fromIndex, PKBDesignEntity to);
+    
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
     const vector<PKBStmt::SharedPtr> &getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;

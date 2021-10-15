@@ -2276,3 +2276,49 @@ bool PQLEvaluator::checkForExactTree(vector<string> &queryInOrder, vector<string
     }
     return true;
 }
+
+// Next
+// Use for Next(_, _)
+bool PQLEvaluator::getNextUnderscoreUnderscore() {
+    return true;
+}
+
+// Case 2: Next(_, syn) 
+unordered_set<int> PQLEvaluator::getNextUnderscoreSyn(PKBDesignEntity to) {
+    return {};
+}
+
+// Case 3: Next(_, int) 
+bool PQLEvaluator::getNextUnderscoreInt(int toIndex) {
+    return true;
+}
+
+// Case 4: Next(syn, syn) 
+set<pair<int, int>> PQLEvaluator::getNextSynSyn(PKBDesignEntity from, PKBDesignEntity to) {
+    return {};
+}
+
+// Case 5: Next(syn, _) 
+unordered_set<int> PQLEvaluator::getNextSynUnderscore(PKBDesignEntity from) {
+    return {};
+}
+
+// Case 6: Next(syn, int) 
+unordered_set<int> PQLEvaluator::getNextSynInt(PKBDesignEntity from, int toIndex) {
+    return {};
+}
+
+// Case 7: Next(int, int) 
+bool PQLEvaluator::getNextIntInt(int fromIndex, int toIndex) {
+    return true;
+}
+
+// Case 8: Next(int, _)
+bool PQLEvaluator::getNextIntUnderscore(int fromIndex) {
+    return true;
+}
+
+// Case 9: Next(int, syn) 
+unordered_set<int> PQLEvaluator::getNextIntSyn(int fromIndex, PKBDesignEntity to) {
+    return {};
+}
