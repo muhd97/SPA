@@ -43,3 +43,8 @@ if ifs; while w; variable v;
 Select <ifs, v> pattern ifs(v,_"x"_,"x")
 
 2000
+10 - Pattern ASSIGN - Negative Case: Three arguments for Assign pattern
+if ifs; while w; variable v; assign ass;
+Select ass pattern ass(_, _ ,_)
+
+2000

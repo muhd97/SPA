@@ -148,6 +148,12 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
         throw "Invalid synonym type of (" + synonymType + ") for pattern clauses\n";
     }
 
+    /* pattern a(?, ?) */
+
+    if (patternCl->hasThirdArg) {
+        throw "Invalid pattern clause. Pattern for assign can only have 2 arguments\n";
+    }
+
     shared_ptr<EntRef> entRef = patternCl->entRef;
     vector<pair<int, string>> pairsStmtIndexAndVariables;
     string LHS;
