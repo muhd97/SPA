@@ -2280,17 +2280,23 @@ bool PQLEvaluator::checkForExactTree(vector<string> &queryInOrder, vector<string
 // Next
 // Use for Next(_, _)
 bool PQLEvaluator::getNextUnderscoreUnderscore() {
-    return true;
+    auto typePair = make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements);
+    return mpPKB->nextSynSynTable.find(typePair) != mpPKB->nextSynSynTable.end();
 }
 
 // Case 2: Next(_, syn) 
 unordered_set<int> PQLEvaluator::getNextUnderscoreSyn(PKBDesignEntity to) {
-    return {};
+    auto typePair = make_pair(PKBDesignEntity::AllStatements, to);
+    unordered_set<int> result;
+    for (auto p: mpPKB->nextSynSynTable[typePair]) {
+        result.insert(p.second);
+    }
+    return result;
 }
 
 // Case 3: Next(_, int) 
 bool PQLEvaluator::getNextUnderscoreInt(int toIndex) {
-    return true;
+    return mpPKB->nextSynIntTable.find(toIndex) != mpPKB->nextSynIntTable.end();
 }
 
 // Case 4: Next(syn, syn) 
@@ -2300,25 +2306,31 @@ set<pair<int, int>> PQLEvaluator::getNextSynSyn(PKBDesignEntity from, PKBDesignE
 
 // Case 5: Next(syn, _) 
 unordered_set<int> PQLEvaluator::getNextSynUnderscore(PKBDesignEntity from) {
-    return {};
+    auto typePair = make_pair(from, PKBDesignEntity::AllStatements);
+    unordered_set<int> result;
+    for (auto p : mpPKB->nextSynSynTable[typePair]) {
+        result.insert(p.first);
+    }
+    return result;
 }
 
 // Case 6: Next(syn, int) 
 unordered_set<int> PQLEvaluator::getNextSynInt(PKBDesignEntity from, int toIndex) {
-    return {};
+    return mpPKB->nextSynIntTable[toIndex][from];
 }
 
 // Case 7: Next(int, int) 
 bool PQLEvaluator::getNextIntInt(int fromIndex, int toIndex) {
-    return true;
+    auto typePair = make_pair(fromIndex, toIndex);
+    return mpPKB->nextIntIntTable.find(typePair) != mpPKB->nextIntIntTable.end();
 }
 
 // Case 8: Next(int, _)
 bool PQLEvaluator::getNextIntUnderscore(int fromIndex) {
-    return true;
+    return mpPKB->nextIntSynTable.find(fromIndex) != mpPKB->nextIntSynTable.end();
 }
 
 // Case 9: Next(int, syn) 
 unordered_set<int> PQLEvaluator::getNextIntSyn(int fromIndex, PKBDesignEntity to) {
-    return {};
+    return mpPKB->nextIntSynTable[fromIndex][to];
 }

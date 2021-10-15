@@ -2419,12 +2419,15 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl, shared_ptr<Next>& 
     // Case 3: Next(_, int) 
     else if (firstRef == StmtRefType::UNDERSCORE && secondRef == StmtRefType::INTEGER) {
         int rightValue = nextCl->stmtRef2->getIntVal();
-        /* Create the result tuple */
-        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-        /* Map the value returned to this particular synonym. */
-        tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(rightValue));
-        /* Add this tuple into the vector to tuples to return. */
-        toReturn.emplace_back(move(tupleToAdd));
+        if (evaluator->getNextUnderscoreInt(rightValue)) {
+            int rightValue = nextCl->stmtRef2->getIntVal();
+            /* Create the result tuple */
+            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+            /* Map the value returned to this particular synonym. */
+            tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(rightValue));
+            /* Add this tuple into the vector to tuples to return. */
+            toReturn.emplace_back(move(tupleToAdd));
+        }
     }
 
     // Case 4: Next(syn, syn) 
@@ -2515,8 +2518,8 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl, shared_ptr<Next>& 
 
     // Case 9: Next(int, syn) 
     else if (firstRef == StmtRefType::INTEGER && secondRef == StmtRefType::SYNONYM) {
-        int leftValue = nextCl->stmtRef2->getIntVal();
-        string rightSyn = nextCl->stmtRef1->getStringVal();
+        int leftValue = nextCl->stmtRef1->getIntVal();
+        string rightSyn = nextCl->stmtRef2->getStringVal();
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
