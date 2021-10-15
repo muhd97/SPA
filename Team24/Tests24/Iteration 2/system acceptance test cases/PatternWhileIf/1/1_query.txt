@@ -18,3 +18,28 @@ if ifs; while w; variable v;
 Select <w, v> pattern w(v,_)
 5 x, 5 y
 2000
+5 - Pattern WHILE - Negative Case: Three Arguments for While Pattern
+if ifs; while w; variable v;
+Select <w, v> pattern w(v,_, _)
+
+2000
+6 - Pattern WHILE - Negative Case: 2nd arg not '_'
+if ifs; while w; variable v;
+Select <w, v> pattern w(v,_"x"_)
+
+2000
+7 - Pattern IFS - Negative Case: Two arguments for If pattern
+if ifs; while w; variable v;
+Select <ifs, v> pattern ifs(v,_)
+
+2000
+8 - Pattern IFS - Negative Case: 2nd arg not '_'
+if ifs; while w; variable v;
+Select <ifs, v> pattern ifs(v,_"x"_,_)
+
+2000
+9 - Pattern IFS - Negative Case: 3rd arg not '_'
+if ifs; while w; variable v;
+Select <ifs, v> pattern ifs(v,_"x"_,"x")
+
+2000

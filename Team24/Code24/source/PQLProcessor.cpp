@@ -212,6 +212,7 @@ void PQLProcessor::handleWhileAndIfPatternClause(const shared_ptr<SelectCl>& sel
     const auto& entRefType = entRef->getEntRefType();
     const auto& patternSyn = patternCl->synonym->getSynonymString();
 
+
     if (!patternCl->exprSpec->isAnything) {
         throw "Invalid pattern clause. 2nd and 3rd arguments of pattern with WHILE and IFS must be UNDERSCORE\n";
     }
@@ -221,6 +222,7 @@ void PQLProcessor::handleWhileAndIfPatternClause(const shared_ptr<SelectCl>& sel
     }
 
     if (DesignEntityType == DesignEntity::IF && !patternCl->hasThirdArg) {
+        /* Third argument having to be UNDERSCORE is caught in parsing stage. */
         throw "Invalid pattern clause. Pattern with IF needs to have 3 arguments.\n";
     }
 

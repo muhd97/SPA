@@ -498,16 +498,12 @@ vector<shared_ptr<PatternCl>> PQLParser::parsePatternCl()
 
     eatKeyword(PQL_PATTERN);
 
-
-
     clauses.push_back(parsePatternClCond());
-
 
     while (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
         eatKeyword(PQL_AND);
         clauses.push_back(parsePatternClCond());
     }
-
 
     return clauses;
 }
@@ -523,7 +519,7 @@ shared_ptr<PatternCl> PQLParser::parsePatternClCond()
     string rawExpression;
     auto exprSpec = parseExpressionSpec();
 
-    /* Account for case where pattern w(?, _, _) */
+    /* Account for case where pattern if(?, _, _) */
     int hasThirdArg = false;
     if (!tokens.empty() && peek().type == PQLTokenType::COMMA) { /* There is a third argument in this pattern! */
         hasThirdArg = true;
