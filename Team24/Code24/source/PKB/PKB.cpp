@@ -368,12 +368,20 @@ PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKB
     // get all identifiers (string) referenced in the expression
     vector<string> identifiers = getIdentifiers(ifStatement->getConditional());
 
+    /* Populate Pattern table for ifs */
+    int idx = res->getIndex();
+    if (!identifiers.empty()) ifPatternTable[idx] = unordered_set<string>();
+
     for (auto &identifier : identifiers)
     {
         // for each string, we get the variable
         PKBVariable::SharedPtr var = getVariable(identifier);
         // our statement uses this variable
         res->addUsedVariable(var);
+
+        /* Populate Pattern table for ifs */
+        ifPatternTable[idx].insert(var->getName());
+
         // this variable is modified by our statement
         var->addUserStatement(res->getIndex());
         // YIDA: For the var Used by this Assign statement, we need to add it to the
@@ -471,12 +479,20 @@ PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, 
         designEntityToStatementsThatUseVarsMap[PKBDesignEntity::While].insert(res);
     }
 
+    /* Populate Pattern table for while */
+    int idx = res->getIndex();
+    if (!identifiers.empty()) whilePatternTable[idx] = unordered_set<string>();
+
     for (auto &identifier : identifiers)
     {
         // for each string, we get the variable
         PKBVariable::SharedPtr var = getVariable(identifier);
         // our statement uses this variable
         res->addUsedVariable(var);
+
+        /* Populate Pattern table for while */
+        whilePatternTable[idx].insert(var->getName());
+
         // this variable is modified by our statement
         var->addUserStatement(res->getIndex());
         // YIDA: For the var Used by this Assign statement, we need to add it to the

@@ -96,7 +96,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(const string& s)
     {
         return PKBDesignEntity::Assign;
     }
-    else if (s == PQL_STMT)
+    else if (s == PQL_STMT || s == PQL_PROG_LINE)
     {
         return PKBDesignEntity::AllStatements; // ALL STATEMENTS
     }

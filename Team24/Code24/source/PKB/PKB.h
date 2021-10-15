@@ -327,6 +327,14 @@ class PKB
     /* Table of all Next(int, syn) */
     unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextIntSynTable;
 
+    /* ======================== Pattern for While/If ======================== */
+
+    /* pattern w(v, _, _) -> Table of all (w, v) that satisfy this */
+    unordered_map<int, unordered_set<string>> whilePatternTable;
+
+    /* pattern ifs(v, _, _) -> Table of all (ifs, v) that satisfy this */
+    unordered_map<int, unordered_set<string>> ifPatternTable;
+
   protected:
     // cache of our results, can be prebuilt
     // using vector<int> as this stores results at the moment, can be returned

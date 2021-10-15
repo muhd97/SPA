@@ -131,13 +131,23 @@ void PQLProcessor::handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const ve
 
 /* ======================== PATTERN CLAUSE ======================== */
 
-// currently for assign statements only
 void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
     //TODO: @kohyida1997. Do typechecking for different kinds of pattern clauses. If/assign/while have different pattern logic and syntax.
 
-    // LHS
+    
+    const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
+
+    if (synonymType == DesignEntity::IF || synonymType == DesignEntity::WHILE) {
+        handleWhileAndIfPatternClause(selectCl, patternCl, toReturn, synonymType);
+        return;
+    }
+
+    if (synonymType != DesignEntity::ASSIGN) {
+        throw "Invalid synonym type of (" + synonymType + ") for pattern clauses\n";
+    }
+
     shared_ptr<EntRef> entRef = patternCl->entRef;
     vector<pair<int, string>> pairsStmtIndexAndVariables;
     string LHS;
@@ -192,6 +202,69 @@ void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr
         /* Add this tuple into the vector to tuples to return. */
         toReturn.emplace_back(move(tupleToAdd));
     }
+}
+
+void PQLProcessor::handleWhileAndIfPatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, vector<shared_ptr<ResultTuple>>& toReturn, const string& DesignEntityType)
+{
+    const shared_ptr<EntRef>& entRef = patternCl->entRef;
+    const auto& entRefType = entRef->getEntRefType();
+    const auto& patternSyn = patternCl->synonym->getSynonymString();
+
+    // validate the 2nd and 3rd args must be (_,_) ??
+
+    const auto& patternTable = DesignEntityType == DesignEntity::WHILE ? evaluator->mpPKB->whilePatternTable : evaluator->mpPKB->ifPatternTable;
+
+    /* pattern x(_, _, _) */
+    if (entRefType == EntRefType::UNDERSCORE) {
+
+        if (!patternTable.empty()) {
+            for (const auto& p : patternTable) {
+                if (!p.second.empty()) {
+                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                    tupleToAdd->insertKeyValuePair(patternSyn, to_string(p.first));
+                    toReturn.emplace_back(move(tupleToAdd));
+                }
+            }
+        }
+
+    }
+    /* pattern x("IDENT", _, _)*/
+    else if (entRefType == EntRefType::IDENT) {
+        const string& identStringVal = entRef->getStringVal();
+
+        if (!patternTable.empty()) {
+            for (const auto& p : patternTable) {
+                if (p.second.find(identStringVal) != p.second.end()) {
+                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                    tupleToAdd->insertKeyValuePair(patternSyn, to_string(p.first));
+                    toReturn.emplace_back(move(tupleToAdd));
+                }
+            }
+        }
+
+    } 
+    /* pattern x(SYN, _, _,) */
+    else {
+
+        const auto& entRefSyn = entRef->getStringVal();
+        const auto& entRefSynType = selectCl->getDesignEntityTypeBySynonym(entRefSyn);
+
+        if (entRefSynType != DesignEntity::VARIABLE) {
+            throw "Invalid pattern clause. EntRef must be declared variable\n";
+        }
+        
+        for (const auto& p : patternTable) {
+            for (const auto& v : p.second) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(patternSyn, to_string(p.first));
+                tupleToAdd->insertKeyValuePair(entRefSyn, v);
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+        }
+    }
+
+    return;
+
 }
 
 /* ======================== WITH CLAUSE ======================== */
@@ -1107,6 +1180,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
     return;
 }
 
+/* ======================== USES ======================== */
 
 void PQLProcessor::handleUsesSFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<UsesS>& usesCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
@@ -1391,6 +1465,8 @@ void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shar
     }
 }
 
+/* ======================== PARENT ======================== */
+
 void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<Parent>& parentCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
@@ -1638,6 +1714,8 @@ void PQLProcessor::handleParentFirstArgUnderscore(shared_ptr<SelectCl>& selectCl
     }
 }
 
+/* ======================== PARENT* ======================== */
+
 void PQLProcessor::handleParentTFirstArgInteger(shared_ptr<SelectCl>& selectCl, shared_ptr<ParentT>& parentCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
@@ -1882,6 +1960,8 @@ void PQLProcessor::handleParentTFirstArgUnderscore(shared_ptr<SelectCl>& selectC
     }
 }
 
+/* ======================== FOLLOWS* ======================== */
+
 void PQLProcessor::handleFollowsTFirstArgSyn(shared_ptr<SelectCl>& selectCl, shared_ptr<FollowsT>& followsTCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
@@ -2101,6 +2181,8 @@ void PQLProcessor::handleFollowsTFirstArgUnderscore(shared_ptr<SelectCl>& select
     }
 }
 
+/* ======================== CALLS ======================== */
+
 void PQLProcessor::handleCalls(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls>& callsCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     shared_ptr<EntRef>& entRefLeft = callsCl->entRef1;
@@ -2244,6 +2326,8 @@ void PQLProcessor::handleCalls(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls>
     }
 }
 
+/* ======================== CALLS* ======================== */
+
 void PQLProcessor::handleCallsT(shared_ptr<SelectCl>& selectCl, shared_ptr<CallsT>& callsTCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     shared_ptr<EntRef>& entRefLeft = callsTCl->entRef1;
@@ -2386,6 +2470,8 @@ void PQLProcessor::handleCallsT(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls
         }
     }
 }
+
+/* ======================== NEXT ======================== */
 
 void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl, shared_ptr<Next>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn) {
     auto firstRef = nextCl->stmtRef1->getStmtRefType();
@@ -2607,15 +2693,15 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
     const auto& rightTest = rightResults[0];
 
     bool exactlySameKeys = true;
-    for (const auto& [key, val] : leftTest->getMap()) {
-        if (!rightTest->synonymKeyAlreadyExists(key)) {
+    for (const auto& p : leftTest->getMap()) {
+        if (!rightTest->synonymKeyAlreadyExists(p.first)) {
             exactlySameKeys = false;
             break;
         }
     }
 
-    for (const auto& [key, val] : rightTest->getMap()) {
-        if (!exactlySameKeys || !leftTest->synonymKeyAlreadyExists(key)) {
+    for (const auto& p : rightTest->getMap()) {
+        if (!exactlySameKeys || !leftTest->synonymKeyAlreadyExists(p.first)) {
             exactlySameKeys = false;
             break;
         }
@@ -3201,7 +3287,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         else {
             currTups.clear();
             extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
-            return res;
+            return move(res);
         }
     }
 
@@ -3237,7 +3323,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         else {
             currTups.clear();
             extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
-            return res;
+            return move(res);
         }
 
     }
@@ -3272,7 +3358,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         else {
             currTups.clear();
             extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
-            return res;
+            return move(res);
         }
 
     }
