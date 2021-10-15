@@ -1148,11 +1148,14 @@ void PKB::initializeNextTables() {
                 cout << "Next(" << p.first->index << ", " << p.second->index << ")" << endl;
                 nextIntIntTable.insert(make_pair(p.first->index, p.second->index));
                 nextSynIntTable[p.second->index][p.first->type].insert(p.first->index);
+                nextSynIntTable[p.second->index][PKBDesignEntity::AllStatements].insert(p.first->index);
                 nextIntSynTable[p.first->index][p.second->type].insert(p.second->index);
+                nextIntSynTable[p.first->index][PKBDesignEntity::AllStatements].insert(p.second->index);
 
                 nextSynSynTable[make_pair(p.first->type, p.second->type)].insert(make_pair(p.first->index, p.second->index));
                 nextSynSynTable[make_pair(PKBDesignEntity::AllStatements, p.second->type)].insert(make_pair(p.first->index, p.second->index));
                 nextSynSynTable[make_pair(p.first->type, PKBDesignEntity::AllStatements)].insert(make_pair(p.first->index, p.second->index));
+                nextSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(make_pair(p.first->index, p.second->index));
             }
 
             for (auto n : curr->getNext()) {
@@ -1162,8 +1165,6 @@ void PKB::initializeNextTables() {
                 }
             }
         }
-
-
     }
 }
 

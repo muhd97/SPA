@@ -2300,7 +2300,8 @@ bool PQLEvaluator::getNextUnderscoreInt(int toIndex) {
 
 // Case 4: Next(syn, syn) 
 set<pair<int, int>> PQLEvaluator::getNextSynSyn(PKBDesignEntity from, PKBDesignEntity to) {
-    return {};
+    auto typePair = make_pair(from, to);
+    return mpPKB->nextSynSynTable[typePair];
 }
 
 // Case 5: Next(syn, _) 
