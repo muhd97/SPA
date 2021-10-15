@@ -233,6 +233,8 @@ class PQLProcessor
     void handleCallsT(shared_ptr<SelectCl> &selectCl, shared_ptr<CallsT> &callsTCl,
         vector<shared_ptr<ResultTuple>>& toReturn);
 
+    void handleNext(shared_ptr<SelectCl>& selectCl, shared_ptr<Next>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn);
+
     void joinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
                           unordered_set<string> &joinKeys, vector<shared_ptr<ResultTuple>> &newResults);
     void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftResults,

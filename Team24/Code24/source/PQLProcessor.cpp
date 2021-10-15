@@ -1094,6 +1094,11 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         handleCallsT(selectCl, callstCl, toReturn);
         break;
     }
+    case RelRefType::NEXT: {
+        shared_ptr<Next> nextCl = static_pointer_cast<Next>(suchThatCl->relRef);
+        handleNext(selectCl, nextCl, toReturn);
+        break;
+    }
     default: {
         break;
     }
@@ -2379,6 +2384,10 @@ void PQLProcessor::handleCallsT(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls
             }
         }
     }
+}
+
+void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl, shared_ptr<Next>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn) {
+    // todo
 }
 
 /* ======================== HELPER METHODS ======================== */
