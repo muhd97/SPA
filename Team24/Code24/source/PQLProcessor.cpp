@@ -2387,9 +2387,38 @@ void PQLProcessor::handleCallsT(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls
     }
 }
 
+bool isStatementDesignEntity(PKBDesignEntity ent) {
+    return ent == PKBDesignEntity::Read
+        || ent == PKBDesignEntity::Print
+        || ent == PKBDesignEntity::Assign
+        || ent == PKBDesignEntity::Call
+        || ent == PKBDesignEntity::While
+        || ent == PKBDesignEntity::If
+        || ent == PKBDesignEntity::AllStatements;
+}
+
 void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl, shared_ptr<Next>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn) {
     auto firstRef = nextCl->stmtRef1->getStmtRefType();
     auto secondRef = nextCl->stmtRef2->getStmtRefType();
+
+
+
+    // Semantic checks (refs must be of statement Type)
+    if (firstRef == StmtRefType::SYNONYM) {
+        string syn = nextCl->stmtRef1->getStringVal();
+        PKBDesignEntity type = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(syn));
+        if (!isStatementDesignEntity(type)) {
+            throw "Next can only be called with statement design entities synonyms.";
+        }
+    }
+
+    if (secondRef == StmtRefType::SYNONYM) {
+        string syn = nextCl->stmtRef2->getStringVal();
+        PKBDesignEntity type = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(syn));
+        if (!isStatementDesignEntity(type)) {
+            throw "Next can only be called with statement design entities synonyms.";
+        }
+    }
 
     // Case 1: Next(_, _)
     if (firstRef  == StmtRefType::UNDERSCORE && secondRef == StmtRefType::UNDERSCORE) {

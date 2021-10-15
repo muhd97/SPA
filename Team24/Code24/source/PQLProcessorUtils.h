@@ -120,9 +120,20 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(const string& s)
     {
         return PKBDesignEntity::Procedure;
     }
-    else //(s == PQL_PRINT)
+    else if(s == PQL_PRINT)
     {
         return PKBDesignEntity::Print;
+    }
+    else if (s == PQL_VARIABLE)
+    {
+        return PKBDesignEntity::Variable;
+    }
+    else if (s == PQL_CONSTANT)
+    {
+        return PKBDesignEntity::Constant;
+    }
+    else {
+        throw "Unreconized design entity: " + s;
     }
 }
 

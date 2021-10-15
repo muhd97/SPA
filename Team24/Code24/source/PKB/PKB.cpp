@@ -1108,11 +1108,8 @@ void PKB::initializeUsesTables()
 }
 
 void PKB::initializeNextTables() {
-    cout << cfg->format();
-
     for (auto proc : mAllProcedures) {
         auto root = cfg->getCFG(proc->getName());
-        cout << endl << endl << "INIT NEXT TABLE FOR " << proc->getName() << endl;
 
         if (root == NULL) {
             throw "Cannot find CFG for " + proc->getName();
@@ -1145,7 +1142,6 @@ void PKB::initializeNextTables() {
             }
 
             for (auto p : relationships) {
-                cout << "Next(" << p.first->index << ", " << p.second->index << ")" << endl;
                 nextIntIntTable.insert(make_pair(p.first->index, p.second->index));
                 nextSynIntTable[p.second->index][p.first->type].insert(p.first->index);
                 nextSynIntTable[p.second->index][PKBDesignEntity::AllStatements].insert(p.first->index);
