@@ -341,7 +341,7 @@ vector<shared_ptr<SuchThatCl>> PQLParser::parseSuchThat()
     clauses.push_back(make_shared<SuchThatCl>(r));
 
 
-    if (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+    while (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
         eatKeyword(PQL_AND);
         auto r = parseRelRef();
         clauses.push_back(make_shared<SuchThatCl>(r));
@@ -499,7 +499,7 @@ vector<shared_ptr<PatternCl>> PQLParser::parsePatternCl()
     clauses.push_back(parsePatternClCond());
 
 
-    if (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
+    while (!tokensAreEmpty() && peek().type == PQLTokenType::NAME && peek().stringValue == PQL_AND) {
         eatKeyword(PQL_AND);
         clauses.push_back(parsePatternClCond());
     }
