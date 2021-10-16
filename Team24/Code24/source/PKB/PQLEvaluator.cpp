@@ -2334,3 +2334,70 @@ bool PQLEvaluator::getNextIntUnderscore(int fromIndex) {
 unordered_set<int> PQLEvaluator::getNextIntSyn(int fromIndex, PKBDesignEntity to) {
     return mpPKB->nextIntSynTable[fromIndex][to];
 }
+
+// ================================================================================================ //
+// NextT
+// Use for NextT(_, _)
+bool PQLEvaluator::getNextTUnderscoreUnderscore() {
+    return mpPKB->nextIntIntTable.begin() != mpPKB->nextIntIntTable.end();
+}
+
+// Case 2: NextT(_, syn) 
+unordered_set<int> PQLEvaluator::getNextTUnderscoreSyn(PKBDesignEntity to) {
+    /* TODO (@JIACHEN) */
+    auto typePair = make_pair(PKBDesignEntity::AllStatements, to);
+    unordered_set<int> result;
+    for (auto p : mpPKB->nextSynSynTable[typePair]) {
+        result.insert(p.second);
+    }
+    return result;
+}
+
+// Case 3: NextT(_, int) 
+bool PQLEvaluator::getNextTUnderscoreInt(int toIndex) {
+    /* TODO (@JIACHEN) */
+    return mpPKB->nextSynIntTable.find(toIndex) != mpPKB->nextSynIntTable.end();
+}
+
+// Case 4: NextT(syn, syn) 
+set<pair<int, int>> PQLEvaluator::getNextTSynSyn(PKBDesignEntity from, PKBDesignEntity to) {
+    /* TODO (@JIACHEN) */
+    auto typePair = make_pair(from, to);
+    return mpPKB->nextSynSynTable[typePair];
+}
+
+// Case 5: NextT(syn, _) 
+unordered_set<int> PQLEvaluator::getNextTSynUnderscore(PKBDesignEntity from) {
+    /* TODO (@JIACHEN) */
+    auto typePair = make_pair(from, PKBDesignEntity::AllStatements);
+    unordered_set<int> result;
+    for (auto p : mpPKB->nextSynSynTable[typePair]) {
+        result.insert(p.first);
+    }
+    return result;
+}
+
+// Case 6: NextT(syn, int) 
+unordered_set<int> PQLEvaluator::getNextTSynInt(PKBDesignEntity from, int toIndex) {
+    /* TODO (@JIACHEN) */
+    return mpPKB->nextSynIntTable[toIndex][from];
+}
+
+// Case 7: NextT(int, int) 
+bool PQLEvaluator::getNextTIntInt(int fromIndex, int toIndex) {
+    /* TODO (@JIACHEN) */
+    auto typePair = make_pair(fromIndex, toIndex);
+    return mpPKB->nextIntIntTable.find(typePair) != mpPKB->nextIntIntTable.end();
+}
+
+// Case 8: NextT(int, _)
+bool PQLEvaluator::getNextTIntUnderscore(int fromIndex) {
+    /* TODO (@JIACHEN) */
+    return mpPKB->nextIntSynTable.find(fromIndex) != mpPKB->nextIntSynTable.end();
+}
+
+// Case 9: NextT(int, syn) 
+unordered_set<int> PQLEvaluator::getNextTIntSyn(int fromIndex, PKBDesignEntity to) {
+    /* TODO (@JIACHEN) */
+    return mpPKB->nextIntSynTable[fromIndex][to];
+}
