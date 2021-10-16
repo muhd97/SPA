@@ -2385,6 +2385,14 @@ StatementType getStatementType(PKBDesignEntity de) {
 // NextT(p, q)
 void getNextTStatmtList(vector<shared_ptr<Statement>> list, StatementType from, StatementType to, int fromIndex, int toIndex, set<pair<int, int>> *result, set<int> *seenP) {
     for (auto stmt : list) {
+        // For debugging
+        /*
+        string builder = "#" + to_string(stmt->getIndex()) + " seenP: ";
+        for (auto p : *seenP) {
+            builder += to_string(p) + ", ";
+        }
+        cout << builder << endl;
+        */
 
         // NONE is used to represent AllStatements
         if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex) {
@@ -2418,14 +2426,14 @@ void getNextTStatmtList(vector<shared_ptr<Statement>> list, StatementType from, 
             if (sizeP < seenP->size()) {
                 // if there are new things in seenP we wanna do another pass
                 getNextTStatmtList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP);
-                // NONE is used to represent AllStatements
-                if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex) {
-                    for (auto p : *seenP) {
-                        result->insert(make_pair(p, stmt->getIndex()));
-                    }
+            }
+
+            // While to while loop!
+            if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex) {
+                for (auto p : *seenP) {
+                    result->insert(make_pair(p, stmt->getIndex()));
                 }
             }
-            
         }
     }
 }
@@ -2435,7 +2443,7 @@ set<pair<int, int>> getNextT(shared_ptr<Program> program, StatementType from, St
 
     for (auto procedure : program->getProcedures()) {
         set<int> seenP = {};
-        getNextTStatmtList(procedure->getStatementList()->getStatements(), from, to, 0, 0, &result, &seenP);
+        getNextTStatmtList(procedure->getStatementList()->getStatements(), from, to, fromIndex, toIndex, &result, &seenP);
     }
 
     return result;
