@@ -2794,6 +2794,7 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
     //for (auto& ptr : tuples) cout << ptr->toString() << endl;
 
     if (resultCl->isBooleanReturnType()) {
+        
         if (!tuples.empty()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
         else toReturn.emplace_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
         return;
@@ -3121,7 +3122,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
 
     if (numElements == 0) {
 
-        if (selectCl->target->isBooleanReturnType()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
+        if (selectCl->target->isBooleanReturnType()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
 
         return move(toReturn);
     }
