@@ -22,7 +22,8 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
 
     /* TODO: @kohyida1997 current order of resolving such-that clauses is in
      * order of their appearance. This needs to change in iteraton 2 and 3 */
-    for (unsigned int i = 0; i < selectCl->suchThatClauses.size(); i++)
+    int N = selectCl->suchThatClauses.size();
+    for (int i = 0; i < N; i++)
     {
         if (i == 0)
         {
@@ -34,6 +35,7 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
             vector<shared_ptr<ResultTuple>> joinedRes;
             joinedRes.reserve(suchThatReturnTuples.size());
 
+
             handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
 
             if (currSuchThatRes.size() == 0) { // Early termination
@@ -41,13 +43,19 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
                 break;
             }
 
+
+            /* This is SLOW */
+            /*unordered_set<string>& setOfSynonymsToJoinOn =
+                getSetOfSynonymsToJoinOn(previousSelectCl, selectCl->suchThatClauses[i]);*/
+
             unordered_set<string>& setOfSynonymsToJoinOn =
-                getSetOfSynonymsToJoinOn(previousSelectCl, selectCl->suchThatClauses[i]);
+                getSetOfSynonymsToJoinOn(suchThatReturnTuples, currSuchThatRes);
 
             if (!setOfSynonymsToJoinOn.empty())
                 hashJoinResultTuples(suchThatReturnTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
             else
                 cartesianProductResultTuples(suchThatReturnTuples, currSuchThatRes, joinedRes);
+
 
             previousSelectCl = selectCl->suchThatClauses[i];
             suchThatReturnTuples = move(joinedRes);
@@ -59,7 +67,8 @@ void PQLProcessor::handleAllPatternClauses(shared_ptr<SelectCl>& selectCl, const
 {
     shared_ptr<PatternCl> previousSelectCl = patternClauses[0];
 
-    for (unsigned int i = 0; i < patternClauses.size(); i++)
+    int N = patternClauses.size();
+    for (int i = 0; i < N; i++)
     {
         if (i == 0)
         {
@@ -79,7 +88,7 @@ void PQLProcessor::handleAllPatternClauses(shared_ptr<SelectCl>& selectCl, const
             }
 
             unordered_set<string>& setOfSynonymsToJoinOn =
-                getSetOfSynonymsToJoinOn(previousSelectCl, patternClauses[i]);
+                getSetOfSynonymsToJoinOn(patternTuples, currSuchThatRes);
 
             if (!setOfSynonymsToJoinOn.empty())
                 hashJoinResultTuples(patternTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
@@ -96,7 +105,8 @@ void PQLProcessor::handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const ve
 {
     auto& previousWithCl = selectCl->withClauses[0];
 
-    for (unsigned int i = 0; i < selectCl->withClauses.size(); i++)
+    int N = selectCl->withClauses.size();
+    for (int i = 0; i < N; i++)
     {
         if (i == 0)
         {
@@ -116,7 +126,7 @@ void PQLProcessor::handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const ve
             }
 
             unordered_set<string>& setOfSynonymsToJoinOn =
-                getSetOfSynonymsToJoinOn(previousWithCl, selectCl->withClauses[i]);
+                getSetOfSynonymsToJoinOn(currWithRes, withClauseTuples);
 
             if (!setOfSynonymsToJoinOn.empty())
                 joinResultTuples(withClauseTuples, currWithRes, setOfSynonymsToJoinOn, joinedRes);
@@ -944,8 +954,8 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         StmtRefType leftType = stmtRef1->getStmtRefType();
         StmtRefType rightType = stmtRef2->getStmtRefType();
 
-        const string& leftSynonymKey = stmtRef1->getStringVal();
-        const string& rightSynonymKey = stmtRef2->getStringVal();
+        string leftSynonymKey = stmtRef1->getStringVal();
+        string rightSynonymKey = stmtRef2->getStringVal();
 
         /* Follows (1, ?) */
         if (leftType == StmtRefType::INTEGER)
@@ -1016,7 +1026,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         if (leftType == StmtRefType::SYNONYM)
         {
             /* Follows (syn, v) OR Follows(syn, AllExceptProcedure) */
-
             if (!givenSynonymMatchesMultipleTypes(selectCl, leftSynonymKey,
                 { DesignEntity::ASSIGN, DesignEntity::CALL, DesignEntity::IF,
                  DesignEntity::PRINT, DesignEntity::READ, DesignEntity::STMT,
@@ -2886,10 +2895,10 @@ void PQLProcessor::joinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults
 
 void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults, unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults)
 {
-    //cout << "Hash Join......\n";
 
     int leftSize = leftResults.size();
     int rightSize = rightResults.size();
+    //cout << "hash join ========= Num LeftResults = " << leftSize << ", Num RightResults = " << rightSize << ", joinKeysSize = " << joinKeys.size() << endl;
     vector<shared_ptr<ResultTuple>>* smallerVec = nullptr;
     vector<shared_ptr<ResultTuple>>* largerVec = nullptr;
 
@@ -2905,11 +2914,13 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
     const auto& smallerRes = *smallerVec;
     const auto& largerRes = *largerVec;
 
-    unordered_map<string, unordered_set<int>> leftHashTable;
+    unordered_map<string, unordered_set<ResultTuple*>> leftHashTable;
     vector<string> joinKeysVec(joinKeys.begin(), joinKeys.end());
 
     /* Build phase */
     int smallerResSize = smallerRes.size();
+    //cout << "SmallerResSize = " << smallerResSize << endl;
+
     for (int i = 0; i < smallerResSize; i++) {
 
         auto& tup = smallerRes[i];
@@ -2920,11 +2931,11 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
         }
 
         if (leftHashTable.find(stringToHash) == leftHashTable.end()) {
-            leftHashTable[stringToHash] = unordered_set<int>();
-            leftHashTable[stringToHash].insert(i);
+            leftHashTable[stringToHash] = unordered_set<ResultTuple*>();
+            leftHashTable[stringToHash].insert(tup.get());
         }
         else {
-            leftHashTable[stringToHash].insert(i);
+            leftHashTable[stringToHash].insert(tup.get());
         }
     }
 
@@ -2938,8 +2949,8 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
         auto setPtr = leftHashTable.find(stringToHash);
         if (setPtr != leftHashTable.end()) {
             auto& setToCompute = leftHashTable[stringToHash];
-            for (int i : setToCompute) {
-                auto& otherTup = smallerRes[i];
+            for (auto i : setToCompute) {
+                auto otherTup = i;//smallerRes[i];
 
                 // build the actual merged result tuple
                 shared_ptr<ResultTuple> toAdd =
@@ -2967,7 +2978,6 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
     //for (auto& tup : newResults) cout << "Tup = " << tup->toString() << endl;
     //putchar('\n');
 
-
     return;
 
 
@@ -2977,7 +2987,8 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
     vector<shared_ptr<ResultTuple>>& rightResults,
     vector<shared_ptr<ResultTuple>>& newResults)
 {
-    //cout << "Cartesian......\n";
+
+    //cout << "cartesian====\n";
 
     if (leftResults.size() == 0)
     {
@@ -3083,7 +3094,7 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
         if (!tuples[0]->synonymKeyAlreadyExists(targetSynonymVal)) return;
 
         unordered_set<string> existingResults;
-        for (auto tuple : tuples)
+        for (auto& tuple : tuples)
         {
             //cout << "Tuple = " << tuple->toString() << ", numKeys = " << tuple->getMap().size() << endl;
 

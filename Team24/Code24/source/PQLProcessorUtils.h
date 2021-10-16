@@ -244,11 +244,15 @@ unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<T> cl1, shared_ptr<R> 
 unordered_set<string> getSetOfSynonymsToJoinOn(const vector<shared_ptr<ResultTuple>>& leftRes, const vector<shared_ptr<ResultTuple>>& rightRes)
 {
     unordered_set<string> toReturn;
+
+    if (leftRes.empty() || rightRes.empty()) return move(unordered_set<string>());
+
     const auto& suchThatSynonyms1 = leftRes[0]->getMap();
     const auto& suchThatSynonyms2 = rightRes[0]->getMap();
 
+
     unordered_set<string> hashMap;
-    hashMap.reserve(suchThatSynonyms1.size() + suchThatSynonyms2.size());
+    hashMap.reserve(suchThatSynonyms1.size());
 
     for (const auto& s1 : suchThatSynonyms1)
     {

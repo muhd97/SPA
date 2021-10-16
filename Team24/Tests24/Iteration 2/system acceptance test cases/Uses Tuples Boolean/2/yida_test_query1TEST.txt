@@ -1,5 +1,5 @@
 5 - Select <a, v> such that Uses(a, v) such that Modifies(a2, v)
-stmt s; assign a, a2; variable v; while w; print p;
-Select <a, v> such that Uses(a, v) such that Follows(a, p)
-8 z, 8 x, 8 y
+stmt s; assign a, a2; variable v; while w; print p; stmt ss3;
+Select BOOLEAN such that Follows(ss3, _)
+TRUE
 500
