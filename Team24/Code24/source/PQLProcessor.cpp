@@ -2738,7 +2738,7 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
             PKBDesignEntity rightArgType =
                 resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
-            for (auto& p : evaluator->getNextTSynSyn(leftArgType, rightArgType))
+            for (auto p : evaluator->getNextTSynSyn(leftArgType, rightArgType))
             {
                 /* Create the result tuple */
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -2801,7 +2801,7 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
             }
         }
 
-        // Case 8: Next(int, _) 
+        // Case 8: NextT(int, _) 
         else if (firstRef == StmtRefType::INTEGER && secondRef == StmtRefType::UNDERSCORE) {
             int leftValue = nextTCl->stmtRef1->getIntVal();
 
@@ -2815,7 +2815,7 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
             }
         }
 
-        // Case 9: Next(int, syn) 
+        // Case 9: NextT(int, syn) 
         else if (firstRef == StmtRefType::INTEGER && secondRef == StmtRefType::SYNONYM) {
             int leftValue = nextTCl->stmtRef1->getIntVal();
             string rightSyn = nextTCl->stmtRef2->getStringVal();

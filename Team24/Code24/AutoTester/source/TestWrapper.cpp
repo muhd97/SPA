@@ -1,8 +1,8 @@
 #pragma optimize( "gty", on )
 
-#define DEBUG 0
-#define PRINT_FINISHED_HEADER 0
-#define PRINT_EXCEPTION_STATEMENTS 0
+#define DEBUG 1
+#define PRINT_FINISHED_HEADER 1
+#define PRINT_EXCEPTION_STATEMENTS 1
 
 #include "TestWrapper.h"
 #include "SimpleAST.h"
