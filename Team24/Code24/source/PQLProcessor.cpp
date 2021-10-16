@@ -2928,6 +2928,7 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
         string stringToHash;
         for (auto& joinKey : joinKeysVec) {
             stringToHash.append(tup->get(joinKey));
+            stringToHash.push_back('$');
         }
 
         if (leftHashTable.find(stringToHash) == leftHashTable.end()) {
@@ -2944,6 +2945,7 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
         string stringToHash;
         for (auto& joinKey : joinKeysVec) {
             stringToHash.append(tup->get(joinKey));
+            stringToHash.push_back('$');
         }
 
         auto setPtr = leftHashTable.find(stringToHash);
