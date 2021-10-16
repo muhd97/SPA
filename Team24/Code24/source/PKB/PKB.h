@@ -43,6 +43,9 @@ class PKB
     void initializeRelationshipTables();
     void initializeWithTables();
 
+    // Program AST
+    shared_ptr<Program> program;
+
     // for all statements, use PKBDesignEntity::AllStatements, where position
     // corresponds to statement index
     unordered_map<PKBDesignEntity, vector<PKBStmt::SharedPtr>> mStatements;
