@@ -43,6 +43,9 @@ class PKB
     void initializeRelationshipTables();
     void initializeWithTables();
 
+    // Program AST
+    shared_ptr<Program> program;
+
     // for all statements, use PKBDesignEntity::AllStatements, where position
     // corresponds to statement index
     unordered_map<PKBDesignEntity, vector<PKBStmt::SharedPtr>> mStatements;
@@ -376,8 +379,6 @@ class PKB
     PKBDesignEntity simpleToPKBType(StatementType);
 
   private:
-    // remembers the main program node
-    shared_ptr<Program> programToExtract;
     // remembers the procedure we are currently extracting, helper for calls
     shared_ptr<PKBProcedure> currentProcedureToExtract;
     // calls relationship table helper

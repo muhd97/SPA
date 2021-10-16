@@ -5,8 +5,8 @@ title Running system acceptance test case for system_test_1!
 
 findstr "failed" out-system_test_1.xml
 findstr "crash" out-system_test_1.xml
-findstr "missing" out-system_test_1.xml
-findstr "additional" out-system_test_1.xml
+findstr "exception" out-system_test_1.xml
+findstr "timeout" out-system_test_1.xml
 
 echo The End!
 pause
