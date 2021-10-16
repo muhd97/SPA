@@ -379,8 +379,6 @@ class PKB
     PKBDesignEntity simpleToPKBType(StatementType);
 
   private:
-    // remembers the main program node
-    shared_ptr<Program> programToExtract;
     // remembers the procedure we are currently extracting, helper for calls
     shared_ptr<PKBProcedure> currentProcedureToExtract;
     // calls relationship table helper

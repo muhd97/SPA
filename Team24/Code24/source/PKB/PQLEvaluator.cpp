@@ -2337,67 +2337,179 @@ unordered_set<int> PQLEvaluator::getNextIntSyn(int fromIndex, PKBDesignEntity to
 
 // ================================================================================================ //
 // NextT
+
+string formatStatementType(StatementType type) {
+    switch (type) {
+    case StatementType::READ:
+        return "Read";
+    case StatementType::PRINT:
+        return "Print";
+    case StatementType::ASSIGN:
+        return "Assign";
+    case StatementType::CALL:
+        return "Call";
+    case StatementType::WHILE:
+        return "While";
+    case StatementType::IF:
+        return "If";
+    case StatementType::STATEMENT:
+        return "Stmt";
+    case StatementType::NONE:
+        return "None";
+    default:
+        throw "Unknown StatementType - Design Ent";
+    }
+}
+
+StatementType getStatementType(PKBDesignEntity de) {
+    switch (de) {
+    case PKBDesignEntity::Read:
+        return StatementType::READ;
+    case PKBDesignEntity::Print:
+        return StatementType::PRINT;
+    case PKBDesignEntity::Assign:
+        return StatementType::ASSIGN;
+    case PKBDesignEntity::Call:
+        return StatementType::CALL;
+    case PKBDesignEntity::While:
+        return StatementType::WHILE;
+    case PKBDesignEntity::If:
+        return StatementType::IF;
+    case PKBDesignEntity::AllStatements:
+        return StatementType::STATEMENT; // Use this as a hack to represent AllStatements
+    default:
+        throw "Unknown StatementType - Design Ent";
+    }
+}
+
+// NextT(p, q)
+void getNextTStatmtList(vector<shared_ptr<Statement>> list, StatementType from, StatementType to, int fromIndex, int toIndex, set<pair<int, int>> *result, set<int> *seenP) {
+    for (auto stmt : list) {
+
+        // NONE is used to represent AllStatements
+        if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex) {
+            for (auto p : *seenP) {
+                result->insert(make_pair(p, stmt->getIndex()));
+            }
+        }
+
+        // NONE is used to represent AllStatements
+        if (stmt->getStatementType() == from || from == StatementType::STATEMENT || stmt->getIndex() == fromIndex) {
+            seenP->insert(stmt->getIndex());
+        }
+
+        if (stmt->getStatementType() == StatementType::IF) {
+            shared_ptr<IfStatement> ifS = static_pointer_cast<IfStatement>(stmt);
+            set<pair<int, int>> cloneResult = set<pair<int, int>>(*result);
+            set<int> cloneSeenP = set<int>(*seenP);
+
+            getNextTStatmtList(ifS->getConsequent()->getStatements(), from, to, fromIndex, toIndex, &cloneResult, &cloneSeenP);
+            getNextTStatmtList(ifS->getAlternative()->getStatements(), from, to, fromIndex, toIndex, result, seenP);
+
+            result->insert(cloneResult.begin(), cloneResult.end());
+            seenP->insert(cloneSeenP.begin(), cloneSeenP.end());
+        }
+        else if (stmt->getStatementType() == StatementType::WHILE) {
+            shared_ptr<WhileStatement> whiles = static_pointer_cast<WhileStatement>(stmt);
+
+            auto sizeP = seenP->size();
+            getNextTStatmtList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP);
+
+            if (sizeP < seenP->size()) {
+                // if there are new things in seenP we wanna do another pass
+                getNextTStatmtList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP);
+                // NONE is used to represent AllStatements
+                if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex) {
+                    for (auto p : *seenP) {
+                        result->insert(make_pair(p, stmt->getIndex()));
+                    }
+                }
+            }
+            
+        }
+    }
+}
+
+set<pair<int, int>> getNextT(shared_ptr<Program> program, StatementType from, StatementType to, int fromIndex, int toIndex) {
+    set<pair<int, int>> result = {};
+
+    for (auto procedure : program->getProcedures()) {
+        set<int> seenP = {};
+        getNextTStatmtList(procedure->getStatementList()->getStatements(), from, to, 0, 0, &result, &seenP);
+    }
+
+    return result;
+}
+
 // Use for NextT(_, _)
 bool PQLEvaluator::getNextTUnderscoreUnderscore() {
-    return mpPKB->nextIntIntTable.begin() != mpPKB->nextIntIntTable.end();
+    // Todo optimize (@jiachen247) Can exit early after first is found match
+    set<pair<int, int>> result = getNextT(mpPKB->program, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0);
+    return result.begin() != result.end();
 }
 
 // Case 2: NextT(_, syn) 
 unordered_set<int> PQLEvaluator::getNextTUnderscoreSyn(PKBDesignEntity to) {
-    /* TODO (@JIACHEN) */
-    auto typePair = make_pair(PKBDesignEntity::AllStatements, to);
-    unordered_set<int> result;
-    for (auto p : mpPKB->nextSynSynTable[typePair]) {
-        result.insert(p.second);
+    set<pair<int, int>> result = getNextT(mpPKB->program, StatementType::STATEMENT, getStatementType(to), 0, 0);
+    unordered_set<int> toResult = {};
+    for (auto p : result) {
+        toResult.insert(p.second);
     }
-    return result;
+    return toResult;
 }
 
 // Case 3: NextT(_, int) 
 bool PQLEvaluator::getNextTUnderscoreInt(int toIndex) {
-    /* TODO (@JIACHEN) */
-    return mpPKB->nextSynIntTable.find(toIndex) != mpPKB->nextSynIntTable.end();
+    // Todo optimize (@jiachen247) Can exit early after first is found match
+    set<pair<int, int>> result = getNextT(mpPKB->program, StatementType::STATEMENT, StatementType::NONE, 0, toIndex);
+    return result.begin() != result.end();
 }
 
 // Case 4: NextT(syn, syn) 
 set<pair<int, int>> PQLEvaluator::getNextTSynSyn(PKBDesignEntity from, PKBDesignEntity to) {
-    /* TODO (@JIACHEN) */
-    auto typePair = make_pair(from, to);
-    return mpPKB->nextSynSynTable[typePair];
+    return getNextT(mpPKB->program, getStatementType(from), getStatementType(to), 0, 0);
 }
 
 // Case 5: NextT(syn, _) 
 unordered_set<int> PQLEvaluator::getNextTSynUnderscore(PKBDesignEntity from) {
-    /* TODO (@JIACHEN) */
-    auto typePair = make_pair(from, PKBDesignEntity::AllStatements);
-    unordered_set<int> result;
-    for (auto p : mpPKB->nextSynSynTable[typePair]) {
-        result.insert(p.first);
+    set<pair<int, int>> result = getNextT(mpPKB->program, getStatementType(from), StatementType::STATEMENT, 0, 0);
+    unordered_set<int> fromResult = {};
+    for (auto p : result) {
+        fromResult.insert(p.first);
     }
-    return result;
+    return fromResult;
 }
 
 // Case 6: NextT(syn, int) 
 unordered_set<int> PQLEvaluator::getNextTSynInt(PKBDesignEntity from, int toIndex) {
-    /* TODO (@JIACHEN) */
-    return mpPKB->nextSynIntTable[toIndex][from];
+    set<pair<int, int>> result = getNextT(mpPKB->program, getStatementType(from), StatementType::NONE, 0, toIndex);
+    unordered_set<int> fromResult = {};
+    for (auto p : result) {
+        fromResult.insert(p.first);
+    }
+    return fromResult;
 }
 
 // Case 7: NextT(int, int) 
 bool PQLEvaluator::getNextTIntInt(int fromIndex, int toIndex) {
-    /* TODO (@JIACHEN) */
-    auto typePair = make_pair(fromIndex, toIndex);
-    return mpPKB->nextIntIntTable.find(typePair) != mpPKB->nextIntIntTable.end();
+    // Todo optimize (@jiachen247) Can exit early after first is found match
+    set<pair<int, int>> result = getNextT(mpPKB->program, StatementType::NONE, StatementType::NONE, fromIndex, toIndex);
+    return result.begin() != result.end();
 }
 
 // Case 8: NextT(int, _)
 bool PQLEvaluator::getNextTIntUnderscore(int fromIndex) {
-    /* TODO (@JIACHEN) */
-    return mpPKB->nextIntSynTable.find(fromIndex) != mpPKB->nextIntSynTable.end();
+    // Todo optimize (@jiachen247) Can exit early after first is found match
+    set<pair<int, int>> result = getNextT(mpPKB->program, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0);
+    return result.begin() != result.end();
 }
 
 // Case 9: NextT(int, syn) 
 unordered_set<int> PQLEvaluator::getNextTIntSyn(int fromIndex, PKBDesignEntity to) {
-    /* TODO (@JIACHEN) */
-    return mpPKB->nextIntSynTable[fromIndex][to];
+    set<pair<int, int>> result = getNextT(mpPKB->program, StatementType::NONE, getStatementType(to), fromIndex, 0);
+    unordered_set<int> toResult = {};
+    for (auto p : result) {
+        toResult.insert(p.second);
+    }
+    return toResult;
 }

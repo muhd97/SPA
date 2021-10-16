@@ -33,7 +33,7 @@ void PKB::initializeCFG(shared_ptr<Program> program) {
 void PKB::extractDesigns(shared_ptr<Program> program)
 {
     // store reference to program to be extracted
-    programToExtract = program;
+    this->program = program;
 
     vector<shared_ptr<Procedure>> procedures = program->getProcedures();
     for (shared_ptr<Procedure> procedure : procedures)
@@ -580,7 +580,7 @@ PKBStmt::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &statement, P
     if (!procedureNameToProcedureMap.count(procedureName))
     {
         // we need to locate the simple node for called procedure
-        vector<shared_ptr<Procedure>> simpleProcedures = programToExtract->getProcedures();
+        vector<shared_ptr<Procedure>> simpleProcedures = program->getProcedures();
         // loop through simpleProcedures to find the desired procedure node
         for (auto &p : simpleProcedures)
         {
