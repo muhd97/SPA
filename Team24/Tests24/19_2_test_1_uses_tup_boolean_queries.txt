@@ -61,7 +61,7 @@ Select <kc, p, proc> such that Uses(a1, v1)
 11 - Select BOOLEAN with NOTHING
 stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
 Select BOOLEAN
-FALSE
+TRUE
 500
 12 - Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, "a") - NEGATIVE CASE: One of the such-that is empty
 stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;

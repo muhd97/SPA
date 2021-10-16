@@ -61,7 +61,7 @@ Select <kc, p, proc> such that Uses(a1, v1)
 11 - Select BOOLEAN with NOTHING
 stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
 Select BOOLEAN
-FALSE
+TRUE
 500
 12 - Select <c, v> such that Uses(a, v) and Follows(_, c) such that Modifies(c, "a") - NEGATIVE CASE: One of the such-that is empty
 stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc;
@@ -93,6 +93,10 @@ stmt s; assign a, a1; variable v, v1; while w, j; if i,m; print p, q; read r; ca
 Select <c, v> such that Parent*(w, s) and Uses(w, v) and Modifies(a, a1) pattern a(_, "zz") and a(_, "qq") and a(_, "pql") with c.procName = p.procName and cc.procName = pproc.procName and cc.procName = proc.procName and c.procName = pproc.procName
 
 2000 
-
+18 - Select <constant, print, proc> such that Uses(a, v) - TUPLE SYNONYMS NOT IN SUCH THAT CLAUSE
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc; assign a2,a3,a4; variable v2,v3,v4; procedure proc1; procedure c1,c2;
+Select <kc, p, proc> such that Uses(a1, v1) and Uses(a2, v1) and Uses(a1, v2) and Uses(a2, v2) such that Follows(a1, a4) and Uses(proc1, v1) such that Follows(a3, a4) and Uses(a3, v4) and Uses(proc1, v2)
+1 5 yida1,1 5 yida2,1 5 yida3,1 5 yida4,1 9 yida1,1 9 yida2,1 9 yida3,1 9 yida4,2 5 yida1,2 5 yida2,2 5 yida3,2 5 yida4,2 9 yida1,2 9 yida2,2 9 yida3,2 9 yida4,3 5 yida1,3 5 yida2,3 5 yida3,3 5 yida4,3 9 yida1,3 9 yida2,3 9 yida3,3 9 yida4,4 5 yida1,4 5 yida2,4 5 yida3,4 5 yida4,4 9 yida1,4 9 yida2,4 9 yida3,4 9 yida4
+9000
 
 

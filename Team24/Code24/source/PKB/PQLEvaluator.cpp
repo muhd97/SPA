@@ -1975,7 +1975,7 @@ vector<pair<int, string>> PQLEvaluator::matchExactPattern(string& LHS, shared_pt
     return res;
 }
 
-bool PQLEvaluator::getCallsStringString(string& caller, string& called)
+bool PQLEvaluator::getCallsStringString(const string& caller, const string& called)
 {
     for (auto& p : mpPKB->callsTable[caller]) {
         if (p.second == called) {
@@ -1985,7 +1985,7 @@ bool PQLEvaluator::getCallsStringString(string& caller, string& called)
     return false;
 }
 
-unordered_set<string> PQLEvaluator::getCallsStringSyn(string& caller)
+unordered_set<string> PQLEvaluator::getCallsStringSyn(const string& caller)
 {
     unordered_set<string> toReturn;
     for (auto& p : mpPKB->callsTable[caller]) {
@@ -1994,12 +1994,12 @@ unordered_set<string> PQLEvaluator::getCallsStringSyn(string& caller)
     return toReturn;
 }
 
-bool PQLEvaluator::getCallsStringUnderscore(string& caller)
+bool PQLEvaluator::getCallsStringUnderscore(const string& caller)
 {
     return mpPKB->callsTable[caller].size() > 0;
 }
 
-unordered_set<string> PQLEvaluator::getCallsSynString(string& called)
+unordered_set<string> PQLEvaluator::getCallsSynString(const string& called)
 {
     unordered_set<string> toReturn;
     for (auto& p : mpPKB->calledTable[called]) {
@@ -2028,7 +2028,7 @@ unordered_set<string> PQLEvaluator::getCallsSynUnderscore()
     return toReturn;
 }
 
-bool PQLEvaluator::getCallsUnderscoreString(string& called)
+bool PQLEvaluator::getCallsUnderscoreString(const string& called)
 {
     return mpPKB->calledTable[called].size() > 0;
 }
@@ -2049,7 +2049,7 @@ bool PQLEvaluator::getCallsUnderscoreUnderscore()
     return mpPKB->callsTable.size() > 0;
 }
 
-bool PQLEvaluator::getCallsTStringString(string& caller, string& called)
+bool PQLEvaluator::getCallsTStringString(const string& caller, const string& called)
 {
     for (auto& p : mpPKB->callsTTable[caller]) {
         if (p.second == called) {
@@ -2059,7 +2059,7 @@ bool PQLEvaluator::getCallsTStringString(string& caller, string& called)
     return false;
 }
 
-unordered_set<string> PQLEvaluator::getCallsTStringSyn(string& caller)
+unordered_set<string> PQLEvaluator::getCallsTStringSyn(const string& caller)
 {
     unordered_set<string> toReturn;
     for (auto& p : mpPKB->callsTTable[caller]) {
@@ -2068,12 +2068,12 @@ unordered_set<string> PQLEvaluator::getCallsTStringSyn(string& caller)
     return toReturn;
 }
 
-bool PQLEvaluator::getCallsTStringUnderscore(string& caller)
+bool PQLEvaluator::getCallsTStringUnderscore(const string& caller)
 {
     return mpPKB->callsTTable[caller].size() > 0;
 }
 
-unordered_set<string> PQLEvaluator::getCallsTSynString(string& called)
+unordered_set<string> PQLEvaluator::getCallsTSynString(const string& called)
 {
     unordered_set<string> toReturn;
     for (auto& p : mpPKB->calledTTable[called]) {
@@ -2102,7 +2102,7 @@ unordered_set<string> PQLEvaluator::getCallsTSynUnderscore()
     return toReturn;
 }
 
-bool PQLEvaluator::getCallsTUnderscoreString(string& called)
+bool PQLEvaluator::getCallsTUnderscoreString(const string& called)
 {
     return mpPKB->calledTTable[called].size() > 0;
 }

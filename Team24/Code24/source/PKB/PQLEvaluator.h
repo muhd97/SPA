@@ -395,16 +395,16 @@ class PQLEvaluator
 
     // Calls
     /* Use for Calls(proc, proc) */
-    bool getCallsStringString(string& caller, string& called);
+    bool getCallsStringString(const string& caller, const string& called);
 
     /* Use for Calls(proc, syn) */
-    unordered_set<string> getCallsStringSyn(string& caller);
+    unordered_set<string> getCallsStringSyn(const string& caller);
 
     /* Use for Calls(proc, _) */
-    bool getCallsStringUnderscore(string& caller);
+    bool getCallsStringUnderscore(const string& caller);
 
     /* Use for Calls(syn, proc) */
-    unordered_set<string> getCallsSynString(string& called);
+    unordered_set<string> getCallsSynString(const string& called);
 
     /* Use for Calls(syn, syn) */
     set<pair<string, string>> getCallsSynSyn();
@@ -413,7 +413,7 @@ class PQLEvaluator
     unordered_set<string> getCallsSynUnderscore();
 
     /* Use for Calls(_, proc) */
-    bool getCallsUnderscoreString(string& called);
+    bool getCallsUnderscoreString(const string& called);
 
     /* Use for Calls(_, syn) */
     unordered_set<string> getCallsUnderscoreSyn();
@@ -423,16 +423,16 @@ class PQLEvaluator
 
     // CallsT
     /* Use for CallsT(proc, proc) */
-    bool getCallsTStringString(string& caller, string& called);
+    bool getCallsTStringString(const string& caller, const string& called);
 
     /* Use for CallsT(proc, syn) */
-    unordered_set<string> getCallsTStringSyn(string& caller);
+    unordered_set<string> getCallsTStringSyn(const string& caller);
 
     /* Use for CallsT(proc, _) */
-    bool getCallsTStringUnderscore(string& caller);
+    bool getCallsTStringUnderscore(const string& caller);
 
     /* Use for CallsT(syn, proc) */
-    unordered_set<string> getCallsTSynString(string& called);
+    unordered_set<string> getCallsTSynString(const string& called);
 
     /* Use for CallsT(syn, syn) */
     set<pair<string, string>> getCallsTSynSyn();
@@ -441,7 +441,7 @@ class PQLEvaluator
     unordered_set<string> getCallsTSynUnderscore();
 
     /* Use for CallsT(_, proc) */
-    bool getCallsTUnderscoreString(string& called);
+    bool getCallsTUnderscoreString(const string& called);
 
     /* Use for CallsT(_, syn) */
     unordered_set<string> getCallsTUnderscoreSyn();
