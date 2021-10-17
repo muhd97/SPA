@@ -500,7 +500,7 @@ void PQLProcessor::handleWithFirstArgAttrRef(const shared_ptr<SelectCl>& selectC
     const shared_ptr<Ref> lhs = withCl->lhs;
     assert(lhs->getRefType() == RefType::ATTR);
     const auto& leftAttrRef = lhs->getAttrRef();
-    const shared_ptr<Ref> rhs = withCl->rhs;
+    const shared_ptr<Ref>& rhs = withCl->rhs;
     const RefType rightType = rhs->getRefType();
 
     /* with attrRef = attrRef */
@@ -636,25 +636,226 @@ void PQLProcessor::handleWithFirstArgAttrRef(const shared_ptr<SelectCl>& selectC
     }
 
     /* with attrRef = "IDENT" */
-    if (rightType == RefType::IDENT) {
+    else if (rightType == RefType::IDENT) {
         /* By the pre-condiiton, we are guaranteed left attrRef is a STRING (NAME) type */
-        auto leftSynKey = leftAttrRef->getSynonymString();
-        auto attrNameType = leftAttrRef->getAttrName()->getAttrNameType();
+        const string& rightVal = rhs->getStringVal();
+        const auto& synonym = lhs->getAttrRef()->getSynonym();
+        const auto& attrName = lhs->getAttrRef()->getAttrName();
+        auto& synType = selectCl->getDesignEntityTypeBySynonym(synonym);
+
+        if (synType == DesignEntity::PROCEDURE) {
+            if (attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
+                throw "Procedure attribute must be procName\n";
+            }
+
+            if (evaluator->mpPKB->procedureNameToProcedureMap.count(rightVal)) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(synonym->getSynonymString(), rightVal);
+                toReturn.emplace_back(move(toAdd));
+            }
+            return;
+        }
+
+        if (synType == DesignEntity::VARIABLE) {
+            if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
+                throw "Variable attribute must be varName\n";
+            }
+            if (evaluator->mpPKB->mVariables.count(rightVal)) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(synonym->getSynonymString(), rightVal);
+                toReturn.emplace_back(move(toAdd));
+            }
+            return;
+        }
+
+        if (synType == DesignEntity::CALL) {
+            if (attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
+                throw "Call attribute must be procName\n";
+            }
+
+            for (const auto& x : evaluator->mpPKB->procNameToCallStmtTable[rightVal]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(synonym->getSynonymString(), x);
+                toReturn.emplace_back(move(toAdd));
+            }
+
+            return;
+        }
+
+        if (synType == DesignEntity::READ) {
+            if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
+                throw "Read attribute must be varName\n";
+            }
+
+            for (const auto& x : evaluator->mpPKB->varNameToReadStmtTable[rightVal]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(synonym->getSynonymString(), x);
+                toReturn.emplace_back(move(toAdd));
+            }
+            return;
+        }
+
+        if (synType == DesignEntity::PRINT) {
+            if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
+                throw "Print attribute must be varName\n";
+            }
+
+            for (const auto& x : evaluator->mpPKB->varNameToPrintStmtTable[rightVal]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(synonym->getSynonymString(), x);
+                toReturn.emplace_back(move(toAdd));
+            }
+            return;
+        }
+
     }
 
     /* with attrRef = synonym */
-    if (rightType == RefType::SYNONYM) {
+    else if (rightType == RefType::SYNONYM) {
+        /* By precondition and rules of with clause, the synonym must be a PROG_LINE, which is an integer. Therefore, leftAttrType can only be CONSTANT.VALUE or some STMT.STMT# */
+        const auto leftAttrNameType = leftAttrRef->getAttrName()->getAttrNameType();
+        const string& rightSynString = rhs->getStringVal();
+        const string& leftSynString = lhs->getAttrRef()->getSynonymString();
 
+        if (leftAttrNameType == AttrNameType::VALUE) { /* with const.value = prog_line */
+
+            for (const auto& str : evaluator->mpPKB->stmtsWithIndexAsConstantsTable[PKBDesignEntity::AllStatements]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(leftSynString, str);
+                toAdd->insertKeyValuePair(rightSynString, str);
+                toReturn.emplace_back(move(toAdd));
+            }
+
+        }
+
+        else if (leftAttrNameType == AttrNameType::STMT_NUMBER) { /* with stmt.stmt# = prog_line */
+            const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(leftAttrRef->getSynonymString());
+            auto leftDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
+
+            if (leftDesignEntity == PKBDesignEntity::Constant || leftDesignEntity == PKBDesignEntity::Variable || leftDesignEntity == PKBDesignEntity::Procedure) {
+                throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
+            }
+
+            for (auto& ptr : evaluator->mpPKB->getStatements(leftDesignEntity)) {
+                string indexToString = to_string(ptr->getIndex());
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(leftSynString, indexToString);
+                toAdd->insertKeyValuePair(rightSynString, indexToString);
+                toReturn.emplace_back(move(toAdd));
+            }
+        
+        }
+        return;
     }
 
     /* with attrRef = INT */
-    if (rightType == RefType::INTEGER) {
+    else if (rightType == RefType::INTEGER) {
+        int rightVal = rhs->getIntVal();
 
+        const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(leftAttrRef->getSynonymString());
+        auto leftDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
+
+        const string& leftSynString = lhs->getAttrRef()->getSynonymString();
+
+        if (leftDesignEntity == PKBDesignEntity::Constant || leftDesignEntity == PKBDesignEntity::Variable || leftDesignEntity == PKBDesignEntity::Procedure) {
+            throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
+        }
+
+        if (evaluator->mpPKB->stmtTypeToSetOfStmtNoTable[leftDesignEntity].count(rightVal)) {
+            shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+            toAdd->insertKeyValuePair(leftSynString, to_string(rightVal));
+            toReturn.emplace_back(move(toAdd));
+        }
+
+        return;
     }
 }
 
 void PQLProcessor::handleWithFirstArgSyn(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
+    const shared_ptr<Ref> lhs = withCl->lhs;
+    assert(lhs->getRefType() == RefType::SYNONYM);
+    const auto& leftSynonymString = lhs->getStringVal();
+    const shared_ptr<Ref>& rhs = withCl->rhs;
+    const RefType rightType = rhs->getRefType();
+
+    const auto& leftEntityType = selectCl->getDesignEntityTypeBySynonym(leftSynonymString);
+
+    if (leftEntityType != DesignEntity::PROG_LINE) {
+        throw "Synonyms must be PROG_LINE type for with clauses\n";
+    }
+
+    if (rightType == RefType::INTEGER) {
+
+        int rightIntVal = rhs->getIntVal();
+        if (evaluator->mpPKB->stmtTypeToSetOfStmtNoTable[PKBDesignEntity::AllStatements].count(rightIntVal)) {
+            shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+            toAdd->insertKeyValuePair(leftSynonymString, to_string(rightIntVal));
+            toReturn.emplace_back(move(toAdd));
+        }
+
+    }
+
+    else if (rightType == RefType::SYNONYM) {
+        const auto& rightSynonymString = rhs->getStringVal();
+
+        const auto& rightEntityType = selectCl->getDesignEntityTypeBySynonym(rightSynonymString);
+
+        if (rightEntityType != DesignEntity::PROG_LINE) {
+            throw "Synonyms must be PROG_LINE type for with clauses\n";
+        }
+        
+        for (auto i : evaluator->mpPKB->stmtTypeToSetOfStmtNoTable[PKBDesignEntity::AllStatements]) {
+            shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+            toAdd->insertKeyValuePair(leftSynonymString, to_string(i));
+            toAdd->insertKeyValuePair(rightSynonymString, to_string(i));
+            toReturn.emplace_back(move(toAdd));
+        }
+
+    }
+
+    else if (rightType == RefType::ATTR) {
+        /* By precondition and rules of with clause, the synonym must be a PROG_LINE, which is an integer. Therefore, rightAttribute can only be CONSTANT.VALUE or some STMT.STMT# */
+        const auto rightAttrNameType = rhs->getAttrRef()->getAttrName()->getAttrNameType();
+        const string& rightSynonymString = rhs->getAttrRef()->getSynonymString();
+        const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(rightSynonymString);
+        auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
+
+        if (rightAttrNameType == AttrNameType::VALUE) { /* with prog_line = const.value */
+
+            if (rightDesignEntity != PKBDesignEntity::Constant) {
+                throw "Value attribute is only applicable to synonyms which are of type Constant\n";
+            }
+
+            for (const auto& str : evaluator->mpPKB->stmtsWithIndexAsConstantsTable[PKBDesignEntity::AllStatements]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(leftSynonymString, str);
+                toAdd->insertKeyValuePair(rightSynonymString, str);
+                toReturn.emplace_back(move(toAdd));
+            }
+
+        }
+
+        else if (rightAttrNameType == AttrNameType::STMT_NUMBER) { /* with prog_line == stmt.stmt# */
+            
+            if (rightDesignEntity == PKBDesignEntity::Constant || rightDesignEntity == PKBDesignEntity::Variable || rightDesignEntity == PKBDesignEntity::Procedure) {
+                throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
+            }
+
+            for (auto& ptr : evaluator->mpPKB->getStatements(rightDesignEntity)) {
+                string indexToString = to_string(ptr->getIndex());
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(leftSynonymString, indexToString);
+                toAdd->insertKeyValuePair(rightSynonymString, indexToString);
+                toReturn.emplace_back(move(toAdd));
+            }
+
+        }
+    }
+
+    /* Cannot be with PROG_LINE = "IDENT" as the types are different */
+
+
 }
 
 /* ======================== SUCH THAT CLAUSE ======================== */

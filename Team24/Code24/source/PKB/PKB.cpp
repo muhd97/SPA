@@ -141,7 +141,11 @@ void PKB::initializeWithTables()
 
     for (auto de : entitiesWithStmtNo) {
         stmtsWithIndexAsConstantsTable[de] = unordered_set<string>();
+        stmtTypeToSetOfStmtNoTable[de] = unordered_set<int>();
+
         for (auto& ptr : getStatements(de)) {
+
+            stmtTypeToSetOfStmtNoTable[de].insert(ptr->getIndex());
             string indexToStr = to_string(ptr->getIndex());
             if (constants.find(indexToStr) != constants.end()) {
                 stmtsWithIndexAsConstantsTable[de].insert(indexToStr);

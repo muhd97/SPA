@@ -245,6 +245,8 @@ class PKB
 
     unordered_map<PKBDesignEntity, unordered_set<string>> stmtsWithIndexAsConstantsTable;
 
+    unordered_map<PKBDesignEntity, unordered_set<int>> stmtTypeToSetOfStmtNoTable;
+
     /* ==================================== RELATIONSHIP TABLES ==================================== */
 
     /* ======================== Uses ======================== */
