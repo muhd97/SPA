@@ -30,7 +30,6 @@ inline bool atLeastOneTargetSynonymIsInClauses(shared_ptr<SelectCl> selectCl)
         if (selectCl->suchThatContainsSynonym(x) || selectCl->patternContainsSynonym(x) || selectCl->withContainsSynonym(x)) return true;
     }
 
-
     return false;
 }
 

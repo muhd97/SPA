@@ -47,6 +47,10 @@ bool PQLParser::tokensAreEmpty()
 
 inline PQLToken PQLParser::eat(PQLTokenType exepctedType)
 {
+    if (tokensAreEmpty()) {
+        PQLToken temp(exepctedType);
+        throw "Expected " + getPQLTokenLabel(temp) + " but tokens were empty\n";
+    }
     PQLToken tok = peek();
     if (tok.type == exepctedType)
     {
@@ -238,8 +242,9 @@ shared_ptr<Ref> PQLParser::parseRef()
     }
     case PQLTokenType::NAME: {
         auto syn = parseSynonym();
-
+  
         if (!tokensAreEmpty() && peek().type == PQLTokenType::DOT) {
+            
             // parse attr ref
             eat(PQLTokenType::DOT);
             shared_ptr<AttrName> attrName = parseAttrName();
@@ -249,6 +254,7 @@ shared_ptr<Ref> PQLParser::parseRef()
         else {
             return make_shared<Ref>(RefType::SYNONYM, syn->getValue());
         }
+        
     }
     case PQLTokenType::STRING: {
         auto str = eat(PQLTokenType::STRING);

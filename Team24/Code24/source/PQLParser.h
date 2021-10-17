@@ -1426,7 +1426,13 @@ public:
     inline bool containsSynonym(shared_ptr<Element> s)
     {
         // TODO (@jiachen247) does attrRef syn.attr counts as containing a syn?
-        return find(synonymsUsed.begin(), synonymsUsed.end(), s->getSynonymString()) != synonymsUsed.end();
+
+        const string& toCheck = s->getSynonymString();
+        for (auto& x : synonymsUsed) {
+            if (x == toCheck) return true;
+        }
+
+        return false;
     }
 
     inline const vector<string>& getAllSynonymsAsString()
@@ -1603,6 +1609,7 @@ public:
             if (flag)
                 break;
         }
+
         return flag;
     }
 
