@@ -17,26 +17,6 @@ class PKB
   public:
     using SharedPtr = std::shared_ptr<PKB>;
 
-    enum class Relation
-    {
-        // Parent
-        Parent = 0,
-        Child = 1,
-        // ParentT
-        ParentT = 2,
-        ChildT = 3,
-        // Follow
-        Before = 4,
-        After = 5,
-        // FollowT
-        BeforeT = 6,
-        AfterT = 7,
-        // Uses
-        Uses = 8,
-        // Modifies
-        Modifies = 9
-    };
-
     void initialise();
     void extractDesigns(shared_ptr<Program> program);
     void initializeCFG(shared_ptr<Program> program);
@@ -185,46 +165,6 @@ class PKB
         return mConstants;
     }
 
-    bool getCached(Relation rel, PKBDesignEntity a, PKBDesignEntity b, vector<int> &res)
-    {
-        try
-        {
-            // todo @nicholas: check if this is desired behavior
-            res = cache.at(rel).at(a).at(b);
-            return true;
-        }
-        catch (std::out_of_range)
-        {
-            // result does not exist in the map, it is not cached
-            return false;
-        }
-    }
-
-    bool getCachedSet(Relation rel, PKBDesignEntity a, PKBDesignEntity b, set<pair<int, int>> &res)
-    {
-        try
-        {
-            // todo @nicholas: check if this is desired behavior
-            res = cacheSet.at(rel).at(a).at(b);
-            return true;
-        }
-        catch (std::out_of_range)
-        {
-            // result does not exist in the map, it is not cached
-            return false;
-        }
-    }
-
-    void insertintoCache(Relation rel, PKBDesignEntity a, PKBDesignEntity b, vector<int> &res)
-    {
-        cache[rel][a][b] = res;
-    }
-
-    void insertintoCacheSet(Relation rel, PKBDesignEntity a, PKBDesignEntity b, set<pair<int, int>> &res)
-    {
-        cacheSet[rel][a][b] = res;
-    }
-
     const unordered_map<string, PKBVariable::SharedPtr> &getAllVariablesMap() const;
 
     /* ==================================== UTILITY TABLES ==================================== */
@@ -339,12 +279,6 @@ class PKB
     unordered_map<int, unordered_set<string>> ifPatternTable;
 
   protected:
-    // cache of our results, can be prebuilt
-    // using vector<int> as this stores results at the moment, can be returned
-    // immediately
-    map<Relation, map<PKBDesignEntity, map<PKBDesignEntity, vector<int>>>> cache;
-    map<Relation, map<PKBDesignEntity, map<PKBDesignEntity, set<pair<int, int>>>>> cacheSet;
-
     void addStatement(PKBStmt::SharedPtr &statement, PKBDesignEntity designEntity);
     void addProcedure(PKBProcedure::SharedPtr &procedure);
     void initializeFollowsTTables();
