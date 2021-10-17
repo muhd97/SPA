@@ -748,24 +748,25 @@ void PKB::initializeFollowsTTables()
         if (!isStatementType(deFollows)) continue;
 
         followsTSynUnderscoreTable[deFollows] = unordered_set<int>();
+        followsTSynUnderscoreTable[PKBDesignEntity::AllStatements] = unordered_set<int>();
 
 
         vector<PKBStmt::SharedPtr> followsStmts;
-        if (deFollows == PKBDesignEntity::AllStatements)
+        /*if (deFollows == PKBDesignEntity::AllStatements)
         {
             const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
             const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
             followsStmts.insert(followsStmts.end(), ifStmts.begin(), ifStmts.end());
-            followsStmts.insert(followsStmts.end(), whileStmts.begin(), whileStmts.end());
+            followsStmts.insert(followsStmts.end(), whileStmts.begin(), whileStmts.end());*/
 
             //addFollowsStmts(followsStmts);
-        }
+        /*}
         else
-        {
+        {*/
             // check these 'possible' follows statements
             followsStmts = getStatements(deFollows);
-        }
+        //}
 
         for (auto& stmt : followsStmts)
         {
@@ -779,6 +780,9 @@ void PKB::initializeFollowsTTables()
             if (flag)
             {
                 followsTSynUnderscoreTable[deFollows].insert(stmt->getIndex());
+                if (deFollows != PKBDesignEntity::AllStatements) {
+                    followsTSynUnderscoreTable[PKBDesignEntity::AllStatements].insert(stmt->getIndex());
+                }
             }
         }
 
