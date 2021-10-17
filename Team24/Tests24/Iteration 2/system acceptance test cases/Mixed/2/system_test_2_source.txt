@@ -3,7 +3,7 @@ procedure Main {
     read a; 
     b = a;
     read c;
-    d = (a * (b + 2)) * (c - 3);
+    d = ((a * (b + 2)) * (c - 3)) / (c * 2);
     if (d > 0) then {
         call A;
         read p;
@@ -25,16 +25,24 @@ procedure A {
             y = 6;
             call Print;
             z = (y / 3) * (b + 2) * (c - 3);
-            while ((z != 0) || (z < a)) {
+            while (((z != 0) || (z < a)) && (a == a)) {
                 z = z - a;
+                z = z + 3;
+                a = z / (z + 3);
             }
+            y = y + z;
         } else {
             b = b + 1;
+            while (3 == 4) {
+                a = 5 + 1;
+                print a;
+            }
+            a = a + b;
         }
     } else {
         c = 4;
         read c;
-        while (a + b > c) {
+        while (0 == 0) {
             d = c;
         }
     }
@@ -60,6 +68,8 @@ procedure B {
         }
     } else {
         c = 4;
+        read c;
+        c = (c + 2) * (c * 2);
         print c;
         while (a + b > c) {
             read d;
@@ -117,7 +127,7 @@ procedure Call {
 }
 
 procedure Assign {
-    x = (a * b) + (2 * (c - 2));
+    x = (a * b) + (2 * (c * 2));
 }
 
 procedure AssignY {
@@ -147,6 +157,7 @@ procedure ReadY {
 procedure E {
     print i;
     read j;
+    z = 6 + j;
     while (((i > 0) && (j == 3 + i)) || (i < j)) {
         i = i + 5;
         if (i > 0) then {
@@ -171,6 +182,7 @@ procedure E {
             call F;
         }
         j = j / 2;
+        z = j;
     }
 }
 
@@ -183,28 +195,43 @@ procedure F {
 }
 
 procedure WhileLoop {
-    while (a + 1 > b) {
+    while (a + 1 > 0) {
         while (a + 1 > b + 1) {
-            while (a + 1 > b) {
+            while (a + 1 > 0) {
+                b = 6;
                 while (a + 1 > b) {
                     while (a + 1 > b + 1) {
                         while (a + 1 > b) {
-                            while (a + 1 > b) {
+                            while (a + 1 > 0) {
                                 while (a + 1 > b + 1) {
+                                    a = 5;
                                     while (a + 1 > b) {
                                         while (a + 1 > b) {
                                             while (a + 1 > b + 1) {
                                                 while (a + 1 > b) {
                                                     while (a + 1 > b + 1) {
+                                                        read b;
                                                         while (a + 1 > b) {
+                                                            x = x + 1;
+                                                            a = x;
+                                                            x = a;
+                                                            b = a;
                                                             while (a + 1 > b) {
                                                                 while (a + 1 > b + 1) {
                                                                     while (a + 1 > b) {
                                                                         while (a + 1 > b) {
                                                                             while (a + 1 > b + 1) {
-                                                                                while (a + 1 > b) {
-                                                                                    a = a + 3;
-                                                                                    b = b + 2;
+                                                                                while (1 == 2) {
+                                                                                    while (a + 1 > b) {
+                                                                                        while (a + 1 > b) {
+                                                                                            while (a + 1 > b + 1) {
+                                                                                                while (1 == 2) {
+                                                                                                    a = a + 3;
+                                                                                                    b = b + 1;
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
                                                                                 }
                                                                             }
                                                                         }
@@ -214,16 +241,21 @@ procedure WhileLoop {
                                                         }
                                                     }
                                                 }
+                                                a = j / x * (b + 4)
                                             }
                                         }
                                     }
+                                    print a;
                                 }
                             }
                         }
                     }
+                    print b;
+                    b = a + 1;
                 }
             }
         }
+        read a;
     }
 }
 
@@ -239,6 +271,8 @@ procedure IfElse {
                     if (a > b + 1) then {
                         if (a > b + 1) then {
                             print a;
+                            b = a + c * 2;
+                            a = ((b + 2) * c) - 3;
                         } else {
                             if (a > b + 1) then {
                                 if (a > b + 1) then {
@@ -251,6 +285,7 @@ procedure IfElse {
                                             print a;
                                         }
                                     } else {
+                                        a = (b + 2) * (c - 3);
                                         print a;
                                     }
                                 }
@@ -259,11 +294,14 @@ procedure IfElse {
                             }
                         }
                     } else {
+                        c = b * c + 2;
                         print a;
                     }
                 }
             } else {
+                a = ((y / 3) * (b + 2)) * (c - 3);
                 print a;
+                c = b * (c + 2);
             }
         }
     } else {
@@ -277,12 +315,19 @@ procedure IfWhile {
             if (a < b) then {
                 while (a > b / 5) {
                     read a;
+                    j = c * 2 * a;
                     if (a == b) then {
                         while (a > b / 6) {
-                            if (a != b) then {.
+                            if (a != b) then {
                                 print b;
                             } else {
-                                print a;
+                                while (6 == 6) {
+                                    if (1 > 3) then {
+                                        print b;
+                                    } else {
+                                        a = 6 + a;
+                                    }
+                                }
                             }
                         }
                     } else {
@@ -347,5 +392,9 @@ procedure IfWhile {
                 }
             }
         }
+        z = (c * (z * 2));
+        print z;
+        read j;
+        print j;
     }
 }

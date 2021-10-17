@@ -1,4 +1,4 @@
-1 - Select all procedure // answers not updated
+1 - Select all procedure
 procedure p;
 Select p
 Main, A, B, C, D, E, F, Call, Assign, AssignY, Print, PrintX, Read, ReadY
@@ -186,7 +186,7 @@ Select w such that Parent(_, w)
 38 - Select if such that Parent(_, if)
 if ifs;
 Select ifs such that Parent(_, ifs)
-18,34,50,65,70,92,93
+18, 34, 50, 65, 70, 92, 93
 5000
 39 - Select a such that Parent(_, a)
 assign a;
@@ -841,7 +841,7 @@ Select <ifs, w> such that Uses(114, "x")
 169 - Select a, v such that Uses(a, v)
 assign a; variable v;
 Select <a, v> such that Uses(a, v)
-3 a,5 a,5 b,5 c,11 b,11 c,14 a,14 b,14 c,17 a,21 b,21 c,21 y,23 a,23 z,24 b,28 c,30 a,30 b,30 c,35 y,38 b,38 c,40 y,47 c,53 x,56 x,59 i,62 p,67 a,67 p,68 q,78 a,78 b,78 c,79 a,79 b,79 c,91 i,94 c,94 j,95 i,95 j,97 c,97 d,97 j,98 j, 101 x,103 c,103 i,106 x,108 j
+3 a,5 a,5 b,5 c,11 b,11 c,14 a,14 b,14 c,17 a,21 b,21 c,21 y,23 a,23 z,24 b,28 c,30 a,30 b,30 c,33 x,35 y,38 b,38 c,40 y,47 c,53 x,56 x,59 i,62 p,67 a,67 p,68 q,78 a,78 b,78 c,79 a,79 b,79 c,91 i,94 c,94 j,95 i,95 j,97 c,97 d,97 j,98 j, 101 x,103 c,103 i,106 x,108 j
 5000
 170 - Select pn, v such that Uses(pn, v)
 print pn; variable v;
@@ -881,7 +881,7 @@ Select v such that Uses(_, v)
 176 - Select a.stmt# such that Uses(a, _)
 assign a;
 Select a.stmt# such that Uses(a, _)
-5,11,14,17,21,23,24,28,3,30,35,38,40,47,53,56,59,62,67,68,78,79,91,94,95,97,98,101,103,106,108
+3,5,11,14,17,21,23,24,28,30,33,35,38,40,47,53,56,59,62,67,68,78,79,91,94,95,97,98,101,103,106,108
 5000
 177 - Select pn such that Uses(pn, _)
 print pn;
@@ -1045,7 +1045,7 @@ Select a such that Modifies(a, _)
 5000
 209 - Select r such that Modifies(r, _)
 read r;
-Select r such that Modifies(r, _)
+Select r such that Modifies(r, _) 
 2, 4, 8, 26, 36, 46, 71, 75, 84, 85, 86, 87, 89, 96, 100
 5000
 210 - Select ifs.stmt# such that Modifies(ifs, _)
@@ -1747,4 +1747,589 @@ FALSE
 
 Select BOOLEAN such that Affects(95, 97)
 FALSE
+5000
+350 - Select BOOLEAN such that Affects(#, #) = False (with assign in between that modifies)
+
+Select BOOLEAN such that Affects(66, 68)
+FALSE
+5000
+351 - Select w such that Affects(#, #) = False (Wrong order)
+while w;
+Select w such that Affects(67, 66)
+
+5000
+352 - Select pn such that Affects(#, #) = False (next line do not modify)
+print pn;
+Select pn such that Affects(68, 69)
+
+5000
+353 - Select r.stmt# such that Affects(#, #) = False (Invalid stmt number - 0)
+read r;
+Select r.stmt# such that Affects(0, 1)
+
+5000
+354 - Select w, r such that Affects(#, #) = False (Out of range stmt number)
+while w; read r;
+Select <w, r> such that Affects(#, #)
+
+5000
+355 - Select BOOLEAN such that Affects(s, #) where # is the start of new if/while block
+
+Select BOOLEAN such that Affects(s, 33)
+FALSE
+5000
+356 - Select BOOLEAN such that Affects(#, s) where # is the start of new if/while block
+stmt s;
+Select s such that Affects(30, s)
+33
+5000
+357 - Select s such that Affects(s, #) where # is a if/while condition
+stmt s;
+Select s such that Affects(s, 32)
+
+5000
+358 - Select a.stmt# such that Affects(a, #) where # is a read stmt
+assign a;
+Select a.stmt# such that Affects(a, 96)
+
+5000
+359 - Select s.stmt# such that Affects(s, #) where # is a print stmt
+stmt s;
+Select s.stmt# such that Affects(s, 102)
+
+5000
+360 - Select a.stmt# such that Affects(#, a) where # is a assign stmt
+assign a;
+Select a.stmt# such that Affects(66, a)
+67
+5000
+361 - Select a1, a2 such that Affects(a1, a2)
+assign a1, a2;
+Select <a1, a2> such that Affects(a1, a2)
+105 106,108 108,108 94,108 95,108 97,108 98,17 23,19 21,21 23,23 23,3 5,30 33,35 40,40 40,43 47,54 56,57 59,60 62,66 67,67 68,91 103,91 91,94 91,94 95,97 103,97 94,97 97
+5000
+362 - Select BOOLEAN such that Affects(c, a) (FALSE)
+call c; assign a;
+Select BOOLEAN such that Affects(c, a)
+FALSE
+5000
+363 - Select BOOLEAN such that Affects(_, _) (TRUE; Meaningless query)
+
+Select BOOLEAN such that Affects(_, _)
+TRUE
+5000
+364 - Select a such that Affects(a, _)
+assign a;
+Select a such that Affects(a, _)
+105,108,17,19,21,23,3,30,35,40,43,54,57,60,66,67,91,94,97
+5000
+365 - Select a such that Affects(_, a)
+assign a;
+Select a such that Affects(_, a)
+103,106,108,21,23,33,40,47,5,56,59,62,67,68,91,94,95,97,98
+5000
+366 - Select cs such that Affects(1, _) = True
+constant cs;
+Select cs such that Affects(1, _)
+
+5000
+367 - Select pn such that Affects(#, _) = False (# is out of range)
+print pn;
+Select pn such that Affects(114, _)
+
+5000
+368 - Error
+stmt s; assignment a1, a2;
+Select x such that Affects(a1, a2)
+
+5000
+369 - Error
+stmt s; assignment a1, a2;
+Select n1 such that Affects(a1, x)
+
+5000
+370 - Select BOOLEAN such that Affects*(#, #) = True (consecutive)
+
+Select BOOLEAN such that Affects*(66, 67)
+TRUE
+5000
+371 - Select p such that Affects*(#, #) = True (with call in between that does not modifies)
+procedure p;
+Select p such that Affects*(54, 56)
+Main, A, B, C, D, E, F, Call, Assign, AssignY, Print, PrintX, Read, ReadY
+5000
+372 - Select pn such that Affects*(#, #) = True (with print in between that does not modifies)
+print pn;
+Select pn such that Affects*(19, 21)
+9, 12, 41, 44, 58, 61, 69, 72, 77, 80, 81, 82, 83, 88, 102, 112, 113
+5000
+373 - Select BOOLEAN such that Affects*(#, #) = False (with call in between that modifies)
+
+Select BOOLEAN such that Affects*(51, 53)
+FALSE
+5000
+374 - Select BOOLEAN such that Affects*(#, #) = False (with read in between that modifies)
+
+Select BOOLEAN such that Affects*(95, 97)
+FALSE
+5000
+375 - Select BOOLEAN such that Affects*(#, #) = True (with assign in between that modifies)
+
+Select BOOLEAN such that Affects*(66, 68)
+TRUE
+5000
+376 - Select w such that Affects*(#, #) = False (Wrong order)
+while w;
+Select w such that Affects*(67, 66)
+
+5000
+377 - Select pn such that Affects*(#, #) = False (next line do not modify)
+print pn;
+Select pn such that Affects*(68, 69)
+
+5000
+378 - Select r.stmt# such that Affects*(#, #) = False (Invalid stmt number - 0)
+read r;
+Select r.stmt# such that Affects*(0, 1)
+
+5000
+379 - Select w, r such that Affects*(#, #) = False (Out of range stmt number)
+while w; read r;
+Select <w, r> such that Affects*(#, #)
+
+5000
+380 - Select BOOLEAN such that Affects*(s, #) where # is the start of new if/while block
+
+Select BOOLEAN such that Affects*(s, 33)
+FALSE
+5000
+381 - Select BOOLEAN such that Affects*(#, s) where # is the start of new if/while block
+stmt s;
+Select s such that Affects*(30, s)
+33
+5000
+382 - Select s such that Affects*(s, #) where # is a if/while condition
+stmt s;
+Select s such that Affects*(s, 32)
+
+5000
+383 - Select a.stmt# such that Affects*(a, #) where # is a read stmt
+assign a;
+Select a.stmt# such that Affects*(a, 96)
+
+5000
+384 - Select s.stmt# such that Affects*(s, #) where # is a print stmt
+stmt s;
+Select s.stmt# such that Affects*(s, 102)
+
+5000
+385 - Select a.stmt# such that Affects*(#, a) where # is a assign stmt
+assign a;
+Select a.stmt# such that Affects*(66, a)
+67, 68
+5000
+386 - Select a1, a2 such that Affects*(a1, a2)
+assign a1, a2;
+Select <a1, a2> such that Affects*(a1, a2)
+108 103,108 91,19 23,66 68,94 103,97 91,97 95,105 106,108 108,108 94,108 95,108 97,108 98,17 23,19 21,21 23,23 23,3 5,30 33,35 40,40 40,43 47,54 56,57 59,60 62,66 67,67 68,91 103,91 91,94 91,94 95,97 103,97 94,97 97
+5000
+387 - Select BOOLEAN such that Affects*(c, a) (FALSE)
+call c; assign a;
+Select BOOLEAN such that Affects*(c, a)
+FALSE
+5000
+388 - Select BOOLEAN such that Affects*(_, _) (TRUE; Meaningless query)
+
+Select BOOLEAN such that Affects*(_, _)
+TRUE
+5000
+389 - Select a such that Affects*(a, _)
+assign a;
+Select a such that Affects*(a, _)
+105,108,17,19,21,23,3,30,35,40,43,54,57,60,66,67,91,94,97
+5000
+390 - Select a such that Affects*(_, a)
+assign a;
+Select a such that Affects*(_, a)
+103,106,108,21,23,33,40,47,5,56,59,62,67,68,91,94,95,97,98
+5000
+391 - Select cs such that Affects*(1, _) = True
+constant cs;
+Select cs such that Affects*(1, _)
+
+5000
+392 - Select pn such that Affects*(#, _) = False (# is out of range)
+print pn;
+Select pn such that Affects*(114, _)
+
+5000
+393 - Error
+stmt s; assignment a1, a2;
+Select x such that Affects*(a1, a2)
+
+5000
+394 - Error
+stmt s; assignment a1, a2;
+Select n1 such that Affects*(a1, x)
+
+5000
+395 - (WITH) Select if such that Parent(if, s)
+if ifs; stmt s;
+Select ifs such that Parent(ifs, s) with s.stmt# = 18
+16
+5000
+396 - (WITH AND) Select variables such that Parent*(#, #) = True
+variable v; prog_line n; assign a;
+Select v such that Parent*(n, a) with n = 32 and a.stmt# = 35
+a, b, c, d, i, j, p, q, x, y, z
+5000
+397 - (WITH) Select cs such that Follows(6, _) = True
+constant cs; stmt s;
+Select cs such that Follows(s, _) with s.stmt# = 6 and cs.value = s.stmt#
+6
+5000
+398 - (WITH) Select s, cs such that Follows*(#, s)
+stmt s; constant cs; if ifs;
+Select <s, cs> such that Follows*(ifs, s) with ifs.stmt# = 50 and s.stmt# = 57 and cs.value = 2
+57 2
+5000
+399 - (WITH) Select w1, w2 such that Uses(#, v)
+while w1, w2;
+Select <w1, w2> such that Uses(13, "a") with w1.stmt# = 104
+104 104,104 111,104 22,104 27,104 39,104 45,104 49,104 63,104 64,104 90
+5000
+400 - (WITH) Select cs such that Modifies(#, v)
+constant cs; stmt s;
+Select cs such that Modifies(s, "a") with s.stmt# = 2 and cs.value = 4
+4
+5000
+401 - (WITH) Select p such that Calls(p, _)
+procedure p;
+Select p such that Calls(p, _) with p.procName = "Call"
+Call
+5000
+402 - (WITH) Select p.procName such that Calls*(p, NAME)
+procedure p1, p2;
+Select p1.procName such that Calls*(p1, p2) with p2.procName = "Read"
+Main, A, D, E, F, Call
+5000
+403 - (WITH) Select p1, p2 such that Next(#, #)
+procedure p1, p2; while w; stmt s;
+Select <p1, p2> such that Next(s, w) with s.stmt# = 23 and w.stmt# = 22
+A A,A Assign,A AssignY,A B,A C,A Call,A D,A E,A F,A Main,A Print,A PrintX,A Read,A ReadY,Assign A,Assign Assign,Assign AssignY,Assign B,Assign C,Assign Call,Assign D,Assign E,Assign F,Assign Main,Assign Print,Assign PrintX,Assign Read,Assign ReadY,AssignY A,AssignY Assign,AssignY AssignY,AssignY B,AssignY C,AssignY Call,AssignY D,AssignY E,AssignY F,AssignY Main,AssignY Print,AssignY PrintX,AssignY Read,AssignY ReadY,B A,B Assign,B AssignY,B B,B C,B Call,B D,B E,B F,B Main,B Print,B PrintX,B Read,B ReadY,C A,C Assign,C AssignY,C B,C C,C Call,C D,C E,C F,C Main,C Print,C PrintX,C Read,C ReadY,Call A,Call Assign,Call AssignY,Call B,Call C,Call Call,Call D,Call E,Call F,Call Main,Call Print,Call PrintX,Call Read,Call ReadY,D A,D Assign,D AssignY,D B,D C,D Call,D D,D E,D F,D Main,D Print,D PrintX,D Read,D ReadY,E A,E Assign,E AssignY,E B,E C,E Call,E D,E E,E F,E Main,E Print,E PrintX,E Read,E ReadY,F A,F Assign,F AssignY,F B,F C,F Call,F D,F E,F F,F Main,F Print,F PrintX,F Read,F ReadY,Main A,Main Assign,Main AssignY,Main B,Main C,Main Call,Main D,Main E,Main F,Main Main,Main Print,Main PrintX,Main Read,Main ReadY,Print A,Print Assign,Print AssignY,Print B,Print C,Print Call,Print D,Print E,Print F,Print Main,Print Print,Print PrintX,Print Read,Print ReadY,PrintX A,PrintX Assign,PrintX AssignY,PrintX B,PrintX C,PrintX Call,PrintX D,PrintX E,PrintX F,PrintX Main,PrintX Print,PrintX PrintX,PrintX Read,PrintX ReadY,Read A,Read Assign,Read AssignY,Read B,Read C,Read Call,Read D,Read E,Read F,Read Main,Read Print,Read PrintX,Read Read,Read ReadY,ReadY A,ReadY Assign,ReadY AssignY,ReadY B,ReadY C,ReadY Call,ReadY D,ReadY E,ReadY F,ReadY Main,ReadY Print,ReadY PrintX,ReadY Read,ReadY ReadY
+5000
+404 - (WITH) Select s such that Next*(#, s)
+stmt s; while w;
+Select s such that Next*(w, s) with w.stmt# = 64
+63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74
+5000
+405 - (WITH Error) Select p such that Affects(#, #) = True (Missing .stmt#)
+procedure p; assign a1, a2;
+Select p such that Affects(a1, a2) with a1.stmt# = 54 and a2 = 56
+
+5000
+406 - (WITH) Select a.stmt# such that Affects*(#, a)
+assign a; stmt s;
+Select a.stmt# such that Affects*(s, a) with s.stmt# = 66
+67, 68
+5000
+407 - Select a1 pattern a(_, a) (Exact match)
+assign a1, a;
+Select a1 pattern a(_, "0")
+1,101,103,105,106,108,11,14,17,19,21,23,24,25,28,3,30,33,35,38,40,42,43,47,5,51,53,54,56,57,59,60,62,66,67,68,78,79,91,94,95,97,98
+5000
+408 - Select a pattern a(_, a) (Exact match)
+assign a;
+Select a pattern a(_, "(b + 2) * (c - 3)")
+11
+5000
+409 - Select a pattern a(_, a) (Exact match)
+assign a;
+Select a pattern a(_, "((a * b) + (2 * (c - 2)))")
+78
+5000
+410 - Select a pattern a(_, a) (Exact match Not Found)
+assign a;
+Select a pattern a(_, "((a * b) + (2 * c) - 2)")
+
+5000
+411 - Select a pattern a(_, _a_) (Partial match)
+assign a;
+Select a pattern a(_, _"(b + 2) * (c - 3)"_)
+11
+5000
+412 - Select a pattern a(_, _a_) 
+assign a;
+Select a pattern a(_, _""_)
+
+5000
+413 - Select a pattern a(_, _a_) ( missing first var or const)
+assign a;
+Select a pattern a(_, _"+ 2"_)
+
+5000
+414 - Select a pattern a(_, _a_) (Partial match)
+assign a;
+Select a pattern a(_, _"(((y / 3) * (b + 2)) * (c - 3))"_)
+21
+5000
+415 - Select a pattern a(_, _a_) (Partial match Not Found)
+assign a;
+Select a pattern a(_, _"b / 2"_)
+
+5000
+416 - Select a pattern a(v, a) (Exact match)
+assign a;
+Select a pattern a("d", "c")
+28, 47
+5000
+417 - Select a pattern a(v, a) (Exact match)
+assign a;
+Select a pattern a("z", "((y / 3) * (b + 2)) * (c - 3)")
+21
+5000
+418 - Select a pattern a(v, a) (Exact match Not Found)
+assign a;
+Select a pattern a("z", "(y / 3) * ((b + 2) * (c - 3))")
+
+5000
+419 - Select a pattern a(v, _a_) (Partial match)
+assign a;
+Select a pattern a("a", _"(b + 2) * (c - 3)"_)
+11
+5000
+420 - Select a1 pattern a(v, _a_) (Partial match - General result)
+assign a, a1;
+Select a1 pattern a("p", _"q"_)
+1,101,103,105,106,108,11,14,17,19,21,23,24,25,28,3,30,33,35,38,40,42,43,47,5,51,53,54,56,57,59,60,62,66,67,68,78,79,91,94,95,97,98
+5000
+421 - Select a pattern a(v, _a_) (Partial match)
+assign a;
+Select a pattern a("z", _"b + 2"_)
+21, 38
+5000
+422- Select a pattern a(v, _a_) (Partial match)
+assign a;
+Select a pattern a("p", _"c * 2"_)
+103
+5000
+423 - Select a pattern a(v, _a_) (Partial match)
+assign a;
+Select a pattern a("d", _"a * (b + 2)"_)
+5
+5000
+424 - Select a pattern a(_, _a_) (Partial match Not Found)
+assign a;
+Select a pattern a("x", _"a * (b + 2) * c"_)
+
+5000
+425 - Select a pattern a(v, _)
+assign a;
+Select a pattern a("x", _)
+105,106,14,30,51,54,78,98
+5000
+426 - Select a pattern a(v, a) (Variable Not Found)
+assign a;
+Select a pattern a("w", "")
+
+5000
+427 - Select a pattern a(_, _)
+assign a;
+Select a pattern a(_, _)
+1,101,103,105,106,108,11,14,17,19,21,23,24,25,28,3,30,33,35,38,40,42,43,47,5,51,53,54,56,57,59,60,62,66,67,68,78,79,91,94,95,97,98
+5000
+428 - Error (pattern)
+assign a;
+Select a pattern a(_, ")
+
+5000
+429 - Error (pattern)
+assign a;
+Select a pattern a(_, "_)
+
+5000
+430 - Error (pattern)
+assign a;
+Select a pattern a(_, ")
+
+5000
+431 - Select ifs pattern ifs(_,_,_)
+if ifs;
+Select ifs pattern ifs(_,_,_)
+16,18,32,34,50,6,65,70,92,93
+5000
+432 - Select ifs pattern ifs(v,_,_) (used)
+if ifs;
+Select ifs pattern ifs("i",_,_)
+92, 93
+5000
+433 - Select ifs pattern ifs(v,_,_) (used)
+if ifs;
+Select ifs pattern ifs("b",_,_)
+16, 50
+5000
+434 - Select ifs pattern ifs(v,_,_) (not used)
+if ifs;
+Select ifs pattern ifs("q",_,_)
+
+5000
+435 - Select ifs pattern ifs(v,s,_)
+if ifs;
+Select ifs pattern ifs("j",94,_)
+
+5000
+436 - Error: Select ifs pattern ifs(v,_) 
+if ifs;
+Select ifs pattern ifs("b",_)
+
+5000
+437 - Select w pattern w(_,_)
+while w;
+Select w pattern w(_,_)
+104,111,22,27,39,45,63,64,90
+5000
+438 - Select w pattern w(v,_) (used)
+while w;
+Select w pattern w("b",_)
+27, 45
+5000
+439 - Select w pattern w(v,_) (used)
+while w;
+Select w pattern w("x",_) 
+63, 64
+5000
+440 - Select w pattern w(v,_) (not used)
+while w;
+Select w pattern w("i",_)
+104, 111, 90
+5000
+441 - Select w pattern w(v,s) (specify container)
+while w;
+Select w pattern w(v, 65)
+
+5000
+442 - Error
+while w;
+Select w pattern w(v,_,_) 
+
+5000
+443 - Select a1, a2 pattern a1(v, _) and a2(_, a)
+assign a1, a2;
+Select <a1, a2> pattern a1("x", _) and a2(_, _"b + 2"_)
+105 11,105 21,105 30,105 38,105 5,106 11,106 21,106 30,106 38,106 5,14 11,14 21,14 30,14 38,14 5,30 11,30 21,30 30,30 38,30 5,51 11,51 21,51 30,51 38,51 5,54 11,54 21,54 30,54 38,54 5,78 11,78 21,78 30,78 38,78 5,98 11,98 21,98 30,98 38,98 5
+5000
+444 - Select w1, w2 pattern w1(v, _) and w2(v, _)
+while w1, w2;
+Select <w1, w2> pattern w1("a", _) and w2("x", _)
+22 63,22 64,27 63,27 64,39 63,39 64,45 63,45 64,63 63,63 64,64 63,64 64
+5000
+445 - Select if1, if2 pattern if1(v, _, _) and if2(v, _, _)
+if if1, if2;
+Select <if1, if2> pattern if1("a", _, _) and if2("x", _, _)
+16 32,16 34,16 65,16 70,18 32,18 34,18 65,18 70,32 32,32 34,32 65,32 70,34 32,34 34,34 65,34 70,50 32,50 34,50 65,50 70,70 32,70 34,70 65,70 70
+5000
+446 - Select a, w pattern a(v, _) and w(v, _)
+assign a; while w;
+Select <a, w> pattern a("a", _) and w("y", _)
+1 39,1 63,11 39,11 63,17 39,17 63,33 39,33 63,62 39,62 63
+5000
+447 - Select w, if1, if2 pattern w(v, _) and if1(v, _, _) and if2(v, _, _)
+while w; if if1, if2; assign a;
+Select <w, if1, if2, a> pattern w("b", _) and if1("i", _, _) and if2("j", _, _) and a(_, "0")
+27 92 93 1,27 92 93 51,27 92 93 54,27 92 93 57,27 92 93 60,27 93 93 1,27 93 93 51,27 93 93 54,27 93 93 57,27 93 93 60,45 92 93 1,45 92 93 51,45 92 93 54,45 92 93 57,45 92 93 60,45 93 93 1,45 93 93 51,45 93 93 54,45 93 93 57,45 93 93 60
+5000
+448 - Select a, ifs, c pattern a(_, a) and ifs(v, _, _)
+assign a; if ifs; call c;
+Select <a, ifs, c> pattern a(_, "b + 4") and ifs("y", _, _)
+
+5000
+449 - Select if1, if2 pattern if2(v, _, _) such that Parent(if1, if2) 
+if if1, if2;
+Select <if1, if2> pattern if2("a", _, _) such that Parent(if1, if2) 
+16 18, 32 34, 65 70
+5000
+450 - Select s such that Parent(s, a) pattern a(_, a) with a.stmt# = 23
+stmt s; assign a; 
+Select s such that Parent(s, a) pattern a(_, "z - a") with a.stmt# = 23
+22
+5000
+451 - Select a.stmt# such that Parent*(#, a) pattern a(_, _a_)
+assign a;
+Select a.stmt# such that Parent*(16, a) pattern a(_, _"c"_)
+21, 28
+5000
+452 - Select if1, if2 pattern if2(v, _, _) such that Parent*(if1, if2) with if1.stmt# = 16
+if if1, if2;
+Select <if1, if2> pattern if2("a", _, _) such that Parent*(if1, if2) with if1.stmt# = 16
+16 18
+5000
+453 - Select s, ifs pattern ifs(v, _, _) and ifs(v, _, _) such that Follows(ifs, s)
+stmt s; if ifs;
+Select <s, ifs> pattern ifs("a", _, _) and ifs("b", _, _) such that Follows(ifs, s)
+29 16, 57 50
+5000
+454 - Select BOOLEAN pattern a(v, _) such that Follows*(a, r) with r.stmt# = 2
+assign a; read r;
+Select BOOLEAN pattern a("a", _) such that Follows*(a, r) with r.stmt# = 2
+TRUE
+5000
+455 - Select if, s such that Parent(if, s) and Next(if, a) with s.stmt# = a.stmt#
+if ifs; stmt s; assign a;
+Select <ifs, s> such that Parent(ifs, s) and Next(ifs, a) with s.stmt# = a.stmt#
+16 17,16 25,18 19,18 24,32 33,32 43,34 35,34 42,50 51,50 54,65 66,92 103,93 94,93 98
+5000
+456 - Select w, s such that Parent*(w, s) and Uses(w, v) and Modifies(s, v)
+while w; stmt s;
+Select <w, s> such that Parent*(w, s) and Uses(w, "y") and Modifies(s, "y")
+39 40,63 64,63 65,63 70,63 74,64 65,64 70,64 74,90 101,90 92,90 93
+5000
+457 - Select a, pn, w such that Follows(a, pn) and Uses(pn, v) and Follows*(a, w)
+assign a; print pn; while w;
+Select <a, pn, w> such that Follows(a, pn) and Uses(pn, "c") and Follows*(a, w)
+43 44 45
+5000
+458 - Select a, s such that Follows*(a, s) and Next(a, s)
+assign a; stmt s;
+Select <a, s> such that Follows*(a, s) and Next(a, s)
+1 2,101 102,103 104,105 106,11 12,14 15,17 18,19 20,21 22,25 26,3 4,30 31,33 34,35 36,38 39,40 41,43 44,5 6,51 52,54 55,57 58,60 61,66 67,67 68,68 69,91 92,94 95,95 96,98 99
+5000
+459 - Select s, a such that Calls(p1, p2) and Modifies(a, v)
+stmt s; assign a; procedure p1, p2; variable v;
+Select <s, a> such that Calls(p1, p2) and Modifies(a, v) and Uses(a, v) with s.stmt# = 99
+99 106,99 108,99 17,99 23,99 24,99 35,99 40,99 91,99 97
+5000
+460 - Select v.varName such that Uses(w, v) and Follows*(s1, s2)
+variable v; while w; stmt s1, s2;
+Select v.varName such that Uses(w, v) and Follows*(s1, s2)
+a,b,c,d,i,j,p,q,x,y,z
+5000
+461 - Select c.procName such that Uses(a, v) and Parent*(ifs, w) and Next(c, r) 
+call c; assign a; variable v; if ifs; while w; read r;
+Select c.procName such that Uses(a, v) and Parent*(ifs, w) and Next(c, r)
+A, PrintX
+5000
+462 - Select BOOLEAN such that Uses(a, v) and Parent(ifs, w) and Next(c, r) and Modifies(pn, v)
+assign a; if is; while w; call c; read r; print pn; variable v;
+Select BOOLEAN such that Uses(a, "x") and Parent(ifs, w) and Next(c, r) and Modifies(pn, v)
+FALSE
+5000
+463 - Select if, s, a pattern a(_, _a_) such that Parent(if, s) and Next(if, a) with s.stmt# = a.stmt#
+if ifs; stmt s; assign a;
+Select <ifs, s, a> pattern a(_, _"a + 4"_) such that Parent(ifs, s) and Next(ifs, a) with s.stmt# = a.stmt#
+16 17 17
+5000
+464 - Select w, a pattern w(v, _) and a(_, a) such that Parent*(w, s) and Uses(w, v) and Modifies(s, v) and a.stmt# = s.stmt#
+while w; assign a; stmt s;
+Select <w, a> pattern w("y", _) and a(_, "y / 6") such that Parent*(w, s) and Uses(w, "y") and Modifies(s, "y") and a.stmt# = s.stmt#
+
+5000
+465 - Select w, ifs, a pattern w(v, _) and ifs(v, _, _) such that Parent*(w, if) and Parent*(w, a) and Follows(ifs, a) and Uses(w, v) with v.varName = v
+while w; if ifs; assign a;
+Select <w, ifs, a> pattern w("a", _) and ifs("p", _, _) such that Parent*(w, if) and Parent*(w, a) and Follows(ifs, a) and Uses(w, v) with v.varName = "x"
+
+5000
+466 - Select cs pattern ifs(v, _, _) such that Follows*(n, _) with n = 6 such that Uses(a, v) with v.varName = v
+constant cs; prog_line n; variable v; if ifs; assign a;
+Select cs pattern ifs("d", _, _) such that Follows*(n, _) with n = 6 such that Uses(a, v) with v.varName = "p"
+0,1,10,2,20,3,4,5,6,8
 5000
