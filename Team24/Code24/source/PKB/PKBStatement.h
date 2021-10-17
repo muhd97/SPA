@@ -1,11 +1,11 @@
 #pragma once
+#include "PKBGroup.h"
 #include <memory>
 #include <vector>
-#include "PKBGroup.h"
 
 using namespace std;
 
-//Old PKBStatement class with combined meaning of Stmt and Procedure
+// Old PKBStatement class with combined meaning of Stmt and Procedure
 class PKBStatement
 {
   public:
@@ -58,7 +58,8 @@ class PKBStatement
         return mUses;
     }
 
-    const vector<string>& getUsedVariablesAsString() {
+    const vector<string> &getUsedVariablesAsString()
+    {
         return mUsesStringVector;
     }
 
@@ -94,7 +95,8 @@ class PKBStatement
 
     void addUsedVariable(PKBVariable::SharedPtr &variable)
     {
-        if (mUses.find(variable) == mUses.end()) {
+        if (mUses.find(variable) == mUses.end())
+        {
             mUses.insert(variable);
             mUsesStringVector.emplace_back(variable->getName());
         }
@@ -107,13 +109,15 @@ class PKBStatement
 
     void addUsedVariables(set<PKBVariable::SharedPtr> &variables)
     {
-        for (const auto ptr : variables) {
-            if (mUses.find(ptr) == mUses.end()) {
+        for (const auto ptr : variables)
+        {
+            if (mUses.find(ptr) == mUses.end())
+            {
                 mUses.insert(ptr);
                 mUsesStringVector.emplace_back(ptr->getName());
             }
         }
-        //mUses.insert(variables.begin(), variables.end());
+        // mUses.insert(variables.begin(), variables.end());
     }
 
     void addModifiedVariables(set<PKBVariable::SharedPtr> variables)

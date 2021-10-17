@@ -18,11 +18,12 @@ string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<SuchThatCl>>& suchThatClauses, vector<shared_ptr<ResultTuple>>& suchThatReturnTuples)
 {
-    shared_ptr<SuchThatCl> previousSelectCl = selectCl->suchThatClauses[0];
+    //shared_ptr<SuchThatCl> previousSelectCl = selectCl->suchThatClauses[0];
 
     /* TODO: @kohyida1997 current order of resolving such-that clauses is in
      * order of their appearance. This needs to change in iteraton 2 and 3 */
-    for (unsigned int i = 0; i < selectCl->suchThatClauses.size(); i++)
+    int N = selectCl->suchThatClauses.size();
+    for (int i = 0; i < N; i++)
     {
         if (i == 0)
         {
@@ -34,6 +35,7 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
             vector<shared_ptr<ResultTuple>> joinedRes;
             joinedRes.reserve(suchThatReturnTuples.size());
 
+
             handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
 
             if (currSuchThatRes.size() == 0) { // Early termination
@@ -41,15 +43,21 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
                 break;
             }
 
+
+            /* This is SLOW */
+            /*unordered_set<string>& setOfSynonymsToJoinOn =
+                getSetOfSynonymsToJoinOn(previousSelectCl, selectCl->suchThatClauses[i]);*/
+
             unordered_set<string>& setOfSynonymsToJoinOn =
-                getSetOfSynonymsToJoinOn(previousSelectCl, selectCl->suchThatClauses[i]);
+                getSetOfSynonymsToJoinOn(suchThatReturnTuples, currSuchThatRes);
 
             if (!setOfSynonymsToJoinOn.empty())
-                joinResultTuples(suchThatReturnTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
+                hashJoinResultTuples(suchThatReturnTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
             else
                 cartesianProductResultTuples(suchThatReturnTuples, currSuchThatRes, joinedRes);
 
-            previousSelectCl = selectCl->suchThatClauses[i];
+
+            //previousSelectCl = selectCl->suchThatClauses[i];
             suchThatReturnTuples = move(joinedRes);
         }
     }
@@ -57,9 +65,10 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
 
 void PQLProcessor::handleAllPatternClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<PatternCl>>& patternClauses, vector<shared_ptr<ResultTuple>>& patternTuples)
 {
-    shared_ptr<PatternCl> previousSelectCl = patternClauses[0];
+    //shared_ptr<PatternCl> previousSelectCl = patternClauses[0];
 
-    for (unsigned int i = 0; i < patternClauses.size(); i++)
+    int N = patternClauses.size();
+    for (int i = 0; i < N; i++)
     {
         if (i == 0)
         {
@@ -79,14 +88,14 @@ void PQLProcessor::handleAllPatternClauses(shared_ptr<SelectCl>& selectCl, const
             }
 
             unordered_set<string>& setOfSynonymsToJoinOn =
-                getSetOfSynonymsToJoinOn(previousSelectCl, patternClauses[i]);
+                getSetOfSynonymsToJoinOn(patternTuples, currSuchThatRes);
 
             if (!setOfSynonymsToJoinOn.empty())
-                joinResultTuples(patternTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
+                hashJoinResultTuples(patternTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
             else
                 cartesianProductResultTuples(patternTuples, currSuchThatRes, joinedRes);
 
-            previousSelectCl = selectCl->patternClauses[i];
+            //previousSelectCl = selectCl->patternClauses[i];
             patternTuples = move(joinedRes);
         }
     }
@@ -96,7 +105,8 @@ void PQLProcessor::handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const ve
 {
     auto& previousWithCl = selectCl->withClauses[0];
 
-    for (unsigned int i = 0; i < selectCl->withClauses.size(); i++)
+    int N = selectCl->withClauses.size();
+    for (int i = 0; i < N; i++)
     {
         if (i == 0)
         {
@@ -116,22 +126,95 @@ void PQLProcessor::handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const ve
             }
 
             unordered_set<string>& setOfSynonymsToJoinOn =
-                getSetOfSynonymsToJoinOn(previousWithCl, selectCl->withClauses[i]);
+                getSetOfSynonymsToJoinOn(currWithRes, withClauseTuples);
 
             if (!setOfSynonymsToJoinOn.empty())
-                joinResultTuples(withClauseTuples, currWithRes, setOfSynonymsToJoinOn, joinedRes);
+                hashJoinResultTuples(withClauseTuples, currWithRes, setOfSynonymsToJoinOn, joinedRes);
             else
                 cartesianProductResultTuples(withClauseTuples, currWithRes, joinedRes);
 
-            previousWithCl = selectCl->withClauses[i];
+            //previousWithCl = selectCl->withClauses[i];
             withClauseTuples = move(joinedRes);
         }
     }
 }
 
+vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
+{
+    vector<shared_ptr<Result>> toReturn;
+    const auto& elems = selectCl->target->getElements();
+    int numElements = elems.size();
+
+    if (numElements == 0) {
+
+        if (selectCl->target->isBooleanReturnType()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
+
+        return move(toReturn);
+    }
+
+    unordered_set<string> duplicateHelperSet;
+
+    vector<shared_ptr<ResultTuple>> res;
+
+    bool isFirst = true;
+
+    for (const auto& x : elems) {
+        if (isFirst) {
+            isFirst = false;
+            extractAllTuplesForSingleElement(selectCl, res, x);
+            duplicateHelperSet.insert(x->getSynonymString());
+            if (res.empty()) return move(toReturn);
+        }
+        else {
+            if (stringIsInsideSet(duplicateHelperSet, x->getSynonymString())) continue;
+            vector<shared_ptr<ResultTuple>> curr;
+            vector<shared_ptr<ResultTuple>> productRes;
+            extractAllTuplesForSingleElement(selectCl, curr, x);
+            duplicateHelperSet.insert(x->getSynonymString());
+            if (curr.empty()) return move(toReturn);
+            cartesianProductResultTuples(res, curr, productRes);
+            res = move(productRes);
+        }
+    }
+
+    duplicateHelperSet.clear();
+
+    for (auto tuple : res)
+    {
+        string temp;
+
+        for (int i = 0; i < numElements; i++) {
+            const auto& curr = elems[i];
+            const string& targetSynonymVal = curr->getSynonymString();
+
+            const string& val = (curr->getElementType() == ElementType::AttrRef)
+                ? resolveAttrRef(targetSynonymVal, static_pointer_cast<AttrRef>(curr), selectCl, tuple)
+                : tuple->get(targetSynonymVal);
+
+            temp.append(val);
+            if (i != numElements - 1) temp.push_back(' ');
+        }
+
+
+        if (duplicateHelperSet.find(temp) == duplicateHelperSet.end()) {
+            //toReturn.emplace_back(make_shared<OrderedStringTupleResult>(move(orderedStrings)));
+            toReturn.emplace_back(make_shared<StringSingleResult>(temp));
+            duplicateHelperSet.insert(move(temp));
+        }
+
+    }
+
+    //extractResultsForIndependentElements(selectCl, elems, toReturn);
+
+    /* Debugging */
+    //for (auto& s : toReturn) cout << s->getResultAsString() << endl;
+
+    return move(toReturn);
+}
+
 /* ======================== PATTERN CLAUSE ======================== */
 
-void PQLProcessor::handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl,
+void PQLProcessor::handlePatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
     //TODO: @kohyida1997. Do typechecking for different kinds of pattern clauses. If/assign/while have different pattern logic and syntax.
@@ -321,7 +404,7 @@ void PQLProcessor::handleWithFirstArgIdent(const shared_ptr<SelectCl>& selectCl,
     const shared_ptr<Ref> lhs = withCl->lhs;
     assert(lhs->getRefType() == RefType::IDENT);
     const string& leftVal = lhs->getStringVal();
-    const shared_ptr<Ref> rhs = withCl->lhs;
+    const shared_ptr<Ref> rhs = withCl->rhs;
     const RefType rightType = rhs->getRefType();
 
     /* with (ident, ident)*/
@@ -335,6 +418,7 @@ void PQLProcessor::handleWithFirstArgIdent(const shared_ptr<SelectCl>& selectCl,
         return;
     }
 
+
     /* with (ident, int) -> illegal.*/
 
     /* with (ident, syn) -> illegal as syn must be prog_line, which is INTEGER. */
@@ -346,7 +430,7 @@ void PQLProcessor::handleWithFirstArgIdent(const shared_ptr<SelectCl>& selectCl,
 
         const auto& synonym = rhs->getAttrRef()->getSynonym();
         const auto& attrName = rhs->getAttrRef()->getAttrName();
-        auto& synType = selectCl->getDesignEntityTypeBySynonym(synonym);
+        const auto& synType = selectCl->getDesignEntityTypeBySynonym(synonym);
 
         if (synType == DesignEntity::PROCEDURE) {
             if (attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
@@ -405,6 +489,7 @@ void PQLProcessor::handleWithFirstArgIdent(const shared_ptr<SelectCl>& selectCl,
                 throw "Print attribute must be varName\n";
             }
 
+
             for (const auto& x : evaluator->mpPKB->varNameToPrintStmtTable[leftVal]) {
                 shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
                 toAdd->insertKeyValuePair(synonym->getSynonymString(), x);
@@ -424,7 +509,7 @@ void PQLProcessor::handleWithFirstArgInt(const shared_ptr<SelectCl>& selectCl, c
     const shared_ptr<Ref> lhs = withCl->lhs;
     assert(lhs->getRefType() == RefType::INTEGER);
     int leftVal = lhs->getIntVal();
-    const shared_ptr<Ref> rhs = withCl->lhs;
+    const shared_ptr<Ref> rhs = withCl->rhs;
     const RefType rightType = rhs->getRefType();
 
     /* with (int, int)*/
@@ -460,6 +545,7 @@ void PQLProcessor::handleWithFirstArgInt(const shared_ptr<SelectCl>& selectCl, c
     /* with (int, syn.stmt#) */
     if (rightType == RefType::ATTR) {
 
+
         const auto& attrRef = rhs->getAttrRef();
         const auto& attrName = attrRef->getAttrName();
         const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(attrRef->getSynonym());
@@ -471,7 +557,7 @@ void PQLProcessor::handleWithFirstArgInt(const shared_ptr<SelectCl>& selectCl, c
 
         PKBStmt::SharedPtr temp;
         if (evaluator->mpPKB->getStatement(leftVal, temp)) {
-            if (temp->getType() == resolvePQLDesignEntityToPKBDesignEntity(synonymType)) {
+            if (synonymType == DesignEntity::STMT || temp->getType() == resolvePQLDesignEntityToPKBDesignEntity(synonymType)) {
                 shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
                 toAdd->insertKeyValuePair(attrRef->getSynonymString(), to_string(leftVal));
                 toReturn.emplace_back(move(toAdd));
@@ -490,19 +576,21 @@ void PQLProcessor::handleWithFirstArgAttrRef(const shared_ptr<SelectCl>& selectC
     const shared_ptr<Ref> lhs = withCl->lhs;
     assert(lhs->getRefType() == RefType::ATTR);
     const auto& leftAttrRef = lhs->getAttrRef();
-    const shared_ptr<Ref> rhs = withCl->rhs;
+    const shared_ptr<Ref>& rhs = withCl->rhs;
     const RefType rightType = rhs->getRefType();
 
+    /* with attrRef = attrRef */
     if (rightType == RefType::ATTR) {
 
         /* By the pre-condiiton, we are guaranteed both attrRef are of same type */
-        auto attrNameType = leftAttrRef->getAttrName()->getAttrNameType();
+        auto leftAttrNameType = leftAttrRef->getAttrName()->getAttrNameType();
         const auto& rightAttrRef = rhs->getAttrRef();
+        auto rightAttrNameType = rightAttrRef->getAttrName()->getAttrNameType();
 
         const auto& leftSynKey = leftAttrRef->getSynonymString();
         const auto& rightSynKey = rightAttrRef->getSynonymString();
 
-        if (attrNameType == AttrNameType::VAR_NAME || attrNameType == AttrNameType::PROC_NAME) {
+        if (leftAttrNameType == AttrNameType::VAR_NAME || leftAttrNameType == AttrNameType::PROC_NAME) {
             const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(leftAttrRef->getSynonymString());
             const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
             auto leftDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
@@ -520,15 +608,335 @@ void PQLProcessor::handleWithFirstArgAttrRef(const shared_ptr<SelectCl>& selectC
                 //cout << "Added tuple: " << toAdd->toString() << endl;
                 toReturn.emplace_back(move(toAdd));
             }
+            return;
+        }
+
+        // statement no
+        if (leftAttrNameType == AttrNameType::STMT_NUMBER) {
+            const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(leftAttrRef->getSynonymString());
+            auto leftDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
+            if (rightAttrNameType == AttrNameType::STMT_NUMBER) { /* With (STMT#, STMT#) */
+                
+                const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
+                
+                auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp2);
+
+                /* Two synonyms can only have same stmt number if they are of the same type, or if one of them is all generic statements. */
+                if (leftDesignEntity == rightDesignEntity) {
+
+                    for (const auto& x : evaluator->getStatementsByPKBDesignEntity(leftDesignEntity)) {
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                        toAdd->insertKeyValuePair(leftSynKey, to_string(x->getIndex()));
+                        toAdd->insertKeyValuePair(rightSynKey, to_string(x->getIndex()));
+                        //cout << "Added tuple: " << toAdd->toString() << endl;
+                        toReturn.emplace_back(move(toAdd));
+                    }
+
+                }
+                else if (rightDesignEntity == PKBDesignEntity::AllStatements) {
+                    for (const auto& x : evaluator->getStatementsByPKBDesignEntity(leftDesignEntity)) {
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                        toAdd->insertKeyValuePair(leftSynKey, to_string(x->getIndex()));
+                        toAdd->insertKeyValuePair(rightSynKey, to_string(x->getIndex()));
+                        //cout << "Added tuple: " << toAdd->toString() << endl;
+                        toReturn.emplace_back(move(toAdd));
+                    }
+                }
+                else if (leftDesignEntity == PKBDesignEntity::AllStatements) {
+                    for (const auto& x : evaluator->getStatementsByPKBDesignEntity(rightDesignEntity)) {
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                        toAdd->insertKeyValuePair(leftSynKey, to_string(x->getIndex()));
+                        toAdd->insertKeyValuePair(rightSynKey, to_string(x->getIndex()));
+                        //cout << "Added tuple: " << toAdd->toString() << endl;
+                        toReturn.emplace_back(move(toAdd));
+                    }
+                }
+                else {
+
+                }
+                return;
+            }
+            else if (rightAttrNameType == AttrNameType::VALUE) { /* With (STMT#, CONST) */
+                // right side MUST be a CONSTANT synonym
+                const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
+                auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp2);
+                
+                if (temp2 == DesignEntity::CONSTANT) {
+                    // BUILD STATEMENT CONSTANT TABLE
+
+                    for (const auto& str : evaluator->mpPKB->stmtsWithIndexAsConstantsTable[leftDesignEntity]) {
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                        toAdd->insertKeyValuePair(leftSynKey, str);
+                        toAdd->insertKeyValuePair(rightSynKey, str);
+                        //cout << "Added tuple: " << toAdd->toString() << endl;
+                        toReturn.emplace_back(move(toAdd));
+                    }
+                }
+
+            }
+        }
+
+        // constant VALUE
+        if (leftAttrNameType == AttrNameType::VALUE) {
+            if (rightAttrNameType == AttrNameType::STMT_NUMBER) { /* With (CONST, STMT#) */
+                const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
+                auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp2);
+                for (const auto& str : evaluator->mpPKB->stmtsWithIndexAsConstantsTable[rightDesignEntity]) {
+                    shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                    toAdd->insertKeyValuePair(leftSynKey, str);
+                    toAdd->insertKeyValuePair(rightSynKey, str);
+                    //cout << "Added tuple: " << toAdd->toString() << endl;
+                    toReturn.emplace_back(move(toAdd));
+                }
+                return;
+            }
+            else if (rightAttrNameType == AttrNameType::VALUE) { /* With (CONST, CONST) */
+                // right side MUST be a CONSTANT synonym
+                const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
+                auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp2);
+
+                if (temp2 == DesignEntity::CONSTANT) {
+                    for (const auto& str : evaluator->mpPKB->getConstants()) {
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                        toAdd->insertKeyValuePair(leftSynKey, str);
+                        toAdd->insertKeyValuePair(rightSynKey, str);
+                        //cout << "Added tuple: " << toAdd->toString() << endl;
+                        toReturn.emplace_back(move(toAdd));
+                    }
+                }
+
+            }
         }
 
         return;
     }
 
+    /* with attrRef = "IDENT" */
+    else if (rightType == RefType::IDENT) {
+        /* By the pre-condiiton, we are guaranteed left attrRef is a STRING (NAME) type */
+        const string& rightVal = rhs->getStringVal();
+        const auto& synonym = lhs->getAttrRef()->getSynonym();
+        const auto& attrName = lhs->getAttrRef()->getAttrName();
+        auto& synType = selectCl->getDesignEntityTypeBySynonym(synonym);
+
+        if (synType == DesignEntity::PROCEDURE) {
+            if (attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
+                throw "Procedure attribute must be procName\n";
+            }
+
+            if (evaluator->mpPKB->procedureNameToProcedureMap.count(rightVal)) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(synonym->getSynonymString(), rightVal);
+                toReturn.emplace_back(move(toAdd));
+            }
+            return;
+        }
+
+        if (synType == DesignEntity::VARIABLE) {
+            if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
+                throw "Variable attribute must be varName\n";
+            }
+            if (evaluator->mpPKB->mVariables.count(rightVal)) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(synonym->getSynonymString(), rightVal);
+                toReturn.emplace_back(move(toAdd));
+            }
+            return;
+        }
+
+        if (synType == DesignEntity::CALL) {
+            if (attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
+                throw "Call attribute must be procName\n";
+            }
+
+            for (const auto& x : evaluator->mpPKB->procNameToCallStmtTable[rightVal]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(synonym->getSynonymString(), x);
+                toReturn.emplace_back(move(toAdd));
+            }
+
+            return;
+        }
+
+        if (synType == DesignEntity::READ) {
+            if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
+                throw "Read attribute must be varName\n";
+            }
+
+            for (const auto& x : evaluator->mpPKB->varNameToReadStmtTable[rightVal]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(synonym->getSynonymString(), x);
+                toReturn.emplace_back(move(toAdd));
+            }
+            return;
+        }
+
+        if (synType == DesignEntity::PRINT) {
+            if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
+                throw "Print attribute must be varName\n";
+            }
+
+            for (const auto& x : evaluator->mpPKB->varNameToPrintStmtTable[rightVal]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(synonym->getSynonymString(), x);
+                toReturn.emplace_back(move(toAdd));
+            }
+            return;
+        }
+
+    }
+
+    /* with attrRef = synonym */
+    else if (rightType == RefType::SYNONYM) {
+        /* By precondition and rules of with clause, the synonym must be a PROG_LINE, which is an integer. Therefore, leftAttrType can only be CONSTANT.VALUE or some STMT.STMT# */
+        const auto leftAttrNameType = leftAttrRef->getAttrName()->getAttrNameType();
+        const string& rightSynString = rhs->getStringVal();
+        const string& leftSynString = lhs->getAttrRef()->getSynonymString();
+
+        if (leftAttrNameType == AttrNameType::VALUE) { /* with const.value = prog_line */
+
+            for (const auto& str : evaluator->mpPKB->stmtsWithIndexAsConstantsTable[PKBDesignEntity::AllStatements]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(leftSynString, str);
+                toAdd->insertKeyValuePair(rightSynString, str);
+                toReturn.emplace_back(move(toAdd));
+            }
+
+        }
+
+        else if (leftAttrNameType == AttrNameType::STMT_NUMBER) { /* with stmt.stmt# = prog_line */
+            const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(leftAttrRef->getSynonymString());
+            auto leftDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
+
+            if (leftDesignEntity == PKBDesignEntity::Constant || leftDesignEntity == PKBDesignEntity::Variable || leftDesignEntity == PKBDesignEntity::Procedure) {
+                throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
+            }
+
+            for (auto& ptr : evaluator->mpPKB->getStatements(leftDesignEntity)) {
+                string indexToString = to_string(ptr->getIndex());
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(leftSynString, indexToString);
+                toAdd->insertKeyValuePair(rightSynString, indexToString);
+                toReturn.emplace_back(move(toAdd));
+            }
+        
+        }
+        return;
+    }
+
+    /* with attrRef = INT */
+    else if (rightType == RefType::INTEGER) {
+        int rightVal = rhs->getIntVal();
+
+        const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(leftAttrRef->getSynonymString());
+        auto leftDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
+
+        const string& leftSynString = lhs->getAttrRef()->getSynonymString();
+
+        if (leftDesignEntity == PKBDesignEntity::Constant || leftDesignEntity == PKBDesignEntity::Variable || leftDesignEntity == PKBDesignEntity::Procedure) {
+            throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
+        }
+
+        if (evaluator->mpPKB->stmtTypeToSetOfStmtNoTable[leftDesignEntity].count(rightVal)) {
+            shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+            toAdd->insertKeyValuePair(leftSynString, to_string(rightVal));
+            toReturn.emplace_back(move(toAdd));
+        }
+
+        return;
+    }
 }
 
+/* PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both integers) 
+
+TODO: @kohyida1997: write test cases for this with case.
+
+*/
 void PQLProcessor::handleWithFirstArgSyn(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
+    const shared_ptr<Ref> lhs = withCl->lhs;
+    assert(lhs->getRefType() == RefType::SYNONYM);
+    const auto& leftSynonymString = lhs->getStringVal();
+    const shared_ptr<Ref>& rhs = withCl->rhs;
+    const RefType rightType = rhs->getRefType();
+
+    const auto& leftEntityType = selectCl->getDesignEntityTypeBySynonym(leftSynonymString);
+
+    if (leftEntityType != DesignEntity::PROG_LINE) {
+        throw "Synonyms must be PROG_LINE type for with clauses\n";
+    }
+
+    if (rightType == RefType::INTEGER) {
+
+        int rightIntVal = rhs->getIntVal();
+        if (evaluator->mpPKB->stmtTypeToSetOfStmtNoTable[PKBDesignEntity::AllStatements].count(rightIntVal)) {
+            shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+            toAdd->insertKeyValuePair(leftSynonymString, to_string(rightIntVal));
+            toReturn.emplace_back(move(toAdd));
+        }
+
+    }
+
+    else if (rightType == RefType::SYNONYM) {
+        const auto& rightSynonymString = rhs->getStringVal();
+
+        const auto& rightEntityType = selectCl->getDesignEntityTypeBySynonym(rightSynonymString);
+
+        if (rightEntityType != DesignEntity::PROG_LINE) {
+            throw "Synonyms must be PROG_LINE type for with clauses\n";
+        }
+        
+        for (auto i : evaluator->mpPKB->stmtTypeToSetOfStmtNoTable[PKBDesignEntity::AllStatements]) {
+            shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+            toAdd->insertKeyValuePair(leftSynonymString, to_string(i));
+            toAdd->insertKeyValuePair(rightSynonymString, to_string(i));
+            toReturn.emplace_back(move(toAdd));
+        }
+
+    }
+
+    else if (rightType == RefType::ATTR) {
+        /* By precondition and rules of with clause, the synonym must be a PROG_LINE, which is an integer. Therefore, rightAttribute can only be CONSTANT.VALUE or some STMT.STMT# */
+        const auto rightAttrNameType = rhs->getAttrRef()->getAttrName()->getAttrNameType();
+        const string& rightSynonymString = rhs->getAttrRef()->getSynonymString();
+        const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(rightSynonymString);
+        auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
+
+        if (rightAttrNameType == AttrNameType::VALUE) { /* with prog_line = const.value */
+
+            if (rightDesignEntity != PKBDesignEntity::Constant) {
+                throw "Value attribute is only applicable to synonyms which are of type Constant\n";
+            }
+
+            for (const auto& str : evaluator->mpPKB->stmtsWithIndexAsConstantsTable[PKBDesignEntity::AllStatements]) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(leftSynonymString, str);
+                toAdd->insertKeyValuePair(rightSynonymString, str);
+                toReturn.emplace_back(move(toAdd));
+            }
+
+        }
+
+        else if (rightAttrNameType == AttrNameType::STMT_NUMBER) { /* with prog_line == stmt.stmt# */
+            
+            if (rightDesignEntity == PKBDesignEntity::Constant || rightDesignEntity == PKBDesignEntity::Variable || rightDesignEntity == PKBDesignEntity::Procedure) {
+                throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
+            }
+
+            for (auto& ptr : evaluator->mpPKB->getStatements(rightDesignEntity)) {
+                string indexToString = to_string(ptr->getIndex());
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                toAdd->insertKeyValuePair(leftSynonymString, indexToString);
+                toAdd->insertKeyValuePair(rightSynonymString, indexToString);
+                toReturn.emplace_back(move(toAdd));
+            }
+
+        }
+    }
+
+    /* Cannot be with PROG_LINE = "IDENT" as the types are different */
+
+
 }
 
 /* ======================== SUCH THAT CLAUSE ======================== */
@@ -944,8 +1352,8 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         StmtRefType leftType = stmtRef1->getStmtRefType();
         StmtRefType rightType = stmtRef2->getStmtRefType();
 
-        const string& leftSynonymKey = stmtRef1->getStringVal();
-        const string& rightSynonymKey = stmtRef2->getStringVal();
+        string leftSynonymKey = stmtRef1->getStringVal();
+        string rightSynonymKey = stmtRef2->getStringVal();
 
         /* Follows (1, ?) */
         if (leftType == StmtRefType::INTEGER)
@@ -1016,7 +1424,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         if (leftType == StmtRefType::SYNONYM)
         {
             /* Follows (syn, v) OR Follows(syn, AllExceptProcedure) */
-
             if (!givenSynonymMatchesMultipleTypes(selectCl, leftSynonymKey,
                 { DesignEntity::ASSIGN, DesignEntity::CALL, DesignEntity::IF,
                  DesignEntity::PRINT, DesignEntity::READ, DesignEntity::STMT,
@@ -2216,10 +2623,10 @@ void PQLProcessor::handleCalls(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls>
     EntRefType rightType = entRefRight->getEntRefType();
 
     if (leftType == EntRefType::IDENT) {
-        string leftArg = entRefLeft->getStringVal();
+        const auto& leftArg = entRefLeft->getStringVal();
 
         if (rightType == EntRefType::IDENT) {
-            string rightArg = entRefRight->getStringVal();
+            const auto& rightArg = entRefRight->getStringVal();
             if (evaluator->getCallsStringString(leftArg, rightArg)) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                 tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, ResultTuple::IDENT_PLACEHOLDER);
@@ -2312,7 +2719,7 @@ void PQLProcessor::handleCalls(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls>
 
     if (leftType == EntRefType::UNDERSCORE) {
         if (rightType == EntRefType::IDENT) {
-            string rightArg = entRefRight->getStringVal();
+            const auto& rightArg = entRefRight->getStringVal();
             if (evaluator->getCallsUnderscoreString(rightArg)) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                 tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::IDENT_PLACEHOLDER);
@@ -2361,10 +2768,10 @@ void PQLProcessor::handleCallsT(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls
     EntRefType rightType = entRefRight->getEntRefType();
 
     if (leftType == EntRefType::IDENT) {
-        string leftArg = entRefLeft->getStringVal();
+        const auto& leftArg = entRefLeft->getStringVal();
 
         if (rightType == EntRefType::IDENT) {
-            string rightArg = entRefRight->getStringVal();
+            const auto& rightArg = entRefRight->getStringVal();
             if (evaluator->getCallsTStringString(leftArg, rightArg)) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                 tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, ResultTuple::IDENT_PLACEHOLDER);
@@ -2411,7 +2818,7 @@ void PQLProcessor::handleCallsT(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls
         const string& leftProcedureKey = entRefLeft->getStringVal();
 
         if (rightType == EntRefType::IDENT) {
-            string rightArg = entRefRight->getStringVal();
+            const auto& rightArg = entRefRight->getStringVal();
             for (auto& s : evaluator->getCallsTSynString(rightArg)) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
@@ -2457,7 +2864,7 @@ void PQLProcessor::handleCallsT(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls
 
     if (leftType == EntRefType::UNDERSCORE) {
         if (rightType == EntRefType::IDENT) {
-            string rightArg = entRefRight->getStringVal();
+            const auto& rightArg = entRefRight->getStringVal();
             if (evaluator->getCallsTUnderscoreString(rightArg)) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                 tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::IDENT_PLACEHOLDER);
@@ -2501,12 +2908,12 @@ void PQLProcessor::handleCallsT(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls
 void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl, 
     shared_ptr<Next>& nextCl, 
     vector<shared_ptr<ResultTuple>>& toReturn) {
-    auto firstRef = nextCl->stmtRef1->getStmtRefType();
-    auto secondRef = nextCl->stmtRef2->getStmtRefType();
+    const auto& firstRef = nextCl->stmtRef1->getStmtRefType();
+    const auto& secondRef = nextCl->stmtRef2->getStmtRefType();
 
     // Semantic checks (refs must be of statement Type)
     if (firstRef == StmtRefType::SYNONYM) {
-        string syn = nextCl->stmtRef1->getStringVal();
+        const string& syn = nextCl->stmtRef1->getStringVal();
         PKBDesignEntity type = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(syn));
         if (!isStatementDesignEntity(type)) {
             throw "Next can only be called with statement design entities synonyms.";
@@ -2514,7 +2921,7 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl,
     }
 
     if (secondRef == StmtRefType::SYNONYM) {
-        string syn = nextCl->stmtRef2->getStringVal();
+        const string& syn = nextCl->stmtRef2->getStringVal();
         PKBDesignEntity type = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(syn));
         if (!isStatementDesignEntity(type)) {
             throw "Next can only be called with statement design entities synonyms.";
@@ -2532,7 +2939,7 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl,
 
     // Case 2: Next(_, syn) 
     else if (firstRef == StmtRefType::UNDERSCORE && secondRef == StmtRefType::SYNONYM) {
-        string rightSyn = nextCl->stmtRef2->getStringVal();
+        const string& rightSyn = nextCl->stmtRef2->getStringVal();
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
@@ -2562,8 +2969,8 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl,
 
     // Case 4: Next(syn, syn) 
     else if (firstRef == StmtRefType::SYNONYM && secondRef == StmtRefType::SYNONYM) {
-        string leftSyn = nextCl->stmtRef1->getStringVal();
-        string rightSyn = nextCl->stmtRef2->getStringVal();
+        const string& leftSyn = nextCl->stmtRef1->getStringVal();
+        const string& rightSyn = nextCl->stmtRef2->getStringVal();
         PKBDesignEntity leftArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(leftSyn));
         PKBDesignEntity rightArgType =
@@ -2584,7 +2991,7 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl,
 
     // Case 5: Next(syn, _) 
     else if (firstRef == StmtRefType::SYNONYM && secondRef == StmtRefType::UNDERSCORE) {
-        string leftSyn = nextCl->stmtRef1->getStringVal();
+        const string& leftSyn = nextCl->stmtRef1->getStringVal();
         PKBDesignEntity leftArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(leftSyn));
 
@@ -2600,7 +3007,7 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl,
 
     // Case 6: Next(syn, int) 
     else if (firstRef == StmtRefType::SYNONYM && secondRef == StmtRefType::INTEGER) {
-        string leftSyn = nextCl->stmtRef1->getStringVal();
+        const string& leftSyn = nextCl->stmtRef1->getStringVal();
         PKBDesignEntity leftArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(leftSyn));
         
@@ -2621,12 +3028,11 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl,
         int leftValue = nextCl->stmtRef1->getIntVal();
         int rightValue = nextCl->stmtRef2->getIntVal();
 
-        if ( evaluator->getNextIntInt(leftValue, rightValue))
+        if (evaluator->getNextIntInt(leftValue, rightValue))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
             tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(leftValue));
-            tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(rightValue));
             /* Add this tuple into the vector to tuples to return. */
             toReturn.emplace_back(move(tupleToAdd));
         }
@@ -2649,7 +3055,7 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl,
     // Case 9: Next(int, syn) 
     else if (firstRef == StmtRefType::INTEGER && secondRef == StmtRefType::SYNONYM) {
         int leftValue = nextCl->stmtRef1->getIntVal();
-        string rightSyn = nextCl->stmtRef2->getStringVal();
+        const string& rightSyn = nextCl->stmtRef2->getStringVal();
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
@@ -2670,12 +3076,12 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
     shared_ptr<NextT>& nextTCl, 
     vector<shared_ptr<ResultTuple>>& toReturn) {
 
-        auto firstRef = nextTCl->stmtRef1->getStmtRefType();
-        auto secondRef = nextTCl->stmtRef2->getStmtRefType();
+        const auto& firstRef = nextTCl->stmtRef1->getStmtRefType();
+        const auto& secondRef = nextTCl->stmtRef2->getStmtRefType();
 
         // Semantic checks (refs must be of statement Type)
         if (firstRef == StmtRefType::SYNONYM) {
-            string syn = nextTCl->stmtRef1->getStringVal();
+            const string& syn = nextTCl->stmtRef1->getStringVal();
             PKBDesignEntity type = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(syn));
             if (!isStatementDesignEntity(type)) {
                 throw "Next* can only be called with statement design entities synonyms.";
@@ -2683,7 +3089,7 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
         }
 
         if (secondRef == StmtRefType::SYNONYM) {
-            string syn = nextTCl->stmtRef2->getStringVal();
+            const string& syn = nextTCl->stmtRef2->getStringVal();
             PKBDesignEntity type = resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(syn));
             if (!isStatementDesignEntity(type)) {
                 throw "Next can only be called with statement design entities synonyms.";
@@ -2701,7 +3107,7 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
 
         // Case 2: NextT(_, syn) 
         else if (firstRef == StmtRefType::UNDERSCORE && secondRef == StmtRefType::SYNONYM) {
-            string rightSyn = nextTCl->stmtRef2->getStringVal();
+            const string& rightSyn = nextTCl->stmtRef2->getStringVal();
             PKBDesignEntity rightArgType =
                 resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
@@ -2738,7 +3144,7 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
             PKBDesignEntity rightArgType =
                 resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
-            for (auto& p : evaluator->getNextTSynSyn(leftArgType, rightArgType))
+            for (const auto& p : evaluator->getNextTSynSyn(leftArgType, rightArgType))
             {
                 /* Create the result tuple */
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -2801,7 +3207,7 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
             }
         }
 
-        // Case 8: Next(int, _) 
+        // Case 8: NextT(int, _) 
         else if (firstRef == StmtRefType::INTEGER && secondRef == StmtRefType::UNDERSCORE) {
             int leftValue = nextTCl->stmtRef1->getIntVal();
 
@@ -2815,7 +3221,7 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
             }
         }
 
-        // Case 9: Next(int, syn) 
+        // Case 9: NextT(int, syn) 
         else if (firstRef == StmtRefType::INTEGER && secondRef == StmtRefType::SYNONYM) {
             int leftValue = nextTCl->stmtRef1->getIntVal();
             string rightSyn = nextTCl->stmtRef2->getStringVal();
@@ -2885,10 +3291,105 @@ void PQLProcessor::joinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults
     }
 }
 
+void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults, unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults)
+{
+
+    int leftSize = leftResults.size();
+    int rightSize = rightResults.size();
+    //cout << "hash join ========= Num LeftResults = " << leftSize << ", Num RightResults = " << rightSize << ", joinKeysSize = " << joinKeys.size() << endl;
+    vector<shared_ptr<ResultTuple>>* smallerVec = nullptr;
+    vector<shared_ptr<ResultTuple>>* largerVec = nullptr;
+
+    if (leftSize < rightSize) {
+        smallerVec = &leftResults;
+        largerVec = &rightResults;
+    }
+    else {
+        smallerVec = &rightResults;
+        largerVec = &leftResults;
+    }
+
+    const auto& smallerRes = *smallerVec;
+    const auto& largerRes = *largerVec;
+
+    unordered_map<string, unordered_set<ResultTuple*>> leftHashTable;
+    vector<string> joinKeysVec(joinKeys.begin(), joinKeys.end());
+
+    /* Build phase */
+    int smallerResSize = smallerRes.size();
+    //cout << "SmallerResSize = " << smallerResSize << endl;
+
+    for (int i = 0; i < smallerResSize; i++) {
+
+        auto& tup = smallerRes[i];
+        // compute hash and insert into hashtable
+        string stringToHash;
+        for (auto& joinKey : joinKeysVec) {
+            stringToHash.append(tup->get(joinKey));
+            stringToHash.push_back('$');
+        }
+
+        if (leftHashTable.find(stringToHash) == leftHashTable.end()) {
+            leftHashTable[stringToHash] = unordered_set<ResultTuple*>();
+            leftHashTable[stringToHash].insert(tup.get());
+        }
+        else {
+            leftHashTable[stringToHash].insert(tup.get());
+        }
+    }
+
+    /* Probe phase */
+    for (auto& tup : largerRes) {
+        string stringToHash;
+        for (auto& joinKey : joinKeysVec) {
+            stringToHash.append(tup->get(joinKey));
+            stringToHash.push_back('$');
+        }
+
+        auto setPtr = leftHashTable.find(stringToHash);
+        if (setPtr != leftHashTable.end()) {
+            auto& setToCompute = leftHashTable[stringToHash];
+            for (auto i : setToCompute) {
+                auto otherTup = i;//smallerRes[i];
+
+                // build the actual merged result tuple
+                shared_ptr<ResultTuple> toAdd =
+                    make_shared<ResultTuple>(tup->synonymKeyToValMap.size());
+
+                /* Copy over the key-values */
+                for (const auto& leftPair : tup->synonymKeyToValMap)
+                {
+                    toAdd->insertKeyValuePair(leftPair.first, leftPair.second);   
+                }
+                for (const auto& rightPair : otherTup->synonymKeyToValMap)
+                {
+                    if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
+                    {
+                        toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
+                    }
+                }
+                newResults.emplace_back(move(toAdd));
+            }
+
+        }
+    }
+
+    //cout << "===== AFTER TUPS =====\n";
+    //for (auto& tup : newResults) cout << "Tup = " << tup->toString() << endl;
+    //putchar('\n');
+
+    return;
+
+
+}
+
 void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftResults,
     vector<shared_ptr<ResultTuple>>& rightResults,
     vector<shared_ptr<ResultTuple>>& newResults)
 {
+
+    //cout << "cartesian ==== LeftSize = " << leftResults.size() << ", RightSize = " << rightResults.size() << ", Product = " << leftResults.size() * rightResults.size() << endl;
+
     if (leftResults.size() == 0)
     {
         newResults = rightResults;
@@ -2925,20 +3426,29 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
         return;
     }
 
-    for (auto& leftPtr : leftResults)
+    int i;
+    int N = leftResults.size();
+    int X = rightResults.size();
+
+    newResults.reserve(N * X);
+
+    //#pragma omp parallel for private(i)
+    for (i = 0; i < N; i++)
     {
-        for (auto& rightPtr : rightResults)
+        auto& leftPtr = leftResults[i];
+        int j;        
+        for (j = 0; j < X; j++)
         {
+            auto& rightPtr = rightResults[j];
             shared_ptr<ResultTuple> toAdd =
                 make_shared<ResultTuple>(leftPtr->synonymKeyToValMap.size() + rightPtr->synonymKeyToValMap.size());
 
             /* Copy over the key-values */
             for (const auto& leftPair : leftPtr->synonymKeyToValMap)
             {
-                if (!toAdd->synonymKeyAlreadyExists(leftPair.first))
-                {
-                    toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
-                }
+
+                toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+                
             }
 
             for (const auto& rightPair : rightPtr->synonymKeyToValMap)
@@ -2950,6 +3460,7 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
             }
 
             newResults.emplace_back(move(toAdd));
+            //newResults[i * X + j] = move(toAdd);
         }
     }
 
@@ -2964,12 +3475,13 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
 }
 
 /* PRE-CONDITION: At least ONE targetSynonym appears in the suchThat/pattern/with clauses*/
-void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl> resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl) {
+void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl) {
 
     // Debugging
     //for (auto& ptr : tuples) cout << ptr->toString() << endl;
 
     if (resultCl->isBooleanReturnType()) {
+        
         if (!tuples.empty()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
         else toReturn.emplace_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
         return;
@@ -2977,7 +3489,7 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
 
     if (resultCl->isSingleValReturnType()) {
 
-        
+
         if (tuples.empty()) return;
         
         shared_ptr<Element> firstElem = resultCl->getElements()[0];
@@ -2992,7 +3504,7 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
         if (!tuples[0]->synonymKeyAlreadyExists(targetSynonymVal)) return;
 
         unordered_set<string> existingResults;
-        for (auto tuple : tuples)
+        for (auto& tuple : tuples)
         {
             //cout << "Tuple = " << tuple->toString() << ", numKeys = " << tuple->getMap().size() << endl;
 
@@ -3289,79 +3801,6 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
 
 }
 
-vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
-{
-    vector<shared_ptr<Result>> toReturn;
-    const auto& elems = selectCl->target->getElements();
-    int numElements = elems.size();
-
-    if (numElements == 0) {
-
-        if (selectCl->target->isBooleanReturnType()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
-
-        return move(toReturn);
-    }
-
-    unordered_set<string> duplicateHelperSet;
-
-    vector<shared_ptr<ResultTuple>> res;
-
-    bool isFirst = true;
-
-    for (const auto& x : elems) {
-        if (isFirst) {
-            isFirst = false;
-            extractAllTuplesForSingleElement(selectCl, res, x);
-            duplicateHelperSet.insert(x->getSynonymString());
-            if (res.empty()) return move(toReturn);
-        }
-        else {
-            if (stringIsInsideSet(duplicateHelperSet, x->getSynonymString())) continue;
-            vector<shared_ptr<ResultTuple>> curr;
-            vector<shared_ptr<ResultTuple>> productRes;
-            extractAllTuplesForSingleElement(selectCl, curr, x);
-            duplicateHelperSet.insert(x->getSynonymString());
-            if (curr.empty()) return move(toReturn);
-            cartesianProductResultTuples(res, curr, productRes);
-            res = move(productRes);
-        }
-    }
-
-    duplicateHelperSet.clear();
-
-    for (auto tuple : res)
-    {
-        string temp;
-
-        for (int i = 0; i < numElements; i++) {
-            const auto& curr = elems[i];
-            const string& targetSynonymVal = curr->getSynonymString();
-
-            const string& val = (curr->getElementType() == ElementType::AttrRef)
-                ? resolveAttrRef(targetSynonymVal, static_pointer_cast<AttrRef>(curr), selectCl, tuple)
-                : tuple->get(targetSynonymVal);
-
-            temp.append(val);
-            if (i != numElements - 1) temp.push_back(' ');
-        }
-
-
-        if (duplicateHelperSet.find(temp) == duplicateHelperSet.end()) {
-            //toReturn.emplace_back(make_shared<OrderedStringTupleResult>(move(orderedStrings)));
-            toReturn.emplace_back(make_shared<StringSingleResult>(temp));
-            duplicateHelperSet.insert(move(temp));
-        }
-
-    }
-
-    //extractResultsForIndependentElements(selectCl, elems, toReturn);
-
-    /* Debugging */
-    //for (auto& s : toReturn) cout << s->getResultAsString() << endl;
-
-    return move(toReturn);
-}
-
 void PQLProcessor::extractResultsForIndependentElements(const shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<Element>>& elems, vector<shared_ptr<Result>>& toReturn)
 {
     int numElements = elems.size();
@@ -3528,7 +3967,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
                 }
                 else
                 {
-                    joinResultTuples(currTups, patternReturnTuples, setOfSynonymsToJoinOn, combinedTuples);
+                    hashJoinResultTuples(currTups, patternReturnTuples, setOfSynonymsToJoinOn, combinedTuples);
                 }
                 currTups = move(combinedTuples);
             }
@@ -3563,7 +4002,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
                 }
                 else
                 {
-                    joinResultTuples(currTups, withReturnClauseTuples, setOfSynonymsToJoinOn, combinedTuples);
+                    hashJoinResultTuples(currTups, withReturnClauseTuples, setOfSynonymsToJoinOn, combinedTuples);
                 }
                 currTups = move(combinedTuples);
             }
@@ -3576,15 +4015,17 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
 
     }
 
+    //cout << "===== AFTER WITH =====\n";
+    //for (auto& tup : currTups) cout << "Tup = " << tup->toString() << endl;
+    //putchar('\n');
+
 
     vector<shared_ptr<ResultTuple>>& finalTuples = currTups;
 
     if (!selectCl->target->isBooleanReturnType() && !atLeastOneTargetSynonymIsInClauses(selectCl))
     {
-        
         return finalTuples.empty() ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
     }
-
 
     extractTargetSynonyms(res, selectCl->target, finalTuples, selectCl);
 

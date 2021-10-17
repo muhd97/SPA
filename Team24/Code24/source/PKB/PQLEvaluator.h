@@ -1,4 +1,4 @@
-#pragma optimize( "gty", on )
+#pragma optimize("gty", on)
 
 #pragma once
 
@@ -10,8 +10,8 @@
 
 #include "PKB.h"
 #include "PKBDesignEntity.h"
-#include "PKBStmt.h"
 #include "PKBProcedure.h"
+#include "PKBStmt.h"
 
 // for pattern
 #include "../SimpleLexer.h"
@@ -136,7 +136,7 @@ class PQLEvaluator
                                                             PKBDesignEntity targetChildrenType);
 
     /* Use for Parent*(INT, synonym) */
-    const vector<int>& getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
+    const vector<int> &getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
 
     /* Use for Parent*(INT, _) */
     bool getParentTIntUnderscore(int statementNo);
@@ -145,13 +145,13 @@ class PQLEvaluator
     bool getParentTIntInt(int parentStatementNo, int childStatementNo);
 
     /* Use for Parent*(synonym, _) */
-    const unordered_set<int>& getParentTSynUnderscore(PKBDesignEntity targetParentType);
+    const unordered_set<int> &getParentTSynUnderscore(PKBDesignEntity targetParentType);
 
     /* Use for Parent*(synonym, INT) */
-    const unordered_set<int>& getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
+    const unordered_set<int> &getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
 
     /* Use for Parent*(synonym1, synonym2) */
-    const set<pair<int, int>>& getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType);
+    const set<pair<int, int>> &getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType);
 
     /* Use for Parent*(_, INT) */
     bool getParentTUnderscoreInt(int childStatementNo);
@@ -248,13 +248,13 @@ class PQLEvaluator
     bool getFollowsTIntegerUnderscore(int leftStmtNo);
 
     /* Use for Follows*(s1, INT) */
-    const unordered_set<int>& getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo);
+    const unordered_set<int> &getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo);
 
     /* Use for Follows*(s1, s2) */
-    const set<pair<int, int>>& getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType);
+    const set<pair<int, int>> &getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType);
 
     /* Use for Follows*(s1, _) */
-    const unordered_set<int>& getFollowsTSynUnderscore(PKBDesignEntity leftType);
+    const unordered_set<int> &getFollowsTSynUnderscore(PKBDesignEntity leftType);
 
     /* Use for Follows*(_, INT) */
     bool getFollowsTUnderscoreInteger(int rightStmtNo);
@@ -267,15 +267,15 @@ class PQLEvaluator
 
     /* Uses */
 
-    const unordered_set<string>& getUsesIntSyn(int statementNo);
+    const unordered_set<string> &getUsesIntSyn(int statementNo);
     bool getUsesIntIdent(int statementNo, string ident);
     bool getUsesIntUnderscore(int statementNo);
-    const vector<pair<int, string>>& getUsesSynSynNonProc(PKBDesignEntity de);
-    const vector<pair<string, string>>& getUsesSynSynProc();
-    const vector<int>& getUsesSynUnderscoreNonProc(PKBDesignEntity de);
-    const vector<string>& getUsesSynUnderscoreProc();
-    const vector<int>& getUsesSynIdentNonProc(PKBDesignEntity entityType, string variableName);
-    const vector<string>& getUsesSynIdentProc(string ident);
+    const vector<pair<int, string>> &getUsesSynSynNonProc(PKBDesignEntity de);
+    const vector<pair<string, string>> &getUsesSynSynProc();
+    const vector<int> &getUsesSynUnderscoreNonProc(PKBDesignEntity de);
+    const vector<string> &getUsesSynUnderscoreProc();
+    const vector<int> &getUsesSynIdentNonProc(PKBDesignEntity entityType, string variableName);
+    const vector<string> &getUsesSynIdentProc(string ident);
 
     bool variableExists(string name);
     bool procExists(string procname);
@@ -311,7 +311,7 @@ class PQLEvaluator
     bool checkUsedByProcName(string procname, string ident);
 
     // Get all statements that use the variable of name {variableName}
-    const vector<int>& getUsers(string variableName);
+    const vector<int> &getUsers(string variableName);
     // Get all statements of type {entityType} that use the variable of name
     // {variableName}
 
@@ -387,24 +387,24 @@ class PQLEvaluator
 
     // Pattern
     // For pattern a("_", "_") or pattern a(IDENT, "_")
-    vector<pair<int, string>> matchAnyPattern(string& LHS);
+    vector<pair<int, string>> matchAnyPattern(string &LHS);
     // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
-    vector<pair<int, string>> matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS);
+    vector<pair<int, string>> matchPartialPattern(string &LHS, shared_ptr<Expression> &RHS);
     // For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
-    vector<pair<int, string>> matchExactPattern(string& LHS, shared_ptr<Expression>& RHS);
+    vector<pair<int, string>> matchExactPattern(string &LHS, shared_ptr<Expression> &RHS);
 
     // Calls
     /* Use for Calls(proc, proc) */
-    bool getCallsStringString(string& caller, string& called);
+    bool getCallsStringString(const string &caller, const string &called);
 
     /* Use for Calls(proc, syn) */
-    unordered_set<string> getCallsStringSyn(string& caller);
+    unordered_set<string> getCallsStringSyn(const string &caller);
 
     /* Use for Calls(proc, _) */
-    bool getCallsStringUnderscore(string& caller);
+    bool getCallsStringUnderscore(const string &caller);
 
     /* Use for Calls(syn, proc) */
-    unordered_set<string> getCallsSynString(string& called);
+    unordered_set<string> getCallsSynString(const string &called);
 
     /* Use for Calls(syn, syn) */
     set<pair<string, string>> getCallsSynSyn();
@@ -413,7 +413,7 @@ class PQLEvaluator
     unordered_set<string> getCallsSynUnderscore();
 
     /* Use for Calls(_, proc) */
-    bool getCallsUnderscoreString(string& called);
+    bool getCallsUnderscoreString(const string &called);
 
     /* Use for Calls(_, syn) */
     unordered_set<string> getCallsUnderscoreSyn();
@@ -423,16 +423,16 @@ class PQLEvaluator
 
     // CallsT
     /* Use for CallsT(proc, proc) */
-    bool getCallsTStringString(string& caller, string& called);
+    bool getCallsTStringString(const string &caller, const string &called);
 
     /* Use for CallsT(proc, syn) */
-    unordered_set<string> getCallsTStringSyn(string& caller);
+    unordered_set<string> getCallsTStringSyn(const string &caller);
 
     /* Use for CallsT(proc, _) */
-    bool getCallsTStringUnderscore(string& caller);
+    bool getCallsTStringUnderscore(const string &caller);
 
     /* Use for CallsT(syn, proc) */
-    unordered_set<string> getCallsTSynString(string& called);
+    unordered_set<string> getCallsTSynString(const string &called);
 
     /* Use for CallsT(syn, syn) */
     set<pair<string, string>> getCallsTSynSyn();
@@ -441,7 +441,7 @@ class PQLEvaluator
     unordered_set<string> getCallsTSynUnderscore();
 
     /* Use for CallsT(_, proc) */
-    bool getCallsTUnderscoreString(string& called);
+    bool getCallsTUnderscoreString(const string &called);
 
     /* Use for CallsT(_, syn) */
     unordered_set<string> getCallsTUnderscoreSyn();
@@ -453,70 +453,69 @@ class PQLEvaluator
     // Case 1: Next(_, _)
     bool getNextUnderscoreUnderscore();
 
-    // Case 2: Next(_, syn) 
+    // Case 2: Next(_, syn)
     unordered_set<int> getNextUnderscoreSyn(PKBDesignEntity to);
 
-    // Case 3: Next(_, int) 
+    // Case 3: Next(_, int)
     bool getNextUnderscoreInt(int toIndex);
 
-    // Case 4: Next(syn, syn) 
+    // Case 4: Next(syn, syn)
     set<pair<int, int>> getNextSynSyn(PKBDesignEntity from, PKBDesignEntity to);
 
-    // Case 5: Next(syn, _) 
+    // Case 5: Next(syn, _)
     unordered_set<int> getNextSynUnderscore(PKBDesignEntity from);
 
-    // Case 6: Next(syn, int) 
+    // Case 6: Next(syn, int)
     unordered_set<int> getNextSynInt(PKBDesignEntity from, int toIndex);
 
-    // Case 7: Next(int, int) 
+    // Case 7: Next(int, int)
     bool getNextIntInt(int fromIndex, int toIndex);
 
     // Case 8: Next(int, _)
     bool getNextIntUnderscore(int fromIndex);
 
-    // Case 9: Next(int, syn) 
+    // Case 9: Next(int, syn)
     unordered_set<int> getNextIntSyn(int fromIndex, PKBDesignEntity to);
 
     // NextT
     // Case 1: NextT(_, _)
     bool getNextTUnderscoreUnderscore();
 
-    // Case 2: NextT(_, syn) 
+    // Case 2: NextT(_, syn)
     unordered_set<int> getNextTUnderscoreSyn(PKBDesignEntity to);
 
-    // Case 3: NextT(_, int) 
+    // Case 3: NextT(_, int)
     bool getNextTUnderscoreInt(int toIndex);
 
-    // Case 4: NextT(syn, syn) 
+    // Case 4: NextT(syn, syn)
     set<pair<int, int>> getNextTSynSyn(PKBDesignEntity from, PKBDesignEntity to);
 
-    // Case 5: NextT(syn, _) 
+    // Case 5: NextT(syn, _)
     unordered_set<int> getNextTSynUnderscore(PKBDesignEntity from);
 
-    // Case 6: NextT(syn, int) 
+    // Case 6: NextT(syn, int)
     unordered_set<int> getNextTSynInt(PKBDesignEntity from, int toIndex);
 
-    // Case 7: NextT(int, int) 
+    // Case 7: NextT(int, int)
     bool getNextTIntInt(int fromIndex, int toIndex);
 
     // Case 8: NextT(int, _)
     bool getNextTIntUnderscore(int fromIndex);
 
-    // Case 9: NextT(int, syn) 
+    // Case 9: NextT(int, syn)
     unordered_set<int> getNextTIntSyn(int fromIndex, PKBDesignEntity to);
 
-    
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
     const vector<PKBStmt::SharedPtr> &getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;
 
-    //General: Access any procedure's pointer with its name
+    // General: Access any procedure's pointer with its name
     const PKBProcedure::SharedPtr &getProcedureByName(string &procName) const;
 
     // General: Get all statements in the PKB
     vector<PKBStmt::SharedPtr> getAllStatements();
 
-    //General: Get all procedures
+    // General: Get all procedures
     set<PKBProcedure::SharedPtr> getAllProcedures();
 
     // General: Access PKB's unordered_map<string, PKBVariable::SharedPtr>
@@ -525,11 +524,9 @@ class PQLEvaluator
 
     /* TODO: @nicholasnge Provide function to return all Constants in the program.
      */
-    unordered_set<string> getAllConstants();
+    const unordered_set<string> &getAllConstants();
 
   protected:
-
-
     PQLEvaluator(PKB::SharedPtr pPKB)
     {
         mpPKB = pPKB;

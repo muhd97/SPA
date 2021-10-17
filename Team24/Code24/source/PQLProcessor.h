@@ -67,19 +67,19 @@ class ResultTuple
         synonymKeyToValMap.reserve(sizeToReserve);
     }
 
-    inline void insertKeyValuePair(string key, string value)
+    inline void insertKeyValuePair(const string& key, const string& value)
     {
         /* Yida note: Pass by ref argument, please don't use move(value) or else
          * original string becomes empty */
         synonymKeyToValMap[key] = value;
     }
 
-    inline const string& get(string key)
+    inline const string& get(const string& key)
     {
         return synonymKeyToValMap[key];
     }
 
-    inline bool synonymKeyAlreadyExists(string key)
+    inline bool synonymKeyAlreadyExists(const string& key)
     {
         return synonymKeyToValMap.find(key) != synonymKeyToValMap.end();
     }
@@ -224,7 +224,7 @@ class PQLProcessor
     void handleFollowsTFirstArgUnderscore(shared_ptr<SelectCl> &selectCl, shared_ptr<FollowsT> &followsTCl,
                                           vector<shared_ptr<ResultTuple>> &toReturn);
 
-    void handlePatternClause(shared_ptr<SelectCl> selectCl, shared_ptr<PatternCl> patternCl,
+    void handlePatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
                              vector<shared_ptr<ResultTuple>> &toReturn);
 
     void handleWhileAndIfPatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
@@ -242,13 +242,17 @@ class PQLProcessor
 
     void joinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
                           unordered_set<string> &joinKeys, vector<shared_ptr<ResultTuple>> &newResults);
+
+    void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
+        unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults);
+
     void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftResults,
                                       vector<shared_ptr<ResultTuple>>& rightResults,
                                       vector<shared_ptr<ResultTuple>> &newResults);
 
     void getResultsByEntityType(vector<shared_ptr<Result>> &toPopulate, const shared_ptr<DesignEntity>& de, const shared_ptr<Element>& elem);
 
-    void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl> resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);
+    void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);
 
 
     const string& resolveAttrRef(const string& syn, shared_ptr<AttrRef>& attrRef, const shared_ptr<SelectCl>& selectCl, shared_ptr<ResultTuple>& tup);

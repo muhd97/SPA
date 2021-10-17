@@ -5,10 +5,10 @@
 #include <set>
 #include <unordered_map>
 
-#include "PKBProcedure.h"
-#include "PKBVariable.h"
-#include "PKBStmt.h"
 #include "../CFG.h"
+#include "PKBProcedure.h"
+#include "PKBStmt.h"
+#include "PKBVariable.h"
 
 using namespace std;
 
@@ -84,7 +84,7 @@ class PKB
     // map, else it has not been extracted
     unordered_map<string, PKBProcedure::SharedPtr> procedureNameToProcedureMap;
 
-    set<PKBProcedure::SharedPtr> mAllProcedures; //vector of all the procedures in the program
+    set<PKBProcedure::SharedPtr> mAllProcedures; // vector of all the procedures in the program
 
     // statement number, starting from index 1
     // puts result in stmt and returns true if query is valid
@@ -180,7 +180,7 @@ class PKB
         return procedureNameToProcedureMap[procname];
     }
 
-    unordered_set<string> getConstants()
+    const unordered_set<string> &getConstants()
     {
         return mConstants;
     }
@@ -241,18 +241,23 @@ class PKB
 
     unordered_map<string, unordered_set<string>> varNameToPrintStmtTable;
 
-    unordered_map <PKBDesignEntity, unordered_map<PKBDesignEntity, set<pair<string, string>>>> attrRefMatchingNameTable;
+    unordered_map<PKBDesignEntity, unordered_map<PKBDesignEntity, set<pair<string, string>>>> attrRefMatchingNameTable;
+
+    unordered_map<PKBDesignEntity, unordered_set<string>> stmtsWithIndexAsConstantsTable;
+
+    unordered_map<PKBDesignEntity, unordered_set<int>> stmtTypeToSetOfStmtNoTable;
 
     /* ==================================== RELATIONSHIP TABLES ==================================== */
 
     /* ======================== Uses ======================== */
 
-    /* Table that maps every statement to a set of all variables it uses (as a string). Use for Uses(INT, SYN), Uses(INT, "IDENT"), Uses(INT, _) */
+    /* Table that maps every statement to a set of all variables it uses (as a string). Use for Uses(INT, SYN),
+     * Uses(INT, "IDENT"), Uses(INT, _) */
     unordered_map<int, unordered_set<string>> usesIntSynTable;
 
     /* Table that maps DesignEntity to all pairs that satisfy Uses(DESIGN_ENTITY_SYN, VAR) */
     unordered_map<PKBDesignEntity, vector<pair<int, string>>> usesSynSynTableNonProc;
-    
+
     /* Table of all pairs that satisfy Uses(PROCEDURE_SYN, VAR) */
     vector<pair<string, string>> usesSynSynTableProc;
 
@@ -262,19 +267,25 @@ class PKB
     /* Table of all procedures that satisfy Uses(PROCEDURE_SYN, _) */
     vector<string> usesSynUnderscoreTableProc;
 
-    /* Table that maps every var name, to a map of DesignEntity to Statements that use the given varname. Meant for Uses(STMT_SYN, "IDENT") */
+    /* Table that maps every var name, to a map of DesignEntity to Statements that use the given varname. Meant for
+     * Uses(STMT_SYN, "IDENT") */
     unordered_map<string, unordered_map<PKBDesignEntity, vector<int>>> usesSynIdentTableNonProc;
-    /* Similar to above, but for var name to procedures that use the given var instead. Meant for Uses(PROC_SYN, "IDENT") */
+    /* Similar to above, but for var name to procedures that use the given var instead. Meant for Uses(PROC_SYN,
+     * "IDENT") */
     unordered_map<string, vector<string>> usesSynIdentTableProc;
 
-    struct pair_hash {
-        inline std::size_t operator()(const std::pair<int, int>& v) const {
+    struct pair_hash
+    {
+        inline std::size_t operator()(const std::pair<int, int> &v) const
+        {
             return v.first * 569 + v.second; // 569 is prime
         }
     };
 
-    struct PKBDesignEntityPairHash {
-        inline std::size_t operator()(const std::pair<PKBDesignEntity, PKBDesignEntity>& v) const {
+    struct PKBDesignEntityPairHash
+    {
+        inline std::size_t operator()(const std::pair<PKBDesignEntity, PKBDesignEntity> &v) const
+        {
             return static_cast<size_t>(v.first) * 31 + static_cast<size_t>(v.second); // 31 is prime
         }
     };
@@ -287,7 +298,8 @@ class PKB
     unordered_map<int, unordered_map<PKBDesignEntity, vector<int>>> followsTIntSynTable;
 
     /* Table of all FollowsT(syn, syn) */
-    unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> followsTSynSynTable;
+    unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash>
+        followsTSynSynTable;
 
     /* Table of all statement nos that are of type syn, and fulfill FollowsT(syn, _) */
     unordered_map<PKBDesignEntity, unordered_set<int>> followsTSynUnderscoreTable;
@@ -302,7 +314,8 @@ class PKB
     unordered_set<pair<int, int>, pair_hash> parentTIntIntTable;
 
     /* Table of all ParentT(syn, syn) */
-    unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> parentTSynSynTable;
+    unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash>
+        parentTSynSynTable;
 
     /* Table of all statement nos that are of type syn, and fulfill ParentT(syn, _) */
     unordered_map<PKBDesignEntity, unordered_set<int>> parentTSynUnderscoreTable;
@@ -379,10 +392,8 @@ class PKB
     PKBDesignEntity simpleToPKBType(StatementType);
 
   private:
-    // remembers the main program node
-    shared_ptr<Program> programToExtract;
     // remembers the procedure we are currently extracting, helper for calls
     shared_ptr<PKBProcedure> currentProcedureToExtract;
     // calls relationship table helper
-    void PKB::insertCallsRelationship(const string& caller, string& called);
+    void PKB::insertCallsRelationship(const string &caller, string &called);
 };

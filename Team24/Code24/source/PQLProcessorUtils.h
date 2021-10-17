@@ -30,7 +30,6 @@ inline bool atLeastOneTargetSynonymIsInClauses(shared_ptr<SelectCl> selectCl)
         if (selectCl->suchThatContainsSynonym(x) || selectCl->patternContainsSynonym(x) || selectCl->withContainsSynonym(x)) return true;
     }
 
-
     return false;
 }
 
@@ -137,84 +136,6 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(const string& s)
     }
 }
 
-//unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<SuchThatCl> suchThatCl, shared_ptr<PatternCl> patternCl)
-//{
-//    unordered_set<string> toReturn;
-//    toReturn.reserve(4); /* At most 4 keys to join on */
-//    const vector<string>& suchThatSynonyms = suchThatCl->getAllSynonymsAsString();
-//    const vector<string>& patternSynonyms = patternCl->getAllSynonymsAsString();
-//
-//    unordered_set<string> hashMap;
-//    hashMap.reserve(suchThatSynonyms.size() + patternSynonyms.size());
-//
-//    for (const string& s1 : suchThatSynonyms)
-//    {
-//        hashMap.insert(s1);
-//    }
-//
-//    for (const string& s2 : patternSynonyms)
-//    {
-//        if (hashMap.find(s2) != hashMap.end())
-//        {
-//            toReturn.insert(s2);
-//        }
-//    }
-//
-//    return move(toReturn);
-//}
-//
-//unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<WithCl> withCl1, shared_ptr<WithCl> withCl2)
-//{
-//    unordered_set<string> toReturn;
-//    toReturn.reserve(4); /* At most 4 keys to join on */
-//    const vector<string>& suchThatSynonyms = withCl1->getAllSynonymsAsString();
-//    const vector<string>& patternSynonyms = withCl2->getAllSynonymsAsString();
-//
-//    unordered_set<string> hashMap;
-//    hashMap.reserve(suchThatSynonyms.size() + patternSynonyms.size());
-//
-//    for (const string& s1 : suchThatSynonyms)
-//    {
-//        hashMap.insert(s1);
-//    }
-//
-//    for (const string& s2 : patternSynonyms)
-//    {
-//        if (hashMap.find(s2) != hashMap.end())
-//        {
-//            toReturn.insert(s2);
-//        }
-//    }
-//
-//    return move(toReturn);
-//}
-//
-//unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<SuchThatCl> suchThatCl1, shared_ptr<SuchThatCl> suchThatCl2)
-//{
-//    unordered_set<string> toReturn;
-//    toReturn.reserve(4); /* At most 4 keys to join on */
-//    const vector<string>& suchThatSynonyms1 = suchThatCl1->getAllSynonymsAsString();
-//    const vector<string>& suchThatSynonyms2 = suchThatCl2->getAllSynonymsAsString();
-//
-//    unordered_set<string> hashMap;
-//    hashMap.reserve(suchThatSynonyms1.size() + suchThatSynonyms2.size());
-//
-//    for (const string& s1 : suchThatSynonyms1)
-//    {
-//        hashMap.insert(s1);
-//    }
-//
-//    for (const string& s2 : suchThatSynonyms2)
-//    {
-//        if (hashMap.find(s2) != hashMap.end())
-//        {
-//            toReturn.insert(s2);
-//        }
-//    }
-//
-//    return move(toReturn);
-//}
-
 template <typename T, typename R>
 unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<T> cl1, shared_ptr<R> cl2)
 {
@@ -244,11 +165,15 @@ unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<T> cl1, shared_ptr<R> 
 unordered_set<string> getSetOfSynonymsToJoinOn(const vector<shared_ptr<ResultTuple>>& leftRes, const vector<shared_ptr<ResultTuple>>& rightRes)
 {
     unordered_set<string> toReturn;
+
+    if (leftRes.empty() || rightRes.empty()) return move(unordered_set<string>());
+
     const auto& suchThatSynonyms1 = leftRes[0]->getMap();
     const auto& suchThatSynonyms2 = rightRes[0]->getMap();
 
+
     unordered_set<string> hashMap;
-    hashMap.reserve(suchThatSynonyms1.size() + suchThatSynonyms2.size());
+    hashMap.reserve(suchThatSynonyms1.size());
 
     for (const auto& s1 : suchThatSynonyms1)
     {

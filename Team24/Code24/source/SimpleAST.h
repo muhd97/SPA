@@ -241,6 +241,7 @@ enum class StatementType
     PRINT,
     CALL,
     ASSIGN,
+    STATEMENT, // Used for Next* (meant to be AllStatement)
     NONE, // Should not happen
 };
 

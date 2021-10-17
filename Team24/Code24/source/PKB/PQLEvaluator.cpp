@@ -1,4 +1,4 @@
-#pragma optimize( "gty", on )
+#pragma optimize("gty", on)
 #include "PQLEvaluator.h"
 
 #include <queue>
@@ -556,9 +556,8 @@ unordered_set<int> PQLEvaluator::getAllChildAndSubChildrenOfGivenType(PKBStmt::S
     return toReturn;
 }
 
-
 /* PRE-CONDITION: StatementNo exists in this program */
-const vector<int>& PQLEvaluator::getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType)
+const vector<int> &PQLEvaluator::getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType)
 {
 
     return mpPKB->parentTIntSynTable[statementNo][targetChildrenType];
@@ -596,10 +595,12 @@ const vector<int>& PQLEvaluator::getParentTIntSyn(int statementNo, PKBDesignEnti
 
 bool PQLEvaluator::getParentTIntUnderscore(int parentStatementNo)
 {
-    const auto& innerMap = mpPKB->parentTIntSynTable[parentStatementNo];
+    const auto &innerMap = mpPKB->parentTIntSynTable[parentStatementNo];
 
-    for (auto& pair : innerMap) {
-        if (!pair.second.empty()) return true;
+    for (auto &pair : innerMap)
+    {
+        if (!pair.second.empty())
+            return true;
     }
 
     return false;
@@ -637,7 +638,9 @@ bool PQLEvaluator::getParentTIntUnderscore(int parentStatementNo)
 
 bool PQLEvaluator::getParentTIntInt(int parentStatementNo, int childStatementNo)
 {
-    if (mpPKB->parentTIntIntTable.find(make_pair(parentStatementNo, childStatementNo)) == mpPKB->parentTIntIntTable.end()) {
+    if (mpPKB->parentTIntIntTable.find(make_pair(parentStatementNo, childStatementNo)) ==
+        mpPKB->parentTIntIntTable.end())
+    {
         return false;
     }
 
@@ -676,25 +679,25 @@ bool PQLEvaluator::getParentTIntInt(int parentStatementNo, int childStatementNo)
 }
 
 /* PRE-CONDITION: TargetParentType IS a container type. */
-const unordered_set<int>& PQLEvaluator::getParentTSynUnderscore(PKBDesignEntity targetParentType)
+const unordered_set<int> &PQLEvaluator::getParentTSynUnderscore(PKBDesignEntity targetParentType)
 {
 
     return mpPKB->parentTSynUnderscoreTable[targetParentType];
 
-    //unordered_set<int> toReturn;
-    //vector<PKBStatement::SharedPtr> parentStmts;
+    // unordered_set<int> toReturn;
+    // vector<PKBStatement::SharedPtr> parentStmts;
 
-    //if (targetParentType == PKBDesignEntity::AllStatements)
+    // if (targetParentType == PKBDesignEntity::AllStatements)
     //{
     //    addParentStmts(parentStmts);
     //}
-    //else
+    // else
     //{
     //    // check these 'possible' parent statements
     //    parentStmts = mpPKB->getStatements(targetParentType);
     //}
 
-    //for (auto &stmt : parentStmts)
+    // for (auto &stmt : parentStmts)
     //{
     //    if (getParentTIntUnderscore(stmt->getIndex()))
     //    {
@@ -702,31 +705,31 @@ const unordered_set<int>& PQLEvaluator::getParentTSynUnderscore(PKBDesignEntity 
     //    }
     //}
 
-    //return move(toReturn);
+    // return move(toReturn);
 }
 
 /* PRE-CONDITION: TargetParentType IS a container and statement type type. */
-const unordered_set<int>& PQLEvaluator::getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo)
+const unordered_set<int> &PQLEvaluator::getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo)
 {
-    
+
     return mpPKB->parentTSynIntTable[childStatementNo][targetParentType];
 
     // Below is non-precomputed version
 
-    //unordered_set<int> toReturn;
-    //vector<PKBStatement::SharedPtr> parentStmts;
+    // unordered_set<int> toReturn;
+    // vector<PKBStatement::SharedPtr> parentStmts;
 
-    //if (targetParentType == PKBDesignEntity::AllStatements)
+    // if (targetParentType == PKBDesignEntity::AllStatements)
     //{
     //    addParentStmts(parentStmts);
     //}
-    //else
+    // else
     //{
     //    // check these 'possible' parent statements
     //    parentStmts = mpPKB->getStatements(targetParentType);
     //}
 
-    //for (auto &stmt : parentStmts)
+    // for (auto &stmt : parentStmts)
     //{
     //    if (getParentTIntInt(stmt->getIndex(), childStatementNo))
     //    {
@@ -734,36 +737,36 @@ const unordered_set<int>& PQLEvaluator::getParentTSynInt(PKBDesignEntity targetP
     //    }
     //}
 
-    //return move(toReturn);
+    // return move(toReturn);
 }
 
 /* PRE-CONDITION: Both parent and child types are STATEMENT types (not procedure or variable or others) */
-const set<pair<int, int>>& PQLEvaluator::getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType)
+const set<pair<int, int>> &PQLEvaluator::getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
 
     return mpPKB->parentTSynSynTable[make_pair(parentType, childType)];
 
     // Below is non-precomputed version
 
-    //set<pair<int, int>> res;
+    // set<pair<int, int>> res;
 
-    //if (!isContainerType(parentType))
+    // if (!isContainerType(parentType))
     //{
     //    return res;
     //}
 
-    //vector<PKBStatement::SharedPtr> parentStmts;
-    //if (parentType == PKBDesignEntity::AllStatements)
+    // vector<PKBStatement::SharedPtr> parentStmts;
+    // if (parentType == PKBDesignEntity::AllStatements)
     //{
     //    addParentStmts(parentStmts);
     //}
-    //else
+    // else
     //{
     //    // check these 'possible' parent statements
     //    parentStmts = mpPKB->getStatements(parentType);
     //}
 
-    //for (auto &stmt : parentStmts)
+    // for (auto &stmt : parentStmts)
     //{
     //    for (const int &x : getAllChildAndSubChildrenOfGivenType(stmt, childType))
     //    {
@@ -774,7 +777,7 @@ const set<pair<int, int>>& PQLEvaluator::getParentTSynSyn(PKBDesignEntity parent
     //    }
     //}
 
-    //return move(res);
+    // return move(res);
 }
 
 bool PQLEvaluator::getParentTUnderscoreInt(int childStatementNo)
@@ -1109,7 +1112,8 @@ bool PQLEvaluator::getFollowsUnderscoreUnderscore()
 bool PQLEvaluator::getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo)
 {
 
-    if (mpPKB->followsTIntIntTable.find(make_pair(leftStmtNo, rightStmtNo)) == mpPKB->followsTIntIntTable.end()) {
+    if (mpPKB->followsTIntIntTable.find(make_pair(leftStmtNo, rightStmtNo)) == mpPKB->followsTIntIntTable.end())
+    {
         return false;
     }
 
@@ -1171,11 +1175,13 @@ const vector<int> PQLEvaluator::getFollowsTIntegerSyn(PKBDesignEntity rightType,
 
 bool PQLEvaluator::getFollowsTIntegerUnderscore(int leftStmtNo)
 {
- 
-    const auto& innerMap = mpPKB->followsTIntSynTable[leftStmtNo];
 
-    for (auto& pair : innerMap) {
-        if (!pair.second.empty()) return true;
+    const auto &innerMap = mpPKB->followsTIntSynTable[leftStmtNo];
+
+    for (auto &pair : innerMap)
+    {
+        if (!pair.second.empty())
+            return true;
     }
 
     return false;
@@ -1195,25 +1201,25 @@ bool PQLEvaluator::getFollowsTIntegerUnderscore(int leftStmtNo)
 // getBeforeT
 
 /* PRE-CONDITION: TargetFollowType IS a container and statement type type. */
-const unordered_set<int>& PQLEvaluator::getFollowsTSynInteger(PKBDesignEntity leftType, int rightStmtNo)
+const unordered_set<int> &PQLEvaluator::getFollowsTSynInteger(PKBDesignEntity leftType, int rightStmtNo)
 {
     return mpPKB->followsTSynIntTable[rightStmtNo][leftType];
 
     // Below is non-precomputed version
 
-    //unordered_set<int> toReturn;
-    //PKBStmt::SharedPtr rightStatement;
+    // unordered_set<int> toReturn;
+    // PKBStmt::SharedPtr rightStatement;
 
-    //if (!mpPKB->getStatement(rightStmtNo, rightStatement))
+    // if (!mpPKB->getStatement(rightStmtNo, rightStatement))
     //{
     //    return toReturn;
     //}
 
-    //PKBGroup::SharedPtr grp = rightStatement->getGroup();
-    //vector<int> grpStatements = grp->getMembers(leftType);
+    // PKBGroup::SharedPtr grp = rightStatement->getGroup();
+    // vector<int> grpStatements = grp->getMembers(leftType);
 
     //// assume ascending order of line numbers
-    //for (int statementIndex : grpStatements)
+    // for (int statementIndex : grpStatements)
     //{
     //    // we've seen past ourself, we can stop now (we could search past since we
     //    // are searching specific type only)
@@ -1224,23 +1230,23 @@ const unordered_set<int>& PQLEvaluator::getFollowsTSynInteger(PKBDesignEntity le
     //    toReturn.insert(statementIndex);
     //}
 
-    //return move(toReturn);
+    // return move(toReturn);
 }
 
 /* PRE-CONDITION: Both leftType and rightTypes are STATEMENT types (not procedure or variable or others) */
-const set<pair<int, int>>& PQLEvaluator::getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType)
+const set<pair<int, int>> &PQLEvaluator::getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType)
 {
     return mpPKB->followsTSynSynTable[make_pair(leftType, rightType)];
 
     // Below is non-precomputed version
 
-    //set<pair<int, int>> toReturn;
+    // set<pair<int, int>> toReturn;
     //// get results manually
     //// get all the 'before' users first
-    //vector<PKBStmt::SharedPtr> beforeStatements = mpPKB->getStatements(leftType);
+    // vector<PKBStmt::SharedPtr> beforeStatements = mpPKB->getStatements(leftType);
 
     //// count from the back, using rbegin and rend
-    //for (int i = beforeStatements.size() - 1; i >= 0; i--)
+    // for (int i = beforeStatements.size() - 1; i >= 0; i--)
     //{
     //    auto &currStmt = beforeStatements[i];
     //    PKBGroup::SharedPtr grp = currStmt->getGroup();
@@ -1259,22 +1265,22 @@ const set<pair<int, int>>& PQLEvaluator::getFollowsTSynSyn(PKBDesignEntity leftT
     //    }
     //}
 
-    //return move(toReturn);
+    // return move(toReturn);
 }
 
 /* PRE-CONDITION: TargetFolllowsType IS a container type. */
-const unordered_set<int>& PQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity leftType)
+const unordered_set<int> &PQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity leftType)
 {
     return mpPKB->followsTSynUnderscoreTable[leftType];
 
-    //unordered_set<int> toReturn;
+    // unordered_set<int> toReturn;
 
     //// get results manually
     //// get all the 'before' users first
-    //vector<PKBStmt::SharedPtr> beforeStatements = mpPKB->getStatements(leftType);
+    // vector<PKBStmt::SharedPtr> beforeStatements = mpPKB->getStatements(leftType);
 
     //// count from the back, using rbegin and rend
-    //for (int i = beforeStatements.size() - 1; i >= 0; i--)
+    // for (int i = beforeStatements.size() - 1; i >= 0; i--)
     //{
     //    auto &currStmt = beforeStatements[i];
     //    PKBGroup::SharedPtr grp = currStmt->getGroup();
@@ -1286,7 +1292,7 @@ const unordered_set<int>& PQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity
     //    }
     //}
 
-    //return move(toReturn);
+    // return move(toReturn);
 }
 
 /* Use for Follows*(_, INT) */
@@ -1341,14 +1347,14 @@ bool PQLEvaluator::getFollowsTUnderscoreUnderscore()
     return false;
 }
 
-const unordered_set<string>& PQLEvaluator::getUsesIntSyn(int statementNo)
+const unordered_set<string> &PQLEvaluator::getUsesIntSyn(int statementNo)
 {
     return mpPKB->usesIntSynTable[statementNo];
 }
 
 bool PQLEvaluator::getUsesIntIdent(int statementNo, string ident)
 {
-    unordered_set<string>& temp = mpPKB->usesIntSynTable[statementNo];
+    unordered_set<string> &temp = mpPKB->usesIntSynTable[statementNo];
     return temp.find(ident) != temp.end();
 }
 
@@ -1357,26 +1363,25 @@ bool PQLEvaluator::getUsesIntUnderscore(int statementNo)
     return !mpPKB->usesIntSynTable[statementNo].empty();
 }
 
-const vector<pair<int, string>>& PQLEvaluator::getUsesSynSynNonProc(PKBDesignEntity de)
+const vector<pair<int, string>> &PQLEvaluator::getUsesSynSynNonProc(PKBDesignEntity de)
 {
     return mpPKB->usesSynSynTableNonProc[de];
 }
 
-const vector<pair<string, string>>& PQLEvaluator::getUsesSynSynProc()
+const vector<pair<string, string>> &PQLEvaluator::getUsesSynSynProc()
 {
     return mpPKB->usesSynSynTableProc;
 }
 
-const vector<int>& PQLEvaluator::getUsesSynUnderscoreNonProc(PKBDesignEntity de)
+const vector<int> &PQLEvaluator::getUsesSynUnderscoreNonProc(PKBDesignEntity de)
 {
     return mpPKB->usesSynUnderscoreTableNonProc[de];
 }
 
-const vector<string>& PQLEvaluator::getUsesSynUnderscoreProc()
+const vector<string> &PQLEvaluator::getUsesSynUnderscoreProc()
 {
     return mpPKB->usesSynUnderscoreTableProc;
 }
-
 
 vector<string> PQLEvaluator::getUsed(int statementIndex)
 {
@@ -1389,8 +1394,6 @@ vector<string> PQLEvaluator::getUsed(int statementIndex)
     res = stmt->getUsedVariables();
     return varToString(move(res));
 }
-
-
 
 bool PQLEvaluator::checkUsed(int statementIndex)
 {
@@ -1460,7 +1463,6 @@ vector<string> PQLEvaluator::getUsedByProcName(string procname)
     vector<PKBVariable::SharedPtr> vars;
 
     return procedure->getUsedVariablesAsString();
-
 }
 
 bool PQLEvaluator::checkUsedByProcName(string procname)
@@ -1489,7 +1491,7 @@ bool PQLEvaluator::checkUsedByProcName(string procname, string ident)
 }
 
 /* PRE-CONDITION: Variable Name exists in this program */
-const vector<int>& PQLEvaluator::getUsers(string variableName)
+const vector<int> &PQLEvaluator::getUsers(string variableName)
 {
     PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
 
@@ -1497,7 +1499,7 @@ const vector<int>& PQLEvaluator::getUsers(string variableName)
 }
 
 /* PRE-CONDITION: Variable Name exists in this program */
-const vector<int>& PQLEvaluator::getUsesSynIdentNonProc(PKBDesignEntity userType, string variableName)
+const vector<int> &PQLEvaluator::getUsesSynIdentNonProc(PKBDesignEntity userType, string variableName)
 {
     // if we are looking for ALL users using the variable, call the other function
     if (userType == PKBDesignEntity::AllStatements)
@@ -1505,13 +1507,12 @@ const vector<int>& PQLEvaluator::getUsesSynIdentNonProc(PKBDesignEntity userType
         return getUsers(variableName);
     }
 
-
     return mpPKB->usesSynIdentTableNonProc[variableName][userType];
-    
-    //vector<int> users = v->getUsers();
+
+    // vector<int> users = v->getUsers();
 
     //// filter only the desired type
-    //for (int userIndex : users)
+    // for (int userIndex : users)
     //{
     //    PKBStatement::SharedPtr userStatement;
     //    if (!mpPKB->getStatement(userIndex, userStatement))
@@ -1524,29 +1525,28 @@ const vector<int>& PQLEvaluator::getUsesSynIdentNonProc(PKBDesignEntity userType
     //    }
     //}
 
-    //return move(res);
+    // return move(res);
 }
 
 /* PRE-CONDITION: Variable Name exists in this program */
-const vector<string>& PQLEvaluator::getUsesSynIdentProc(string ident)
+const vector<string> &PQLEvaluator::getUsesSynIdentProc(string ident)
 {
-    
-     return mpPKB->usesSynIdentTableProc[ident];
-    
+
+    return mpPKB->usesSynIdentTableProc[ident];
 }
 
 bool PQLEvaluator::variableExists(string name)
 {
-    PKBVariable::SharedPtr& v = mpPKB->getVarByName(name);
+    PKBVariable::SharedPtr &v = mpPKB->getVarByName(name);
     return v != nullptr;
 }
 
 bool PQLEvaluator::procExists(string procname)
 {
-    if (mpPKB->getProcedureByName(procname) == nullptr) return false;
+    if (mpPKB->getProcedureByName(procname) == nullptr)
+        return false;
     return true;
 }
-
 
 vector<int> PQLEvaluator::getUsers()
 {
@@ -1786,16 +1786,15 @@ vector<int> PQLEvaluator::getModifiers(PKBDesignEntity modifierType, string vari
 {
     // if we are looking for ALL users using the variable, call the other function
 
-    
     if (modifierType == PKBDesignEntity::AllStatements)
     {
         return getModifiers(variableName);
     }
 
-    
     vector<int> res;
     PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
-    if (v == nullptr) return res;
+    if (v == nullptr)
+        return res;
 
     vector<int> modifiers = v->getModifiers();
 
@@ -1878,7 +1877,7 @@ vector<PKBVariable::SharedPtr> PQLEvaluator::getAllVariables()
     vars.reserve(map.size());
     for (auto &kv : map)
     {
-    vars.emplace_back(kv.second);
+        vars.emplace_back(kv.second);
     }
 
     return move(vars);
@@ -1886,7 +1885,7 @@ vector<PKBVariable::SharedPtr> PQLEvaluator::getAllVariables()
 
 /* TODO: @nicholasnge Provide function to return all Constants in the program.
  */
-unordered_set<string> PQLEvaluator::getAllConstants()
+const unordered_set<string> &PQLEvaluator::getAllConstants()
 {
     return mpPKB->getConstants();
 }
@@ -1894,11 +1893,11 @@ unordered_set<string> PQLEvaluator::getAllConstants()
 // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 // if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern
 // instead
-vector<pair<int, string>> PQLEvaluator::matchAnyPattern(string& LHS)
+vector<pair<int, string>> PQLEvaluator::matchAnyPattern(string &LHS)
 {
     vector<PKBStmt::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
     vector<pair<int, string>> res;
-    for (auto& assignStmt : assignStmts)
+    for (auto &assignStmt : assignStmts)
     {
         // check LHS
         if (LHS == assignStmt->simpleAssignStatement->getId()->getName() || LHS == "_")
@@ -1914,7 +1913,7 @@ vector<pair<int, string>> PQLEvaluator::matchAnyPattern(string& LHS)
 // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 // if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern
 // instead
-vector<pair<int, string>> PQLEvaluator::matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS)
+vector<pair<int, string>> PQLEvaluator::matchPartialPattern(string &LHS, shared_ptr<Expression> &RHS)
 {
     vector<PKBStmt::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
     vector<pair<int, string>> res;
@@ -1923,7 +1922,7 @@ vector<pair<int, string>> PQLEvaluator::matchPartialPattern(string& LHS, shared_
     vector<string> queryInOrder = inOrderTraversalHelper(RHS);
     vector<string> queryPreOrder = preOrderTraversalHelper(RHS);
 
-    for (auto& assignStmt : assignStmts)
+    for (auto &assignStmt : assignStmts)
     {
         // check LHS
         if (LHS != assignStmt->simpleAssignStatement->getId()->getName() && LHS != "_")
@@ -1946,7 +1945,7 @@ vector<pair<int, string>> PQLEvaluator::matchPartialPattern(string& LHS, shared_
 // For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
 // if you want to use a("_", _EXPR_) or a(IDENT, _EXPR_), use matchPattern
 // instead
-vector<pair<int, string>> PQLEvaluator::matchExactPattern(string& LHS, shared_ptr<Expression>& RHS)
+vector<pair<int, string>> PQLEvaluator::matchExactPattern(string &LHS, shared_ptr<Expression> &RHS)
 {
     vector<PKBStmt::SharedPtr> assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
     vector<pair<int, string>> res;
@@ -1955,7 +1954,7 @@ vector<pair<int, string>> PQLEvaluator::matchExactPattern(string& LHS, shared_pt
     vector<string> queryInOrder = inOrderTraversalHelper(RHS);
     vector<string> queryPreOrder = preOrderTraversalHelper(RHS);
 
-    for (auto& assignStmt : assignStmts)
+    for (auto &assignStmt : assignStmts)
     {
         // check LHS
         if (LHS != assignStmt->simpleAssignStatement->getId()->getName() && LHS != "_")
@@ -1975,34 +1974,38 @@ vector<pair<int, string>> PQLEvaluator::matchExactPattern(string& LHS, shared_pt
     return res;
 }
 
-bool PQLEvaluator::getCallsStringString(string& caller, string& called)
+bool PQLEvaluator::getCallsStringString(const string &caller, const string &called)
 {
-    for (auto& p : mpPKB->callsTable[caller]) {
-        if (p.second == called) {
+    for (auto &p : mpPKB->callsTable[caller])
+    {
+        if (p.second == called)
+        {
             return true;
         }
     }
     return false;
 }
 
-unordered_set<string> PQLEvaluator::getCallsStringSyn(string& caller)
+unordered_set<string> PQLEvaluator::getCallsStringSyn(const string &caller)
 {
     unordered_set<string> toReturn;
-    for (auto& p : mpPKB->callsTable[caller]) {
+    for (auto &p : mpPKB->callsTable[caller])
+    {
         toReturn.insert(p.second);
     }
     return toReturn;
 }
 
-bool PQLEvaluator::getCallsStringUnderscore(string& caller)
+bool PQLEvaluator::getCallsStringUnderscore(const string &caller)
 {
     return mpPKB->callsTable[caller].size() > 0;
 }
 
-unordered_set<string> PQLEvaluator::getCallsSynString(string& called)
+unordered_set<string> PQLEvaluator::getCallsSynString(const string &called)
 {
     unordered_set<string> toReturn;
-    for (auto& p : mpPKB->calledTable[called]) {
+    for (auto &p : mpPKB->calledTable[called])
+    {
         toReturn.insert(p.first);
     }
     return toReturn;
@@ -2011,7 +2014,8 @@ unordered_set<string> PQLEvaluator::getCallsSynString(string& called)
 set<pair<string, string>> PQLEvaluator::getCallsSynSyn()
 {
     set<pair<string, string>> toReturn;
-    for (auto const& [procName, pairs] : mpPKB->callsTable) {
+    for (auto const &[procName, pairs] : mpPKB->callsTable)
+    {
         toReturn.insert(pairs.begin(), pairs.end());
     }
     return toReturn;
@@ -2020,15 +2024,17 @@ set<pair<string, string>> PQLEvaluator::getCallsSynSyn()
 unordered_set<string> PQLEvaluator::getCallsSynUnderscore()
 {
     unordered_set<string> toReturn;
-    for (auto const& [procName, pairs] : mpPKB->callsTable) {
-        if (pairs.size() > 0) {
+    for (auto const &[procName, pairs] : mpPKB->callsTable)
+    {
+        if (pairs.size() > 0)
+        {
             toReturn.insert(procName);
         }
     }
     return toReturn;
 }
 
-bool PQLEvaluator::getCallsUnderscoreString(string& called)
+bool PQLEvaluator::getCallsUnderscoreString(const string &called)
 {
     return mpPKB->calledTable[called].size() > 0;
 }
@@ -2036,8 +2042,10 @@ bool PQLEvaluator::getCallsUnderscoreString(string& called)
 unordered_set<string> PQLEvaluator::getCallsUnderscoreSyn()
 {
     unordered_set<string> toReturn;
-    for (auto const& [procName, pairs] : mpPKB->calledTable) {
-        if (pairs.size() > 0) {
+    for (auto const &[procName, pairs] : mpPKB->calledTable)
+    {
+        if (pairs.size() > 0)
+        {
             toReturn.insert(procName);
         }
     }
@@ -2049,34 +2057,38 @@ bool PQLEvaluator::getCallsUnderscoreUnderscore()
     return mpPKB->callsTable.size() > 0;
 }
 
-bool PQLEvaluator::getCallsTStringString(string& caller, string& called)
+bool PQLEvaluator::getCallsTStringString(const string &caller, const string &called)
 {
-    for (auto& p : mpPKB->callsTTable[caller]) {
-        if (p.second == called) {
+    for (auto &p : mpPKB->callsTTable[caller])
+    {
+        if (p.second == called)
+        {
             return true;
         }
     }
     return false;
 }
 
-unordered_set<string> PQLEvaluator::getCallsTStringSyn(string& caller)
+unordered_set<string> PQLEvaluator::getCallsTStringSyn(const string &caller)
 {
     unordered_set<string> toReturn;
-    for (auto& p : mpPKB->callsTTable[caller]) {
+    for (auto &p : mpPKB->callsTTable[caller])
+    {
         toReturn.insert(p.second);
     }
     return toReturn;
 }
 
-bool PQLEvaluator::getCallsTStringUnderscore(string& caller)
+bool PQLEvaluator::getCallsTStringUnderscore(const string &caller)
 {
     return mpPKB->callsTTable[caller].size() > 0;
 }
 
-unordered_set<string> PQLEvaluator::getCallsTSynString(string& called)
+unordered_set<string> PQLEvaluator::getCallsTSynString(const string &called)
 {
     unordered_set<string> toReturn;
-    for (auto& p : mpPKB->calledTTable[called]) {
+    for (auto &p : mpPKB->calledTTable[called])
+    {
         toReturn.insert(p.first);
     }
     return toReturn;
@@ -2085,7 +2097,8 @@ unordered_set<string> PQLEvaluator::getCallsTSynString(string& called)
 set<pair<string, string>> PQLEvaluator::getCallsTSynSyn()
 {
     set<pair<string, string>> toReturn;
-    for (auto const& [procName, pairs] : mpPKB->callsTTable) {
+    for (auto const &[procName, pairs] : mpPKB->callsTTable)
+    {
         toReturn.insert(pairs.begin(), pairs.end());
     }
     return toReturn;
@@ -2094,15 +2107,17 @@ set<pair<string, string>> PQLEvaluator::getCallsTSynSyn()
 unordered_set<string> PQLEvaluator::getCallsTSynUnderscore()
 {
     unordered_set<string> toReturn;
-    for (auto const& [procName, pairs] : mpPKB->callsTTable) {
-        if (pairs.size() > 0) {
+    for (auto const &[procName, pairs] : mpPKB->callsTTable)
+    {
+        if (pairs.size() > 0)
+        {
             toReturn.insert(procName);
         }
     }
     return toReturn;
 }
 
-bool PQLEvaluator::getCallsTUnderscoreString(string& called)
+bool PQLEvaluator::getCallsTUnderscoreString(const string &called)
 {
     return mpPKB->calledTTable[called].size() > 0;
 }
@@ -2110,8 +2125,10 @@ bool PQLEvaluator::getCallsTUnderscoreString(string& called)
 unordered_set<string> PQLEvaluator::getCallsTUnderscoreSyn()
 {
     unordered_set<string> toReturn;
-    for (auto const& [procName, pairs] : mpPKB->calledTTable) {
-        if (pairs.size() > 0) {
+    for (auto const &[procName, pairs] : mpPKB->calledTTable)
+    {
+        if (pairs.size() > 0)
+        {
             toReturn.insert(procName);
         }
     }
@@ -2279,116 +2296,306 @@ bool PQLEvaluator::checkForExactTree(vector<string> &queryInOrder, vector<string
 
 // Next
 // Use for Next(_, _)
-bool PQLEvaluator::getNextUnderscoreUnderscore() {
+bool PQLEvaluator::getNextUnderscoreUnderscore()
+{
     return mpPKB->nextIntIntTable.begin() != mpPKB->nextIntIntTable.end();
 }
 
-// Case 2: Next(_, syn) 
-unordered_set<int> PQLEvaluator::getNextUnderscoreSyn(PKBDesignEntity to) {
+// Case 2: Next(_, syn)
+unordered_set<int> PQLEvaluator::getNextUnderscoreSyn(PKBDesignEntity to)
+{
     auto typePair = make_pair(PKBDesignEntity::AllStatements, to);
     unordered_set<int> result;
-    for (auto p: mpPKB->nextSynSynTable[typePair]) {
+    for (auto p : mpPKB->nextSynSynTable[typePair])
+    {
         result.insert(p.second);
     }
     return result;
 }
 
-// Case 3: Next(_, int) 
-bool PQLEvaluator::getNextUnderscoreInt(int toIndex) {
+// Case 3: Next(_, int)
+bool PQLEvaluator::getNextUnderscoreInt(int toIndex)
+{
     return mpPKB->nextSynIntTable.find(toIndex) != mpPKB->nextSynIntTable.end();
 }
 
-// Case 4: Next(syn, syn) 
-set<pair<int, int>> PQLEvaluator::getNextSynSyn(PKBDesignEntity from, PKBDesignEntity to) {
+// Case 4: Next(syn, syn)
+set<pair<int, int>> PQLEvaluator::getNextSynSyn(PKBDesignEntity from, PKBDesignEntity to)
+{
     auto typePair = make_pair(from, to);
     return mpPKB->nextSynSynTable[typePair];
 }
 
-// Case 5: Next(syn, _) 
-unordered_set<int> PQLEvaluator::getNextSynUnderscore(PKBDesignEntity from) {
+// Case 5: Next(syn, _)
+unordered_set<int> PQLEvaluator::getNextSynUnderscore(PKBDesignEntity from)
+{
     auto typePair = make_pair(from, PKBDesignEntity::AllStatements);
     unordered_set<int> result;
-    for (auto p : mpPKB->nextSynSynTable[typePair]) {
+    for (auto p : mpPKB->nextSynSynTable[typePair])
+    {
         result.insert(p.first);
     }
     return result;
 }
 
-// Case 6: Next(syn, int) 
-unordered_set<int> PQLEvaluator::getNextSynInt(PKBDesignEntity from, int toIndex) {
+// Case 6: Next(syn, int)
+unordered_set<int> PQLEvaluator::getNextSynInt(PKBDesignEntity from, int toIndex)
+{
     return mpPKB->nextSynIntTable[toIndex][from];
 }
 
-// Case 7: Next(int, int) 
-bool PQLEvaluator::getNextIntInt(int fromIndex, int toIndex) {
+// Case 7: Next(int, int)
+bool PQLEvaluator::getNextIntInt(int fromIndex, int toIndex)
+{
     auto typePair = make_pair(fromIndex, toIndex);
     return mpPKB->nextIntIntTable.find(typePair) != mpPKB->nextIntIntTable.end();
 }
 
 // Case 8: Next(int, _)
-bool PQLEvaluator::getNextIntUnderscore(int fromIndex) {
+bool PQLEvaluator::getNextIntUnderscore(int fromIndex)
+{
     return mpPKB->nextIntSynTable.find(fromIndex) != mpPKB->nextIntSynTable.end();
 }
 
-// Case 9: Next(int, syn) 
-unordered_set<int> PQLEvaluator::getNextIntSyn(int fromIndex, PKBDesignEntity to) {
+// Case 9: Next(int, syn)
+unordered_set<int> PQLEvaluator::getNextIntSyn(int fromIndex, PKBDesignEntity to)
+{
     return mpPKB->nextIntSynTable[fromIndex][to];
 }
 
+// ================================================================================================ //
 // NextT
+
+string formatStatementType(StatementType type)
+{
+    switch (type)
+    {
+    case StatementType::READ:
+        return "Read";
+    case StatementType::PRINT:
+        return "Print";
+    case StatementType::ASSIGN:
+        return "Assign";
+    case StatementType::CALL:
+        return "Call";
+    case StatementType::WHILE:
+        return "While";
+    case StatementType::IF:
+        return "If";
+    case StatementType::STATEMENT:
+        return "Stmt";
+    case StatementType::NONE:
+        return "None";
+    default:
+        throw "Unknown StatementType - Design Ent";
+    }
+}
+
+StatementType getStatementType(PKBDesignEntity de)
+{
+    switch (de)
+    {
+    case PKBDesignEntity::Read:
+        return StatementType::READ;
+    case PKBDesignEntity::Print:
+        return StatementType::PRINT;
+    case PKBDesignEntity::Assign:
+        return StatementType::ASSIGN;
+    case PKBDesignEntity::Call:
+        return StatementType::CALL;
+    case PKBDesignEntity::While:
+        return StatementType::WHILE;
+    case PKBDesignEntity::If:
+        return StatementType::IF;
+    case PKBDesignEntity::AllStatements:
+        return StatementType::STATEMENT; // Use this as a hack to represent AllStatements
+    default:
+        throw "Unknown StatementType - Design Ent";
+    }
+}
+
+// NextT(p, q)
+void getNextTStatmtList(vector<shared_ptr<Statement>> list, StatementType from, StatementType to, int fromIndex,
+                        int toIndex, set<pair<int, int>> *result, set<int> *seenP, bool canExitEarly)
+{
+    for (auto stmt : list)
+    {
+        // For debugging
+        /*
+        string builder = "#" + to_string(stmt->getIndex()) + " seenP: ";
+        for (auto p : *seenP) {
+            builder += to_string(p) + ", ";
+        }
+        cout << builder << endl;
+        */
+
+        if (canExitEarly && result->begin() != result->end())
+        {
+            return;
+        }
+
+        // NONE is used to represent AllStatements
+        if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex)
+        {
+            for (auto p : *seenP)
+            {
+                result->insert(make_pair(p, stmt->getIndex()));
+            }
+
+            if (canExitEarly)
+            {
+                return;
+            }
+        }
+
+        // NONE is used to represent AllStatements
+        if (stmt->getStatementType() == from || from == StatementType::STATEMENT || stmt->getIndex() == fromIndex)
+        {
+            seenP->insert(stmt->getIndex());
+        }
+
+        if (stmt->getStatementType() == StatementType::IF)
+        {
+            shared_ptr<IfStatement> ifS = static_pointer_cast<IfStatement>(stmt);
+            set<pair<int, int>> cloneResult = set<pair<int, int>>(*result);
+            set<int> cloneSeenP = set<int>(*seenP);
+
+            getNextTStatmtList(ifS->getConsequent()->getStatements(), from, to, fromIndex, toIndex, &cloneResult,
+                               &cloneSeenP, canExitEarly);
+            getNextTStatmtList(ifS->getAlternative()->getStatements(), from, to, fromIndex, toIndex, result, seenP,
+                               canExitEarly);
+
+            result->insert(cloneResult.begin(), cloneResult.end());
+            seenP->insert(cloneSeenP.begin(), cloneSeenP.end());
+        }
+        else if (stmt->getStatementType() == StatementType::WHILE)
+        {
+            shared_ptr<WhileStatement> whiles = static_pointer_cast<WhileStatement>(stmt);
+
+            auto sizeP = seenP->size();
+            getNextTStatmtList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP, canExitEarly);
+
+            if (sizeP < seenP->size())
+            {
+                // if there are new things in seenP we wanna do another pass
+                getNextTStatmtList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP,
+                                   canExitEarly);
+            }
+
+            // While to while loop!
+            if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex)
+            {
+                for (auto p : *seenP)
+                {
+                    result->insert(make_pair(p, stmt->getIndex()));
+                }
+            }
+        }
+    }
+}
+
+set<pair<int, int>> getNextT(shared_ptr<Program> program, StatementType from, StatementType to, int fromIndex,
+                             int toIndex, bool canExitEarly)
+{
+    set<pair<int, int>> result = {};
+
+    for (auto procedure : program->getProcedures())
+    {
+        set<int> seenP = {};
+        getNextTStatmtList(procedure->getStatementList()->getStatements(), from, to, fromIndex, toIndex, &result,
+                           &seenP, false);
+    }
+
+    return result;
+}
+
 // Use for NextT(_, _)
-bool PQLEvaluator::getNextTUnderscoreUnderscore() {
-    return mpPKB->nextIntIntTable.begin() != mpPKB->nextIntIntTable.end();
+bool PQLEvaluator::getNextTUnderscoreUnderscore()
+{
+    set<pair<int, int>> result =
+        getNextT(mpPKB->program, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, true);
+    return result.begin() != result.end();
 }
 
-// Case 2: NextT(_, syn) 
-unordered_set<int> PQLEvaluator::getNextTUnderscoreSyn(PKBDesignEntity to) {
-    auto typePair = make_pair(PKBDesignEntity::AllStatements, to);
-    unordered_set<int> result;
-    for (auto p : mpPKB->nextSynSynTable[typePair]) {
-        result.insert(p.second);
+// Case 2: NextT(_, syn)
+unordered_set<int> PQLEvaluator::getNextTUnderscoreSyn(PKBDesignEntity to)
+{
+    set<pair<int, int>> result = getNextT(mpPKB->program, StatementType::STATEMENT, getStatementType(to), 0, 0, false);
+    unordered_set<int> toResult = {};
+    for (auto p : result)
+    {
+        toResult.insert(p.second);
     }
-    return result;
+    return toResult;
 }
 
-// Case 3: NextT(_, int) 
-bool PQLEvaluator::getNextTUnderscoreInt(int toIndex) {
-    return mpPKB->nextSynIntTable.find(toIndex) != mpPKB->nextSynIntTable.end();
+// Case 3: NextT(_, int)
+bool PQLEvaluator::getNextTUnderscoreInt(int toIndex)
+{
+    set<pair<int, int>> result =
+        getNextT(mpPKB->program, StatementType::STATEMENT, StatementType::NONE, 0, toIndex, true);
+    return result.begin() != result.end();
 }
 
-// Case 4: NextT(syn, syn) 
-set<pair<int, int>> PQLEvaluator::getNextTSynSyn(PKBDesignEntity from, PKBDesignEntity to) {
-    auto typePair = make_pair(from, to);
-    return mpPKB->nextSynSynTable[typePair];
+// Case 4: NextT(syn, syn)
+set<pair<int, int>> PQLEvaluator::getNextTSynSyn(PKBDesignEntity from, PKBDesignEntity to)
+{
+    return getNextT(mpPKB->program, getStatementType(from), getStatementType(to), 0, 0, false);
 }
 
-// Case 5: NextT(syn, _) 
-unordered_set<int> PQLEvaluator::getNextTSynUnderscore(PKBDesignEntity from) {
-    auto typePair = make_pair(from, PKBDesignEntity::AllStatements);
-    unordered_set<int> result;
-    for (auto p : mpPKB->nextSynSynTable[typePair]) {
-        result.insert(p.first);
+// Case 5: NextT(syn, _)
+unordered_set<int> PQLEvaluator::getNextTSynUnderscore(PKBDesignEntity from)
+{
+    set<pair<int, int>> result =
+        getNextT(mpPKB->program, getStatementType(from), StatementType::STATEMENT, 0, 0, false);
+    unordered_set<int> fromResult = {};
+    for (auto p : result)
+    {
+        fromResult.insert(p.first);
     }
-    return result;
+    return fromResult;
 }
 
-// Case 6: NextT(syn, int) 
-unordered_set<int> PQLEvaluator::getNextTSynInt(PKBDesignEntity from, int toIndex) {
-    return mpPKB->nextSynIntTable[toIndex][from];
+// Case 6: NextT(syn, int)
+unordered_set<int> PQLEvaluator::getNextTSynInt(PKBDesignEntity from, int toIndex)
+{
+    set<pair<int, int>> result =
+        getNextT(mpPKB->program, getStatementType(from), StatementType::NONE, 0, toIndex, false);
+    unordered_set<int> fromResult = {};
+    for (auto p : result)
+    {
+        fromResult.insert(p.first);
+    }
+    return fromResult;
 }
 
-// Case 7: NextT(int, int) 
-bool PQLEvaluator::getNextTIntInt(int fromIndex, int toIndex) {
-    auto typePair = make_pair(fromIndex, toIndex);
-    return mpPKB->nextIntIntTable.find(typePair) != mpPKB->nextIntIntTable.end();
+// Case 7: NextT(int, int)
+bool PQLEvaluator::getNextTIntInt(int fromIndex, int toIndex)
+{
+    // Todo optimize (@jiachen247) Can exit early after first is found match
+    set<pair<int, int>> result =
+        getNextT(mpPKB->program, StatementType::NONE, StatementType::NONE, fromIndex, toIndex, true);
+    return result.begin() != result.end();
 }
 
 // Case 8: NextT(int, _)
-bool PQLEvaluator::getNextTIntUnderscore(int fromIndex) {
-    return mpPKB->nextIntSynTable.find(fromIndex) != mpPKB->nextIntSynTable.end();
+bool PQLEvaluator::getNextTIntUnderscore(int fromIndex)
+{
+    // Todo optimize (@jiachen247) Can exit early after first is found match
+    set<pair<int, int>> result =
+        getNextT(mpPKB->program, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0, true);
+    return result.begin() != result.end();
 }
 
-// Case 9: NextT(int, syn) 
-unordered_set<int> PQLEvaluator::getNextTIntSyn(int fromIndex, PKBDesignEntity to) {
-    return mpPKB->nextIntSynTable[fromIndex][to];
+// Case 9: NextT(int, syn)
+unordered_set<int> PQLEvaluator::getNextTIntSyn(int fromIndex, PKBDesignEntity to)
+{
+    set<pair<int, int>> result =
+        getNextT(mpPKB->program, StatementType::NONE, getStatementType(to), fromIndex, 0, false);
+    unordered_set<int> toResult = {};
+    for (auto p : result)
+    {
+        toResult.insert(p.second);
+    }
+    return toResult;
 }

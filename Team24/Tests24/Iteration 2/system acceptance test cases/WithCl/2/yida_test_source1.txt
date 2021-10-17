@@ -1,6 +1,6 @@
 procedure yida1 {
     x = 1;
-    y = 2;
+    y =77;
 	z = x + y;
 	read a;
 	print b;
@@ -21,4 +21,17 @@ procedure yida3 {
 
 procedure yida4 {
 
+}
+
+procedure yida5 {
+  	if (x > 3)then {
+		
+	} else {
+		while (w < (24 + y)) {
+			y = y + 24;
+			call yida4;
+			print y;
+			read y;
+		}	
+	}
 }
