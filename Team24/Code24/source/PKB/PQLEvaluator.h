@@ -525,7 +525,7 @@ class PQLEvaluator
 
     /* TODO: @nicholasnge Provide function to return all Constants in the program.
      */
-    unordered_set<string> getAllConstants();
+    const unordered_set<string>& getAllConstants();
 
   protected:
 
