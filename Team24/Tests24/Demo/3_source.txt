@@ -279,7 +279,7 @@ procedure IfWhile {
                     read a;
                     if (a == b) then {
                         while (a > b / 6) {
-                            if (a != b) then {.
+                            if (a != b) then {
                                 print b;
                             } else {
                                 print a;
