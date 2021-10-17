@@ -125,6 +125,31 @@ void PKB::initializeWithTables()
         }
     }
 
+
+    // PKBDesignEntity to stmts whose statement numbers appear as constants
+    vector<PKBDesignEntity> entitiesWithStmtNo = {
+        PKBDesignEntity::AllStatements,
+        PKBDesignEntity::Assign,
+        PKBDesignEntity::Call,
+        PKBDesignEntity::Read,
+        PKBDesignEntity::Print,
+        PKBDesignEntity::If,
+        PKBDesignEntity::While,
+    };
+
+    const auto& constants = getConstants();
+
+    for (auto de : entitiesWithStmtNo) {
+        stmtsWithIndexAsConstantsTable[de] = unordered_set<string>();
+        for (auto& ptr : getStatements(de)) {
+            string indexToStr = to_string(ptr->getIndex());
+            if (constants.find(indexToStr) != constants.end()) {
+                stmtsWithIndexAsConstantsTable[de].insert(indexToStr);
+            }
+        }
+
+    }
+
 }
 
 

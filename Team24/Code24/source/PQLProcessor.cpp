@@ -129,7 +129,7 @@ void PQLProcessor::handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const ve
                 getSetOfSynonymsToJoinOn(currWithRes, withClauseTuples);
 
             if (!setOfSynonymsToJoinOn.empty())
-                joinResultTuples(withClauseTuples, currWithRes, setOfSynonymsToJoinOn, joinedRes);
+                hashJoinResultTuples(withClauseTuples, currWithRes, setOfSynonymsToJoinOn, joinedRes);
             else
                 cartesianProductResultTuples(withClauseTuples, currWithRes, joinedRes);
 
@@ -503,16 +503,18 @@ void PQLProcessor::handleWithFirstArgAttrRef(const shared_ptr<SelectCl>& selectC
     const shared_ptr<Ref> rhs = withCl->rhs;
     const RefType rightType = rhs->getRefType();
 
+    /* with attrRef = attrRef */
     if (rightType == RefType::ATTR) {
 
         /* By the pre-condiiton, we are guaranteed both attrRef are of same type */
-        auto attrNameType = leftAttrRef->getAttrName()->getAttrNameType();
+        auto leftAttrNameType = leftAttrRef->getAttrName()->getAttrNameType();
         const auto& rightAttrRef = rhs->getAttrRef();
+        auto rightAttrNameType = rightAttrRef->getAttrName()->getAttrNameType();
 
         const auto& leftSynKey = leftAttrRef->getSynonymString();
         const auto& rightSynKey = rightAttrRef->getSynonymString();
 
-        if (attrNameType == AttrNameType::VAR_NAME || attrNameType == AttrNameType::PROC_NAME) {
+        if (leftAttrNameType == AttrNameType::VAR_NAME || leftAttrNameType == AttrNameType::PROC_NAME) {
             const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(leftAttrRef->getSynonymString());
             const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
             auto leftDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
@@ -530,11 +532,125 @@ void PQLProcessor::handleWithFirstArgAttrRef(const shared_ptr<SelectCl>& selectC
                 //cout << "Added tuple: " << toAdd->toString() << endl;
                 toReturn.emplace_back(move(toAdd));
             }
+            return;
+        }
+
+        // statement no
+        if (leftAttrNameType == AttrNameType::STMT_NUMBER) {
+            const auto& temp1 = selectCl->getDesignEntityTypeBySynonym(leftAttrRef->getSynonymString());
+            auto leftDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
+            if (rightAttrNameType == AttrNameType::STMT_NUMBER) { /* With (STMT#, STMT#) */
+                
+                const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
+                
+                auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp2);
+
+                /* Two synonyms can only have same stmt number if they are of the same type, or if one of them is all generic statements. */
+                if (leftDesignEntity == rightDesignEntity) {
+
+                    for (const auto& x : evaluator->getStatementsByPKBDesignEntity(leftDesignEntity)) {
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                        toAdd->insertKeyValuePair(leftSynKey, to_string(x->getIndex()));
+                        toAdd->insertKeyValuePair(rightSynKey, to_string(x->getIndex()));
+                        //cout << "Added tuple: " << toAdd->toString() << endl;
+                        toReturn.emplace_back(move(toAdd));
+                    }
+
+                }
+                else if (rightDesignEntity == PKBDesignEntity::AllStatements) {
+                    for (const auto& x : evaluator->getStatementsByPKBDesignEntity(leftDesignEntity)) {
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                        toAdd->insertKeyValuePair(leftSynKey, to_string(x->getIndex()));
+                        toAdd->insertKeyValuePair(rightSynKey, to_string(x->getIndex()));
+                        //cout << "Added tuple: " << toAdd->toString() << endl;
+                        toReturn.emplace_back(move(toAdd));
+                    }
+                }
+                else if (leftDesignEntity == PKBDesignEntity::AllStatements) {
+                    for (const auto& x : evaluator->getStatementsByPKBDesignEntity(rightDesignEntity)) {
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                        toAdd->insertKeyValuePair(leftSynKey, to_string(x->getIndex()));
+                        toAdd->insertKeyValuePair(rightSynKey, to_string(x->getIndex()));
+                        //cout << "Added tuple: " << toAdd->toString() << endl;
+                        toReturn.emplace_back(move(toAdd));
+                    }
+                }
+                else {
+
+                }
+                return;
+            }
+            else if (rightAttrNameType == AttrNameType::VALUE) { /* With (STMT#, CONST) */
+                // right side MUST be a CONSTANT synonym
+                const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
+                auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp2);
+                
+                if (temp2 == DesignEntity::CONSTANT) {
+                    // BUILD STATEMENT CONSTANT TABLE
+
+                    for (const auto& str : evaluator->mpPKB->stmtsWithIndexAsConstantsTable[leftDesignEntity]) {
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                        toAdd->insertKeyValuePair(leftSynKey, str);
+                        toAdd->insertKeyValuePair(rightSynKey, str);
+                        //cout << "Added tuple: " << toAdd->toString() << endl;
+                        toReturn.emplace_back(move(toAdd));
+                    }
+                }
+
+            }
+        }
+
+        // constant VALUE
+        if (leftAttrNameType == AttrNameType::VALUE) {
+            if (rightAttrNameType == AttrNameType::STMT_NUMBER) { /* With (CONST, STMT#) */
+                const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
+                auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp2);
+                for (const auto& str : evaluator->mpPKB->stmtsWithIndexAsConstantsTable[rightDesignEntity]) {
+                    shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                    toAdd->insertKeyValuePair(leftSynKey, str);
+                    toAdd->insertKeyValuePair(rightSynKey, str);
+                    //cout << "Added tuple: " << toAdd->toString() << endl;
+                    toReturn.emplace_back(move(toAdd));
+                }
+                return;
+            }
+            else if (rightAttrNameType == AttrNameType::VALUE) { /* With (CONST, CONST) */
+                // right side MUST be a CONSTANT synonym
+                const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
+                auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp2);
+
+                if (temp2 == DesignEntity::CONSTANT) {
+                    for (const auto& str : evaluator->mpPKB->getConstants()) {
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                        toAdd->insertKeyValuePair(leftSynKey, str);
+                        toAdd->insertKeyValuePair(rightSynKey, str);
+                        //cout << "Added tuple: " << toAdd->toString() << endl;
+                        toReturn.emplace_back(move(toAdd));
+                    }
+                }
+
+            }
         }
 
         return;
     }
 
+    /* with attrRef = "IDENT" */
+    if (rightType == RefType::IDENT) {
+        /* By the pre-condiiton, we are guaranteed left attrRef is a STRING (NAME) type */
+        auto leftSynKey = leftAttrRef->getSynonymString();
+        auto attrNameType = leftAttrRef->getAttrName()->getAttrNameType();
+    }
+
+    /* with attrRef = synonym */
+    if (rightType == RefType::SYNONYM) {
+
+    }
+
+    /* with attrRef = INT */
+    if (rightType == RefType::INTEGER) {
+
+    }
 }
 
 void PQLProcessor::handleWithFirstArgSyn(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)

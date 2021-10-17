@@ -160,7 +160,7 @@ class PKB
         return procedureNameToProcedureMap[procname];
     }
 
-    unordered_set<string> getConstants()
+    const unordered_set<string>& getConstants()
     {
         return mConstants;
     }
@@ -181,7 +181,9 @@ class PKB
 
     unordered_map<string, unordered_set<string>> varNameToPrintStmtTable;
 
-    unordered_map <PKBDesignEntity, unordered_map<PKBDesignEntity, set<pair<string, string>>>> attrRefMatchingNameTable;
+    unordered_map<PKBDesignEntity, unordered_map<PKBDesignEntity, set<pair<string, string>>>> attrRefMatchingNameTable;
+
+    unordered_map<PKBDesignEntity, unordered_set<string>> stmtsWithIndexAsConstantsTable;
 
     /* ==================================== RELATIONSHIP TABLES ==================================== */
 
@@ -285,6 +287,7 @@ class PKB
     void initializeParentTTables();
     void initializeUsesTables();
     void initializeNextTables();
+
 
     inline void addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr &variable);
     void addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr> &variables);
