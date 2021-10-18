@@ -3637,8 +3637,8 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
         if (!independentElements.empty()) {
             // supplement
 
-            for (const auto& e : independentElements) cout << e->getSynonymString() << " ";
-            putchar('\n');
+            //for (const auto& e : independentElements) cout << e->getSynonymString() << " ";
+            //putchar('\n');
            
             vector<shared_ptr<ResultTuple>> res;
 
