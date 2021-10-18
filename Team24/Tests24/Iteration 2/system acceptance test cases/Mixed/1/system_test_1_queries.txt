@@ -2309,7 +2309,7 @@ Select c.procName such that Uses(a, v) and Parent*(ifs, w) and Next(c, r)
 A, PrintX
 5000
 462 - Select BOOLEAN such that Uses(a, v) and Parent(ifs, w) and Next(c, r) and Modifies(pn, v)
-assign a; if is; while w; call c; read r; print pn; variable v;
+assign a; if ifs; while w; call c; read r; print pn; variable v;
 Select BOOLEAN such that Uses(a, "x") and Parent(ifs, w) and Next(c, r) and Modifies(pn, v)
 FALSE
 5000
