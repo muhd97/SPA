@@ -1535,7 +1535,7 @@ Select c such that Next(27, 28)
 5000
 307 - Select a such that Next*(#, #) = True (withinIf - outsideIfElse)
 assign a;
-Select a such that Next(24, 29)
+Select a such that Next*(24, 29)
 1, 3, 5, 11, 14, 17, 19, 21, 23, 24, 25, 28, 30, 33, 35, 38, 40, 42, 43, 47, 51, 53, 54, 56, 57, 59, 60, 62, 66, 67, 68, 78, 79, 91, 94, 95, 97, 98, 101, 103, 105, 106, 108
 5000
 308 - Select p1, p2 such that Next*(#, #) = True (withinWhile - whileCondition)

@@ -241,7 +241,7 @@ procedure WhileLoop {
                                                         }
                                                     }
                                                 }
-                                                a = j / x * (b + 4)
+                                                a = j / x * (b + 4);
                                             }
                                         }
                                     }
