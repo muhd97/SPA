@@ -47,12 +47,6 @@ set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesi
         return res;
     }
 
-    // check if res is cached, if so return results
-    if (mpPKB->getCachedSet(PKB::Relation::Parent, parentType, childType, res))
-    {
-        return res;
-    }
-
     // if not cached, we find the res manually and insert it into the cache
     vector<PKBStmt::SharedPtr> parentStmts;
     if (parentType == PKBDesignEntity::AllStatements)
@@ -79,8 +73,6 @@ set<pair<int, int>> PQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesi
         }
     }
 
-    // insert into cache for future use
-    mpPKB->insertintoCacheSet(PKB::Relation::Parent, parentType, childType, res);
     return res;
 }
 
@@ -891,11 +883,6 @@ bool PQLEvaluator::getStatementAfter(PKBStmt::SharedPtr &statementBefore, PKBStm
 vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
     vector<int> res;
-    // check if res is cached, if so return results
-    if (mpPKB->getCached(PKB::Relation::Before, beforeType, afterType, res))
-    {
-        return res;
-    }
 
     // get results manually
     vector<PKBStmt::SharedPtr> stmts = mpPKB->getStatements(afterType);
@@ -919,8 +906,6 @@ vector<int> PQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity 
         }
     }
 
-    // insert res into cache
-    mpPKB->insertintoCache(PKB::Relation::Before, beforeType, afterType, res);
     return res;
 }
 
@@ -1009,11 +994,6 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
 vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
     vector<int> res;
-    // check if res is cached, if so return results
-    if (mpPKB->getCached(PKB::Relation::After, beforeType, afterType, res))
-    {
-        return res;
-    }
 
     // get results manually
     // todo @nicholas: add optimization to go through shorter list of synonym
@@ -1039,8 +1019,6 @@ vector<int> PQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity a
         }
     }
 
-    // insert res into cache
-    mpPKB->insertintoCache(PKB::Relation::After, beforeType, afterType, res);
     return res;
 }
 
@@ -1078,8 +1056,6 @@ set<pair<int, int>> PQLEvaluator::getAfterPairs(PKBDesignEntity beforeType, PKBD
         }
     }
 
-    // insert res into cache
-    // mpPKB->insertintoCacheSet(PKB::Relation::After, rightType, rightType, res);
     return res;
 }
 

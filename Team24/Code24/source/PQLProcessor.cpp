@@ -1476,7 +1476,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
             if (!givenSynonymMatchesMultipleTypes(selectCl, leftSynonymKey,
                 { DesignEntity::ASSIGN, DesignEntity::CALL, DesignEntity::IF,
                  DesignEntity::PRINT, DesignEntity::READ, DesignEntity::STMT,
-                 DesignEntity::WHILE }))
+                 DesignEntity::WHILE, DesignEntity::PROG_LINE }))
             {
                 throw "Follows Error: The synonyms in a Follows relationship "
                     "must be "
@@ -1509,7 +1509,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
                 if (!givenSynonymMatchesMultipleTypes(selectCl, rightSynonymKey,
                     { DesignEntity::ASSIGN, DesignEntity::CALL, DesignEntity::IF,
                      DesignEntity::PRINT, DesignEntity::READ, DesignEntity::STMT,
-                     DesignEntity::WHILE }))
+                     DesignEntity::WHILE, DesignEntity::PROG_LINE }))
                 {
                     throw "Follows Error: The synonyms in a Follows "
                         "relationship must "
