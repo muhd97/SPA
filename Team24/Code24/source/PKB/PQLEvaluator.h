@@ -210,34 +210,12 @@ class PQLEvaluator
     // => getAfterPairs( PKBDE::Assign, PKBDE::While )
     set<pair<int, int>> getAfterPairs(PKBDesignEntity beforeType, PKBDesignEntity afterType);
 
-    // Get all statements that follow statements of type {beforeType}
-    // eg. assign a; stmt s; Select s such that Follows( a, s );
-    // => getAfter( PKBDE::Assign )
-    vector<int> getAfter(PKBDesignEntity beforeType);
-
     // Get all pairs of statements (a, b) such that a follow statements b of type
     // {beforeType} eg. assign a; while w; Select w such that Follows( a, w );
     // => getAfterPairs( PKBDE::Assign, PKBDE::While )
     set<pair<int, int>> getAfterPairs(PKBDesignEntity beforeType);
 
     // Follow*
-
-    // Get all statements of type {beforeType} followed directly/indirectly by
-    // statements of type {afterType} eg. assign a; while w; Select a such that
-    // FollowsT( a, w );
-    // => getBeforeT( PKBDE::Assign, PKBDE::While )
-    vector<int> getBeforeT(PKBDesignEntity beforeType, PKBDesignEntity afterType);
-
-    // Get all statements that are followed directly/indirectly by statements of
-    // type {afterType} eg. assign a; stmt s; Select s such that FollowsT( s, a );
-    // => getBeforeT( PKBDE::Assign )
-    vector<int> getBeforeT(PKBDesignEntity afterType);
-
-    // Get all statements that follow directly/indirectly statements of type
-    // {beforeType} eg. assign a; stmt s; Select s such that Follows( a, s );
-    // => getAfterT( PKBDE::Assign )
-    vector<int> getAfterT(PKBDesignEntity beforeType);
-
     /* Use for Follows*(INT, INT) */
     bool getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo);
 
