@@ -662,6 +662,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
 
     while (!tokensAreEmpty())
     {
+
         if (peek().type == PQLTokenType::NAME && peek().stringValue == PQL_SUCH)
         { 
 
@@ -712,7 +713,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
         }
         else
         {
-            cout << "ParseSelectCl Unknown token: " + getPQLTokenLabel(peek()) << endl;
+            throw "ParseSelectCl Unknown token: " + getPQLTokenLabel(peek()) + "\n";
             break;
         }
     }

@@ -20,8 +20,6 @@ string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<SuchThatCl>>& suchThatClauses, vector<shared_ptr<ResultTuple>>& suchThatReturnTuples)
 {
-    //shared_ptr<SuchThatCl> previousSelectCl = selectCl->suchThatClauses[0];
-
     /* TODO: @kohyida1997 current order of resolving such-that clauses is in
      * order of their appearance. This needs to change in iteraton 2 and 3 */
     int N = selectCl->suchThatClauses.size();
@@ -30,6 +28,9 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
         if (i == 0)
         {
             handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
+            if (suchThatReturnTuples.size() == 0) {
+                return;
+            }
             
         }
         else
@@ -47,20 +48,26 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
             }
 
 
-            /* This is SLOW */
-            /*unordered_set<string>& setOfSynonymsToJoinOn =
-                getSetOfSynonymsToJoinOn(previousSelectCl, selectCl->suchThatClauses[i]);*/
-
             unordered_set<string>& setOfSynonymsToJoinOn =
                 getSetOfSynonymsToJoinOn(suchThatReturnTuples, currSuchThatRes);
+
+            cout << "SuchThat1 Tup \n";
+            for (auto& tup : currSuchThatRes) { cout << tup->toString() << endl; }
+            cout << endl;
+
+            cout << "SuchThat2 Tup \n";
+            for (auto& tup : suchThatReturnTuples) { cout << tup->toString() << endl; }
+            cout << endl;
+
+            cout << "toJoin\n";
+            for (auto& tup : setOfSynonymsToJoinOn) { cout << tup << endl; }
+            cout << endl;
 
             if (!setOfSynonymsToJoinOn.empty())
                 hashJoinResultTuples(suchThatReturnTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
             else
                 cartesianProductResultTuples(suchThatReturnTuples, currSuchThatRes, joinedRes);
 
-
-            //previousSelectCl = selectCl->suchThatClauses[i];
             suchThatReturnTuples = move(joinedRes);
         }
     }
@@ -76,6 +83,9 @@ void PQLProcessor::handleAllPatternClauses(shared_ptr<SelectCl>& selectCl, const
         if (i == 0)
         {
             handlePatternClause(selectCl, patternClauses[i], patternTuples);
+            if (patternTuples.size() == 0) {
+                return;
+            }
         }
         else
         {
@@ -99,7 +109,6 @@ void PQLProcessor::handleAllPatternClauses(shared_ptr<SelectCl>& selectCl, const
             else
                 cartesianProductResultTuples(patternTuples, currSuchThatRes, joinedRes);
 
-            //previousSelectCl = selectCl->patternClauses[i];
             patternTuples = move(joinedRes);
         }
     }
@@ -115,6 +124,9 @@ void PQLProcessor::handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const ve
         if (i == 0)
         {
             handleWithClause(selectCl, selectCl->withClauses[i], withClauseTuples);
+            if (withClauseTuples.size() == 0) {
+                return;
+            }
         }
         else
         {
@@ -137,7 +149,6 @@ void PQLProcessor::handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const ve
             else
                 cartesianProductResultTuples(withClauseTuples, currWithRes, joinedRes);
 
-            //previousWithCl = selectCl->withClauses[i];
             withClauseTuples = move(joinedRes);
         }
     }
@@ -520,7 +531,7 @@ void PQLProcessor::handleWithFirstArgInt(const shared_ptr<SelectCl>& selectCl, c
     /* with (int, int)*/
     if (rightType == RefType::INTEGER) {
 
-        if (leftVal = rhs->getIntVal()) {
+        if (leftVal == rhs->getIntVal()) {
             shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
             toAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, "");
             toReturn.emplace_back(move(toAdd));
@@ -556,19 +567,37 @@ void PQLProcessor::handleWithFirstArgInt(const shared_ptr<SelectCl>& selectCl, c
         const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(attrRef->getSynonym());
 
         /* TODO: @kohyida1997 we might not need to do this check. */
-        if (attrName->getAttrNameType() != AttrNameType::STMT_NUMBER) {
+        /*if (attrName->getAttrNameType() != AttrNameType::STMT_NUMBER || attrName->getAttrNameType() != AttrNameType::VALUE) {
             throw "AttrName must be stmt# when comparing integers in with-clause\n";
-        }
+        }*/
 
-        PKBStmt::SharedPtr temp;
-        if (evaluator->mpPKB->getStatement(leftVal, temp)) {
-            if (synonymType == DesignEntity::STMT || temp->getType() == resolvePQLDesignEntityToPKBDesignEntity(synonymType)) {
-                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
-                toAdd->insertKeyValuePair(attrRef->getSynonymString(), to_string(leftVal));
-                toReturn.emplace_back(move(toAdd));
+
+        if (attrName->getAttrNameType() == AttrNameType::STMT_NUMBER) {
+            PKBStmt::SharedPtr temp;
+            if (evaluator->mpPKB->getStatement(leftVal, temp)) {
+                if (synonymType == DesignEntity::STMT || temp->getType() == resolvePQLDesignEntityToPKBDesignEntity(synonymType)) {
+                    shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                    toAdd->insertKeyValuePair(attrRef->getSynonymString(), to_string(leftVal));
+                    toReturn.emplace_back(move(toAdd));
+                }
+
             }
-
         }
+        else if (attrName->getAttrNameType() == AttrNameType::VALUE) {
+            /* Has to be CONSTANT syn */
+            if (synonymType == DesignEntity::CONSTANT) {
+
+                string intToString = to_string(leftVal);
+                if (evaluator->getAllConstants().count(intToString)) {
+                    shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>();
+                    toAdd->insertKeyValuePair(attrRef->getSynonymString(), intToString);
+                    toReturn.emplace_back(move(toAdd));
+                }
+
+            }
+        }
+
+
         return;
     }
 
