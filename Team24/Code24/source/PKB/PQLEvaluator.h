@@ -376,7 +376,7 @@ class PQLEvaluator
     bool getCallsStringString(const string &caller, const string &called);
 
     /* Use for Calls(proc, syn) */
-    unordered_set<string> getCallsStringSyn(const string &caller);
+    const  set<pair<string, string>>& getCallsStringSyn(const string &caller);
 
     /* Use for Calls(proc, _) */
     bool getCallsStringUnderscore(const string &caller);

@@ -1962,14 +1962,16 @@ bool PQLEvaluator::getCallsStringString(const string &caller, const string &call
     return false;
 }
 
-unordered_set<string> PQLEvaluator::getCallsStringSyn(const string &caller)
+const  set<pair<string, string>>& PQLEvaluator::getCallsStringSyn(const string &caller)
 {
-    unordered_set<string> toReturn;
-    for (auto &p : mpPKB->callsTable[caller])
-    {
-        toReturn.insert(p.second);
-    }
-    return toReturn;
+    //unordered_set<string> toReturn;
+    //for (auto &p : mpPKB->callsTable[caller])
+    //{
+    //    toReturn.insert(p.second);
+    //}
+    //return toReturn;
+
+    return mpPKB->callsTable[caller];
 }
 
 bool PQLEvaluator::getCallsStringUnderscore(const string &caller)
@@ -2482,7 +2484,7 @@ set<pair<int, int>> getNextT(shared_ptr<Program> program, StatementType from, St
                            &seenP, false);
     }
 
-    return result;
+    return move(result);
 }
 
 // Use for NextT(_, _)
@@ -2502,7 +2504,7 @@ unordered_set<int> PQLEvaluator::getNextTUnderscoreSyn(PKBDesignEntity to)
     {
         toResult.insert(p.second);
     }
-    return toResult;
+    return move(toResult);
 }
 
 // Case 3: NextT(_, int)
@@ -2529,7 +2531,7 @@ unordered_set<int> PQLEvaluator::getNextTSynUnderscore(PKBDesignEntity from)
     {
         fromResult.insert(p.first);
     }
-    return fromResult;
+    return move(fromResult);
 }
 
 // Case 6: NextT(syn, int)
@@ -2542,7 +2544,7 @@ unordered_set<int> PQLEvaluator::getNextTSynInt(PKBDesignEntity from, int toInde
     {
         fromResult.insert(p.first);
     }
-    return fromResult;
+    return move(fromResult);
 }
 
 // Case 7: NextT(int, int)

@@ -5,6 +5,7 @@
 #include "PQLProcessorUtils.h"
 #include "PQLLexer.h"
 #include <execution>
+#include <algorithm>
 //#include <omp.h>
 //#include <thread>
 
@@ -2690,11 +2691,11 @@ void PQLProcessor::handleCalls(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls>
             }
             const string& rightProcedureKey = entRefRight->getStringVal();
 
-            for (auto& s : evaluator->getCallsStringSyn(leftArg)) {
+            for (const auto& s : evaluator->getCallsStringSyn(leftArg)) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
 
                 /* Map the value returned to this particular synonym. */
-                tupleToAdd->insertKeyValuePair(rightProcedureKey, s);
+                tupleToAdd->insertKeyValuePair(rightProcedureKey, s.second);
 
                 /* Add this tuple into the vector to tuples to return. */
                 toReturn.emplace_back(move(tupleToAdd));
@@ -3191,6 +3192,7 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
                 resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(leftSyn));
             PKBDesignEntity rightArgType =
                 resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
+
 
             for (const auto& p : evaluator->getNextTSynSyn(leftArgType, rightArgType))
             {
