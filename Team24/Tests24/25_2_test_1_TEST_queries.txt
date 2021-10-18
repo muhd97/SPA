@@ -1,0 +1,5 @@
+1 - Cartesian Product Parallel Test
+assign a1,a2,a3,a4,a5,a6,a7,a8,a9,a10; variable v1,v2,v3,v4,v5,v6,v7,v8,v9,v10;
+Select BOOLEAN such that Uses(a1, v1) such that Uses(a2,v2) such that Uses(a3,v3) such that Uses(a4,v4) such that Uses(a5,v5) such that Uses(a6,v6)
+TRUE
+5000

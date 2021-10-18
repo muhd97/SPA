@@ -1,0 +1,128 @@
+1 - Select c with c.procName = proc.procName
+assign a; call c; procedure proc;
+Select c with c.procName = proc.procName
+11, 12, 16
+500
+2 - Select c with c.procName = proc.procName
+assign a; call c; procedure proc;
+Select c with proc.procName = c.procName
+11, 12, 16
+500
+3 - Select c with c.procName = proc.procName
+assign a; call c; procedure proc;
+Select <c, proc> with c.procName = proc.procName
+11 yida1, 12 yida2, 16 yida4
+500
+4 - Select c with c.procName = proc.procName
+assign a; call c; procedure proc;
+Select <c.procName, proc> with c.procName = proc.procName
+yida1 yida1, yida2 yida2, yida4 yida4
+500
+5 - Select p with "y" = p.varName
+assign a; call c; procedure proc; print p;
+Select p with "y" = p.varName
+17
+500
+6 - Select p.varName with "y" = p.varName
+assign a; call c; procedure proc; print p;
+Select p.varName with p.varName = "y"
+y
+500
+7 - Select r with "y" = r.varName
+assign a; call c; read r;procedure proc; print p;
+Select r with "y" = r.varName
+18
+500
+8 - Select r.varName with r.varName = "y"
+assign a; call c; procedure proc; print p; read r;
+Select r.varName with r.varName = "y"
+y
+500
+9 - Select r.varName with r.varName = "yy" - NEGATIVE CASE
+assign a; call c; procedure proc; print p; read r;
+Select r.varName with "yy" = r.varName
+
+500
+10 - Select BOOLEAN with "yy" = "yy"
+assign a; call c; procedure proc; print p; read r;
+Select BOOLEAN with "yy" = "yy"
+TRUE
+500
+11 - Select BOOLEAN with "yy" = "yx"
+assign a; call c; procedure proc; print p; read r;
+Select BOOLEAN with "yy" = "yx"
+FALSE
+500
+12 - Select r.varName with r.varName = "y" and "yy" = "yy" and "yy" = "yx" - NEGATIVE CASE
+assign a; call c; procedure proc; print p; read r;
+Select r.varName with r.varName = "y" and "yy" = "yy" and "yy" = "yx"
+
+500
+13 - Select <r.varName, r, p.varName, p> with r.varName = p.varName and "y" = p.varName
+assign a; call c; procedure proc; print p; read r;
+Select <r.varName, r, p.varName, p> with r.varName = p.varName and "y" = p.varName
+y 18 y 17
+500
+14 - Select <r.varName, r, p.varName, p> with 18 = r.stmt# and v.varName = p.varName and p.stmt# = 17 such that Uses(a, v)
+assign a; call c; procedure proc; print p; read r; variable v;
+Select <r.varName, r, p.varName, p> with 18 = r.stmt# and v.varName = p.varName and p.stmt# = 17 such that Uses(a, v)
+y 18 y 17
+500
+15 - Select <r.varName, r, p.varName, p> with 18 = r.stmt# and v.varName = p.varName and p.stmt# = 5 such that Uses(a, v)
+assign a; call c; procedure proc; print p; read r; variable v;
+Select <r.varName, r, p.varName, p> with 18 = r.stmt# and v.varName = p.varName and p.stmt# = 5 such that Uses(a, v)
+
+500
+16 - Select n with n = 6;
+assign a; call c; procedure proc; print p;prog_line n; read r; variable v;
+Select n with n = 6 and 6 = n;
+6
+500
+17 - Select n with n = 6;
+assign a; call c; procedure proc; print p;prog_line n; read r; variable v;
+Select n with n = 6 and 7 = n;
+
+500
+18 - Select n with n = 6;
+assign a; call c; procedure proc; print p;prog_line n; read r; variable v;
+Select n with  7 = n;
+7
+500
+19 - Select n with n = 6;
+assign a; call c; procedure proc; print p;prog_line n; read r; variable v; stmt s;
+Select s with 10 = n such that Next*(s, n) with s.stmt# = 6
+6
+500
+20 - Select n with n = 6;
+assign a; call c; procedure proc; print p;prog_line n; read r; variable v; stmt s;
+Select s with n = 10 such that Next*(s, n) with 6 = s.stmt#
+6
+500
+21 - Select n with n = 6;
+assign a; call c; procedure proc; print p;prog_line n; read r; variable v; constant k;stmt s; stmt aftS;
+Select s with 4 = aftS.stmt# such that Next*(s, aftS) with k.value = s.stmt#
+1,3
+500
+22 - Select s - NEGATIVE CASE: Invalid 5 = proc.stmt# 
+assign a; call c; procedure proc; print p;prog_line n; read r; variable v; constant k;stmt s; stmt aftS;
+Select s with 4 = aftS.stmt# such that Next*(s, aftS) with 5 = proc.stmt#
+
+500
+23 - Select v with v.stmt# = 1 - NEGATIVE CASE: Invalid v.stmt#
+assign a; call c; procedure proc; print p;prog_line n; read r; variable v; constant k;stmt s; stmt aftS;
+Select v with v.stmt# = 1
+
+500
+
+
+
+
+
+
+
+
+
+
+
+
+
