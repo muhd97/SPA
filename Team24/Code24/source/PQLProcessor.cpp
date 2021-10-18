@@ -4,6 +4,7 @@
 #include "PQLProcessor.h"
 #include "PQLProcessorUtils.h"
 #include "PQLLexer.h"
+#include <execution>
 //#include <omp.h>
 //#include <thread>
 
@@ -3473,50 +3474,98 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
         return;
     }
 
-    int i;
+    
     int N = leftResults.size();
     int X = rightResults.size();
 
-    newResults.reserve(N * X);
-    //#pragma omp parallel for private(i) num_threads(4)
-    for (i = 0; i < N; i++)
-    {
-        auto& leftPtr = leftResults[i];
-        int j;        
-        for (j = 0; j < X; j++)
-        {
-            auto& rightPtr = rightResults[j];
-            shared_ptr<ResultTuple> toAdd =
-                make_shared<ResultTuple>(leftPtr->synonymKeyToValMap.size() + rightPtr->synonymKeyToValMap.size());
+    /* Parallel version */
 
-            /* Copy over the key-values */
-            for (const auto& leftPair : leftPtr->synonymKeyToValMap)
-            {
+    vector<shared_ptr<ResultTuple>>* smallerVec = &rightResults;
+    vector<shared_ptr<ResultTuple>>* largerVec = &leftResults;
 
-                toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
-                
-            }
-
-            for (const auto& rightPair : rightPtr->synonymKeyToValMap)
-            {
-                if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
-                {
-                    toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
-                }
-            }
-
-            newResults.emplace_back(move(toAdd));
-            //newResults[i * X + j] = move(toAdd);
-        }
+    if (N < X) {
+        smallerVec = &leftResults;
+        largerVec = &rightResults;
     }
 
-    /* Debugging */
-    //for (auto& tup : newResults) {
-    //    for (auto& pair : tup->getMap()) {
-    //        cout << "(key=" << pair.first << ", val=" << pair.second << ") ";
+    auto& smaller = *smallerVec;
+    auto& larger = *largerVec;
+
+    X = smaller.size();
+    N = larger.size();
+
+    newResults.resize(N * X);
+    auto* baseAddress = &larger[0];
+    for_each(execution::par_unseq, larger.begin(), larger.end(),
+        [baseAddress, X, &smaller, &newResults](auto&& item)
+        {
+            int i = (&item - baseAddress);
+            auto& leftPtr = item;
+            int j;
+            for (j = 0; j < X; j++)
+            {
+                auto& rightPtr = smaller[j];
+                shared_ptr<ResultTuple> toAdd =
+                    make_shared<ResultTuple>(leftPtr->synonymKeyToValMap.size() + rightPtr->synonymKeyToValMap.size());
+
+                for (const auto& leftPair : leftPtr->synonymKeyToValMap) 
+                    toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+                
+                for (const auto& rightPair : rightPtr->synonymKeyToValMap)
+                {
+                    if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
+                    {
+                        toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
+                    }
+                }
+
+                newResults[i * X + j] = move(toAdd);
+            }
+        });
+
+
+    /* Sequential version */
+
+    //int i;
+    //newResults.reserve(N * X);
+    ////#pragma omp parallel for private(i) num_threads(4)
+    //for (i = 0; i < N; i++)
+    //{
+    //    auto& leftPtr = leftResults[i];
+    //    int j;        
+    //    for (j = 0; j < X; j++)
+    //    {
+    //        auto& rightPtr = rightResults[j];
+    //        shared_ptr<ResultTuple> toAdd =
+    //            make_shared<ResultTuple>(leftPtr->synonymKeyToValMap.size() + rightPtr->synonymKeyToValMap.size());
+
+    //        /* Copy over the key-values */
+    //        for (const auto& leftPair : leftPtr->synonymKeyToValMap)
+    //        {
+
+    //            toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+    //            
+    //        }
+
+    //        for (const auto& rightPair : rightPtr->synonymKeyToValMap)
+    //        {
+    //            if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
+    //            {
+    //                toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
+    //            }
+    //        }
+
+    //        newResults.emplace_back(move(toAdd));
+    //        //newResults[i * X + j] = move(toAdd);
     //    }
-    //    cout << endl;
     //}
+
+    /* Debugging */
+   /* cout << "============= Res ==============\n";
+    for (auto& tup : newResults) {
+        cout << tup->toString() << endl;
+    }
+    cout << endl;*/
 
 }
 
