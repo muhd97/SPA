@@ -75,17 +75,17 @@ Select <r.varName, r, p.varName, p> with 18 = r.stmt# and v.varName = p.varName 
 500
 16 - Select n with n = 6;
 assign a; call c; procedure proc; print p;prog_line n; read r; variable v;
-Select n with n = 6 and 6 = n
+Select n with n = 6 and 6 = n;
 6
 500
 17 - Select n with n = 6;
 assign a; call c; procedure proc; print p;prog_line n; read r; variable v;
-Select n with n = 6 and 7 = n
+Select n with n = 6 and 7 = n;
 
 500
 18 - Select n with n = 6;
 assign a; call c; procedure proc; print p;prog_line n; read r; variable v;
-Select n with  7 = n
+Select n with  7 = n;
 7
 500
 19 - Select n with n = 6;
@@ -113,31 +113,8 @@ assign a; call c; procedure proc; print p;prog_line n; read r; variable v; const
 Select v with v.stmt# = 1
 
 500
-24 - Select BOOLEAN with (FALSE)
-assign a;
-Select BOOLEAN with 10 = 11
-FALSE
-500
-25 - Select s Uses(s, _) invalid
-assign a; stmt s;
-Select s Uses(s, _)
 
-500
-26 - Select p such that Uses(p, "thisIsANonExistentVar") and Calls(p, "colours")
-procedure p; 
-Select p such that Uses(p, "thisIsANonExistentVar") and Calls(p, "yida1")
 
-500
-27 - constant value exist.
-constant c;
-Select c with 77 = c.value
-77
-500
-28 - select synonym, 3 with
-stmt s, s1; variable v, v1;
-Select v with s.stmt# = s1.stmt# and v.varName = v1.varName and 1 = 2
-none
-5000
 
 
 
