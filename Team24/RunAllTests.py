@@ -7,7 +7,18 @@ source_query_test_cases = [
                                                                                                                                                                                                                                                                      "05_1_mixed_first_queries"), ("06_1_mixed_invalid_source", "06_1_mixed_queries"), ("07_1_mixed_second_source", "07_1_mixed_second_queries"), ("08_1_modifies_test_source", "08_1_modifies_test_queries"), ("09_1_mixed_first_source", "09_1_parent_only_first_queries"),
     ("10_1_mixed_first_source", "10_1_uses_only_first_queries"), ("11_1_test_1a_source", "11_1_test_1a_queries"), ("12_1_test_1b_source", "12_1_test_1b_queries"), ("13_1_test_1c_source", "13_1_test_1c_queries"), ("14_1_test_1d_source", "14_1_test_1d_queries"), (
         "15_1_test_1t_source", "15_1_test_1t_queries"), ("16_1_test_2a_source", "16_1_test_2a_queries"), ("17_1_test_2b_source", "17_1_test_2b_queries"), ("18_1_test_3a_source", "18_1_test_3a_queries"), ("19_2_test_1_source", "19_2_test_1_uses_tup_boolean_queries"),
-    ("20_2_test_1_attr_source", "20_2_test_1_attr_queries")]
+    ("20_2_test_1_attr_source", "20_2_test_1_attr_queries"), (
+        "21_2_withcl_calidation_1a_test_source", "21_2_withcl_validation_1a_queries"),
+    ("22_2_calls_callsT_source", "22_2_calls_callsT_queries"),
+    ("23_2_pattern_whileIf_source", "23_2_pattern_whileIf_queries"),
+    ("24_2_withCl_test_1_source", "24_2_withCl_test_1a_queries"),
+    ("25_2_test_1_source", "25_2_test_1_TEST_queries"),
+    ("26_2_system_test_1_source", "26_2_system_test_1_queries"),
+    ("27_2_system_test_1_source", "27_2_system_test_1_test_queries"),
+    ("28_2_system_test_2_source", "28_2_system_test_2_queries"),
+    ("29_2_demo_1_source", "29_2_demo_1_queries"),
+    ("30_2_demo_2_source", "30_2_demo_2_queries"),
+    ("31_2_demo_source", "31_2_demo_queries")]
 
 
 autotester_dir = ".\\Code24\\Debug\\"
@@ -46,9 +57,9 @@ def run_tests():
     for t in source_query_test_cases:
         source_file = t[0]
         query_file = t[1]
-        # os.system("{}autotester.exe {}{}.txt {}{}.txt {}{}_output.xml".format(autotester_dir, 
-        # test_cases_dir, source_file, 
-        # test_cases_dir, query_file, 
+        # os.system("{}autotester.exe {}{}.txt {}{}.txt {}{}_output.xml".format(autotester_dir,
+        # test_cases_dir, source_file,
+        # test_cases_dir, query_file,
         # output_dir, query_file))
         os.popen("{}AutoTester.exe {}{}.txt {}{}.txt {}{}_output.xml".format(autotester_dir,
                                                                              test_cases_dir, source_file,
