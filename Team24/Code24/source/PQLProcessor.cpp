@@ -51,18 +51,6 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
             unordered_set<string>& setOfSynonymsToJoinOn =
                 getSetOfSynonymsToJoinOn(suchThatReturnTuples, currSuchThatRes);
 
-            cout << "SuchThat1 Tup \n";
-            for (auto& tup : currSuchThatRes) { cout << tup->toString() << endl; }
-            cout << endl;
-
-            cout << "SuchThat2 Tup \n";
-            for (auto& tup : suchThatReturnTuples) { cout << tup->toString() << endl; }
-            cout << endl;
-
-            cout << "toJoin\n";
-            for (auto& tup : setOfSynonymsToJoinOn) { cout << tup << endl; }
-            cout << endl;
-
             if (!setOfSynonymsToJoinOn.empty())
                 hashJoinResultTuples(suchThatReturnTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
             else
