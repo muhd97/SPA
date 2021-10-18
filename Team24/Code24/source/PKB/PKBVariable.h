@@ -15,7 +15,7 @@ class PKBVariable
         return SharedPtr(new PKBVariable(name));
     }
 
-    const string& getName()
+    const string &getName()
     {
         return mName;
     }
@@ -24,16 +24,18 @@ class PKBVariable
     // dont think a variable will have so many users that it is necessary.
     vector<int> getUsers()
     {
-        //cout << "PKBVariable mName: " << mName << ", No. Stmts that use this var = " << mUsers.size() << endl;
+        // cout << "PKBVariable mName: " << mName << ", No. Stmts that use this var = " << mUsers.size() << endl;
 
         return vector<int>(mUsers.begin(), mUsers.end());
     }
 
-    const vector<int>& getUsersByConstRef() {
+    const vector<int> &getUsersByConstRef()
+    {
         return mUsersVector;
     }
 
-    const set<int>& getUsersAsSet() {
+    const set<int> &getUsersAsSet()
+    {
         return mUsers;
     }
 
@@ -44,7 +46,8 @@ class PKBVariable
 
     void addUserStatement(int userStatementIndex)
     {
-        if (mUsers.find(userStatementIndex) == mUsers.end()) {
+        if (mUsers.find(userStatementIndex) == mUsers.end())
+        {
             mUsers.insert(userStatementIndex);
             mUsersVector.emplace_back(userStatementIndex);
         }

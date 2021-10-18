@@ -52,7 +52,4 @@ template <typename C, C beginVal, C endVal> class Iterator
     }
 };
 
-
-
 typedef Iterator<PKBDesignEntity, PKBDesignEntity::Read, PKBDesignEntity::AllStatements> PKBDesignEntityIterator;
-

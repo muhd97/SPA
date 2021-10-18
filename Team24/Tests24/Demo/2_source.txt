@@ -45,7 +45,7 @@ procedure B {
     x = a * (b + 2) * (c + 8);
     call ReadY;
     if (((a <= 10) && (a != 0)) && (3 >= x)) then {
-        a = 4;
+        a = 4 + x;
         if (a < 20 - x) then {
             y = y / 6;
             read z;
@@ -70,7 +70,7 @@ procedure B {
 }
 
 procedure C {
-    while (a > 0) {
+    while (1 > 0) {
         if (a > b) then {
             x = 0;
             call Assign;

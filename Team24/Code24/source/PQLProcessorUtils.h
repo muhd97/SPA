@@ -30,7 +30,6 @@ inline bool atLeastOneTargetSynonymIsInClauses(shared_ptr<SelectCl> selectCl)
         if (selectCl->suchThatContainsSynonym(x) || selectCl->patternContainsSynonym(x) || selectCl->withContainsSynonym(x)) return true;
     }
 
-
     return false;
 }
 
@@ -64,7 +63,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(shared_ptr<Design
     {
         return PKBDesignEntity::Assign;
     }
-    else if (s == PQL_STMT)
+    else if (s == PQL_STMT || s == PQL_PROG_LINE)
     {
         return PKBDesignEntity::AllStatements; // ALL STATEMENTS
     }

@@ -14,6 +14,7 @@
 #include "PQLProcessor.h"
 #include "CFG.h"
 #include <memory>
+//#include <omp.h>
 
 
 using namespace std;
@@ -32,6 +33,8 @@ TestWrapper::TestWrapper() {
   // create any objects here as instance variables of this class
   // as well as any initialization required for your spa program
     pkb = make_shared<PKB>();
+    //omp_set_num_threads(4);
+
 }
 
 // method for parsing the SIMPLE source
@@ -108,17 +111,23 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
     }
 
 #if PRINT_EXCEPTION_STATEMENTS
+    catch (const string & e) {
+        cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
+        cout << "Error message: " << e << endl;
+    }
+#endif
+#if PRINT_EXCEPTION_STATEMENTS
     catch (const exception& ex) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
         cout << "Error message: " << ex.what() << endl;
     }
 #endif
+    catch (const char* s) {
 #if PRINT_EXCEPTION_STATEMENTS
-    catch (const string& e) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
-        cout << "Error message: " << e << endl;
-    }
+        cout << "Error message: " << s << endl;
 #endif
+    }
     catch (...) {
 #if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
