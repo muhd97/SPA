@@ -3,13 +3,15 @@
 
 using namespace std;
 
-class PKBProcedure : public PKBGroupEntity {
-private:
+class PKBProcedure : public PKBGroupEntity
+{
+  private:
     string mName;
-public:
+
+  public:
     using SharedPtr = std::shared_ptr<PKBProcedure>;
 
-    string getName();
+    const string &getName();
     virtual bool isProcedure();
     PKBProcedure(string procName);
     static SharedPtr create(string procName);

@@ -3,9 +3,9 @@
 #include <map>
 #include <set>
 
+#include "../SimpleAST.h"
 #include "PKBDesignEntity.h"
 #include "PKBVariable.h"
-#include "../SimpleAST.h"
 
 using namespace std;
 
@@ -117,7 +117,6 @@ class PKBGroup
         mOwnerIndex = ownerStatementIndex;
     }
 
-
     PKBGroup(string procedureName)
     {
         mIndex = totalGroupCount;
@@ -129,15 +128,16 @@ class PKBGroup
     static int totalGroupCount;
 };
 
-
-class PKBGroupEntity {
-private:  
+class PKBGroupEntity
+{
+  private:
     PKBGroup::SharedPtr mBelongsTo;
     vector<PKBGroup::SharedPtr> mContainerGroups;
     set<PKBVariable::SharedPtr> mUses;
     set<PKBVariable::SharedPtr> mModifies;
     vector<string> mUsesStringVector;
-public:
+
+  public:
     using SharedPtr = std::shared_ptr<PKBGroupEntity>;
 
     // for pattern
@@ -151,7 +151,7 @@ public:
 
     set<PKBVariable::SharedPtr> getUsedVariables();
 
-    const vector<string>& getUsedVariablesAsString();
+    const vector<string> &getUsedVariablesAsString();
 
     int getUsedVariablesSize();
 
@@ -171,13 +171,14 @@ public:
 
     virtual bool isProcedure() = 0;
 
-protected:
-    PKBGroupEntity(set<PKBVariable::SharedPtr> uses,
-                 set<PKBVariable::SharedPtr> modifies)
+  protected:
+    PKBGroupEntity(set<PKBVariable::SharedPtr> uses, set<PKBVariable::SharedPtr> modifies)
     {
         mUses = uses;
         mModifies = modifies;
     }
 
-    PKBGroupEntity() {}
+    PKBGroupEntity()
+    {
+    }
 };

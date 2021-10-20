@@ -2,12 +2,13 @@
 
 int PKBGroup::totalGroupCount = 0;
 
-
-PKBGroup::SharedPtr PKBGroupEntity::getGroup() {
+PKBGroup::SharedPtr PKBGroupEntity::getGroup()
+{
     return mBelongsTo;
 };
 
-vector<PKBGroup::SharedPtr> PKBGroupEntity::getContainerGroups() {
+vector<PKBGroup::SharedPtr> PKBGroupEntity::getContainerGroups()
+{
     return mContainerGroups;
 };
 
@@ -36,13 +37,15 @@ void PKBGroupEntity::addContainerGroup(PKBGroup::SharedPtr &containerGroup)
     mContainerGroups.emplace_back(containerGroup);
 }
 
-const vector<string>& PKBGroupEntity::getUsedVariablesAsString() {
+const vector<string> &PKBGroupEntity::getUsedVariablesAsString()
+{
     return mUsesStringVector;
 }
 
 void PKBGroupEntity::addUsedVariable(PKBVariable::SharedPtr &variable)
 {
-    if (mUses.find(variable) == mUses.end()) {
+    if (mUses.find(variable) == mUses.end())
+    {
         mUses.insert(variable);
         mUsesStringVector.emplace_back(variable->getName());
     }
@@ -55,13 +58,15 @@ void PKBGroupEntity::addModifiedVariable(PKBVariable::SharedPtr variable)
 
 void PKBGroupEntity::addUsedVariables(set<PKBVariable::SharedPtr> &variables)
 {
-    for (const auto ptr : variables) {
-        if (mUses.find(ptr) == mUses.end()) {
+    for (const auto ptr : variables)
+    {
+        if (mUses.find(ptr) == mUses.end())
+        {
             mUses.insert(ptr);
             mUsesStringVector.emplace_back(ptr->getName());
         }
     }
-    //mUses.insert(variables.begin(), variables.end());
+    // mUses.insert(variables.begin(), variables.end());
 }
 
 void PKBGroupEntity::addModifiedVariables(set<PKBVariable::SharedPtr> variables)

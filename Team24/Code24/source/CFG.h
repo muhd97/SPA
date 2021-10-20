@@ -1,15 +1,26 @@
 #pragma once
 #include "SimpleAST.h"
+#include "PKB\PKBDesignEntity.h"
 #include <unordered_map>
 #include <iostream>
 
-
 using namespace std;
+
+class CFGStatement {
+public:
+	CFGStatement(PKBDesignEntity type, int index) {
+		this->type = type;
+		this->index = index;
+	}
+
+	PKBDesignEntity type;
+	int index;
+};
 
 class BasicBlock {
 private:
 	int id = -100;
-	vector<shared_ptr<Statement>> statements;
+	vector<shared_ptr<CFGStatement>> statements;
 	vector<shared_ptr<BasicBlock>> next;
 public:
 	BasicBlock(int id) {
@@ -19,9 +30,20 @@ public:
 	bool isEmpty();
 	void addNext(shared_ptr<BasicBlock> bb);
 	vector<shared_ptr<BasicBlock>> getNext();
-	void addStatement(shared_ptr<Statement> statement);
-	// Todo add access methods
+	void addStatement(shared_ptr<CFGStatement> statement);
 	string format();
+
+	// get list of first statments following bb
+	vector<shared_ptr<CFGStatement>> getNextImmediateStatements();
+	
+	vector<shared_ptr<CFGStatement>> getStatements() {
+		return statements;
+	}
+
+	shared_ptr<CFGStatement> getFirstStatement() {
+		return statements[0];
+	}
+	
 };
 
 class CFG {

@@ -1,13 +1,16 @@
 #include "PKBStmt.h"
 
-int PKBStmt::getIndex() {
+int PKBStmt::getIndex()
+{
     return mIndex;
 }
 
-PKBDesignEntity PKBStmt::getType() {
+PKBDesignEntity PKBStmt::getType()
+{
     return mType;
 }
 
-bool PKBStmt::isProcedure() {
+bool PKBStmt::isProcedure()
+{
     return false;
 }

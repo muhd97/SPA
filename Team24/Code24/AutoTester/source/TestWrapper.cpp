@@ -1,3 +1,9 @@
+#pragma optimize( "gty", on )
+
+#define DEBUG 0
+#define PRINT_FINISHED_HEADER 0
+#define PRINT_EXCEPTION_STATEMENTS 0
+
 #include "TestWrapper.h"
 #include "SimpleAST.h"
 #include "SimpleLexer.h"
@@ -8,6 +14,8 @@
 #include "PQLProcessor.h"
 #include "CFG.h"
 #include <memory>
+//#include <omp.h>
+
 
 using namespace std;
 
@@ -25,6 +33,8 @@ TestWrapper::TestWrapper() {
   // create any objects here as instance variables of this class
   // as well as any initialization required for your spa program
     pkb = make_shared<PKB>();
+    //omp_set_num_threads(4);
+
 }
 
 // method for parsing the SIMPLE source
@@ -40,69 +50,90 @@ void TestWrapper::parse(std::string filename) {
         }
 
         vector<SimpleToken> tokens = simpleLex(program);
+#if DEBUG
         printSimpleTokens(tokens);
-
+#endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
-
-        // for debugging
+       
+#if DEBUG
         cout << root->format();
-
-        cout << "\n==== Building CFG ====\n";
-        shared_ptr<CFG> cfg = buildCFG(root);
-        cout << cfg->format();
-
-
         cout << "\n==== Building PKB ====\n";
-
+#endif
         this->pkb->initialise();
         this->pkb->extractDesigns(root);
+        this->pkb->initializeCFG(root);
         this->pkb->initializeRelationshipTables();
+        this->pkb->initializeWithTables();
         this->evaluator = PQLEvaluator::create(this->pkb);
 
+#if DEBUG
         cout << "\n==== PKB has been populated. ====\n";
+#endif
     }
+#if PRINT_EXCEPTION_STATEMENTS
     catch (const std::exception& ex) {
         cout << "Exception was thrown while trying to parsing simple code.\n";
-        cout << "Error message: " << ex.what() << endl;;
+        cout << "Error message: " << ex.what() << endl;
     }
+#endif
     catch (...) {
+#if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to parsing simple code.\n";
+#endif
     }
 }
 
 // method to evaluating a query
-void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
+void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
+#if DEBUG
     cout << "\n==== Parsing queries ====\n";
+#endif
 
     try {
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
+#if DEBUG
         cout << "\n==== Printing Parsed Query ====\n";
         cout << sel->format() << endl;
-        
         cout << "\n==== Processing PQL Query ====\n";
-
-        
-
         cout << "\n==== Created PQLEvaluator using PKB ====\n";
-
+#endif
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
 
+#if DEBUG
         cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
-
-        vector<shared_ptr<Result>> res = pqlProcessor->processPQLQuery(sel);
+#endif
+        vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
 
         for (auto& r : res) {
             results.emplace_back(r->getResultAsString());
         }
     }
-    catch (std::exception& ex) {
+
+#if PRINT_EXCEPTION_STATEMENTS
+    catch (const string & e) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
-        cout << "Error message: " << ex.what() << endl;;
+        cout << "Error message: " << e << endl;
+    }
+#endif
+#if PRINT_EXCEPTION_STATEMENTS
+    catch (const exception& ex) {
+        cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
+        cout << "Error message: " << ex.what() << endl;
+    }
+#endif
+    catch (const char* s) {
+#if PRINT_EXCEPTION_STATEMENTS
+        cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
+        cout << "Error message: " << s << endl;
+#endif
     }
     catch (...) {
+#if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
+#endif
     }
-
+#if PRINT_FINISHED_HEADER
     cout << "\n<<<<<< =========== Finished Processing PQL Queries =========== >>>>>>\n";
+#endif
 }

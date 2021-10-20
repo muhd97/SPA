@@ -56,6 +56,8 @@
       <AdditionalIncludeDirectories>$(SolutionDir)source;$(SolutionDir)source\PKB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

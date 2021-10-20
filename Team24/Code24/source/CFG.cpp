@@ -1,3 +1,4 @@
+#pragma optimize( "gty", on )
 #include "CFG.h"
 #include <memory>
 #include <queue>
@@ -19,8 +20,8 @@ shared_ptr<BasicBlock> CFG::getCFG(string procName) {
 
 string BasicBlock::format() {
 	string builder = "BB" + to_string(id) + ":\nStatement: ";
-	for (shared_ptr<Statement> statement : statements) {
-		builder += to_string(statement->getIndex()) + " / ";
+	for (shared_ptr<CFGStatement> statement : statements) {
+		builder += to_string(statement->index) + " / ";
 	}
 
 	builder += "\nNext: ";
@@ -29,6 +30,21 @@ string BasicBlock::format() {
 	}
 
 	return builder + "\n";
+}
+
+vector<shared_ptr<CFGStatement>> BasicBlock::getNextImmediateStatements() {
+	vector<shared_ptr<CFGStatement>> following = {};
+
+	for (auto bb : getNext()) {
+		if (bb->isEmpty()) {
+			auto followinCurrentBb = bb->getNextImmediateStatements();
+			following.insert(following.end(), followinCurrentBb.begin(), followinCurrentBb.end());
+		}
+		else {
+			following.push_back(bb->getFirstStatement());
+		}
+	}
+	return following;
 }
 
 
@@ -73,7 +89,7 @@ bool BasicBlock::isEmpty() {
 	return statements.size() == 0;
 }
 
-void BasicBlock::addStatement(shared_ptr<Statement> statement) {
+void BasicBlock::addStatement(shared_ptr<CFGStatement> statement) {
 	statements.push_back(statement);
 }
 
@@ -83,12 +99,38 @@ void BasicBlock::addNext(shared_ptr<BasicBlock> bb) {
 
 shared_ptr<BasicBlock> buildStatementListCFG(shared_ptr<StatementList> statementLst, shared_ptr<BasicBlock> current);
 
+PKBDesignEntity toPKBType(StatementType simpleStatementType)
+{
+	switch (simpleStatementType)
+	{
+	case StatementType::WHILE:
+		return PKBDesignEntity::While;
+	case StatementType::IF:
+		return PKBDesignEntity::If;
+	case StatementType::READ:
+		return PKBDesignEntity::Read;
+	case StatementType::PRINT:
+		return PKBDesignEntity::Print;
+	case StatementType::CALL:
+		return PKBDesignEntity::Call;
+	case StatementType::ASSIGN:
+		return PKBDesignEntity::Assign;
+	default:
+		throw "hey this Simple StatementType aint supported mate!";
+	}
+}
+
+shared_ptr<CFGStatement> toCFGStatement(shared_ptr<Statement> simpleStatement) {
+	PKBDesignEntity de = toPKBType(simpleStatement->getStatementType());
+	return make_shared<CFGStatement>(de, simpleStatement->getIndex());
+}
+
 shared_ptr<BasicBlock> buildIfCFG(shared_ptr<IfStatement> ifStatement, shared_ptr<BasicBlock> condBlock) {
 	auto consequentBlock = make_shared<BasicBlock>(getNextBBId());
 	auto alternativeBlock = make_shared<BasicBlock>(getNextBBId());
 	auto nextBlock = make_shared<BasicBlock>(getNextBBId());
 
-	condBlock->addStatement(ifStatement);
+	condBlock->addStatement(toCFGStatement(ifStatement));
 
 	condBlock->addNext(consequentBlock);
 	condBlock->addNext(alternativeBlock);
@@ -106,7 +148,7 @@ shared_ptr<BasicBlock> buildWhileCFG(shared_ptr<WhileStatement> whileStatement, 
 	auto bodyBlock = make_shared<BasicBlock>(getNextBBId());
 	auto nextBlock = make_shared<BasicBlock>(getNextBBId());
 
-	condBlock->addStatement(whileStatement);
+	condBlock->addStatement(toCFGStatement(whileStatement));
 	condBlock->addNext(bodyBlock);
 	condBlock->addNext(nextBlock);
 	bodyBlock = buildStatementListCFG(whileStatement->getBody(), bodyBlock);
@@ -132,7 +174,7 @@ shared_ptr<BasicBlock> buildStatementListCFG(shared_ptr<StatementList> statement
 		}
 		else {
 			// add statement to currenct basic block
-			current->addStatement(statement);
+			current->addStatement(toCFGStatement(statement));
 		}
 	}
 	return current;

@@ -228,3 +228,13 @@ stmt s; while w; if ifs;
 Select s such that Follows(6, x)
 
 5000
+46 - select synonym, follows progLine stmtNumber
+prog_line n;
+Select n such that Follows(n, 27)
+5
+5000
+47 - select synonym, follows progLine stmtNumber
+prog_line n;
+Select n such that Follows*(n, 27)
+1,2,3,4,5
+5000
