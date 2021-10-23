@@ -2,7 +2,8 @@
 #pragma optimize( "gty", on )
 
 #include <functional>
-#include ".\PKB\PQLEvaluator.h"
+
+#include "..\PKB\PKBPQLEvaluator.h"
 #include "PQLParser.h"
 #include "PQLOptimizer.h"
 
@@ -126,42 +127,13 @@ class StringSingleResult : public Result
     }
 };
 
-/*
-class OrderedStringTupleResult : public Result
-{
-public:
-    vector<string> orderedStrings;
-    string formattedStrings;
-
-    OrderedStringTupleResult(vector<string> s) : orderedStrings(move(s)) 
-    {
-        formattedStrings = "";
-        for (unsigned int i = 0; i < orderedStrings.size(); i++) {
-            formattedStrings += orderedStrings[i];
-            if (i != orderedStrings.size() - 1) formattedStrings += " ";
-        }
-    }
-
-    ResultType getResultType()
-    {
-        return ResultType::OrderedStringTupleResult;
-    }
-
-    const string& getResultAsString() const override
-    {
-        return formattedStrings;
-    }
-
-};
-*/
-
 class PQLProcessor
 {
   public:
-    shared_ptr<PQLEvaluator> evaluator = nullptr;
+    shared_ptr<PKBPQLEvaluator> evaluator = nullptr;
 
 
-    PQLProcessor(shared_ptr<PQLEvaluator> eval) : evaluator(move(eval))
+    PQLProcessor(shared_ptr<PKBPQLEvaluator> eval) : evaluator(move(eval))
     {
     }
 

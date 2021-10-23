@@ -8,7 +8,7 @@
 // include your other headers here
 #include "AbstractWrapper.h"
 #include "PKB.h"
-#include "PQLEvaluator.h"
+#include "PKBPQLEvaluator.h"
 
 class TestWrapper : public AbstractWrapper {
  public:
@@ -28,7 +28,7 @@ class TestWrapper : public AbstractWrapper {
 private:
     // Yida: add PKB object and evaluator object
     shared_ptr<PKB> pkb = nullptr;
-    shared_ptr<PQLEvaluator> evaluator = nullptr;
+    shared_ptr<PKBPQLEvaluator> evaluator = nullptr;
 };
 
 #endif
