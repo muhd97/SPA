@@ -1,6 +1,6 @@
 #pragma optimize( "gty", on )
 
-
+#include "PQLOptimizer.h"
 #include "PQLProcessor.h"
 #include "PQLProcessorUtils.h"
 #include "PQLLexer.h"
@@ -4016,7 +4016,10 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
 
 
     validateSelectCl(selectCl);
-
+     
+    /* Get Clause Groups */
+    PQLOptimizer opt = PQLOptimizer(selectCl);
+    opt.getClauseGroups();
 
     /* Final Results to Return */
     vector<shared_ptr<Result>> res;

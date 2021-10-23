@@ -1223,6 +1223,8 @@ public:
     
     inline virtual EvalClType getEvalClType() = 0;
 
+    inline virtual string format() = 0;
+
 };
 
 class SuchThatCl : public EvalCl
@@ -1498,7 +1500,7 @@ public:
                  */
                 if (synonymToParentDeclarationMap.find(syn->getValue()) != synonymToParentDeclarationMap.end())
                 {
-                    throw std::invalid_argument("Error: Duplicate synonym detected in query!");
+                    throw std::exception("Error: Duplicate synonym detected in query!");
                 }
 
                 synonymToParentDeclarationMap[syn->getValue()] = d;
