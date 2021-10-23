@@ -23,7 +23,7 @@ class PQLOptimizer {
     }
 
 
-};
+}; 
 
 class Node {
 
