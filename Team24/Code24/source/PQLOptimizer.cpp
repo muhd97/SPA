@@ -1,11 +1,12 @@
 #include "PQLOptimizer.h"
+#include <algorithm>
 
 #define DEBUG_GROUPS 0
 
 using namespace std;
 
 inline string ClauseGroup::format() {
-    string str;
+    string str = "";
 
     str += "Group syns: [";
     for (const auto& s : synonyms) str += s + ", ";
@@ -13,6 +14,9 @@ inline string ClauseGroup::format() {
 
     if (synonymsInsideResultCl) str += " (Has Synonyms inside ResultCl)";
     else str += " (No synonyms in ResultCl)";
+
+    str += (", Clause Size = " + to_string(clauses.size()));
+    str += (", Synonyms Size = " + to_string(synonyms.size()));
 
     for (const auto& evalCl : clauses) {
         str += evalCl->format();
@@ -73,6 +77,8 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
 
     if (!cgForNoSynClauses->clauses.empty()) toReturn.emplace_back(cgForNoSynClauses);
 
+    sortClauseGroups(toReturn);
+
 #if DEBUG_GROUPS
     /* Debugging: */
     for (const auto& cg : toReturn) {
@@ -86,7 +92,12 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
         delete n;
     }
 
+
     return move(toReturn);
+}
+
+inline void PQLOptimizer::sortClauseGroups(vector<shared_ptr<ClauseGroup>>& vec) {
+    sort(vec.begin(), vec.end(), f);
 }
 
 inline void PQLOptimizer::DFS(OptNode* curr, unordered_map<OptNode*, vector<OptNode*>>& adjList, unordered_set<OptNode*>& visited, shared_ptr<ClauseGroup>& cg) {
