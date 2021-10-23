@@ -23,13 +23,17 @@ class PQLOptimizer {
     }
 
 
-}; 
+};
 
 class Node {
 
 };
 
-class SynNode {
+class SynNode : public Node {
+
+};
+
+class EvalNode : public Node {
 
 };
 
