@@ -17,6 +17,10 @@
     <ClCompile Include="..\source\Source.cpp" />
     <ClCompile Include="..\source\CFG.cpp" />
     <ClCompile Include="..\source\PQL\PQLOptimizer.cpp" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerAssignPattern.cpp" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.cpp" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerWith.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
@@ -36,5 +40,9 @@
     <ClInclude Include="..\source\PKB\PKBProcedure.h" />
     <ClInclude Include="..\source\PQL\PQLOptimizer.h" />
     <ClInclude Include="..\source\CFG.h" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandler.h" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerAssignPattern.h" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.h" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerWith.h" />
   </ItemGroup>
 </Project>

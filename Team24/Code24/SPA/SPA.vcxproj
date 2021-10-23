@@ -20,6 +20,10 @@
     <ClCompile Include="..\source\PKB\PKBPQLEvaluator.cpp" />
     <ClCompile Include="..\source\PKB\Statement.cpp" />
     <ClCompile Include="..\source\PKB\PKBVariable.cpp" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerAssignPattern.cpp" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.cpp" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerWith.cpp" />
     <ClCompile Include="..\source\PQL\PQLLexer.cpp" />
     <ClCompile Include="..\source\PQL\PQLParser.cpp" />
     <ClCompile Include="..\source\PQL\PQLProcessor.cpp" />
@@ -41,6 +45,10 @@
     <ClInclude Include="..\source\PKB\PKBVariable.h" />
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandler.h" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerAssignPattern.h" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.h" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerWith.h" />
     <ClInclude Include="..\source\PQL\PQLProcessor.h" />
     <ClInclude Include="..\source\PQL\PQLOptimizer.h" />
     <ClInclude Include="..\source\PQL\PQLProcessorUtils.h" />
