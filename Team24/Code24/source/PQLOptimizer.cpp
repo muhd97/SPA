@@ -11,6 +11,9 @@ inline string ClauseGroup::format() {
     for (const auto& s : synonyms) str += s + ", ";
     str += "]";
 
+    if (synonymsInsideResultCl) str += " (Has Synonyms inside ResultCl)";
+    else str += " (No synonyms in ResultCl)";
+
     for (const auto& evalCl : clauses) {
         str += evalCl->format();
     }
@@ -22,7 +25,6 @@ inline string ClauseGroup::format() {
 vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
 
     vector<shared_ptr<ClauseGroup>> toReturn;
-
     unordered_map<OptNode*, vector<OptNode*>> adjList;
     unordered_map<string, OptNode*> synNodes;
     vector<OptNode*> allNodes;
@@ -93,7 +95,11 @@ inline void PQLOptimizer::DFS(OptNode* curr, unordered_map<OptNode*, vector<OptN
     visited.insert(curr);
 
     if (curr->isSyn) {
-        cg->synonyms.insert(curr->syn);
+        const string& syn = curr->syn;
+        if (!cg->synonymsInsideResultCl && synonymsUsedInResultClause.count(syn)) {
+            cg->synonymsInsideResultCl = true;
+        }
+        cg->synonyms.insert(syn);
     }
     else if (curr->isEvalCl) {
         cg->clauses.emplace_back(curr->cl);

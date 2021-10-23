@@ -46,6 +46,7 @@ class PQLOptimizer {
 public:
     PQLOptimizer(const shared_ptr<SelectCl>& _selectCl) : selectCl(_selectCl) {
 
+
         for (const auto& cl : selectCl->suchThatClauses) {
             evalClauses.emplace_back(cl);
         }
@@ -55,11 +56,15 @@ public:
         for (const auto& cl : selectCl->withClauses) {
             evalClauses.emplace_back(cl);
         }
+        
+        for (const auto& ptr : selectCl->getTarget()->getElements()) synonymsUsedInResultClause.insert(ptr->getSynonymString());
+
     }
 
     vector<shared_ptr<ClauseGroup>> getClauseGroups();
 
 private:
+    unordered_set<string> synonymsUsedInResultClause;
     vector<shared_ptr<EvalCl>> evalClauses;
     shared_ptr<SelectCl> selectCl;
     void DFS(OptNode* curr, unordered_map<OptNode*, vector<OptNode*>>& adjList, unordered_set<OptNode*>& visited, shared_ptr<ClauseGroup>& cg);
