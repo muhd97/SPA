@@ -19,11 +19,6 @@ public:
 
 };
 
-enum class NodeType {
-    Synonym,
-    Clause
-};
-
 class OptNode {
 public:
     shared_ptr<EvalCl> cl;
@@ -73,6 +68,7 @@ private:
     vector<shared_ptr<EvalCl>> evalClauses;
     shared_ptr<SelectCl> selectCl;
     void DFS(OptNode* curr, unordered_map<OptNode*, vector<OptNode*>>& adjList, unordered_set<OptNode*>& visited, shared_ptr<ClauseGroup>& cg);
+
     function<bool(const shared_ptr<ClauseGroup> & cg1, const shared_ptr<ClauseGroup> & cg2)> f = [](const shared_ptr<ClauseGroup>& cg1, const shared_ptr<ClauseGroup>& cg2) {
 
         if (cg1->synonyms.empty()) return true;

@@ -1,9 +1,10 @@
 #pragma once
 #pragma optimize( "gty", on )
 
-
+#include <functional>
 #include ".\PKB\PQLEvaluator.h"
 #include "PQLParser.h"
+#include "PQLOptimizer.h"
 
 using namespace std;
 
@@ -125,6 +126,7 @@ class StringSingleResult : public Result
     }
 };
 
+/*
 class OrderedStringTupleResult : public Result
 {
 public:
@@ -151,6 +153,7 @@ public:
     }
 
 };
+*/
 
 class PQLProcessor
 {
@@ -254,7 +257,6 @@ class PQLProcessor
 
     void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);
 
-
     const string& resolveAttrRef(const string& syn, shared_ptr<AttrRef>& attrRef, const shared_ptr<SelectCl>& selectCl, shared_ptr<ResultTuple>& tup);
 
     const string& resolveAttrRef(const string& rawSynVal, shared_ptr<AttrRef>& attrRef, const shared_ptr<DesignEntity>& de);
@@ -263,15 +265,7 @@ class PQLProcessor
 
     void extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<Element>& elem);
 
-};
+    void handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<EvalCl> evalCl);
 
-/*
-
-This class is to be responsible for the formatting of the results from the PQL
-queries
-
-*/
-
-class PQLResultFormatter
-{
+    void handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<ClauseGroup>& clauseGroup);
 };

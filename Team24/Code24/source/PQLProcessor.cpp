@@ -27,6 +27,7 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
     int N = selectCl->suchThatClauses.size();
     for (int i = 0; i < N; i++)
     {
+        cout << selectCl->suchThatClauses[i]->format() << endl;
         if (i == 0)
         {
             handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
@@ -3437,7 +3438,6 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
     vector<shared_ptr<ResultTuple>>& rightResults,
     vector<shared_ptr<ResultTuple>>& newResults)
 {
-
     //cout << "cartesian ==== LeftSize = " << leftResults.size() << ", RightSize = " << rightResults.size() << ", Product = " << leftResults.size() * rightResults.size() << endl;
 
     if (leftResults.size() == 0)
@@ -3900,6 +3900,62 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
 
 }
 
+void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<EvalCl> evalCl)
+{
+    const auto type = evalCl->getEvalClType();
+    if (type == EvalClType::Pattern) {
+        handlePatternClause(selectCl, static_pointer_cast<PatternCl>(evalCl), toPopulate);
+    }
+    else if (type == EvalClType::SuchThat) {
+        handleSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
+    }
+    else if (type == EvalClType::With) {
+        handleWithClause(selectCl, static_pointer_cast<WithCl>(evalCl), toPopulate);
+    }
+}
+
+void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<ClauseGroup>& clauseGroup)
+{
+    bool hasSynonyms = !clauseGroup->synonyms.empty();
+    bool isFirst = true;
+    int i = 0;
+    for (const auto& clPtr : clauseGroup->clauses) {
+        if (isFirst) {
+            handleSingleEvalClause(selectCl, toPopulate, clPtr);
+            if (toPopulate.empty()) {
+                return;
+            }
+            isFirst = false;
+        }
+        else {
+            vector<shared_ptr<ResultTuple>> currRes;
+            handleSingleEvalClause(selectCl, currRes, clPtr);
+
+            if (currRes.empty()) { // Early termination
+                toPopulate = move(currRes);
+                break;
+            }
+
+            /* No synonyms, we just want to check if any of the clauses become empty. */
+            if (!hasSynonyms) {
+                toPopulate = move(currRes);
+                continue;
+            }
+
+            vector<shared_ptr<ResultTuple>> combinedRes;
+            unordered_set<string>& setOfSynonymsToJoinOn =
+                getSetOfSynonymsToJoinOn(toPopulate, currRes);
+
+            if (!setOfSynonymsToJoinOn.empty())
+                hashJoinResultTuples(toPopulate, currRes, setOfSynonymsToJoinOn, combinedRes);
+            else
+                cartesianProductResultTuples(toPopulate, currRes, combinedRes);
+
+            toPopulate = move(combinedRes);
+        }
+    }
+}
+
 void PQLProcessor::extractResultsForIndependentElements(const shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<Element>>& elems, vector<shared_ptr<Result>>& toReturn)
 {
     int numElements = elems.size();
@@ -4004,7 +4060,6 @@ void PQLProcessor::getResultsByEntityType(vector<shared_ptr<Result>>& toReturn, 
     }
 }
 
-
 /* ======================== EXPOSED PUBLIC METHODS ======================== */
 
 /* YIDA: Can only handle queries that return statement numbers, procedure names
@@ -4017,115 +4072,169 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
 
     validateSelectCl(selectCl);
      
-    /* Get Clause Groups */
-    PQLOptimizer opt = PQLOptimizer(selectCl);
-    opt.getClauseGroups();
-
-    /* Final Results to Return */
-    vector<shared_ptr<Result>> res;
-
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses() && !selectCl->hasWithClauses())
     {
         return move(handleNoSuchThatOrPatternCase(move(selectCl)));
     }
 
+    /* Get Clause Groups */
+    PQLOptimizer opt = PQLOptimizer(selectCl);
+    const auto& clauseGroups = opt.getClauseGroups();
+
+    /* Final Results to Return */
+    vector<shared_ptr<Result>> res;
 
     vector<shared_ptr<ResultTuple>> currTups;
 
+    bool isBooleanReturnType = selectCl->target->isBooleanReturnType();
+    bool prevGroupHasSynonymsInResultCl = true;
 
-     /* STEP 1: Evaluate SuchThat clauses first, get all the tuples. */
-    vector<shared_ptr<ResultTuple>> suchThatReturnTuples;
-    if (selectCl->hasSuchThatClauses())
-    {
-        handleAllSuchThatClauses(selectCl, selectCl->suchThatClauses, suchThatReturnTuples);
-        if (!suchThatReturnTuples.empty()) currTups = move(suchThatReturnTuples);
+    int groupSize = clauseGroups.size();
+    for (int i = 0; i < groupSize; i++) {
+        
+        const auto& currGroup = clauseGroups[i];
+        bool hasSynonymsInResultCl = currGroup->synonymsInsideResultCl;
+
+        if (i == 0) {
+            handleClauseGroup(selectCl, currTups, currGroup);
+
+            if (currTups.empty() && hasSynonymsInResultCl) break;;
+            
+            /* The synonyms for this group don't appear in the target synonyms */
+            if (!hasSynonymsInResultCl) {
+                prevGroupHasSynonymsInResultCl = false;
+                if (isBooleanReturnType) {
+                    if (currTups.empty()) {
+                        break;
+                    }
+                }
+                continue;
+            }
+            prevGroupHasSynonymsInResultCl = true;
+            //if (!hasSynonymsInResultCl && !isBooleanReturnType) currTups.clear();
+        }
         else {
-            currTups.clear();
-            extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
-            return move(res);
+            vector<shared_ptr<ResultTuple>> tempRes;
+            handleClauseGroup(selectCl, tempRes, currGroup);
+
+            if (currTups.empty() && hasSynonymsInResultCl) break;
+
+            /* The synonyms for this group don't appear in the target synonyms */
+            if (!hasSynonymsInResultCl) {
+                prevGroupHasSynonymsInResultCl = false;
+                /* If it is a boolean return type, we just need to make sure this current group is not empty. */
+                if (isBooleanReturnType) {
+                    if (tempRes.empty()) {
+                        currTups.clear();
+                        break;
+                    } 
+                    /* Switch ownership, don't bother cartesian product */
+                    currTups = move(tempRes);
+                }
+                else {
+                    // just ignore the results
+                }
+                continue;
+            }
+            
+
+            /* Else we need to do cartesian product */
+            vector<shared_ptr<ResultTuple>> combinedRes;
+            if (prevGroupHasSynonymsInResultCl) cartesianProductResultTuples(currTups, tempRes, combinedRes);
+            else combinedRes = move(tempRes);
+            currTups = move(combinedRes);
+            prevGroupHasSynonymsInResultCl = true;
+
         }
     }
+
+
+     /* STEP 1: Evaluate SuchThat clauses first, get all the tuples. */
+    //vector<shared_ptr<ResultTuple>> suchThatReturnTuples;
+    //if (selectCl->hasSuchThatClauses())
+    //{
+    //    handleAllSuchThatClauses(selectCl, selectCl->suchThatClauses, suchThatReturnTuples);
+    //    if (!suchThatReturnTuples.empty()) currTups = move(suchThatReturnTuples);
+    //    else {
+    //        currTups.clear();
+    //        extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
+    //        return move(res);
+    //    }
+    //}
 
     //
 
-    /* STEP 2: Then evaluate Pattern clauses, get all the tuples. */
-    vector<shared_ptr<ResultTuple>> patternReturnTuples;
-    if (selectCl->hasPatternClauses())
-    {
-        handleAllPatternClauses(selectCl, selectCl->patternClauses, patternReturnTuples);
+    ///* STEP 2: Then evaluate Pattern clauses, get all the tuples. */
+    //vector<shared_ptr<ResultTuple>> patternReturnTuples;
+    //if (selectCl->hasPatternClauses())
+    //{
+    //    handleAllPatternClauses(selectCl, selectCl->patternClauses, patternReturnTuples);
 
-        if (!patternReturnTuples.empty()) {
-            if (currTups.empty()) currTups = move(patternReturnTuples);
-            else {
-                vector<shared_ptr<ResultTuple>> combinedTuples;
+    //    if (!patternReturnTuples.empty()) {
+    //        if (currTups.empty()) currTups = move(patternReturnTuples);
+    //        else {
+    //            vector<shared_ptr<ResultTuple>> combinedTuples;
 
-                unordered_set<string>& setOfSynonymsToJoinOn =
-                    getSetOfSynonymsToJoinOn(currTups, patternReturnTuples);
+    //            unordered_set<string>& setOfSynonymsToJoinOn =
+    //                getSetOfSynonymsToJoinOn(currTups, patternReturnTuples);
 
-                if (setOfSynonymsToJoinOn.empty())
-                { // no need to join, take cartesian product
-                    cartesianProductResultTuples(currTups, patternReturnTuples, combinedTuples);
-                }
-                else
-                {
-                    hashJoinResultTuples(currTups, patternReturnTuples, setOfSynonymsToJoinOn, combinedTuples);
-                }
-                currTups = move(combinedTuples);
-            }
-        }
-        else {
-            currTups.clear();
-            extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
-            return move(res);
-        }
+    //            if (setOfSynonymsToJoinOn.empty())
+    //            { // no need to join, take cartesian product
+    //                cartesianProductResultTuples(currTups, patternReturnTuples, combinedTuples);
+    //            }
+    //            else
+    //            {
+    //                hashJoinResultTuples(currTups, patternReturnTuples, setOfSynonymsToJoinOn, combinedTuples);
+    //            }
+    //            currTups = move(combinedTuples);
+    //        }
+    //    }
+    //    else {
+    //        currTups.clear();
+    //        extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
+    //        return move(res);
+    //    }
 
-    }
+    //}
 
     //cout << "After pattern done =========== \n";
     //for (auto& tup : currTups) cout << "tup = " << tup->toString() << endl;
 
-    vector<shared_ptr<ResultTuple>> withReturnClauseTuples;
-    if (selectCl->hasWithClauses()) {
+    //vector<shared_ptr<ResultTuple>> withReturnClauseTuples;
+    //if (selectCl->hasWithClauses()) {
 
-        handleAllWithClauses(selectCl, selectCl->withClauses, withReturnClauseTuples);
+    //    handleAllWithClauses(selectCl, selectCl->withClauses, withReturnClauseTuples);
 
-        if (!withReturnClauseTuples.empty()) {
-            if (currTups.empty()) currTups = move(withReturnClauseTuples);
-            else {
-                vector<shared_ptr<ResultTuple>> combinedTuples;
-
-
-                unordered_set<string>& setOfSynonymsToJoinOn =
-                    getSetOfSynonymsToJoinOn(currTups, withReturnClauseTuples);
+    //    if (!withReturnClauseTuples.empty()) {
+    //        if (currTups.empty()) currTups = move(withReturnClauseTuples);
+    //        else {
+    //            vector<shared_ptr<ResultTuple>> combinedTuples;
 
 
-                if (setOfSynonymsToJoinOn.empty())
-                { // no need to join, take cartesian product
-                    cartesianProductResultTuples(currTups, withReturnClauseTuples, combinedTuples);
-                }
-                else
-                {
-                    hashJoinResultTuples(currTups, withReturnClauseTuples, setOfSynonymsToJoinOn, combinedTuples);
-                }
-                currTups = move(combinedTuples);
-            }
-        }
-        else {
-            currTups.clear();
-            extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
-            return move(res);
-        }
-
-    }
+    //            unordered_set<string>& setOfSynonymsToJoinOn =
+    //                getSetOfSynonymsToJoinOn(currTups, withReturnClauseTuples);
 
 
-    //cout << "After with done =========== \n";
-    //for (auto& tup : currTups) cout << "tup = " << tup->toString() << endl;
+    //            if (setOfSynonymsToJoinOn.empty())
+    //            { // no need to join, take cartesian product
+    //                cartesianProductResultTuples(currTups, withReturnClauseTuples, combinedTuples);
+    //            }
+    //            else
+    //            {
+    //                hashJoinResultTuples(currTups, withReturnClauseTuples, setOfSynonymsToJoinOn, combinedTuples);
+    //            }
+    //            currTups = move(combinedTuples);
+    //        }
+    //    }
+    //    else {
+    //        currTups.clear();
+    //        extractTargetSynonyms(res, selectCl->target, currTups, selectCl);
+    //        return move(res);
+    //    }
 
-    //cout << "===== AFTER WITH =====\n";
-    //for (auto& tup : currTups) cout << "Tup = " << tup->toString() << endl;
-    //putchar('\n');
+    //}
+
 
 
     vector<shared_ptr<ResultTuple>>& finalTuples = currTups;

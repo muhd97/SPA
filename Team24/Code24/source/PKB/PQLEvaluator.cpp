@@ -1,6 +1,8 @@
 #pragma optimize("gty", on)
 #include "PQLEvaluator.h"
 
+#include <algorithm>
+#include <execution>
 #include <queue>
 
 bool PQLEvaluator::statementExists(int statementNo)
@@ -2477,11 +2479,31 @@ set<pair<int, int>> getNextT(shared_ptr<Program> program, StatementType from, St
 {
     set<pair<int, int>> result = {};
 
-    for (auto procedure : program->getProcedures())
+    const auto& procs = program->getProcedures();
+    if (procs.empty()) return move(result);
+    vector<set<pair<int, int>>> procSets(procs.size(), set<pair<int, int>>());
+
+    auto* baseProc = &procs[0];
+
+    for_each(execution::par_unseq, procs.begin(), procs.end(), 
+        [&procSets, baseProc, from, to, fromIndex, toIndex, &procs](auto&& item) {
+            int idx = &item - baseProc;
+            auto procedure = procs[idx];
+
+            set<int> seenP = {};
+            getNextTStatmtList(procedure->getStatementList()->getStatements(), from, to, fromIndex, toIndex, &procSets[idx],
+                &seenP, false);
+    });
+
+    /*for (auto procedure : program->getProcedures())
     {
         set<int> seenP = {};
         getNextTStatmtList(procedure->getStatementList()->getStatements(), from, to, fromIndex, toIndex, &result,
                            &seenP, false);
+    }*/
+
+    for (const auto& set : procSets) {
+        result.insert(set.begin(), set.end());
     }
 
     return move(result);
