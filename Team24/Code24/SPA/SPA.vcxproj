@@ -23,6 +23,7 @@
     <ClCompile Include="..\source\PQLLexer.cpp" />
     <ClCompile Include="..\source\PQLParser.cpp" />
     <ClCompile Include="..\source\PQLProcessor.cpp" />
+    <ClCompile Include="..\source\PQLOptimizer.cpp" />
     <ClCompile Include="..\source\PKB\PKBStmt.cpp" />
     <ClCompile Include="..\source\PKB\PKBProcedure.cpp" />
     <ClCompile Include="..\source\Source.cpp" />
@@ -41,6 +42,7 @@
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
     <ClInclude Include="..\source\PQLProcessor.h" />
+    <ClInclude Include="..\source\PQLOptimizer.h" />
     <ClInclude Include="..\source\PQLProcessorUtils.h" />
     <ClInclude Include="..\source\PKB\PKBStmt.h" />
     <ClInclude Include="..\source\PKB\PKBProcedure.h" />

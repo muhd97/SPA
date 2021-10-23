@@ -16,6 +16,7 @@
     <ClCompile Include="..\source\PKB\PKBProcedure.cpp" />
     <ClCompile Include="..\source\Source.cpp" />
     <ClCompile Include="..\source\CFG.cpp" />
+    <ClCompile Include="..\source\PQLOptimizer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQLLexer.h" />
@@ -33,6 +34,7 @@
     <ClInclude Include="..\source\PQLProcessorUtils.h" />
     <ClInclude Include="..\source\PKB\PKBStmt.h" />
     <ClInclude Include="..\source\PKB\PKBProcedure.h" />
+    <ClInclude Include="..\source\PQLOptimizer.h" />
     <ClInclude Include="..\source\CFG.h" />
   </ItemGroup>
 </Project>

@@ -1205,7 +1205,27 @@ public:
     }
 };
 
-class SuchThatCl
+enum class EvalClType {
+    Pattern,
+    SuchThat,
+    With
+};
+
+/* Generic class representing a clause to be evaluated */
+class EvalCl {
+public:
+
+    virtual ~EvalCl() {
+
+    }
+
+    inline virtual const vector<string>& getAllSynonymsAsString() = 0;
+    
+    inline virtual EvalClType getEvalClType() = 0;
+
+};
+
+class SuchThatCl : public EvalCl
 {
 private:
     vector<string> synonymsUsed;
@@ -1224,6 +1244,10 @@ public:
         {
             cout << "Deleted: " << format() << endl;
         }
+    }
+
+    inline EvalClType getEvalClType() {
+        return EvalClType::SuchThat;
     }
 
     inline string format()
@@ -1338,7 +1362,7 @@ public:
     }
 };
 
-class PatternCl
+class PatternCl : public EvalCl
 {
 private:
     vector<string> synonymsUsed;
@@ -1358,6 +1382,10 @@ public:
             synonymsUsed.emplace_back(this->entRef->getStringVal());
         }
 
+    }
+
+    inline EvalClType getEvalClType() {
+        return EvalClType::Pattern;
     }
 
     ~PatternCl()
@@ -1385,7 +1413,8 @@ public:
     }
 };
 
-class WithCl
+
+class WithCl : public EvalCl
 {
 private:
     vector<string> synonymsUsed;
@@ -1408,6 +1437,10 @@ public:
         if (rhs->getRefType() == RefType::ATTR) {
             synonymsUsed.emplace_back(rhs->getAttrRef()->getSynonymString());
         }
+    }
+
+    inline EvalClType getEvalClType() {
+        return EvalClType::With;
     }
 
     ~WithCl()
