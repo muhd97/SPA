@@ -9,9 +9,9 @@
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 
 #include "PKB.h"
-#include "PQLLexer.h"
-#include "PQLParser.h"
-#include "PQLProcessor.h"
+#include "../PQL/PQLLexer.h"
+#include "../PQL/PQLParser.h"
+#include "../PQL/PQLProcessor.h"
 #include "CFG.h"
 #include <memory>
 //#include <omp.h>
@@ -64,7 +64,7 @@ void TestWrapper::parse(std::string filename) {
         this->pkb->initializeCFG(root);
         this->pkb->initializeRelationshipTables();
         this->pkb->initializeWithTables();
-        this->evaluator = PQLEvaluator::create(this->pkb);
+        this->evaluator = PKBPQLEvaluator::create(this->pkb);
 
 #if DEBUG
         cout << "\n==== PKB has been populated. ====\n";

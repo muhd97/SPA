@@ -2,7 +2,7 @@
 #pragma optimize( "gty", on )
 
 
-#include ".\PKB\PQLEvaluator.h"
+#include "..\PKB\PKBPQLEvaluator.h"
 #include "PQLParser.h"
 
 using namespace std;
@@ -155,10 +155,10 @@ public:
 class PQLProcessor
 {
   public:
-    shared_ptr<PQLEvaluator> evaluator = nullptr;
+    shared_ptr<PKBPQLEvaluator> evaluator = nullptr;
 
 
-    PQLProcessor(shared_ptr<PQLEvaluator> eval) : evaluator(move(eval))
+    PQLProcessor(shared_ptr<PKBPQLEvaluator> eval) : evaluator(move(eval))
     {
     }
 
