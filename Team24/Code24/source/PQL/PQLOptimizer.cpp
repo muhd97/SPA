@@ -1,7 +1,8 @@
 #include "PQLOptimizer.h"
 #include <algorithm>
+#include <queue>
 
-#define DEBUG_GROUPS 0
+#define DEBUG_GROUPS 1
 
 using namespace std;
 
@@ -35,6 +36,10 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
 
     shared_ptr<ClauseGroup> cgForNoSynClauses = make_shared<ClauseGroup>();
 
+#if DEBUG_GROUPS
+    cout << "Number of clauses: " << evalClauses.size() << endl;
+#endif
+
     for (const auto& ptr : evalClauses) {
         const auto& allSyn = ptr->getAllSynonymsAsString();
 
@@ -44,6 +49,7 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
         }
 
         OptNode* clauseNode = new OptNode(ptr);
+        allNodes.push_back(clauseNode);
         vector<OptNode*> currNeighbours;
 
         for (const auto& s : allSyn) {
@@ -59,7 +65,7 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
 
         }
 
-        allNodes.push_back(clauseNode);
+        
         adjList[clauseNode] = move(currNeighbours);
     }
 
@@ -70,7 +76,7 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
     for (OptNode* n : allNodes) {
         if (!visited.count(n)) {
             shared_ptr<ClauseGroup> cg = make_shared<ClauseGroup>();
-            DFS(n, adjList, visited, cg);
+            BFS(n, adjList, visited, cg);
             toReturn.emplace_back(move(cg));
         }
     }
@@ -116,7 +122,55 @@ inline void PQLOptimizer::DFS(OptNode* curr, unordered_map<OptNode*, vector<OptN
         cg->clauses.emplace_back(curr->cl);
     }
 
-    for (OptNode* ptr : adjList[curr]) {
+    const auto& neighbours = adjList[curr];
+
+    //sort(neighbours.begin(), neighbours.end(), 
+    //    [](auto* ptr1, auto* ptr2) {
+
+
+
+    //});
+
+    for (OptNode* ptr : neighbours) {
         DFS(ptr, adjList, visited, cg);
     }
+}
+
+void PQLOptimizer::BFS(OptNode* start, unordered_map<OptNode*, vector<OptNode*>>& adjList, unordered_set<OptNode*>& visited, shared_ptr<ClauseGroup>& cg)
+{
+    queue<OptNode*> q;
+
+    //visited.insert(start);
+
+    q.push(start);
+
+    while (!q.empty()) {
+        OptNode* curr = q.front();
+
+        if (visited.count(curr)) {
+            q.pop();
+            continue;
+        }
+
+        if (curr->isSyn) {
+            const string& syn = curr->syn;
+            if (!cg->synonymsInsideResultCl && synonymsUsedInResultClause.count(syn)) {
+                cg->synonymsInsideResultCl = true;
+            }
+            cg->synonyms.insert(syn);
+        }
+        else if (curr->isEvalCl) {
+            cg->clauses.emplace_back(curr->cl);
+        }
+
+        visited.insert(curr);
+
+        for (OptNode* ptr : adjList[curr]) {
+            if (!visited.count(ptr)) {
+                q.push(ptr);
+            }
+        }
+        q.pop();
+    }
+
 }

@@ -27,7 +27,6 @@ void PQLProcessor::handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, cons
     int N = selectCl->suchThatClauses.size();
     for (int i = 0; i < N; i++)
     {
-        cout << selectCl->suchThatClauses[i]->format() << endl;
         if (i == 0)
         {
             handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
@@ -3920,6 +3919,7 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
     bool isFirst = true;
     int i = 0;
     for (const auto& clPtr : clauseGroup->clauses) {
+
         if (isFirst) {
             handleSingleEvalClause(selectCl, toPopulate, clPtr);
             if (toPopulate.empty()) {

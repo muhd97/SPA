@@ -1,3 +1,4 @@
+
 #include "PQLClauseHandlerAssignPattern.h"
 
 #include <iostream>

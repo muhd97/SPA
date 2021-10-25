@@ -38,6 +38,17 @@ public:
         isEvalCl = false;
     }
 
+    //int getNumSynonymMatch(const unordered_set<string>& syns) {
+    //    if (isSyn) return -1;
+
+    //    int count = 0;
+    //    for (const auto& syn : cl->getAllSynonymsAsString()) {
+    //        if (syns.count(syn)) count++;
+    //    }
+
+    //    return count;
+    //}
+
 };
 
 
@@ -68,6 +79,7 @@ private:
     vector<shared_ptr<EvalCl>> evalClauses;
     shared_ptr<SelectCl> selectCl;
     void DFS(OptNode* curr, unordered_map<OptNode*, vector<OptNode*>>& adjList, unordered_set<OptNode*>& visited, shared_ptr<ClauseGroup>& cg);
+    void BFS(OptNode* start, unordered_map<OptNode*, vector<OptNode*>>& adjList, unordered_set<OptNode*>& visited, shared_ptr<ClauseGroup>& cg);
 
     function<bool(const shared_ptr<ClauseGroup> & cg1, const shared_ptr<ClauseGroup> & cg2)> f = [](const shared_ptr<ClauseGroup>& cg1, const shared_ptr<ClauseGroup>& cg2) {
 
