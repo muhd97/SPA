@@ -1,5 +1,6 @@
 #pragma optimize( "gty", on )
 
+#define PRINT_PARSED_PROGRAM 1
 #define DEBUG 0
 #define PRINT_FINISHED_HEADER 0
 #define PRINT_EXCEPTION_STATEMENTS 0
@@ -9,8 +10,8 @@
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 
 #include "PKB.h"
+#include "PQLParser.h"
 #include "../PQL/PQLLexer.h"
-#include "../PQL/PQLParser.h"
 #include "../PQL/PQLProcessor.h"
 #include "CFG.h"
 #include <memory>
@@ -55,7 +56,7 @@ void TestWrapper::parse(std::string filename) {
 #endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
        
-#if DEBUG
+#if PRINT_PARSED_PROGRAM
         cout << root->format();
         cout << "\n==== Building PKB ====\n";
 #endif

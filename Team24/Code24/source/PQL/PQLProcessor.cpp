@@ -3455,25 +3455,25 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
     const auto& leftTest = leftResults[0];
     const auto& rightTest = rightResults[0];
 
-    bool exactlySameKeys = true;
-    for (const auto& p : leftTest->getMap()) {
-        if (!rightTest->synonymKeyAlreadyExists(p.first)) {
-            exactlySameKeys = false;
-            break;
-        }
-    }
+    //bool exactlySameKeys = true;
+    //for (const auto& p : leftTest->getMap()) {
+    //    if (!rightTest->synonymKeyAlreadyExists(p.first)) {
+    //        exactlySameKeys = false;
+    //        break;
+    //    }
+    //}
 
-    for (const auto& p : rightTest->getMap()) {
-        if (!exactlySameKeys || !leftTest->synonymKeyAlreadyExists(p.first)) {
-            exactlySameKeys = false;
-            break;
-        }
-    }
+    //for (const auto& p : rightTest->getMap()) {
+    //    if (!exactlySameKeys || !leftTest->synonymKeyAlreadyExists(p.first)) {
+    //        exactlySameKeys = false;
+    //        break;
+    //    }
+    //}
 
-    if (exactlySameKeys) {
-        newResults = leftResults;
-        return;
-    }
+    //if (exactlySameKeys) {
+    //    newResults = leftResults;
+    //    return;
+    //}
 
     
     int N = leftResults.size();
@@ -4078,6 +4078,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         return move(handleNoSuchThatOrPatternCase(move(selectCl)));
     }
 
+
     /* Get Clause Groups */
     PQLOptimizer opt = PQLOptimizer(selectCl);
     const auto& clauseGroups = opt.getClauseGroups();
@@ -4090,63 +4091,72 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     bool isBooleanReturnType = selectCl->target->isBooleanReturnType();
     bool prevGroupHasSynonymsInResultCl = true;
 
-    int groupSize = clauseGroups.size();
-    for (int i = 0; i < groupSize; i++) {
-        
-        const auto& currGroup = clauseGroups[i];
-        bool hasSynonymsInResultCl = currGroup->synonymsInsideResultCl;
+    try {
 
-        if (i == 0) {
-            handleClauseGroup(selectCl, currTups, currGroup);
+        int groupSize = clauseGroups.size();
+        for (int i = 0; i < groupSize; i++) {
 
-            if (currTups.empty() && hasSynonymsInResultCl) break;;
-            
-            /* The synonyms for this group don't appear in the target synonyms */
-            if (!hasSynonymsInResultCl) {
-                prevGroupHasSynonymsInResultCl = false;
-                if (isBooleanReturnType) {
-                    if (currTups.empty()) {
-                        break;
+            const auto& currGroup = clauseGroups[i];
+            bool hasSynonymsInResultCl = currGroup->synonymsInsideResultCl;
+
+            if (i == 0) {
+                handleClauseGroup(selectCl, currTups, currGroup);
+
+                if (currTups.empty() && hasSynonymsInResultCl) break;;
+
+                /* The synonyms for this group don't appear in the target synonyms */
+                if (!hasSynonymsInResultCl) {
+                    prevGroupHasSynonymsInResultCl = false;
+                    if (isBooleanReturnType) {
+                        if (currTups.empty()) {
+                            break;
+                        }
                     }
+                    continue;
                 }
-                continue;
+                prevGroupHasSynonymsInResultCl = true;
+                //if (!hasSynonymsInResultCl && !isBooleanReturnType) currTups.clear();
             }
-            prevGroupHasSynonymsInResultCl = true;
-            //if (!hasSynonymsInResultCl && !isBooleanReturnType) currTups.clear();
-        }
-        else {
-            vector<shared_ptr<ResultTuple>> tempRes;
-            handleClauseGroup(selectCl, tempRes, currGroup);
+            else {
+                vector<shared_ptr<ResultTuple>> tempRes;
+                handleClauseGroup(selectCl, tempRes, currGroup);
 
-            if (currTups.empty() && hasSynonymsInResultCl) break;
+                if (currTups.empty() && hasSynonymsInResultCl) break;
 
-            /* The synonyms for this group don't appear in the target synonyms */
-            if (!hasSynonymsInResultCl) {
-                prevGroupHasSynonymsInResultCl = false;
-                /* If it is a boolean return type, we just need to make sure this current group is not empty. */
-                if (isBooleanReturnType) {
-                    if (tempRes.empty()) {
-                        currTups.clear();
-                        break;
-                    } 
-                    /* Switch ownership, don't bother cartesian product */
-                    currTups = move(tempRes);
+                /* The synonyms for this group don't appear in the target synonyms */
+                if (!hasSynonymsInResultCl) {
+                    prevGroupHasSynonymsInResultCl = false;
+                    /* If it is a boolean return type, we just need to make sure this current group is not empty. */
+                    if (isBooleanReturnType) {
+                        if (tempRes.empty()) {
+                            currTups.clear();
+                            break;
+                        }
+                        /* Switch ownership, don't bother cartesian product */
+                        currTups = move(tempRes);
+                    }
+                    else {
+                        // just ignore the results
+                    }
+                    continue;
                 }
-                else {
-                    // just ignore the results
-                }
-                continue;
+
+
+                /* Else we need to do cartesian product */
+                vector<shared_ptr<ResultTuple>> combinedRes;
+                if (prevGroupHasSynonymsInResultCl) cartesianProductResultTuples(currTups, tempRes, combinedRes);
+                else combinedRes = move(tempRes);
+                currTups = move(combinedRes);
+                prevGroupHasSynonymsInResultCl = true;
+
             }
-            
-
-            /* Else we need to do cartesian product */
-            vector<shared_ptr<ResultTuple>> combinedRes;
-            if (prevGroupHasSynonymsInResultCl) cartesianProductResultTuples(currTups, tempRes, combinedRes);
-            else combinedRes = move(tempRes);
-            currTups = move(combinedRes);
-            prevGroupHasSynonymsInResultCl = true;
-
         }
+    }
+    catch (...) {
+        if (isBooleanReturnType) {
+            res.push_back(make_shared<StringSingleResult>("FALSE"));
+        }
+        return move(res);
     }
 
 
@@ -4198,8 +4208,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
 
     //}
 
-    //cout << "After pattern done =========== \n";
-    //for (auto& tup : currTups) cout << "tup = " << tup->toString() << endl;
+    ///*cout << "After pattern done =========== \n";
+    //for (auto& tup : currTups) cout << "tup = " << tup->toString() << endl;*/
 
     //vector<shared_ptr<ResultTuple>> withReturnClauseTuples;
     //if (selectCl->hasWithClauses()) {

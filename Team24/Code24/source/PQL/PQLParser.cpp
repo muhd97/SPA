@@ -1,4 +1,5 @@
 #pragma optimize( "gty", on )
+
 #include "PQLParser.h"
 
 #include <iostream>
@@ -17,6 +18,7 @@ string DesignEntity::CONSTANT = "constant";
 string DesignEntity::PROCEDURE = "procedure";
 string DesignEntity::CALL = "call";
 string DesignEntity::PROG_LINE = "prog_line";
+
 
 PQLToken PQLParser::peek()
 {

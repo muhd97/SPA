@@ -1508,6 +1508,8 @@ public:
         }
     }
 
+
+
     shared_ptr<Declaration>& getParentDeclarationForSynonym(const string& s)
     {
         if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end())
@@ -1647,10 +1649,12 @@ public:
 
         return flag;
     }
+    
 
-    inline const shared_ptr<ResultCl>& getTarget() {
+    inline const shared_ptr<ResultCl>& SelectCl::getTarget() {
         return target;
     }
+    
 };
 
 class PQLParser
@@ -1697,7 +1701,6 @@ public:
     shared_ptr<WithCl> parseAttrCompare();
     shared_ptr<ExpressionSpec> parseExpressionSpec();
     shared_ptr<SelectCl> parseSelectCl();
-
     shared_ptr<ResultCl> parseResultCl();
     shared_ptr<Element> parseElement();
     shared_ptr<AttrName> parseAttrName();

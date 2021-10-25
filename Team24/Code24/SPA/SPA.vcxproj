@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\PQL\PQLParser.cpp" />
     <ClCompile Include="..\source\CFG.cpp" />
     <ClCompile Include="..\source\SimpleAST.cpp" />
     <ClCompile Include="..\source\SimpleLexer.cpp" />
@@ -25,7 +26,6 @@
     <ClCompile Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandlerWith.cpp" />
     <ClCompile Include="..\source\PQL\PQLLexer.cpp" />
-    <ClCompile Include="..\source\PQL\PQLParser.cpp" />
     <ClCompile Include="..\source\PQL\PQLProcessor.cpp" />
     <ClCompile Include="..\source\PQL\PQLOptimizer.cpp" />
     <ClCompile Include="..\source\PKB\PKBStmt.cpp" />
@@ -34,8 +34,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\CFG.h" />
-    <ClInclude Include="..\source\PQL\PQLLexer.h" />
     <ClInclude Include="..\source\PQL\PQLParser.h" />
+    <ClInclude Include="..\source\PQL\PQLLexer.h" />
     <ClInclude Include="..\source\SimpleAST.h" />
     <ClInclude Include="..\source\PKB\PKBGroup.h" />
     <ClInclude Include="..\source\PKB\PKB.h" />
@@ -45,10 +45,10 @@
     <ClInclude Include="..\source\PKB\PKBVariable.h" />
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
-    <ClCompile Include="..\source\PQL\PQLClauseHandler.h" />
-    <ClCompile Include="..\source\PQL\PQLClauseHandlerAssignPattern.h" />
-    <ClCompile Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.h" />
-    <ClCompile Include="..\source\PQL\PQLClauseHandlerWith.h" />
+    <ClInclude Include="..\source\PQL\PQLClauseHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLClauseHandlerAssignPattern.h" />
+    <ClInclude Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.h" />
+    <ClInclude Include="..\source\PQL\PQLClauseHandlerWith.h" />
     <ClInclude Include="..\source\PQL\PQLProcessor.h" />
     <ClInclude Include="..\source\PQL\PQLOptimizer.h" />
     <ClInclude Include="..\source\PQL\PQLProcessorUtils.h" />

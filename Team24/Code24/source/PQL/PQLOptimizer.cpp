@@ -1,8 +1,9 @@
 #include "PQLOptimizer.h"
+#include "PQLParser.h"
 #include <algorithm>
 #include <queue>
 
-#define DEBUG_GROUPS 1
+#define DEBUG_GROUPS 0
 
 using namespace std;
 
