@@ -281,7 +281,7 @@ Select s such that Next*(8, s)
 77 - Invalid first syn type, second wildcard 
 constant c;
 Select BOOLEAN such that Next*(c, _)
-
+FALSE
 5000
 78 - Valid BOOLEAN query
 assign a;
