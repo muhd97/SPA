@@ -1651,10 +1651,11 @@ public:
     }
     
 
-    inline const shared_ptr<ResultCl>& SelectCl::getTarget() {
+    inline const shared_ptr<ResultCl>& getTarget() {
         return target;
     }
-    
+
+
 };
 
 class PQLParser

@@ -1,9 +1,21 @@
 #pragma optimize( "gty", on )
 #pragma once
 #include "PQLProcessor.h"
+#include <initializer_list>
 
 #include "PQLLexer.h"
 
+inline shared_ptr<ResultTuple> getResultTuple(const initializer_list<pair<string, string>>& args) {
+
+    shared_ptr<ResultTuple> res = make_shared<ResultTuple>();
+
+    for (const auto& p : args) {
+        res->insertKeyValuePair(p.first, p.second);
+    }
+
+    return move(res);
+
+}
 
 /* Method to check if the target synonym of the select clause is declared */
 inline bool targetSynonymNotDeclared(shared_ptr<SelectCl> selectCl)

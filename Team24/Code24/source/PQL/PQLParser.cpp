@@ -723,3 +723,4 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
 
     return make_shared<SelectCl>(move(result), move(declarations), move(suchThatClauses), move(patternClauses), move(withClauses));
 }
+
