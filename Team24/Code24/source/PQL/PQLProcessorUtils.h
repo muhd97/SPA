@@ -312,6 +312,7 @@ unordered_set<shared_ptr<Element>> getSetOfIndependentSynonymsInTargetSynonyms(c
         }
     }
 
+
     for (const auto& ptr : temp) {
         if (stringIsInsideSet(allowedSynonyms, ptr->getSynonymString())) independentElements.insert(ptr);
     }

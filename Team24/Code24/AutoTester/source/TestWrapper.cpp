@@ -3,7 +3,7 @@
 #define PRINT_PARSED_PROGRAM 0
 #define DEBUG 0
 #define PRINT_FINISHED_HEADER 0
-#define PRINT_EXCEPTION_STATEMENTS 1
+#define PRINT_EXCEPTION_STATEMENTS 0
 
 #include "TestWrapper.h"
 #include "SimpleAST.h"
@@ -110,12 +110,6 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
         }
     }
 
-#if PRINT_EXCEPTION_STATEMENTS
-    catch (const string & e) {
-        cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
-        cout << "Error message: " << e << endl;
-    }
-#endif
 #if PRINT_EXCEPTION_STATEMENTS
     catch (const exception& ex) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";

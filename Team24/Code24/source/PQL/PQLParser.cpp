@@ -38,7 +38,7 @@ void PQLParser::advance()
     }
     else
     {
-        cout << "PQLParser failed to advance EOF\n";
+        throw "PQLParser failed to advance EOF\n";
     }
 }
 
@@ -156,7 +156,7 @@ shared_ptr<DesignEntity> PQLParser::parseDesignEntity()
         }
         else
         {
-            cout << "ERROR: Unrecognized Design Entity!\n" << curr.stringValue;
+            throw "ERROR: Unrecognized Design Entity!\n" + curr.stringValue;
         }
 
         return make_shared<DesignEntity>(curr.stringValue);
@@ -487,7 +487,7 @@ shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
     }
     else
     {
-        cout << "Error: Invalid expression spec." << endl;
+        throw "Error: Invalid expression spec.\n";
     }
 
     if (!tokensAreEmpty() && peek().type == PQLTokenType::COMMA) {

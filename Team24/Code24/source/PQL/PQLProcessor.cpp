@@ -1,5 +1,8 @@
 #pragma optimize( "gty", on )
 
+#define DEBUG_HASH_JOIN 0
+#define DEBUG_CARTESIAN 0
+
 #include "PQLOptimizer.h"
 #include "PQLProcessor.h"
 #include "PQLProcessorUtils.h"
@@ -2933,10 +2936,11 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
 
     int leftSize = leftResults.size();
     int rightSize = rightResults.size();
-    //cout << "hash join ========= Num LeftResults = " << leftSize << ", Num RightResults = " << rightSize << ", joinKeysSize = " << joinKeys.size() << endl;
+#if DEBUG_HASH_JOIN
+    cout << "hash join ========= Num LeftResults = " << leftSize << ", Num RightResults = " << rightSize << ", joinKeysSize = " << joinKeys.size() << endl;
+#endif
     vector<shared_ptr<ResultTuple>>* smallerVec = nullptr;
     vector<shared_ptr<ResultTuple>>* largerVec = nullptr;
-
     if (leftSize < rightSize) {
         smallerVec = &leftResults;
         largerVec = &rightResults;
@@ -2945,7 +2949,6 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
         smallerVec = &rightResults;
         largerVec = &leftResults;
     }
-
     const auto& smallerRes = *smallerVec;
     const auto& largerRes = *largerVec;
 
@@ -2954,7 +2957,6 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
 
     /* Build phase */
     int smallerResSize = smallerRes.size();
-    //cout << "SmallerResSize = " << smallerResSize << endl;
 
     for (int i = 0; i < smallerResSize; i++) {
 
@@ -3011,10 +3013,6 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
         }
     }
 
-    //cout << "===== AFTER TUPS =====\n";
-    //for (auto& tup : newResults) cout << "Tup = " << tup->toString() << endl;
-    //putchar('\n');
-
     return;
 
 
@@ -3024,8 +3022,9 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
     vector<shared_ptr<ResultTuple>>& rightResults,
     vector<shared_ptr<ResultTuple>>& newResults)
 {
-    //cout << "cartesian ==== LeftSize = " << leftResults.size() << ", RightSize = " << rightResults.size() << ", Product = " << leftResults.size() * rightResults.size() << endl;
-
+#if DEBUG_CARTESIAN
+    cout << "cartesian ==== LeftSize = " << leftResults.size() << ", RightSize = " << rightResults.size() << ", Product = " << leftResults.size() * rightResults.size() << endl;
+#endif
     if (leftResults.size() == 0)
     {
         newResults = rightResults;
@@ -3037,51 +3036,20 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
         newResults = leftResults;
         return;
     }
-
-    /* If all keys are the same, just return either. */
-    const auto& leftTest = leftResults[0];
-    const auto& rightTest = rightResults[0];
-
-    //bool exactlySameKeys = true;
-    //for (const auto& p : leftTest->getMap()) {
-    //    if (!rightTest->synonymKeyAlreadyExists(p.first)) {
-    //        exactlySameKeys = false;
-    //        break;
-    //    }
-    //}
-
-    //for (const auto& p : rightTest->getMap()) {
-    //    if (!exactlySameKeys || !leftTest->synonymKeyAlreadyExists(p.first)) {
-    //        exactlySameKeys = false;
-    //        break;
-    //    }
-    //}
-
-    //if (exactlySameKeys) {
-    //    newResults = leftResults;
-    //    return;
-    //}
-
     
     int N = leftResults.size();
     int X = rightResults.size();
-
     /* Parallel version */
-
     vector<shared_ptr<ResultTuple>>* smallerVec = &rightResults;
     vector<shared_ptr<ResultTuple>>* largerVec = &leftResults;
-
     if (N < X) {
         smallerVec = &leftResults;
         largerVec = &rightResults;
     }
-
     auto& smaller = *smallerVec;
     auto& larger = *largerVec;
-
     X = smaller.size();
     N = larger.size();
-
     newResults.resize(N * X);
     auto* baseAddress = &larger[0];
     for_each(execution::par_unseq, larger.begin(), larger.end(),
@@ -3106,67 +3074,16 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
                         toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
                     }
                 }
-
                 newResults[i * X + j] = move(toAdd);
             }
         });
-
-
-    /* Sequential version */
-
-    //int i;
-    //newResults.reserve(N * X);
-    ////#pragma omp parallel for private(i) num_threads(4)
-    //for (i = 0; i < N; i++)
-    //{
-    //    auto& leftPtr = leftResults[i];
-    //    int j;        
-    //    for (j = 0; j < X; j++)
-    //    {
-    //        auto& rightPtr = rightResults[j];
-    //        shared_ptr<ResultTuple> toAdd =
-    //            make_shared<ResultTuple>(leftPtr->synonymKeyToValMap.size() + rightPtr->synonymKeyToValMap.size());
-
-    //        /* Copy over the key-values */
-    //        for (const auto& leftPair : leftPtr->synonymKeyToValMap)
-    //        {
-
-    //            toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
-    //            
-    //        }
-
-    //        for (const auto& rightPair : rightPtr->synonymKeyToValMap)
-    //        {
-    //            if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
-    //            {
-    //                toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
-    //            }
-    //        }
-
-    //        newResults.emplace_back(move(toAdd));
-    //        //newResults[i * X + j] = move(toAdd);
-    //    }
-    //}
-
-    /* Debugging */
-   /* cout << "============= Res ==============\n";
-    for (auto& tup : newResults) {
-        cout << tup->toString() << endl;
-    }
-    cout << endl;*/
-
 }
 
 /* PRE-CONDITION: At least ONE targetSynonym appears in the suchThat/pattern/with clauses*/
 void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl) {
 
-    // Debugging
-    //for (auto& ptr : tuples) cout << ptr->toString() << endl;
 
     if (resultCl->isBooleanReturnType()) {
-        
-
-
         if (!tuples.empty()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
         else toReturn.emplace_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
         return;
@@ -3191,9 +3108,6 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
         unordered_set<string> existingResults;
         for (auto& tuple : tuples)
         {
-            //cout << "Tuple = " << tuple->toString() << ", numKeys = " << tuple->getMap().size() << endl;
-
-            //if (true || tuple->synonymKeyAlreadyExists(targetSynonymVal)) {
                 const string& val = isAttrRef
                     ? resolveAttrRef(targetSynonymVal, attrRef, selectCl, tuple)
                     : tuple->get(targetSynonymVal);
@@ -3202,7 +3116,7 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
                     toReturn.emplace_back(make_shared<StringSingleResult>(val));
                     existingResults.insert(val);
                 }
-            //}
+            
         }
         return;
     }
@@ -3214,29 +3128,18 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
         int numTargetElements = resultCl->getElements().size();
         const vector<shared_ptr<Element>>& targetElems = resultCl->getElements();
         unordered_set<string> existingResults;
-
         const auto& independentElements = getSetOfIndependentSynonymsInTargetSynonyms(selectCl);
-
         if (!dependentElementsAllExistInTupleKeys(tuples, independentElements, targetElems)) return;
 
         /* If there are some elements that are not used in the suchThat/pattern/with clauses, we need to resolve them separately. */
         if (!independentElements.empty()) {
-            // supplement
-
-            //for (const auto& e : independentElements) cout << e->getSynonymString() << " ";
-            //putchar('\n');
-           
             vector<shared_ptr<ResultTuple>> res;
-
             bool isFirst = true;
-
-
             for (const auto& x : independentElements) {
                 if (isFirst) {
                     isFirst = false;
                     extractAllTuplesForSingleElement(selectCl, res, x);
                     if (res.empty()) return;
-
                 }
                 else {
                     vector<shared_ptr<ResultTuple>> curr;
@@ -3247,47 +3150,31 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
                     res = move(productRes);
 
                 }
-                
             }
-        
             vector<shared_ptr<ResultTuple>> independentAndDependantProductRes;
             cartesianProductResultTuples(res, tuples, independentAndDependantProductRes);
             tuples = move(independentAndDependantProductRes);
         }
 
-        //for (auto& tup : tuples) cout << "Tup = " << tup->toString() << endl;
-
 
         for (auto tuple : tuples)
         {
-            //if (allTargetSynonymsExistInTuple(targetElems, tuple)) {
-                string temp;
-                /*vector<string> orderedStrings;
-                orderedStrings.reserve(numTargetSynonyms);
-                for (auto& synPtr : targetSynonyms) {
-                    orderedStrings.emplace_back(tuple->get(synPtr->getValue()));
-                }*/
+            string temp;
+            for (unsigned int i = 0; i < targetElems.size(); i++) {
+                const auto& curr = targetElems[i];
+                const string& targetSynonymVal = curr->getSynonymString();
 
-                for (unsigned int i = 0; i < targetElems.size(); i++) {
-                    const auto& curr = targetElems[i];
-                    const string& targetSynonymVal = curr->getSynonymString();
-
-                    const string& val = (curr->getElementType() == ElementType::AttrRef) //&& (independentElements.find(curr) == independentElements.end())
-                        ? resolveAttrRef(targetSynonymVal, static_pointer_cast<AttrRef>(curr), selectCl, tuple)
-                        : tuple->get(targetSynonymVal);
-
-                    temp.append(val);
-                    if (i != targetElems.size() - 1) temp.push_back(' ');
-                }
-
-                //cout << "CurrTuple = " << temp << endl;
-
-                if (existingResults.find(temp) == existingResults.end()) {
-                    //toReturn.emplace_back(make_shared<OrderedStringTupleResult>(move(orderedStrings)));
-                    toReturn.emplace_back(make_shared<StringSingleResult>(temp));
-                    existingResults.insert(move(temp));
-                }
-            //}
+                const string& val = (curr->getElementType() == ElementType::AttrRef) 
+                    ? resolveAttrRef(targetSynonymVal, static_pointer_cast<AttrRef>(curr), selectCl, tuple)
+                    : tuple->get(targetSynonymVal);
+                
+                temp.append(val);
+                if (i != targetElems.size() - 1) temp.push_back(' ');
+            }
+            if (existingResults.find(temp) == existingResults.end()) {
+                toReturn.emplace_back(make_shared<StringSingleResult>(temp));
+                existingResults.insert(move(temp));
+            }
         }
         return;
 
@@ -3460,80 +3347,6 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
             toPopulate = move(combinedRes);
         }
-    }
-}
-
-void PQLProcessor::getResultsByEntityType(vector<shared_ptr<Result>>& toReturn, const shared_ptr<DesignEntity>& de, const shared_ptr<Element>& elem)
-{
-    shared_ptr<AttrRef> attrRef = nullptr;
-    bool isAttrRef = elem->getElementType() == ElementType::AttrRef;
-
-    unordered_set<string> existingResults;
-
-    if (isAttrRef) attrRef = static_pointer_cast<AttrRef>(elem);
-
-    if (de->getEntityTypeName() == PQL_CONSTANT)
-    {
-        for (const string& x : evaluator->getAllConstants()) {
-            const string& toAdd = !isAttrRef ? x : resolveAttrRef(x, attrRef, de);
-
-            if (stringIsInsideSet(existingResults, toAdd)) continue;
-
-            existingResults.insert(toAdd);
-            toReturn.emplace_back(make_shared<StringSingleResult>(toAdd));
-        }
-        return;
-    }
-
-    if (de->getEntityTypeName() == PQL_VARIABLE)
-    {
-        const vector<shared_ptr<PKBVariable>>& vars = evaluator->getAllVariables();
-        for (auto& ptr : vars) {
-
-            const string& toAdd = !isAttrRef ? ptr->getName() : resolveAttrRef(ptr->getName(), attrRef, de);
-
-            if (stringIsInsideSet(existingResults, toAdd)) continue;
-
-            existingResults.insert(toAdd);
-            toReturn.emplace_back(make_shared<StringSingleResult>(toAdd));
-        }
-        return;
-    }
-
-    if (de->getEntityTypeName() == PQL_PROCEDURE)
-    {
-        const set<shared_ptr<PKBProcedure>>& procedures =
-            evaluator->getAllProcedures();
-        for (auto& ptr : procedures) {
-            const string& toAdd = !isAttrRef ? ptr->getName() : resolveAttrRef(ptr->getName(), attrRef, de);
-
-            if (stringIsInsideSet(existingResults, toAdd)) continue;
-
-            existingResults.insert(toAdd);
-
-            toReturn.emplace_back(make_shared<StringSingleResult>(toAdd));
-        }
-        return;
-    }
-
-    PKBDesignEntity pkbde = resolvePQLDesignEntityToPKBDesignEntity(de);
-    vector<shared_ptr<PKBStmt>> stmts;
-
-    if (pkbde == PKBDesignEntity::AllStatements)
-        stmts = evaluator->getAllStatements();
-    else {
-        stmts = evaluator->getStatementsByPKBDesignEntity(pkbde);
-    }
-
-    for (auto& ptr : stmts)
-    {
-        const string& toAdd = !isAttrRef ? to_string(ptr->getIndex()) : resolveAttrRef(to_string(ptr->getIndex()), attrRef, de);
-
-        if (stringIsInsideSet(existingResults, toAdd)) continue;
-
-        existingResults.insert(toAdd);
-
-        toReturn.emplace_back(make_shared<StringSingleResult>(toAdd));
     }
 }
 
