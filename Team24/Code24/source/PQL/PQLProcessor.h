@@ -16,21 +16,9 @@ the PQLParser.
 
 */
 
-/*
-
-The purpose of wrapping the query results using a class is to faciliate future
-implementation.
-
-In iteration 1, results returned from each query are simply statement numbers,
-but in future iterations, tuples or other data types might be returned as
-result. As such, it will be useful to wrap the results using a generic Result
-class to extend from.
-
-*/
 enum class ResultType
 {
-    StringSingleResult,
-    OrderedStringTupleResult
+    StringSingleResult
 };
 
 class Result
@@ -142,19 +130,8 @@ class PQLProcessor
   private:
     vector<shared_ptr<Result>> handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl);
 
-    void extractResultsForIndependentElements(const shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<Element>>& elems, vector<shared_ptr<Result>>& results);
-
     void handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
                               vector<shared_ptr<ResultTuple>> &toReturn);
-
-    void handleAllSuchThatClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<SuchThatCl>>& suchThatClauses,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void handleAllPatternClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<PatternCl>>& patternClauses,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void handleAllWithClauses(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<WithCl>>& withClauses,
-        vector<shared_ptr<ResultTuple>>& toReturn);
 
     void handleWithClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
         vector<shared_ptr<ResultTuple>>& toReturn);
@@ -214,9 +191,6 @@ class PQLProcessor
     void handleNext(shared_ptr<SelectCl>& selectCl, shared_ptr<Next>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
     void handleNextT(shared_ptr<SelectCl>& selectCl, shared_ptr<NextT>& nextTCl, vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void joinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
-                          unordered_set<string> &joinKeys, vector<shared_ptr<ResultTuple>> &newResults);
 
     void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
         unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults);
