@@ -1,7 +1,11 @@
 #pragma once
 #pragma optimize( "gty", on )
 
-#include <functional>
+//#include <functional>
+#include <vector>
+#include <string>
+#include "../PKB/PKBPQLEvaluator.h"
+#include "PQLParser.h"
 
 using namespace std;
 
@@ -74,7 +78,7 @@ public:
         return synonymKeyToValMap;
     }
 
-    string toString() {
+     string toString() {
         string s = "[";
 
         for (const auto& kv : synonymKeyToValMap) {

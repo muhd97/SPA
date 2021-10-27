@@ -1,4 +1,5 @@
 #pragma optimize( "gty", on )
+//#pragma once
 
 #define DEBUG_HASH_JOIN 0
 #define DEBUG_CARTESIAN 0
@@ -9,6 +10,7 @@
 #include "PQLLexer.h"
 #include <execution>
 #include <algorithm>
+#include "PQLClauseHandlerWhileAndIfPattern.h"
 
 /* Initialize static variables for PQLProcessor.cpp */
 string Result::dummy = "BaseResult: getResultAsString()";
@@ -142,7 +144,9 @@ void PQLProcessor::handlePatternClause(const shared_ptr<SelectCl>& selectCl, con
     const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
 
     if (synonymType == DesignEntity::IF || synonymType == DesignEntity::WHILE) {
-        handleWhileAndIfPatternClause(selectCl, patternCl, toReturn, synonymType);
+        
+        vector<shared_ptr<ResultTuple>> answer = PQLClauseHandlerWhileAndIfPattern::handleWhileAndIfPatternClause(evaluator, selectCl, patternCl, synonymType);
+        toReturn.insert(toReturn.end(), answer.begin(), answer.end());
         return;
     }
 
@@ -205,62 +209,6 @@ void PQLProcessor::handlePatternClause(const shared_ptr<SelectCl>& selectCl, con
         }
         toReturn.emplace_back(move(tupleToAdd));
     }
-}
-
-void PQLProcessor::handleWhileAndIfPatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, vector<shared_ptr<ResultTuple>>& toReturn, const string& DesignEntityType)
-{
-
-    const shared_ptr<EntRef>& entRef = patternCl->entRef;
-    const auto& entRefType = entRef->getEntRefType();
-    const auto& patternSyn = patternCl->synonym->getSynonymString();
-
-    if (!patternCl->exprSpec->isAnything) {
-        throw "Invalid pattern clause. 2nd and 3rd arguments of pattern with WHILE and IFS must be UNDERSCORE\n";
-    }
-
-    if (DesignEntityType == DesignEntity::WHILE && patternCl->hasThirdArg) {
-        throw "Invalid pattern clause. Pattern with WHILE only has 2 arguments.\n";
-    }
-
-    if (DesignEntityType == DesignEntity::IF && !patternCl->hasThirdArg) {
-        /* Third argument having to be UNDERSCORE is caught in parsing stage. */
-        throw "Invalid pattern clause. Pattern with IF needs to have 3 arguments.\n";
-    }
-    const auto& patternTable = DesignEntityType == DesignEntity::WHILE ? evaluator->mpPKB->whilePatternTable : evaluator->mpPKB->ifPatternTable;
-    function<bool(pair<int, unordered_set<string>>)> additionalCond;
-    if (entRefType == EntRefType::UNDERSCORE || entRefType == EntRefType::IDENT) {
-        if (entRefType == EntRefType::UNDERSCORE) {
-            additionalCond = [](auto& pair) {return !pair.second.empty(); };
-        }
-        else {
-            additionalCond = [&entRef](auto& pair) {return pair.second.count(entRef->getStringVal()); };
-        }
-
-        for (const auto& p : patternTable) {
-            if (additionalCond(p)) {
-                toReturn.emplace_back(getResultTuple({ {patternSyn, to_string(p.first)} }));
-            }
-        }
-    }
-    /* pattern x(SYN, _, _,) */
-    else {
-
-        const auto& entRefSyn = entRef->getStringVal();
-        const auto& entRefSynType = selectCl->getDesignEntityTypeBySynonym(entRefSyn);
-
-        if (entRefSynType != DesignEntity::VARIABLE) {
-            throw "Invalid pattern clause. EntRef must be declared variable\n";
-        }
-        
-        for (const auto& p : patternTable) {
-            for (const auto& v : p.second) {
-                toReturn.emplace_back(getResultTuple({ {patternSyn, to_string(p.first)}, {entRefSyn, v} }));
-            }
-        }
-    }
-
-    return;
-
 }
 
 /* ======================== WITH CLAUSE ======================== */

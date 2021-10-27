@@ -6,7 +6,9 @@
 #include "..\PKB\PKBPQLEvaluator.h"
 #include "PQLParser.h"
 #include "PQLOptimizer.h"
-#include "PQLResult.h"
+#include "PQLResultTuple.h"
+
+
 
 using namespace std;
 
@@ -80,9 +82,6 @@ class PQLProcessor
 
     void handlePatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
                              vector<shared_ptr<ResultTuple>> &toReturn);
-
-    void handleWhileAndIfPatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
-        vector<shared_ptr<ResultTuple>>& toReturn, const string& DesignEntityType);
 
     void handleCalls(shared_ptr<SelectCl> &selectCl, shared_ptr<Calls> &callsCl,
         vector<shared_ptr<ResultTuple>>& toReturn);
