@@ -45,7 +45,7 @@
     <ClInclude Include="..\source\PKB\PKBVariable.h" />
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
-    <ClInclude Include="..\source\PQL\PQLResult.h" />
+    <ClInclude Include="..\source\PQL\PQLResultTuple.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandler.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandlerAssignPattern.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.h" />
