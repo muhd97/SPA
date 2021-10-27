@@ -10,8 +10,7 @@
 #include "PQLLexer.h"
 #include <execution>
 #include <algorithm>
-#include "PQLClauseHandlerWhileAndIfPattern.h"
-#include "PQLClauseHandlerAssignPattern.h"
+#include "PQLClauseHandlerPattern.h"
 
 /* Initialize static variables for PQLProcessor.cpp */
 string Result::dummy = "BaseResult: getResultAsString()";
@@ -132,31 +131,6 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
     }
 
     return move(toReturn);
-}
-
-/* ======================== PATTERN CLAUSE ======================== */
-
-void PQLProcessor::handlePatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
-    vector<shared_ptr<ResultTuple>>& toReturn)
-{
-    //TODO: @kohyida1997. Do typechecking for different kinds of pattern clauses. If/assign/while have different pattern logic and syntax.
-
-    
-    const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
-
-    if (synonymType == DesignEntity::IF || synonymType == DesignEntity::WHILE) {
-        
-        vector<shared_ptr<ResultTuple>> answer = PQLClauseHandlerWhileAndIfPattern::handleWhileAndIfPatternClause(evaluator, selectCl, patternCl, synonymType);
-        toReturn.insert(toReturn.end(), answer.begin(), answer.end());
-        return;
-    }
-    else
-    {
-        bool retflag;
-        vector<shared_ptr<ResultTuple>> answer = PQLClauseHandlerAssignPattern::handleAssignPatternClause(evaluator, selectCl, patternCl, synonymType, retflag);
-        toReturn.insert(toReturn.end(), answer.begin(), answer.end());
-        if (retflag) return;
-    }
 }
 
 
@@ -3193,7 +3167,7 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
 {
     const auto type = evalCl->getEvalClType();
     if (type == EvalClType::Pattern) {
-        handlePatternClause(selectCl, static_pointer_cast<PatternCl>(evalCl), toPopulate);
+        PQLClauseHandlerPattern::handlePatternClause(evaluator, selectCl, static_pointer_cast<PatternCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::SuchThat) {
         handleSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
