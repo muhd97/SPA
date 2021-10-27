@@ -1,9 +1,5 @@
 #pragma once
 
-//#include <string>
-//#include <vector>
-//#include "PQLProcessorUtils.h"
-
 #include "PQLResultTuple.h"
 #include "..\PKB\PKBPQLEvaluator.h"
 #include "PQLParser.h"
