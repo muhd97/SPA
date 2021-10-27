@@ -8,9 +8,9 @@ using namespace std;
 //	validateArguments();
 //}
 
-vector<shared_ptr<ResultTuple>> PQLClauseHandlerAssignPattern::handleAssignPatternClause(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType, bool& retflag)
+void PQLClauseHandlerAssignPattern::handleAssignPatternClause(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType, bool& retflag, vector<shared_ptr<ResultTuple>>& toReturn1)
 {
-    vector<shared_ptr<ResultTuple>> toReturn1;
+ 
     retflag = true;
 
     if (synonymType != DesignEntity::ASSIGN) {
@@ -74,5 +74,5 @@ vector<shared_ptr<ResultTuple>> PQLClauseHandlerAssignPattern::handleAssignPatte
         toReturn1.emplace_back(move(tupleToAdd));
     }
     retflag = false;
-    return toReturn1;
+    return ;
 }

@@ -22,6 +22,7 @@
     <ClCompile Include="..\source\PKB\Statement.cpp" />
     <ClCompile Include="..\source\PKB\PKBVariable.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLClauseHandlerPattern.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandlerAssignPattern.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandlerWith.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="..\source\SimpleParser.h" />
     <ClInclude Include="..\source\PQL\PQLResultTuple.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLClauseHandlerPattern.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandlerAssignPattern.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandlerWith.h" />

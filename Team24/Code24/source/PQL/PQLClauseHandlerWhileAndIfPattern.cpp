@@ -9,8 +9,8 @@ using namespace std;
 //}
     
 
-vector<shared_ptr<ResultTuple>> PQLClauseHandlerWhileAndIfPattern::handleWhileAndIfPatternClause(shared_ptr<PKBPQLEvaluator> evaluator1, const shared_ptr<SelectCl>& selectCl1, const shared_ptr<PatternCl>& patternCl1, const string& DesignEntityType1) {
-    vector<shared_ptr<ResultTuple>> toReturn1;
+void PQLClauseHandlerWhileAndIfPattern::handleWhileAndIfPatternClause(shared_ptr<PKBPQLEvaluator> evaluator1, const shared_ptr<SelectCl>& selectCl1, const shared_ptr<PatternCl>& patternCl1, const string& DesignEntityType1, vector<shared_ptr<ResultTuple>>& toReturn1) {
+    
     
     const shared_ptr<EntRef>& entRef1 = patternCl1->entRef;
     const auto& entRefType1 = entRef1->getEntRefType();
@@ -63,6 +63,6 @@ vector<shared_ptr<ResultTuple>> PQLClauseHandlerWhileAndIfPattern::handleWhileAn
             }
         }
     }
-    return toReturn1;
+    return ;
 
 }
