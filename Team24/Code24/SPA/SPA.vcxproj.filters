@@ -36,6 +36,7 @@
     <ClInclude Include="..\source\SimpleParser.h" />
     <ClInclude Include="..\source\PQL\PQLProcessor.h" />
     <ClInclude Include="..\source\PQL\PQLProcessorUtils.h" />
+    <ClInclude Include="..\source\PQL\PQLResult.h" />
     <ClInclude Include="..\source\PKB\PKBStmt.h" />
     <ClInclude Include="..\source\PKB\PKBProcedure.h" />
     <ClInclude Include="..\source\PQL\PQLOptimizer.h" />
