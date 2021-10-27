@@ -19,16 +19,16 @@
 
 using namespace std;
 
-class PQLEvaluator
+class PKBPQLEvaluator
 {
   public:
-    using SharedPtr = std::shared_ptr<PQLEvaluator>;
+    using SharedPtr = std::shared_ptr<PKBPQLEvaluator>;
 
     PKB::SharedPtr mpPKB;
 
     static SharedPtr create(PKB::SharedPtr pPKB)
     {
-        return SharedPtr(new PQLEvaluator(pPKB));
+        return SharedPtr(new PKBPQLEvaluator(pPKB));
     }
 
     // In following documentation: PKBDE is short for PKBDesignEntity
@@ -505,7 +505,7 @@ class PQLEvaluator
     const unordered_set<string> &getAllConstants();
 
   protected:
-    PQLEvaluator(PKB::SharedPtr pPKB)
+    PKBPQLEvaluator(PKB::SharedPtr pPKB)
     {
         mpPKB = pPKB;
     }

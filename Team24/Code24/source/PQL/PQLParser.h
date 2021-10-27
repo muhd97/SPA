@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "PQLLexer.h"
-#include "SimpleAST.h"
-#include "SimpleLexer.h"
-#include "SimpleParser.h"
+#include "..\SimpleAST.h"
+#include "..\SimpleLexer.h"
+#include "..\SimpleParser.h"
 
 const bool DESTRUCTOR_MESSAGE_ENABLED = false;
 
@@ -1205,7 +1205,29 @@ public:
     }
 };
 
-class SuchThatCl
+enum class EvalClType {
+    Pattern,
+    SuchThat,
+    With
+};
+
+/* Generic class representing a clause to be evaluated */
+class EvalCl {
+public:
+
+    virtual ~EvalCl() {
+
+    }
+
+    inline virtual const vector<string>& getAllSynonymsAsString() = 0;
+    
+    inline virtual EvalClType getEvalClType() = 0;
+
+    inline virtual string format() = 0;
+
+};
+
+class SuchThatCl : public EvalCl
 {
 private:
     vector<string> synonymsUsed;
@@ -1224,6 +1246,10 @@ public:
         {
             cout << "Deleted: " << format() << endl;
         }
+    }
+
+    inline EvalClType getEvalClType() {
+        return EvalClType::SuchThat;
     }
 
     inline string format()
@@ -1338,7 +1364,7 @@ public:
     }
 };
 
-class PatternCl
+class PatternCl : public EvalCl
 {
 private:
     vector<string> synonymsUsed;
@@ -1358,6 +1384,10 @@ public:
             synonymsUsed.emplace_back(this->entRef->getStringVal());
         }
 
+    }
+
+    inline EvalClType getEvalClType() {
+        return EvalClType::Pattern;
     }
 
     ~PatternCl()
@@ -1385,7 +1415,8 @@ public:
     }
 };
 
-class WithCl
+
+class WithCl : public EvalCl
 {
 private:
     vector<string> synonymsUsed;
@@ -1408,6 +1439,10 @@ public:
         if (rhs->getRefType() == RefType::ATTR) {
             synonymsUsed.emplace_back(rhs->getAttrRef()->getSynonymString());
         }
+    }
+
+    inline EvalClType getEvalClType() {
+        return EvalClType::With;
     }
 
     ~WithCl()
@@ -1465,13 +1500,15 @@ public:
                  */
                 if (synonymToParentDeclarationMap.find(syn->getValue()) != synonymToParentDeclarationMap.end())
                 {
-                    throw std::invalid_argument("Error: Duplicate synonym detected in query!");
+                    throw std::exception("Error: Duplicate synonym detected in query!");
                 }
 
                 synonymToParentDeclarationMap[syn->getValue()] = d;
             }
         }
     }
+
+
 
     shared_ptr<Declaration>& getParentDeclarationForSynonym(const string& s)
     {
@@ -1612,10 +1649,13 @@ public:
 
         return flag;
     }
+    
 
     inline const shared_ptr<ResultCl>& getTarget() {
         return target;
     }
+
+
 };
 
 class PQLParser
@@ -1662,7 +1702,6 @@ public:
     shared_ptr<WithCl> parseAttrCompare();
     shared_ptr<ExpressionSpec> parseExpressionSpec();
     shared_ptr<SelectCl> parseSelectCl();
-
     shared_ptr<ResultCl> parseResultCl();
     shared_ptr<Element> parseElement();
     shared_ptr<AttrName> parseAttrName();

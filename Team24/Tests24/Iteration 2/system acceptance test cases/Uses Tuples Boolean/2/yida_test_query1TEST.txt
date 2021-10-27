@@ -1,5 +1,10 @@
-1 - Cartesian Product Parallel Test //such that Uses(a3,v3) such that Uses(a4,v4) such that Uses(a5,v5) such that Uses(a6,v6)
+1 - Cartesian Product Parallel Test //such that Uses(a3,v3) such that Uses(a4,v4) such that Uses(a5,v5) such that Uses(a6,v6) (WE dont need ANY cartesian products)
 assign a1,a2,a3,a4,a5,a6,a7,a8,a9,a10; variable v1,v2,v3,v4,v5,v6,v7,v8,v9,v10;
 Select BOOLEAN such that Uses(a1, v1) such that Uses(a2,v2) such that Uses(a3,v3) such that Uses(a4,v4) such that Uses(a5,v5) such that Uses(a6,v6)
 TRUE
+5000
+20 - == WARNING SLOW QUERY == Select <constant, print, proc> such that Uses(a, v) - TUPLE SYNONYMS NOT IN SUCH THAT CLAUSE.
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc; assign a2,a3,a4; variable v2,v3,v4; procedure proc1; procedure c1,c2; variable v5, v6; stmt ss1,ss2,ss3,ss4,ss5; variable vv;
+Select <kc, p, proc> such that Uses(a1, v1) and Uses(a2, v1) and Uses(a1, v2) and Uses(a2, v2) such that Follows(a1, a4) and Uses(proc1, v1) such that Follows(a3, a4) and Uses(a3, v4) and Uses(proc1, v2) and Uses(ss1, v1) and Uses(ss2, v2) and Uses(ss1, v5) and Uses(ss1, v6) and Follows*(ss2, ss4) and Follows*(ss3, ss4)  and Follows*(ss2, ss3) and Uses(ss3, v) and Uses(ss5, v) and Uses(s, v) and Uses(s, vv)
+1 5 yida1,1 5 yida2,1 5 yida3,1 5 yida4,1 9 yida1,1 9 yida2,1 9 yida3,1 9 yida4,2 5 yida1,2 5 yida2,2 5 yida3,2 5 yida4,2 9 yida1,2 9 yida2,2 9 yida3,2 9 yida4,3 5 yida1,3 5 yida2,3 5 yida3,3 5 yida4,3 9 yida1,3 9 yida2,3 9 yida3,3 9 yida4,4 5 yida1,4 5 yida2,4 5 yida3,4 5 yida4,4 9 yida1,4 9 yida2,4 9 yida3,4 9 yida4
 5000

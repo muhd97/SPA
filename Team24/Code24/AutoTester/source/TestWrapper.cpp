@@ -1,5 +1,6 @@
 #pragma optimize( "gty", on )
 
+#define PRINT_PARSED_PROGRAM 0
 #define DEBUG 0
 #define PRINT_FINISHED_HEADER 0
 #define PRINT_EXCEPTION_STATEMENTS 0
@@ -9,12 +10,11 @@
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 
 #include "PKB.h"
-#include "PQLLexer.h"
 #include "PQLParser.h"
-#include "PQLProcessor.h"
+#include "../PQL/PQLLexer.h"
+#include "../PQL/PQLProcessor.h"
 #include "CFG.h"
 #include <memory>
-//#include <omp.h>
 
 
 using namespace std;
@@ -55,7 +55,7 @@ void TestWrapper::parse(std::string filename) {
 #endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
        
-#if DEBUG
+#if PRINT_PARSED_PROGRAM
         cout << root->format();
         cout << "\n==== Building PKB ====\n";
 #endif
@@ -64,7 +64,7 @@ void TestWrapper::parse(std::string filename) {
         this->pkb->initializeCFG(root);
         this->pkb->initializeRelationshipTables();
         this->pkb->initializeWithTables();
-        this->evaluator = PQLEvaluator::create(this->pkb);
+        this->evaluator = PKBPQLEvaluator::create(this->pkb);
 
 #if DEBUG
         cout << "\n==== PKB has been populated. ====\n";
@@ -110,12 +110,6 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
         }
     }
 
-#if PRINT_EXCEPTION_STATEMENTS
-    catch (const string & e) {
-        cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
-        cout << "Error message: " << e << endl;
-    }
-#endif
 #if PRINT_EXCEPTION_STATEMENTS
     catch (const exception& ex) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";

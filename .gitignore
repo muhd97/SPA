@@ -530,5 +530,6 @@ FodyWeavers.xsd
 # End of https://www.toptal.com/developers/gitignore/api/c++,windows,visualstudio,qt,qtcreator
 
 # AutoTester
+*.xml
 output.xml
 /Team24/Tests24/Outputs/*.xml

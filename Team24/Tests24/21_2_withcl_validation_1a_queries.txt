@@ -1,12 +1,12 @@
 1 - POSITIVE CASE (Same ref type)
 stmt s;
 Select s with s.stmt# = 5
-1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+5
 500
 2 - POSITIVE CASE (Same ref type) with multiple ands
 stmt s;
 Select s with s.stmt# = 5 and s.stmt# = 12 and 3=3 
-1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+
 500
 3 - Empty output with one of the ands being false
 stmt s;
