@@ -1516,14 +1516,8 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl>& selectCl, s
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSynonym));
 
         for (auto& i : evaluator->getChildren(rightArgType, leftArgInteger))
-        {
-            /* Create the result tuple */
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(rightSynonym, to_string(i));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {rightSynonym, to_string(i)} }));
+        
     }
 
     /* Parent(1, _) Special case. No Synonym, left side is Integer. */
@@ -1534,13 +1528,8 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl>& selectCl, s
         if (evaluator->mpPKB->getStatement(leftArgInteger, stmt))
         {
             if (evaluator->getChildren(PKBDesignEntity::AllStatements, stmt->getIndex()).size() > 0u)
-            {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                /* Map the value returned to this particular synonym. */
-                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger));
-                /* Add this tuple into the vector to tuples to return. */
-                toReturn.emplace_back(move(tupleToAdd));
-            }
+                toReturn.emplace_back(getResultTuple({ {ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger)} }));
+            
         }
     }
 
@@ -1553,17 +1542,10 @@ void PQLProcessor::handleParentFirstArgInteger(shared_ptr<SelectCl>& selectCl, s
 
         if (evaluator->mpPKB->getStatement(leftArgInteger, stmt))
         {
-            set<int>& childrenIds = evaluator->getChildren(PKBDesignEntity::AllStatements, stmt->getIndex());
+            const set<int>& childrenIds = evaluator->getChildren(PKBDesignEntity::AllStatements, stmt->getIndex());
 
             if (childrenIds.size() > 0u && (childrenIds.find(rightArgInteger) != childrenIds.end()))
-            {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                /* Map the value returned to this particular synonym. */
-                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger));
-                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(rightArgInteger));
-                /* Add this tuple into the vector to tuples to return. */
-                toReturn.emplace_back(move(tupleToAdd));
-            }
+                toReturn.emplace_back(getResultTuple({ {ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger)} }));
         }
     }
 }
@@ -1601,12 +1583,12 @@ void PQLProcessor::handleParentFirstArgSyn(shared_ptr<SelectCl>& selectCl, share
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym,
             { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE }))
         {
-            /*cout << "TODO: Handle error case. Parent(syn, s), but s is declared "
+            throw "TODO: Handle error case. Parent(syn, s), but s is declared "
                 "as "
                 "Procedure, Constant or Variable. These DesignEntity types "
                 "have no "
-                "parents.\n";*/
-            return;
+                "parents.\n";
+            
         }
 
         /* Parent(syn, syn) -> BOTH Synonyms are the same! Parents is not
@@ -1621,49 +1603,22 @@ void PQLProcessor::handleParentFirstArgSyn(shared_ptr<SelectCl>& selectCl, share
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSynonym));
 
         for (auto& p : evaluator->getChildren(leftArgType, rightArgType))
-        {
-            /* Create the result tuple */
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-
-            tupleToAdd->insertKeyValuePair(leftSynonym, to_string(p.first));
-            tupleToAdd->insertKeyValuePair(rightSynonym, to_string(p.second));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(p.first)}, {rightSynonym, to_string(p.second)} }));
+        
     }
 
     /* Parent(syn, _) Special case. No Synonym, left side is Integer. */
-    if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
-    {
-        PKBStmt::SharedPtr stmt = nullptr;
-
-        for (const int& x : evaluator->getParentsSynUnderscore(leftArgType))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(leftSynonym, to_string(x));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
-    }
-
     /* Parent(syn, 2) Special Case. No Synonym, both args are Integer. */
-    if (rightArg->getStmtRefType() == StmtRefType::INTEGER)
-    {
-        PKBStmt::SharedPtr stmt = nullptr;
+    else if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE || rightArg->getStmtRefType() == StmtRefType::INTEGER) {
 
-        int rightArgInteger = rightArg->getIntVal();
+        const auto& lookUpTable = rightArg->getStmtRefType() == StmtRefType::UNDERSCORE
+            ? evaluator->getParentsSynUnderscore(leftArgType)
+            : evaluator->getParents(leftArgType, rightArg->getIntVal());
 
-        for (const int& x : evaluator->getParents(leftArgType, rightArgInteger))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(leftSynonym, to_string(x));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+        for (const int& x : lookUpTable)
+            toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(x)} }));
     }
+
 }
 
 void PQLProcessor::handleParentFirstArgUnderscore(shared_ptr<SelectCl>& selectCl, shared_ptr<Parent>& parentCl,
@@ -1680,14 +1635,7 @@ void PQLProcessor::handleParentFirstArgUnderscore(shared_ptr<SelectCl>& selectCl
         const int& rightArgInteger = rightArg->getIntVal();
 
         if (!evaluator->getParents(PKBDesignEntity::AllStatements, rightArgInteger).empty())
-        {
-            /* Create the result tuple */
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(rightArgInteger));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {ResultTuple::INTEGER_PLACEHOLDER, to_string(rightArgInteger)} }));
     }
 
     /* Parent(_, Syn) */
@@ -1701,33 +1649,18 @@ void PQLProcessor::handleParentFirstArgUnderscore(shared_ptr<SelectCl>& selectCl
         /* Validate. Parent(_, syn) where syn MUST not be a Constant */
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym,
             { DesignEntity::CONSTANT, DesignEntity::VARIABLE, DesignEntity::PROCEDURE }))
-        {
-            cout << "Special case. Parent(_, syn), but syn is a Constant, Var or "
-                "Procedure. These types of entites have no parents.\n";
-            return;
-        }
+            throw "Special case. Parent(_, syn), but syn is a Constant, Var or "
+                "Procedure. These types of entites have no parents.\n";            
 
         for (const int& x : evaluator->getChildrenUnderscoreSyn(rightArgType))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(rightSynonym, to_string(x));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {rightSynonym, to_string(x)} }));
     }
 
     /* Parent(_, _) */
     if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
     {
         if (evaluator->getParentsUnderscoreUnderscore())
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER} }));
     }
 }
 
@@ -1751,65 +1684,29 @@ void PQLProcessor::handleParentTFirstArgInteger(shared_ptr<SelectCl>& selectCl, 
 
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym,
             { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE }))
-        {
             throw "TODO: Handle error case. Parent(INTEGER, syn), but syn is "
                 "declared as Procedure, Constant or Variable. These "
                 "DesignEntity "
                 "types have no parents.\n";
-            return;
-        }
 
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSynonym));
 
         for (auto& i : evaluator->getParentTIntSyn(leftArgInteger, rightArgType))
-        {
-            /* Create the result tuple */
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(rightSynonym, to_string(i));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {rightSynonym, to_string(i)} }));
     }
 
     /* ParentT(1, _) Special case. No Synonym, left side is Integer. */
-    if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
-    {
-        PKBStmt::SharedPtr stmt = nullptr;
-
-        if (evaluator->mpPKB->getStatement(leftArgInteger, stmt))
-        {
-            if (evaluator->getParentTIntUnderscore(leftArgInteger))
-            {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                /* Map the value returned to this particular synonym. */
-                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger));
-                /* Add this tuple into the vector to tuples to return. */
-                toReturn.emplace_back(move(tupleToAdd));
-            }
-        }
-    }
-
     /* ParentT(1, 2) Special Case. No Synonym, both args are Integer. */
-    if (rightArg->getStmtRefType() == StmtRefType::INTEGER)
-    {
+    else {
+        function<bool(void)> cond;
+        if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
+            cond = [&leftArgInteger, this]() {return this->evaluator->getParentTIntUnderscore(leftArgInteger); };
+        else 
+            cond = [&leftArgInteger, this, &rightArg]() {return evaluator->getParentTIntInt(leftArgInteger, rightArg->getIntVal()); };
         PKBStmt::SharedPtr stmt = nullptr;
-
-        int rightArgInteger = rightArg->getIntVal();
-
-        if (evaluator->mpPKB->getStatement(leftArgInteger, stmt))
-        {
-            if (evaluator->getParentTIntInt(leftArgInteger, rightArgInteger))
-            {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                /* Map the value returned to this particular synonym. */
-                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger));
-                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(rightArgInteger));
-                /* Add this tuple into the vector to tuples to return. */
-                toReturn.emplace_back(move(tupleToAdd));
-            }
-        }
+        if (evaluator->mpPKB->getStatement(leftArgInteger, stmt) && cond())
+            toReturn.emplace_back(getResultTuple({ {ResultTuple::INTEGER_PLACEHOLDER, to_string(leftArgInteger)} }));
     }
 }
 
@@ -1828,9 +1725,9 @@ void PQLProcessor::handleParentTFirstArgSyn(shared_ptr<SelectCl>& selectCl, shar
     if (!givenSynonymMatchesMultipleTypes(selectCl, leftSynonym,
         { DesignEntity::IF, DesignEntity::WHILE, DesignEntity::STMT, DesignEntity::PROG_LINE }))
     {
-        cout << "Special case. Parent(syn, ?), but syn is not a container type, "
+        throw "Special case. Parent(syn, ?), but syn is not a container type, "
             "thus it must have no children.\n";
-        return;
+        
     }
 
     PKBDesignEntity leftArgType =
@@ -1847,69 +1744,35 @@ void PQLProcessor::handleParentTFirstArgSyn(shared_ptr<SelectCl>& selectCl, shar
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonym,
             { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE }))
         {
-            //cout <<  "TODO: Handle error case. ParentT(syn, s), but s is declared "
-            //    "as "
-            //    "Procedure, Constant or Variable. These DesignEntity types "
-            //    "don't "
-            //    "have parents.\n";
-            return;
+            throw "TODO: Handle error case. ParentT(syn, s), but s is declared "
+                "as "
+                "Procedure, Constant or Variable. These DesignEntity types "
+                "don't "
+                "have parents.\n";
         }
 
         /* Parent(syn, syn) -> BOTH Synonyms are the same! Parents is not
          * reflexive.
          */
-        if (leftSynonym == rightSynonym)
-        {
-            return;
-        }
+        if (leftSynonym == rightSynonym) return;
 
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSynonym));
 
         for (auto& p : evaluator->getParentTSynSyn(leftArgType, rightArgType))
-        {
-            /* Create the result tuple */
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-
-            tupleToAdd->insertKeyValuePair(leftSynonym, to_string(p.first));
-            tupleToAdd->insertKeyValuePair(rightSynonym, to_string(p.second));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(p.first)}, {rightSynonym, to_string(p.second)} }));
     }
 
     /* ParentT(syn, _) */
-    if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
-    {
-        PKBStmt::SharedPtr stmt = nullptr;
-
-        for (const int& x : evaluator->getParentTSynUnderscore(leftArgType))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(leftSynonym, to_string(x));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+    /* ParentT(syn, 2) */
+    else {
+        const auto& lookUpTable = rightArg->getStmtRefType() == StmtRefType::UNDERSCORE
+            ? evaluator->getParentTSynUnderscore(leftArgType)
+            : evaluator->getParentTSynInt(leftArgType, rightArg->getIntVal());
+        for (const int& x : lookUpTable)
+            toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(x)} }));
     }
 
-    /* ParentT(syn, 2) Special Case. No Synonym, both args are Integer. */
-    if (rightArg->getStmtRefType() == StmtRefType::INTEGER)
-    {
-        int rightArgInteger = rightArg->getIntVal();
-
-        if (!evaluator->statementExists(rightArgInteger)) return;
-
-        for (const int& x : evaluator->getParentTSynInt(leftArgType, rightArgInteger))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(leftSynonym, to_string(x));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
-    }
 }
 
 void PQLProcessor::handleParentTFirstArgUnderscore(shared_ptr<SelectCl>& selectCl, shared_ptr<ParentT>& parentCl,
@@ -1917,30 +1780,13 @@ void PQLProcessor::handleParentTFirstArgUnderscore(shared_ptr<SelectCl>& selectC
 {
     shared_ptr<StmtRef>& leftArg = parentCl->stmtRef1;
     shared_ptr<StmtRef>& rightArg = parentCl->stmtRef2;
-
+    const auto& rightStmtRefType = rightArg->getStmtRefType();
     assert(leftArg->getStmtRefType() == StmtRefType::UNDERSCORE);
 
-    /* ParentT(_, Integer) */
-    if (rightArg->getStmtRefType() == StmtRefType::INTEGER)
-    {
-        const int& rightArgInteger = rightArg->getIntVal();
-
-        if (evaluator->getParentTUnderscoreInt(rightArgInteger))
-        {
-            /* Create the result tuple */
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(rightArgInteger));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
-    }
-
     /* ParentT(_, Syn) */
-    if (rightArg->getStmtRefType() == StmtRefType::SYNONYM)
+    if (rightStmtRefType == StmtRefType::SYNONYM)
     {
         const string& rightSynonym = rightArg->getStringVal();
-
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSynonym));
 
@@ -1954,26 +1800,19 @@ void PQLProcessor::handleParentTFirstArgUnderscore(shared_ptr<SelectCl>& selectC
         }
 
         for (const int& x : evaluator->getParentTUnderscoreSyn(rightArgType))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(rightSynonym, to_string(x));
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {rightSynonym, to_string(x)} }));
     }
 
+    /* ParentT(_, Integer) */
     /* ParentT(_, _) */
-    if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
-    {
-        if (evaluator->getParentTUnderscoreUnderscore())
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+    else if (rightStmtRefType == StmtRefType::UNDERSCORE || rightStmtRefType == StmtRefType::INTEGER) {
+        function<bool(void)> cond;
+        if (rightStmtRefType == StmtRefType::UNDERSCORE)
+            cond = [this]() {return this->evaluator->getParentTUnderscoreUnderscore(); };
+        else 
+            cond = [this, &rightArg]() {return this->evaluator->getParentTUnderscoreInt(rightArg->getIntVal()); };
+        if (cond())
+            toReturn.emplace_back(getResultTuple({ {ResultTuple::UNDERSCORE_PLACEHOLDER, ""} }));
     }
 }
 
@@ -1990,26 +1829,27 @@ void PQLProcessor::handleFollowsTFirstArgSyn(shared_ptr<SelectCl>& selectCl, sha
 
     assert(leftArg->getStmtRefType() == StmtRefType::SYNONYM);
 
+    shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[leftSynonymKey];
+    PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
+    const auto& rightStmtRefType = rightArg->getStmtRefType();
+
     /* Check if leftArg is a valid STATEMENT, not Procedure/Constant/Variable */
     if (givenSynonymMatchesMultipleTypes(selectCl, leftSynonymKey,
         { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE }))
     {
         throw "Follows*(s1, ?) but s1 is not declared a type of statement. "
             "Follows*() is only defined for statements\n";
-        return;
     }
 
     /* FollowsT (s1, s2) */
-    if (rightArg->getStmtRefType() == StmtRefType::SYNONYM)
+    if (rightStmtRefType == StmtRefType::SYNONYM)
     {
         const string& rightSynonymKey = rightArg->getStringVal();
-
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonymKey,
             { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE }))
         {
             throw "Follows*(s1, s2) but s2 is not declared a type of statement. "
                 "Follows*() is only defined for statements\n";
-            return;
         }
 
         if (leftSynonymKey == rightSynonymKey)
@@ -2017,59 +1857,21 @@ void PQLProcessor::handleFollowsTFirstArgSyn(shared_ptr<SelectCl>& selectCl, sha
             /* Follows(s1, s1) and FollowsT(s1, s1) cannot be true. */
             return;
         }
-
-        shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[leftSynonymKey];
-        PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
-
         shared_ptr<Declaration>& parentDecl2 = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
         PKBDesignEntity pkbDe2 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl2->getDesignEntity());
 
         for (auto& p : evaluator->getFollowsTSynSyn(pkbDe1, pkbDe2))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(p.first));
-            tupleToAdd->insertKeyValuePair(rightSynonymKey, to_string(p.second));
-
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {leftSynonymKey, to_string(p.first)}, {rightSynonymKey, to_string(p.second)} }));
     }
 
     /* FollowsT (s1, _) */
-    if (rightArg->getStmtRefType() == StmtRefType::UNDERSCORE)
-    {
-        shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[leftSynonymKey];
-        PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
-
-        for (auto& s : evaluator->getFollowsTSynUnderscore(pkbDe1))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s));
-
-            toReturn.emplace_back(move(tupleToAdd));
-        }
-    }
-
     /* FollowsT (s1, INTEGER) */
-    if (rightArg->getStmtRefType() == StmtRefType::INTEGER)
-    {
-        int rightArgInteger = rightArg->getIntVal();
-        if (!evaluator->statementExists(rightArgInteger)) return;
-
-        shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[leftSynonymKey];
-        PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
-
-        for (auto& s : evaluator->getFollowsTSynInteger(pkbDe1, rightArgInteger))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s));
-
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+    else if (rightStmtRefType == StmtRefType::UNDERSCORE || rightStmtRefType == StmtRefType::INTEGER) {
+        const auto& lookUpTable = rightStmtRefType == StmtRefType::UNDERSCORE
+            ? evaluator->getFollowsTSynUnderscore(pkbDe1)
+            : evaluator->getFollowsTSynInteger(pkbDe1, rightArg->getIntVal());
+        for (auto& s : lookUpTable)
+            toReturn.emplace_back(getResultTuple({ {leftSynonymKey, to_string(s)} }));
     }
 }
 
@@ -2100,40 +1902,20 @@ void PQLProcessor::handleFollowsTFirstArgInteger(shared_ptr<SelectCl>& selectCl,
         shared_ptr<Declaration>& decl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
         PKBDesignEntity pkbde = resolvePQLDesignEntityToPKBDesignEntity(decl->getDesignEntity());
         for (auto& s : evaluator->getFollowsTIntegerSyn(pkbde, stmtRef1->getIntVal()))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(rightSynonymKey, to_string(s));
-
-            /* Add this tuple into the vector to tuples to return. */
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {rightSynonymKey, to_string(s)} }));
     }
 
     // check if follows(int, _) is true
-    else if (rightType == StmtRefType::UNDERSCORE)
-    {
-        /* Create the result tuple */
-        if (evaluator->getFollowsTIntegerUnderscore(stmtRef1->getIntVal()))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
-            toReturn.emplace_back(tupleToAdd);
-        }
-    }
-
     // check if follows(int, int) is true
-    else if (rightType == StmtRefType::INTEGER)
+    else if (rightType == StmtRefType::UNDERSCORE || rightType == StmtRefType::INTEGER)
     {
-        int s1 = stmtRef1->getIntVal();
-        int s2 = stmtRef2->getIntVal();
-        if (evaluator->getFollowsTIntegerInteger(s1, s2))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
-            toReturn.emplace_back(tupleToAdd);
-        }
+        function<bool(void)> cond;
+        if (rightType == StmtRefType::UNDERSCORE)
+            cond = [this, &stmtRef1]() {return evaluator->getFollowsTIntegerUnderscore(stmtRef1->getIntVal()); };
+        else
+            cond = [this, &stmtRef1, &stmtRef2]() {return evaluator->getFollowsTIntegerInteger(stmtRef1->getIntVal(), stmtRef2->getIntVal()); };
+        if (cond())
+            toReturn.emplace_back(getResultTuple({ {ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER} }));
     }
 }
 
@@ -2150,51 +1932,31 @@ void PQLProcessor::handleFollowsTFirstArgUnderscore(shared_ptr<SelectCl>& select
     if (rightType == StmtRefType::INTEGER)
     {
         if (evaluator->getFollowsTUnderscoreInteger(stmtRef2->getIntVal()))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-            tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER} }));
     }
 
     if (rightType == StmtRefType::SYNONYM)
     {
         const string& rightSynonymKey = stmtRef2->getStringVal();
-
         if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonymKey,
             { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE }))
         {
             throw "Follows*(_, s2) but s2 is not declared a type of statement. "
                 "Follows*() is only defined for statements\n";
-            return;
         }
 
         shared_ptr<Declaration>& decl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
         PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(decl->getDesignEntity());
 
         for (auto& s : evaluator->getFollowsTUnderscoreSyn(pkbDe))
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(rightSynonymKey, to_string(s));
-
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {rightSynonymKey, to_string(s)} }));
     }
 
     if (rightType == StmtRefType::UNDERSCORE)
     {
         // is there similar methid getFollowsTUnderscoreUnderscore()
         if (evaluator->getFollowsUnderscoreUnderscore())
-        {
-            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-            /* Map the value returned to this particular synonym. */
-            tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
-
-            toReturn.emplace_back(move(tupleToAdd));
-        }
+            toReturn.emplace_back(getResultTuple({ {ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER} }));
     }
 }
 
@@ -2978,8 +2740,6 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
 
 /* PRE-CONDITION: At least ONE targetSynonym appears in the suchThat/pattern/with clauses*/
 void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl) {
-
-
     if (resultCl->isBooleanReturnType()) {
         if (!tuples.empty()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
         else toReturn.emplace_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
@@ -3018,7 +2778,7 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
         return;
     }
 
-    if (resultCl->isMultiTupleReturnType()) {
+    else if (resultCl->isMultiTupleReturnType()) {
 
         if (tuples.empty()) return;
 
@@ -3054,13 +2814,12 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
         }
 
 
-        for (auto tuple : tuples)
+        for (auto& tuple : tuples)
         {
             string temp;
             for (unsigned int i = 0; i < targetElems.size(); i++) {
                 const auto& curr = targetElems[i];
                 const string& targetSynonymVal = curr->getSynonymString();
-
                 const string& val = (curr->getElementType() == ElementType::AttrRef) 
                     ? resolveAttrRef(targetSynonymVal, static_pointer_cast<AttrRef>(curr), selectCl, tuple)
                     : tuple->get(targetSynonymVal);
@@ -3074,7 +2833,6 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
             }
         }
         return;
-
     }
 
 }
@@ -3249,14 +3007,10 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
 /* ======================== EXPOSED PUBLIC METHODS ======================== */
 
-/* YIDA: Can only handle queries that return statement numbers, procedure names
- * and variables for now. */
 vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& selectCl)
 {
     /* Pre-Validate PQLQuery first to catch simple errors like a synonym not
      * being declared first. */
-
-
     validateSelectCl(selectCl);
      
     /* Special case 0: There are no RelRef or Pattern clauses*/
@@ -3279,10 +3033,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     bool prevGroupHasSynonymsInResultCl = true;
 
     try {
-
         int groupSize = clauseGroups.size();
         for (int i = 0; i < groupSize; i++) {
-
             const auto& currGroup = clauseGroups[i];
             bool hasSynonymsInResultCl = currGroup->synonymsInsideResultCl;
 
@@ -3302,7 +3054,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
                     continue;
                 }
                 prevGroupHasSynonymsInResultCl = true;
-                //if (!hasSynonymsInResultCl && !isBooleanReturnType) currTups.clear();
             }
             else {
                 vector<shared_ptr<ResultTuple>> tempRes;
@@ -3322,13 +3073,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
                         /* Switch ownership, don't bother cartesian product */
                         currTups = move(tempRes);
                     }
-                    else {
-                        // just ignore the results
-                    }
                     continue;
                 }
-
-
                 /* Else we need to do cartesian product */
                 vector<shared_ptr<ResultTuple>> combinedRes;
                 if (prevGroupHasSynonymsInResultCl) cartesianProductResultTuples(currTups, tempRes, combinedRes);
@@ -3340,7 +3086,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         }
     }
     catch (...) {
-
         if (isBooleanReturnType) {
             res.push_back(make_shared<StringSingleResult>("FALSE"));
         }
