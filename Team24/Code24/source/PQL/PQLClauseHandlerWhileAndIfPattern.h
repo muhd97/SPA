@@ -10,5 +10,5 @@ using namespace std;
 class PQLClauseHandlerWhileAndIfPattern
 {
 public:
-    static vector<shared_ptr<ResultTuple>> handleWhileAndIfPatternClause(shared_ptr<PKBPQLEvaluator> evaluator1, const shared_ptr<SelectCl>& selectCl1, const shared_ptr<PatternCl>& patternCl1, const string& DesignEntityType1);
+    static void handleWhileAndIfPatternClause(shared_ptr<PKBPQLEvaluator> evaluator1, const shared_ptr<SelectCl>& selectCl1, const shared_ptr<PatternCl>& patternCl1, const string& DesignEntityType1, vector<shared_ptr<ResultTuple>>& toReturn1);
 };

@@ -10,5 +10,5 @@ using namespace std;
 class PQLClauseHandlerAssignPattern
 {
 public:
-    static vector<shared_ptr<ResultTuple>> handleAssignPatternClause(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType, bool& retflag);
+    static void handleAssignPatternClause(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType, bool& retflag, vector<shared_ptr<ResultTuple>>& toReturn);
 };
