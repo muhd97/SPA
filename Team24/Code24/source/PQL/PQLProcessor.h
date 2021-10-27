@@ -83,6 +83,8 @@ class PQLProcessor
     void handlePatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
                              vector<shared_ptr<ResultTuple>> &toReturn);
 
+    void handleAssignPatternClause(const std::string& synonymType, const std::shared_ptr<PatternCl>& patternCl, const std::shared_ptr<SelectCl>& selectCl, std::vector<std::shared_ptr<ResultTuple>>& toReturn, bool& retflag);
+
     void handleCalls(shared_ptr<SelectCl> &selectCl, shared_ptr<Calls> &callsCl,
         vector<shared_ptr<ResultTuple>>& toReturn);
 
