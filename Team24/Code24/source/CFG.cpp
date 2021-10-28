@@ -187,9 +187,7 @@ shared_ptr<CFG> buildCFG(shared_ptr<Program> root) {
 		shared_ptr<BasicBlock> end = buildStatementListCFG(proc->getStatementList(), start);
 		roots.insert({ proc->getName(),  start});
 	}
-	
-	shared_ptr<CFG> res = make_shared<CFG>(roots);
-	cout << res->format();
-	return res;
+
+	return make_shared<CFG>(roots);
 }
 
