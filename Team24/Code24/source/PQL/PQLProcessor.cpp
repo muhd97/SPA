@@ -784,6 +784,26 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         handleNextT(selectCl, nextTCl, toReturn);
         break;
     }
+    case RelRefType::AFFECTS: {
+        shared_ptr<Affects> affectsCl = static_pointer_cast<Affects>(suchThatCl->relRef);
+        handleAffects(selectCl, affectsCl, toReturn);
+        break;
+    }
+    case RelRefType::AFFECTS_T: {
+        shared_ptr<AffectsT> affectsTCl = static_pointer_cast<AffectsT>(suchThatCl->relRef);
+        handleAffectsT(selectCl, affectsTCl, toReturn);
+        break;
+    }
+    case RelRefType::AFFECTS_BIP: {
+        shared_ptr<AffectsBIP> affectsBIPCl = static_pointer_cast<AffectsBIP>(suchThatCl->relRef);
+        handleAffectsBIP(selectCl, affectsBIPCl, toReturn);
+        break;
+    }
+    case RelRefType::AFFECTS_T_BIP: {
+        shared_ptr<AffectsTBIP> affectsTBIPCl = static_pointer_cast<AffectsTBIP>(suchThatCl->relRef);
+        handleAffectsTBIP(selectCl, affectsTBIPCl, toReturn);
+        break;
+    }
     default: {
         throw "Unknown such that relationship: " + suchThatCl->relRef->format();
         break;
@@ -2066,6 +2086,22 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
             }
         }
 
+}
+
+void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Affects>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn)
+{
+}
+
+void PQLProcessor::handleAffectsT(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsT>& nextTCl, vector<shared_ptr<ResultTuple>>& toReturn)
+{
+}
+
+void PQLProcessor::handleAffectsBIP(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsBIP>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn)
+{
+}
+
+void PQLProcessor::handleAffectsTBIP(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsTBIP>& nextTCl, vector<shared_ptr<ResultTuple>>& toReturn)
+{
 }
 
 /* ======================== HELPER METHODS ======================== */
