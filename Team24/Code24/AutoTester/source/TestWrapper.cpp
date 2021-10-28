@@ -10,7 +10,7 @@
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 
 #include "PKB.h"
-#include "PQLParser.h"
+#include "../PQL/PQLParser.h"
 #include "../PQL/PQLLexer.h"
 #include "../PQL/PQLProcessor.h"
 #include "CFG.h"

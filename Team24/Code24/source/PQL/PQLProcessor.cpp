@@ -795,12 +795,12 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         break;
     }
     case RelRefType::AFFECTS_BIP: {
-        shared_ptr<AffectsBIP> affectsBIPCl = static_pointer_cast<AffectsBIP>(suchThatCl->relRef);
+        shared_ptr<AffectsBip> affectsBIPCl = static_pointer_cast<AffectsBip>(suchThatCl->relRef);
         handleAffectsBIP(selectCl, affectsBIPCl, toReturn);
         break;
     }
     case RelRefType::AFFECTS_T_BIP: {
-        shared_ptr<AffectsTBIP> affectsTBIPCl = static_pointer_cast<AffectsTBIP>(suchThatCl->relRef);
+        shared_ptr<AffectsBipT> affectsTBIPCl = static_pointer_cast<AffectsBipT>(suchThatCl->relRef);
         handleAffectsTBIP(selectCl, affectsTBIPCl, toReturn);
         break;
     }
@@ -2096,11 +2096,11 @@ void PQLProcessor::handleAffectsT(shared_ptr<SelectCl>& selectCl, shared_ptr<Aff
 {
 }
 
-void PQLProcessor::handleAffectsBIP(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsBIP>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLProcessor::handleAffectsBIP(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsBip>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
 }
 
-void PQLProcessor::handleAffectsTBIP(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsTBIP>& nextTCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLProcessor::handleAffectsTBIP(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsBipT>& nextTCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
 }
 

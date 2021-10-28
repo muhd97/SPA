@@ -80,9 +80,9 @@ class PQLProcessor
 
     void handleAffectsT(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsT>& nextTCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
-    void handleAffectsBIP(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsBIP>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn);
+    void handleAffectsBIP(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsBip>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
-    void handleAffectsTBIP(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsTBIP>& nextTCl, vector<shared_ptr<ResultTuple>>& toReturn);
+    void handleAffectsTBIP(shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsBipT>& nextTCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
     void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
         unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults);
