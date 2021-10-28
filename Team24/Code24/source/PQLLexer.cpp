@@ -117,6 +117,18 @@ vector<PQLToken> pqlLex(string &program)
                 i++;
                 tokens.emplace_back(PQLTokenType::NEXT_T);
             }
+            else if (value == SPECIAL_NEXT_BIP && curr == '*') {
+                i++;
+                tokens.emplace_back(PQLTokenType::NEXT_BIP_T);
+            }
+            else if (value == SPECIAL_AFFECTS && curr == '*') {
+                i++;
+                tokens.emplace_back(PQLTokenType::AFFECTS_T);
+            }
+            else if (value == SPECIAL_AFFECTS_BIP && curr == '*') {
+                i++;
+                tokens.emplace_back(PQLTokenType::AFFECTS_BIP_T);
+            }
             else {
                 tokens.emplace_back(std::move(value));
             }

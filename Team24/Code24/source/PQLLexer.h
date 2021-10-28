@@ -10,6 +10,9 @@ const string SPECIAL_PARENT = "Parent";
 const string SPECIAL_FOLLOWS = "Follows";
 const string SPECIAL_CALLS = "Calls";
 const string SPECIAL_NEXT = "Next";
+const string SPECIAL_AFFECTS = "Affects";
+const string SPECIAL_NEXT_BIP = "NextBip";
+const string SPECIAL_AFFECTS_BIP = "AffectsBip";
 const string SPECIAL_STMT = "stmt";
 
 enum class PQLTokenType
@@ -32,7 +35,10 @@ enum class PQLTokenType
     PARENT_T,
     FOLLOWS_T,
     NEXT_T,
+    NEXT_BIP_T,
     CALLS_T,
+    AFFECTS_T,
+    AFFECTS_BIP_T,
     STMT_NUMBER
 };
 
