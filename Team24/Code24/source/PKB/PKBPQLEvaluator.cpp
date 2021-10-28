@@ -2365,13 +2365,18 @@ map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures) {
 			//cout << "while : " << stmt->index << endl;
 
 			map<string, set<int>> lastModifiedTableCopy;
+			map<string, set<int>> lastModifiedTableCopy2 = lastModifiedTable;
 			vector<shared_ptr<BasicBlock>>& nextBlocks = basicBlock->getNext();
 			shared_ptr<BasicBlock>& nestedBlock = nextBlocks[0];
 			do {
 				//cout << "NOT THE SAME" << endl;
-				lastModifiedTableCopy = lastModifiedTable;
-				computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
-			} while ((lastModifiedTableCopy != lastModifiedTable));
+				for (const auto& [varName, intSet] : lastModifiedTableCopy2) {
+					set<int>& original = lastModifiedTable[varName];
+					original.insert(intSet.begin(), intSet.end());
+				}
+				lastModifiedTableCopy = lastModifiedTableCopy2;
+				computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTableCopy2, seenProcedures);
+			} while ((lastModifiedTableCopy != lastModifiedTableCopy2));
 			//cout << "ITS THE SAME" << endl;
 
 			PKBStmt::SharedPtr firstStmt;
