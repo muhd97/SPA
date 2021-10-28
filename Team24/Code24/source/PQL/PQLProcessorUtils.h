@@ -1,9 +1,21 @@
 #pragma optimize( "gty", on )
 #pragma once
 #include "PQLProcessor.h"
+#include <initializer_list>
 
 #include "PQLLexer.h"
 
+inline shared_ptr<ResultTuple> getResultTuple(const initializer_list<pair<string, string>>& args) {
+
+    shared_ptr<ResultTuple> res = make_shared<ResultTuple>();
+
+    for (const auto& p : args) {
+        res->insertKeyValuePair(p.first, p.second);
+    }
+
+    return move(res);
+
+}
 
 /* Method to check if the target synonym of the select clause is declared */
 inline bool targetSynonymNotDeclared(shared_ptr<SelectCl> selectCl)
@@ -137,7 +149,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(const string& s)
 }
 
 template <typename T, typename R>
-unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<T> cl1, shared_ptr<R> cl2)
+inline unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<T> cl1, shared_ptr<R> cl2)
 {
     unordered_set<string> toReturn;
     const vector<string>& suchThatSynonyms1 = cl1->getAllSynonymsAsString();
@@ -162,7 +174,7 @@ unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<T> cl1, shared_ptr<R> 
     return move(toReturn);
 }
 
-unordered_set<string> getSetOfSynonymsToJoinOn(const vector<shared_ptr<ResultTuple>>& leftRes, const vector<shared_ptr<ResultTuple>>& rightRes)
+inline unordered_set<string> getSetOfSynonymsToJoinOn(const vector<shared_ptr<ResultTuple>>& leftRes, const vector<shared_ptr<ResultTuple>>& rightRes)
 {
     unordered_set<string> toReturn;
 
@@ -273,7 +285,7 @@ inline bool allTargetSynonymsExistInTuple(const vector<shared_ptr<Element>>& syn
 }
 
 /* A synonym that is independent is one that is inside the TargetSynonym set, but does not appear in any SuchThat, With or Pattern clauses. */
-unordered_set<shared_ptr<Element>> getSetOfIndependentSynonymsInTargetSynonyms(const shared_ptr<SelectCl>& selectCl) {
+inline unordered_set<shared_ptr<Element>> getSetOfIndependentSynonymsInTargetSynonyms(const shared_ptr<SelectCl>& selectCl) {
     const auto& temp = selectCl->getTarget()->getElements();
     unordered_set<string> allowedSynonyms;
     unordered_set<shared_ptr<Element>> independentElements;
@@ -300,6 +312,7 @@ unordered_set<shared_ptr<Element>> getSetOfIndependentSynonymsInTargetSynonyms(c
         }
     }
 
+
     for (const auto& ptr : temp) {
         if (stringIsInsideSet(allowedSynonyms, ptr->getSynonymString())) independentElements.insert(ptr);
     }
@@ -308,7 +321,7 @@ unordered_set<shared_ptr<Element>> getSetOfIndependentSynonymsInTargetSynonyms(c
 
 }
 
-bool dependentElementsAllExistInTupleKeys(const vector<shared_ptr<ResultTuple>>& tuples, const unordered_set<shared_ptr<Element>>& independentElements, const vector<shared_ptr<Element>>& allTargetElements) {
+inline bool dependentElementsAllExistInTupleKeys(const vector<shared_ptr<ResultTuple>>& tuples, const unordered_set<shared_ptr<Element>>& independentElements, const vector<shared_ptr<Element>>& allTargetElements) {
     const auto& sampleTuple = tuples[0];
     
     for (const auto& ptr : allTargetElements) {

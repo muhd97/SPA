@@ -19,16 +19,16 @@
 
 using namespace std;
 
-class PQLEvaluator
+class PKBPQLEvaluator
 {
   public:
-    using SharedPtr = std::shared_ptr<PQLEvaluator>;
+    using SharedPtr = std::shared_ptr<PKBPQLEvaluator>;
 
     PKB::SharedPtr mpPKB;
 
     static SharedPtr create(PKB::SharedPtr pPKB)
     {
-        return SharedPtr(new PQLEvaluator(pPKB));
+        return SharedPtr(new PKBPQLEvaluator(pPKB));
     }
 
     // In following documentation: PKBDE is short for PKBDesignEntity
@@ -376,7 +376,7 @@ class PQLEvaluator
     bool getCallsStringString(const string &caller, const string &called);
 
     /* Use for Calls(proc, syn) */
-    unordered_set<string> getCallsStringSyn(const string &caller);
+    const  set<pair<string, string>>& getCallsStringSyn(const string &caller);
 
     /* Use for Calls(proc, _) */
     bool getCallsStringUnderscore(const string &caller);
@@ -483,6 +483,10 @@ class PQLEvaluator
     // Case 9: NextT(int, syn)
     unordered_set<int> getNextTIntSyn(int fromIndex, PKBDesignEntity to);
 
+    // Affects
+    void getAffects(string& procName, bool includeAffectsT, bool BIP);
+    void getAffects(string& procName, bool includeAffectsT, bool BIP, map<string, set<int>>& lastModifiedTable);
+
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
     const vector<PKBStmt::SharedPtr> &getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;
@@ -500,12 +504,10 @@ class PQLEvaluator
     // mVariables;
     vector<PKBVariable::SharedPtr> getAllVariables();
 
-    /* TODO: @nicholasnge Provide function to return all Constants in the program.
-     */
     const unordered_set<string> &getAllConstants();
 
   protected:
-    PQLEvaluator(PKB::SharedPtr pPKB)
+    PKBPQLEvaluator(PKB::SharedPtr pPKB)
     {
         mpPKB = pPKB;
     }
@@ -599,4 +601,24 @@ class PQLEvaluator
     vector<string> preOrderTraversalHelper(shared_ptr<Expression> expr);
     bool checkForSubTree(vector<string> &queryInOrder, vector<string> &assignInOrder);
     bool checkForExactTree(vector<string> &queryInOrder, vector<string> &assignInOrder);
+
+
+    // helpers for affects
+    /* ======================== Affects ======================== */
+    set<pair<int, int>> affectsList;
+    set<pair<int, int>> affectsTList;
+    map<int, set<pair<int, int>>> affectsTHelperTable;
+
+    void computeAffects(shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsAssign(int index, bool includeAffectsT,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsRead(int index, bool includeAffectsT,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsCall(int index, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsIf(int index, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsWhile(int index, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable);
 };

@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "PQLLexer.h"
-#include "SimpleAST.h"
-#include "SimpleLexer.h"
-#include "SimpleParser.h"
+#include "..\SimpleAST.h"
+#include "..\SimpleLexer.h"
+#include "..\SimpleParser.h"
 
 const bool DESTRUCTOR_MESSAGE_ENABLED = false;
 
@@ -499,7 +499,11 @@ enum class RelRefType
     CALLS,
     CALLS_T,
     NEXT,
-    NEXT_T
+    NEXT_T,
+    AFFECTS,
+    AFFECTS_T,
+    AFFECTS_BIP,
+    AFFECTS_T_BIP
 };
 
 // extend entRef to catch synonym vs. underscore vs. ident
@@ -1561,7 +1565,265 @@ public:
 };
 
 
-class SuchThatCl
+class AffectsT : public RelRef
+{
+public:
+    shared_ptr<StmtRef> stmtRef1;
+    shared_ptr<StmtRef> stmtRef2;
+
+    AffectsT(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : stmtRef1(move(sRef1)), stmtRef2(move(sRef2))
+    {
+    }
+
+    inline string format() override
+    {
+        return "Affects*(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
+    }
+
+    ~AffectsT()
+    {
+        if (DESTRUCTOR_MESSAGE_ENABLED)
+        {
+            cout << "Deleted: " << format() << endl;
+        }
+    }
+
+    inline bool containsSynonym(shared_ptr<Element> s)
+    {
+        bool flag = false;
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
+        {
+            flag = stmtRef1->getStringVal() == s->getSynonymString();
+            if (flag)
+                return flag;
+        }
+
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
+        {
+            flag = stmtRef2->getStringVal() == s->getSynonymString();
+        }
+
+        return flag;
+    }
+
+    inline RelRefType getType()
+    {
+        return RelRefType::AFFECTS_T;
+    }
+
+    vector<string> getAllSynonymsAsString()
+    {
+        vector<string> toReturn;
+
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
+            toReturn.emplace_back(stmtRef1->getStringVal());
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
+            toReturn.emplace_back(stmtRef2->getStringVal());
+
+        return move(toReturn);
+    }
+};
+
+class Affects : public RelRef
+{
+public:
+    shared_ptr<StmtRef> stmtRef1;
+    shared_ptr<StmtRef> stmtRef2;
+
+    Affects(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : stmtRef1(move(sRef1)), stmtRef2(move(sRef2))
+    {
+    }
+
+    inline string format() override
+    {
+        return "Affects(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
+    }
+
+    ~Affects()
+    {
+        if (DESTRUCTOR_MESSAGE_ENABLED)
+        {
+            cout << "Deleted: " << format() << endl;
+        }
+    }
+
+    inline bool containsSynonym(shared_ptr<Element> s)
+    {
+        bool flag = false;
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
+        {
+            flag = stmtRef1->getStringVal() == s->getSynonymString();
+            if (flag)
+                return flag;
+        }
+
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
+        {
+            flag = stmtRef2->getStringVal() == s->getSynonymString();
+        }
+
+        return flag;
+    }
+
+    inline RelRefType getType()
+    {
+        return RelRefType::AFFECTS;
+    }
+
+    vector<string> getAllSynonymsAsString()
+    {
+        vector<string> toReturn;
+
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
+            toReturn.emplace_back(stmtRef1->getStringVal());
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
+            toReturn.emplace_back(stmtRef2->getStringVal());
+
+        return move(toReturn);
+    }
+};
+
+class AffectsTBIP : public RelRef
+{
+public:
+    shared_ptr<StmtRef> stmtRef1;
+    shared_ptr<StmtRef> stmtRef2;
+
+    AffectsTBIP(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : stmtRef1(move(sRef1)), stmtRef2(move(sRef2))
+    {
+    }
+
+    inline string format() override
+    {
+        return "AffectsBIP*(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
+    }
+
+    ~AffectsTBIP()
+    {
+        if (DESTRUCTOR_MESSAGE_ENABLED)
+        {
+            cout << "Deleted: " << format() << endl;
+        }
+    }
+
+    inline bool containsSynonym(shared_ptr<Element> s)
+    {
+        bool flag = false;
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
+        {
+            flag = stmtRef1->getStringVal() == s->getSynonymString();
+            if (flag)
+                return flag;
+        }
+
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
+        {
+            flag = stmtRef2->getStringVal() == s->getSynonymString();
+        }
+
+        return flag;
+    }
+
+    inline RelRefType getType()
+    {
+        return RelRefType::AFFECTS_T_BIP;
+    }
+
+    vector<string> getAllSynonymsAsString()
+    {
+        vector<string> toReturn;
+
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
+            toReturn.emplace_back(stmtRef1->getStringVal());
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
+            toReturn.emplace_back(stmtRef2->getStringVal());
+
+        return move(toReturn);
+    }
+};
+
+class AffectsBIP : public RelRef
+{
+public:
+    shared_ptr<StmtRef> stmtRef1;
+    shared_ptr<StmtRef> stmtRef2;
+
+    AffectsBIP(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : stmtRef1(move(sRef1)), stmtRef2(move(sRef2))
+    {
+    }
+
+    inline string format() override
+    {
+        return "AffectsBIP(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
+    }
+
+    ~AffectsBIP()
+    {
+        if (DESTRUCTOR_MESSAGE_ENABLED)
+        {
+            cout << "Deleted: " << format() << endl;
+        }
+    }
+
+    inline bool containsSynonym(shared_ptr<Element> s)
+    {
+        bool flag = false;
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
+        {
+            flag = stmtRef1->getStringVal() == s->getSynonymString();
+            if (flag)
+                return flag;
+        }
+
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
+        {
+            flag = stmtRef2->getStringVal() == s->getSynonymString();
+        }
+
+        return flag;
+    }
+
+    inline RelRefType getType()
+    {
+        return RelRefType::AFFECTS_BIP;
+    }
+
+    vector<string> getAllSynonymsAsString()
+    {
+        vector<string> toReturn;
+
+        if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
+            toReturn.emplace_back(stmtRef1->getStringVal());
+        if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
+            toReturn.emplace_back(stmtRef2->getStringVal());
+
+        return move(toReturn);
+    }
+};
+
+enum class EvalClType {
+    Pattern,
+    SuchThat,
+    With
+};
+
+/* Generic class representing a clause to be evaluated */
+class EvalCl {
+public:
+
+    virtual ~EvalCl() {
+
+    }
+
+    inline virtual const vector<string>& getAllSynonymsAsString() = 0;
+    
+    inline virtual EvalClType getEvalClType() = 0;
+
+    inline virtual string format() = 0;
+
+};
+
+class SuchThatCl : public EvalCl
 {
 private:
     vector<string> synonymsUsed;
@@ -1580,6 +1842,10 @@ public:
         {
             cout << "Deleted: " << format() << endl;
         }
+    }
+
+    inline EvalClType getEvalClType() {
+        return EvalClType::SuchThat;
     }
 
     inline string format()
@@ -1694,7 +1960,7 @@ public:
     }
 };
 
-class PatternCl
+class PatternCl : public EvalCl
 {
 private:
     vector<string> synonymsUsed;
@@ -1714,6 +1980,10 @@ public:
             synonymsUsed.emplace_back(this->entRef->getStringVal());
         }
 
+    }
+
+    inline EvalClType getEvalClType() {
+        return EvalClType::Pattern;
     }
 
     ~PatternCl()
@@ -1741,7 +2011,8 @@ public:
     }
 };
 
-class WithCl
+
+class WithCl : public EvalCl
 {
 private:
     vector<string> synonymsUsed;
@@ -1764,6 +2035,10 @@ public:
         if (rhs->getRefType() == RefType::ATTR) {
             synonymsUsed.emplace_back(rhs->getAttrRef()->getSynonymString());
         }
+    }
+
+    inline EvalClType getEvalClType() {
+        return EvalClType::With;
     }
 
     ~WithCl()
@@ -1821,13 +2096,15 @@ public:
                  */
                 if (synonymToParentDeclarationMap.find(syn->getValue()) != synonymToParentDeclarationMap.end())
                 {
-                    throw std::invalid_argument("Error: Duplicate synonym detected in query!");
+                    throw std::exception("Error: Duplicate synonym detected in query!");
                 }
 
                 synonymToParentDeclarationMap[syn->getValue()] = d;
             }
         }
     }
+
+
 
     shared_ptr<Declaration>& getParentDeclarationForSynonym(const string& s)
     {
@@ -1968,10 +2245,13 @@ public:
 
         return flag;
     }
+    
 
     inline const shared_ptr<ResultCl>& getTarget() {
         return target;
     }
+
+
 };
 
 class PQLParser
@@ -2018,7 +2298,6 @@ public:
     shared_ptr<WithCl> parseAttrCompare();
     shared_ptr<ExpressionSpec> parseExpressionSpec();
     shared_ptr<SelectCl> parseSelectCl();
-
     shared_ptr<ResultCl> parseResultCl();
     shared_ptr<Element> parseElement();
     shared_ptr<AttrName> parseAttrName();

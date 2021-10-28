@@ -150,7 +150,7 @@ vector<PQLToken> pqlLex(string &program)
         }
         else
         {
-            cout << "PQLLexer: Unknown token '" << curr << "'." << endl;
+            throw "PQLLexer: Unknown token '" + to_string(curr) + "'." + "\n";
         }
         i++;
     }
