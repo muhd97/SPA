@@ -466,6 +466,7 @@ const unordered_set<int>& PKBPQLEvaluator::getParentTSynUnderscore(PKBDesignEnti
 /*PRE-CONDITION: TargetParentType IS a container and statement type type. */
 const unordered_set<int>& PKBPQLEvaluator::getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo)
 {
+	if (!statementExists(childStatementNo)) throw "Statement doesn't exist: " + to_string(childStatementNo);
 	return mpPKB->parentTSynIntTable[childStatementNo][targetParentType];
 }
 
@@ -823,6 +824,8 @@ bool PKBPQLEvaluator::getFollowsTIntegerUnderscore(int leftStmtNo)
 /*PRE-CONDITION: TargetFollowType IS a container and statement type type. */
 const unordered_set<int>& PKBPQLEvaluator::getFollowsTSynInteger(PKBDesignEntity leftType, int rightStmtNo)
 {
+	if (!statementExists(rightStmtNo)) throw "Statement doesn't exist: " + to_string(rightStmtNo);
+
 	return mpPKB->followsTSynIntTable[rightStmtNo][leftType];
 }
 

@@ -6,7 +6,9 @@
 #include "..\PKB\PKBPQLEvaluator.h"
 #include "PQLParser.h"
 #include "PQLOptimizer.h"
-#include "PQLResult.h"
+#include "PQLResultTuple.h"
+
+
 
 using namespace std;
 
@@ -34,22 +36,6 @@ class PQLProcessor
 
     void handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
                               vector<shared_ptr<ResultTuple>> &toReturn);
-
-    void handleWithClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void handleWithFirstArgIdent(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void handleWithFirstArgInt(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void handleWithFirstArgAttrRef(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void handleWithFirstArgSyn(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
     void handleUsesSFirstArgInteger(shared_ptr<SelectCl> &selectCl, shared_ptr<UsesS> &usesCl,
                                     vector<shared_ptr<ResultTuple>> &toReturn);
     void handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared_ptr<UsesS> &usesCl,
@@ -77,12 +63,6 @@ class PQLProcessor
                                        vector<shared_ptr<ResultTuple>> &toReturn);
     void handleFollowsTFirstArgUnderscore(shared_ptr<SelectCl> &selectCl, shared_ptr<FollowsT> &followsTCl,
                                           vector<shared_ptr<ResultTuple>> &toReturn);
-
-    void handlePatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
-                             vector<shared_ptr<ResultTuple>> &toReturn);
-
-    void handleWhileAndIfPatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
-        vector<shared_ptr<ResultTuple>>& toReturn, const string& DesignEntityType);
 
     void handleCalls(shared_ptr<SelectCl> &selectCl, shared_ptr<Calls> &callsCl,
         vector<shared_ptr<ResultTuple>>& toReturn);
