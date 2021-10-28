@@ -1502,8 +1502,7 @@ vector<string> PKB::getIdentifiers(shared_ptr<ConditionalExpression> expr)
             break;
         }
         default:
-            throw("On that final day, not all who call upon this function will be "
-                  "called a ConditionalType");
+            break;
         }
     }
 

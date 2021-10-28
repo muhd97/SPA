@@ -483,6 +483,10 @@ class PKBPQLEvaluator
     // Case 9: NextT(int, syn)
     unordered_set<int> getNextTIntSyn(int fromIndex, PKBDesignEntity to);
 
+    // Affects
+    void getAffects(string& procName, bool includeAffectsT, bool BIP);
+    void getAffects(string& procName, bool includeAffectsT, bool BIP, map<string, set<int>>& lastModifiedTable);
+
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
     const vector<PKBStmt::SharedPtr> &getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;
@@ -500,8 +504,6 @@ class PKBPQLEvaluator
     // mVariables;
     vector<PKBVariable::SharedPtr> getAllVariables();
 
-    /* TODO: @nicholasnge Provide function to return all Constants in the program.
-     */
     const unordered_set<string> &getAllConstants();
 
   protected:
@@ -599,4 +601,24 @@ class PKBPQLEvaluator
     vector<string> preOrderTraversalHelper(shared_ptr<Expression> expr);
     bool checkForSubTree(vector<string> &queryInOrder, vector<string> &assignInOrder);
     bool checkForExactTree(vector<string> &queryInOrder, vector<string> &assignInOrder);
+
+
+    // helpers for affects
+    /* ======================== Affects ======================== */
+    set<pair<int, int>> affectsList;
+    set<pair<int, int>> affectsTList;
+    map<int, set<pair<int, int>>> affectsTHelperTable;
+
+    void computeAffects(shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsAssign(int index, bool includeAffectsT,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsRead(int index, bool includeAffectsT,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsCall(int index, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsIf(int index, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsWhile(int index, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable);
 };
