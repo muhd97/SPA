@@ -478,7 +478,7 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
     else if (isKeyword(curr, PQL_AFFECTS))
     {
         // Affects
-        eatKeyword(PQL_NEXT);
+        eatKeyword(PQL_AFFECTS);
         eat(PQLTokenType::LEFT_PAREN);
         auto ref1 = parseStmtRef();
         eat(PQLTokenType::COMMA);

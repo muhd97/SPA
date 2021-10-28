@@ -2269,7 +2269,11 @@ void PKBPQLEvaluator::getAffects(string& procName, bool includeAffectsT, bool BI
 	computeAffects(firstBlock, includeAffectsT, BIP, lastModifiedTable, set<string>());
 }
 
-void PKBPQLEvaluator::getAffects(bool includeAffectsT, bool BIP) {
+pair<set<pair<int, int>>, set<pair<int, int>>>& PKBPQLEvaluator::getAffects(bool includeAffectsT, bool BIP) {
+	// clear affectsLists, no cheat
+	affectsList.clear();
+	affectsTList.clear();
+
 	const unordered_map<string, shared_ptr<BasicBlock>>& cfgMap = mpPKB->cfg->getAllCFGs();
 	if (BIP) {
 		set<string> seenProcedures;
@@ -2287,6 +2291,8 @@ void PKBPQLEvaluator::getAffects(bool includeAffectsT, bool BIP) {
 			computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, set<string>());
 		}
 	}
+
+	return make_pair(affectsList, affectsTList);
 }
 
 void PKBPQLEvaluator::computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,

@@ -503,7 +503,7 @@ enum class RelRefType
     AFFECTS,
     AFFECTS_T,
     AFFECTS_BIP,
-    AFFECTS_T_BIP
+    AFFECTS_BIP_T
 };
 
 // extend entRef to catch synonym vs. underscore vs. ident
@@ -1372,7 +1372,7 @@ public:
 
     inline RelRefType getType()
     {
-        return RelRefType::NEXT_T;
+        return RelRefType::AFFECTS_T;
     }
 
     vector<string> getAllSynonymsAsString()
@@ -1431,7 +1431,7 @@ public:
 
     inline RelRefType getType()
     {
-        return RelRefType::NEXT;
+        return RelRefType::AFFECTS;
     }
 
     vector<string> getAllSynonymsAsString()
@@ -1489,7 +1489,7 @@ public:
 
     inline RelRefType getType()
     {
-        return RelRefType::NEXT;
+        return RelRefType::AFFECTS_BIP;
     }
 
     vector<string> getAllSynonymsAsString()
@@ -1548,7 +1548,7 @@ public:
 
     inline RelRefType getType()
     {
-        return RelRefType::NEXT_T;
+        return RelRefType::AFFECTS_BIP_T;
     }
 
     vector<string> getAllSynonymsAsString()

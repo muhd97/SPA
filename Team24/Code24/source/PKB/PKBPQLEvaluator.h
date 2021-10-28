@@ -484,7 +484,7 @@ class PKBPQLEvaluator
     unordered_set<int> getNextTIntSyn(int fromIndex, PKBDesignEntity to);
 
     // Affects
-    void getAffects(bool includeAffectsT, bool BIP);
+    pair<set<pair<int, int>>, set<pair<int, int>>>& getAffects(bool includeAffectsT, bool BIP);
     void getAffects(string& procName, bool includeAffectsT, bool BIP);
 
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>

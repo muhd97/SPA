@@ -785,23 +785,19 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         break;
     }
     case RelRefType::AFFECTS: {
-        shared_ptr<Affects> affectsCl = static_pointer_cast<Affects>(suchThatCl->relRef);
-        handleAffects(selectCl, affectsCl, toReturn);
+        handleAffects(selectCl, suchThatCl, toReturn, false, false);
         break;
     }
     case RelRefType::AFFECTS_T: {
-        shared_ptr<AffectsT> affectsTCl = static_pointer_cast<AffectsT>(suchThatCl->relRef);
-        handleAffectsT(selectCl, affectsTCl, toReturn);
+        handleAffects(selectCl, suchThatCl, toReturn, true, false);
         break;
     }
     case RelRefType::AFFECTS_BIP: {
-        shared_ptr<AffectsBIP> affectsBIPCl = static_pointer_cast<AffectsBIP>(suchThatCl->relRef);
-        handleAffectsBIP(selectCl, affectsBIPCl, toReturn);
+        handleAffects(selectCl, suchThatCl, toReturn, false, true);
         break;
     }
-    case RelRefType::AFFECTS_T_BIP: {
-        shared_ptr<AffectsTBIP> affectsTBIPCl = static_pointer_cast<AffectsTBIP>(suchThatCl->relRef);
-        handleAffectsTBIP(selectCl, affectsTBIPCl, toReturn);
+    case RelRefType::AFFECTS_BIP_T: {
+        handleAffects(selectCl, suchThatCl, toReturn, true, true);
         break;
     }
     default: {
@@ -2090,8 +2086,152 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
 
 void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn, bool isT, bool isBIP)
 {
-}
+    cout << "handling affects" << endl;
+    cout << (isT ? "T" : "no T") << endl;
+    cout << (isBIP ? "BIP" : "no BIP") << endl;
+    shared_ptr<StmtRef> stmtRefLeft;
+    shared_ptr<StmtRef> stmtRefRight;
+    if (isT) {
+        if (isBIP) {
+            stmtRefLeft = static_pointer_cast<AffectsBipT>(suchThatCl->relRef)->stmtRef1;
+            stmtRefRight = static_pointer_cast<AffectsBipT>(suchThatCl->relRef)->stmtRef2;
+        }
+        else {
+            stmtRefLeft = static_pointer_cast<AffectsT>(suchThatCl->relRef)->stmtRef1;
+            stmtRefRight = static_pointer_cast<AffectsT>(suchThatCl->relRef)->stmtRef2;
+        }
+    }
+    else {
+        if (isBIP) {
+            stmtRefLeft = static_pointer_cast<AffectsBip>(suchThatCl->relRef)->stmtRef1;
+            stmtRefRight = static_pointer_cast<AffectsBip>(suchThatCl->relRef)->stmtRef2;
+        }
+        else {
+            stmtRefLeft = static_pointer_cast<Affects>(suchThatCl->relRef)->stmtRef1;
+            stmtRefRight = static_pointer_cast<Affects>(suchThatCl->relRef)->stmtRef2;
+        }
+    }
+    pair<set<pair<int, int>>, set<pair<int, int>>> res = evaluator->getAffects(isT, isBIP);
+    cout << "no Errr" << endl;
 
+    set<pair<int, int>> relevantRes = isT ? res.second : res.first;
+    StmtRefType leftType = stmtRefLeft->getStmtRefType();
+    StmtRefType rightType = stmtRefRight->getStmtRefType();
+
+    if (leftType == StmtRefType::INTEGER) {
+        const int leftArg = stmtRefLeft->getIntVal();
+        if (rightType == StmtRefType::INTEGER) {
+            const int rightArg = stmtRefRight->getIntVal();
+            
+            if (relevantRes.count(make_pair(leftArg, rightArg))) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
+                toReturn.emplace_back(tupleToAdd);
+            }
+        }
+        else if (rightType == StmtRefType::SYNONYM) {
+            if (selectCl->getDesignEntityTypeBySynonym(stmtRefRight->getStringVal()) != DesignEntity::ASSIGN) {
+                return; // invalid query
+            }
+            const string& rightAssignKey = stmtRefRight->getStringVal();
+            for (const auto& p : relevantRes) {
+                if (p.first == leftArg) {
+                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                    tupleToAdd->insertKeyValuePair(rightAssignKey, to_string(p.first));
+                    toReturn.emplace_back(move(tupleToAdd));
+                }
+            }
+        }
+
+        else if (rightType == StmtRefType::UNDERSCORE) {
+            for (const auto& p : relevantRes) {
+                if (p.first == leftArg) {
+                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                    tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
+                    toReturn.emplace_back(move(tupleToAdd));
+                    return;
+                }
+            }
+        }
+    }
+
+    else if (leftType == StmtRefType::SYNONYM) {
+        if (selectCl->getDesignEntityTypeBySynonym(stmtRefLeft->getStringVal()) != DesignEntity::ASSIGN) {
+            return; // invalid query
+        }
+        const string& leftAssignKey = stmtRefLeft->getStringVal();
+
+        if (rightType == StmtRefType::INTEGER) {
+            const auto& rightArg = stmtRefRight->getIntVal();
+            for (const auto& p : relevantRes) {
+                if (p.second == rightArg) {
+                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                    tupleToAdd->insertKeyValuePair(leftAssignKey, to_string(p.second));
+                    toReturn.emplace_back(move(tupleToAdd));
+                }
+            }
+        }
+        else if (rightType == StmtRefType::SYNONYM) {
+            if (selectCl->getDesignEntityTypeBySynonym(stmtRefRight->getStringVal()) != DesignEntity::ASSIGN) {
+                return; // invalid query
+            }
+            const string& rightAssignKey = stmtRefRight->getStringVal();
+            for (auto& p : relevantRes) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(leftAssignKey, to_string(p.first));
+                tupleToAdd->insertKeyValuePair(rightAssignKey, to_string(p.second));
+
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+        }
+        else if (rightType == StmtRefType::UNDERSCORE) {
+            set<int> seen;
+            for (const auto& p : relevantRes) {
+                if (!seen.count(p.first)) {
+                    seen.insert(p.first);
+                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                    tupleToAdd->insertKeyValuePair(leftAssignKey, to_string(p.first));
+                    toReturn.emplace_back(move(tupleToAdd));
+                }
+            }
+        }
+    }
+
+    else { // leftType == StmtRefType::UNDERSCORE 
+        if (rightType == StmtRefType::INTEGER) {
+            const auto& rightArg = stmtRefRight->getIntVal();
+            for (const auto& p : relevantRes) {
+                if (p.second == rightArg) {
+                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                    tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
+                    toReturn.emplace_back(move(tupleToAdd));
+                    return;
+                }
+            }
+        }
+        else if (rightType == StmtRefType::SYNONYM) {
+            if (selectCl->getDesignEntityTypeBySynonym(stmtRefRight->getStringVal()) != DesignEntity::ASSIGN) {
+                return; // invalid query
+            }
+            const string& rightAssignKey = stmtRefRight->getStringVal();
+            set<int> seen;
+            for (const auto& p : relevantRes) {
+                if (!seen.count(p.second)) {
+                    seen.insert(p.second);
+                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                    tupleToAdd->insertKeyValuePair(rightAssignKey, to_string(p.second));
+                    toReturn.emplace_back(move(tupleToAdd));
+                }
+            }
+        }
+        else if (rightType == StmtRefType::UNDERSCORE) {
+            if (!relevantRes.empty()) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
+                toReturn.emplace_back(move(tupleToAdd));
+            }
+        }
+    }
 }
 
 /* ======================== HELPER METHODS ======================== */
