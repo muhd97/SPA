@@ -2200,6 +2200,7 @@ void PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 			if (affectingStatements.size() > 0) {
 				for (int s : affectingStatements) {
 					pair<int, int>& affectClause = make_pair(s, index);
+					//cout << "affect inserted: " << s << ", " << index << endl;
 					affectsList.insert(affectClause);
 
 					// handle affects*
@@ -2269,11 +2270,12 @@ void PKBPQLEvaluator::getAffects(string& procName, bool includeAffectsT, bool BI
 	computeAffects(firstBlock, includeAffectsT, BIP, lastModifiedTable, set<string>());
 }
 
-pair<set<pair<int, int>>, set<pair<int, int>>>& PKBPQLEvaluator::getAffects(bool includeAffectsT, bool BIP) {
+pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLEvaluator::getAffects(bool includeAffectsT, bool BIP) {
+	//cout << "getAffects called" << endl;
 	// clear affectsLists, no cheat
 	affectsList.clear();
 	affectsTList.clear();
-
+	//cout << "lists cleared" << endl;
 	const unordered_map<string, shared_ptr<BasicBlock>>& cfgMap = mpPKB->cfg->getAllCFGs();
 	if (BIP) {
 		set<string> seenProcedures;
@@ -2288,63 +2290,117 @@ pair<set<pair<int, int>>, set<pair<int, int>>>& PKBPQLEvaluator::getAffects(bool
 	else {
 		for (auto const& cfg : cfgMap) {
 			map<string, set<int>> lastModifiedTable;
+			//cout << "PROCEDURE: " << cfg.first << endl;
 			computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, set<string>());
 		}
 	}
-
+	//cout << "size of Affects: " << affectsList.size() << endl;
+	//cout << "size of AffectsT: " << affectsTList.size() << endl;
 	return make_pair(affectsList, affectsTList);
 }
 
-void PKBPQLEvaluator::computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
+const shared_ptr<BasicBlock> PKBPQLEvaluator::computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
 map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures) {
+	//cout << "compute affects called" << endl;
 
 	vector<shared_ptr<CFGStatement>>& statements = basicBlock->getStatements();
+
+	if (statements.size() == 0) {
+		if (basicBlock->getNext().size() > 0) {
+			return computeAffects(basicBlock->getNext().back(), includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+		}
+		else {
+			return basicBlock;
+		}
+	}
 
 	for (shared_ptr<CFGStatement>& stmt : statements) {
 		int index = stmt->index;
 
 		if (stmt->type == PKBDesignEntity::Assign) {
+			//cout << "assign : " << stmt->index << endl;
 			handleAffectsAssign(index, includeAffectsT, lastModifiedTable);
 		}
 		else if (stmt->type == PKBDesignEntity::Read) {
+			//cout << "read : " << stmt->index << endl;
 			handleAffectsRead(index, includeAffectsT, lastModifiedTable);
 		}
 		else if (stmt->type == PKBDesignEntity::Call) {
+			//cout << "call : " << stmt->index << endl;
 			handleAffectsCall(index, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
 		}
 		else if (stmt->type == PKBDesignEntity::If) {
+			//cout << "If : " << stmt->index << endl;
 			map<string, set<int>> lastModifiedTableCopy = lastModifiedTable;
 
-			if (basicBlock->getNext().size() == 1) {
-				shared_ptr<BasicBlock>& nextBlock = basicBlock->getNext()[0];
-				computeAffects(nextBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
-			} 
-			else if (basicBlock->getNext().size() == 2) {
-				shared_ptr<BasicBlock>& ifBlock = basicBlock->getNext()[0];
-				shared_ptr<BasicBlock>& elseBlock = basicBlock->getNext()[1];
+			vector<shared_ptr<BasicBlock>>& nextBlocks = basicBlock->getNext();
 
-				computeAffects(ifBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
-				computeAffects(elseBlock, includeAffectsT, BIP, lastModifiedTableCopy, seenProcedures);
+			shared_ptr<BasicBlock>& ifBlock = nextBlocks[0];
+			shared_ptr<BasicBlock>& elseBlock = nextBlocks[1];
+			//cout << "computing IF BLOCK" << endl;
+			computeAffects(ifBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+			//cout << "computiong ELSE BLOCK" << endl;
+			auto lastBlock = computeAffects(elseBlock, includeAffectsT, BIP, lastModifiedTableCopy, seenProcedures);
+			//cout << "merge start" << endl;
 
-				for (const auto& [varName, intSet] : lastModifiedTableCopy) {
-					set<int>& original = lastModifiedTable[varName];
-					original.insert(intSet.begin(), intSet.end());
-				}
+			for (const auto& [varName, intSet] : lastModifiedTableCopy) {
+				//cout << "merging variable: " << varName << endl;
+
+				set<int>& original = lastModifiedTable[varName];
+				original.insert(intSet.begin(), intSet.end());
+			}
+			//cout << "merge end" << endl;
+			//cout << lastBlock->getNextImmediateStatements().back()->index<< endl;
+
+			PKBStmt::SharedPtr thisStmt;
+			PKBStmt::SharedPtr nextStmt;
+			if (mpPKB->getStatement(index, thisStmt) && // we can get this statement
+				lastBlock->getNextImmediateStatements().size() > 0 && // this next block has statements
+				mpPKB->getStatement(lastBlock->getNextImmediateStatements().back()->index, nextStmt) && // we can get a statement from next block
+				thisStmt->getGroup() == nextStmt->getGroup()) { // that statement is in the same nesting level as our if statement
+				return computeAffects(lastBlock->getNext().back(), includeAffectsT, BIP, lastModifiedTable, seenProcedures);
 			}
 		}
 		else if (stmt->type == PKBDesignEntity::While) {
+			//cout << "while : " << stmt->index << endl;
+
 			map<string, set<int>> lastModifiedTableCopy;
-			shared_ptr<BasicBlock>& nestedBlock = basicBlock->getNext()[0];
-			while (lastModifiedTableCopy != lastModifiedTable) {
+			vector<shared_ptr<BasicBlock>>& nextBlocks = basicBlock->getNext();
+			shared_ptr<BasicBlock>& nestedBlock = nextBlocks[0];
+			do {
+				//cout << "NOT THE SAME" << endl;
 				lastModifiedTableCopy = lastModifiedTable;
 				computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
-			}
+			} while ((lastModifiedTableCopy != lastModifiedTable));
+			//cout << "ITS THE SAME" << endl;
 
-			if (basicBlock->getNext().size() == 2) {
-				shared_ptr<BasicBlock>& afterWhileBlock = basicBlock->getNext()[1];
-				computeAffects(afterWhileBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+			PKBStmt::SharedPtr firstStmt;
+			PKBStmt::SharedPtr nextStmt;
+			if (basicBlock->getNextImmediateStatements().size() > 1 && 
+			mpPKB->getStatement(basicBlock->getNextImmediateStatements()[1]->index, nextStmt) &&
+			mpPKB->getStatement(basicBlock->getFirstStatement()->index, firstStmt) &&
+			firstStmt->getGroup() == nextStmt->getGroup()) {
+				//cout << "contuining same nesting elvel" << endl;
+				return computeAffects(nextBlocks[1], includeAffectsT, BIP, lastModifiedTable, seenProcedures);
 			}
+			//cout << " NOT contuining same nesting elvel" << endl;
+			//cout << basicBlock->getFirstStatement()->index << endl;
+			return basicBlock;
 		}
 	}
+	// differentiate end of a block and before while statement in same block
+	if (basicBlock->getNextImmediateStatements().size() == 1) {
+		PKBStmt::SharedPtr thisStmt;
+		PKBStmt::SharedPtr nextStmt;
+		if (mpPKB->getStatement(basicBlock->getNextImmediateStatements().back()->index, nextStmt) && // we can get the next statement
+			basicBlock->getStatements().size() > 0 && // this block has at least one statement
+			mpPKB->getStatement(basicBlock->getFirstStatement()->index, thisStmt) &&
+			thisStmt->getGroup() == nextStmt->getGroup()) {
+			//cout << "contuining basic block" << endl;
+			return computeAffects(basicBlock->getNext()[0], includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+		}
+	}
+	//cout << "returning basic block" << endl;
 
+	return basicBlock;
 }

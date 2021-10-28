@@ -2086,9 +2086,6 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
 
 void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn, bool isT, bool isBIP)
 {
-    cout << "handling affects" << endl;
-    cout << (isT ? "T" : "no T") << endl;
-    cout << (isBIP ? "BIP" : "no BIP") << endl;
     shared_ptr<StmtRef> stmtRefLeft;
     shared_ptr<StmtRef> stmtRefRight;
     if (isT) {
@@ -2111,33 +2108,37 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
             stmtRefRight = static_pointer_cast<Affects>(suchThatCl->relRef)->stmtRef2;
         }
     }
-    pair<set<pair<int, int>>, set<pair<int, int>>> res = evaluator->getAffects(isT, isBIP);
-    cout << "no Errr" << endl;
-
-    set<pair<int, int>> relevantRes = isT ? res.second : res.first;
+    pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP);
+    set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
+    for (auto p : relevantRes) {
+        cout << "(" << p.first << ", " << p.second << "), ";
+    }
     StmtRefType leftType = stmtRefLeft->getStmtRefType();
     StmtRefType rightType = stmtRefRight->getStmtRefType();
 
     if (leftType == StmtRefType::INTEGER) {
-        const int leftArg = stmtRefLeft->getIntVal();
+        int leftArg = stmtRefLeft->getIntVal();
         if (rightType == StmtRefType::INTEGER) {
-            const int rightArg = stmtRefRight->getIntVal();
-            
-            if (relevantRes.count(make_pair(leftArg, rightArg))) {
+            int rightArg = stmtRefRight->getIntVal();
+            cout << relevantRes.count(make_pair(leftArg, rightArg)) << endl;
+            if (relevantRes.count(make_pair(leftArg, rightArg)) > 0) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                 tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
                 toReturn.emplace_back(tupleToAdd);
             }
         }
         else if (rightType == StmtRefType::SYNONYM) {
-            if (selectCl->getDesignEntityTypeBySynonym(stmtRefRight->getStringVal()) != DesignEntity::ASSIGN) {
+            if (!givenSynonymMatchesMultipleTypes(selectCl, stmtRefRight->getStringVal(),
+                { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
                 return; // invalid query
             }
             const string& rightAssignKey = stmtRefRight->getStringVal();
             for (const auto& p : relevantRes) {
+                cout << p.first << endl;
+
                 if (p.first == leftArg) {
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    tupleToAdd->insertKeyValuePair(rightAssignKey, to_string(p.first));
+                    tupleToAdd->insertKeyValuePair(rightAssignKey, to_string(p.second));
                     toReturn.emplace_back(move(tupleToAdd));
                 }
             }
@@ -2156,23 +2157,29 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
     }
 
     else if (leftType == StmtRefType::SYNONYM) {
-        if (selectCl->getDesignEntityTypeBySynonym(stmtRefLeft->getStringVal()) != DesignEntity::ASSIGN) {
+        if (!givenSynonymMatchesMultipleTypes(selectCl, stmtRefLeft->getStringVal(),
+            { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
             return; // invalid query
         }
         const string& leftAssignKey = stmtRefLeft->getStringVal();
 
         if (rightType == StmtRefType::INTEGER) {
-            const auto& rightArg = stmtRefRight->getIntVal();
+            cout << "IVE BEEN DIRECTED HERE" << endl;
+            int rightArg = stmtRefRight->getIntVal();
+            cout << "RIGHT ARG: " << rightArg << endl;
             for (const auto& p : relevantRes) {
-                if (p.second == rightArg) {
+                cout << p.second << endl;
+                if (p.second == rightArg) { 
+                    cout << "IVE BEEN ADDED" << endl;
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    tupleToAdd->insertKeyValuePair(leftAssignKey, to_string(p.second));
+                    tupleToAdd->insertKeyValuePair(leftAssignKey, to_string(p.first));
                     toReturn.emplace_back(move(tupleToAdd));
                 }
             }
         }
         else if (rightType == StmtRefType::SYNONYM) {
-            if (selectCl->getDesignEntityTypeBySynonym(stmtRefRight->getStringVal()) != DesignEntity::ASSIGN) {
+            if (!givenSynonymMatchesMultipleTypes(selectCl, stmtRefRight->getStringVal(),
+                { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
                 return; // invalid query
             }
             const string& rightAssignKey = stmtRefRight->getStringVal();
@@ -2210,7 +2217,8 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
             }
         }
         else if (rightType == StmtRefType::SYNONYM) {
-            if (selectCl->getDesignEntityTypeBySynonym(stmtRefRight->getStringVal()) != DesignEntity::ASSIGN) {
+            if (!givenSynonymMatchesMultipleTypes(selectCl, stmtRefRight->getStringVal(),
+                { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
                 return; // invalid query
             }
             const string& rightAssignKey = stmtRefRight->getStringVal();

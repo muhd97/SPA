@@ -54,7 +54,7 @@ void TestWrapper::parse(std::string filename) {
         printSimpleTokens(tokens);
 #endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
-       
+        cout << root->format();
 #if PRINT_PARSED_PROGRAM
         cout << root->format();
         cout << "\n==== Building PKB ====\n";
