@@ -484,8 +484,8 @@ class PKBPQLEvaluator
     unordered_set<int> getNextTIntSyn(int fromIndex, PKBDesignEntity to);
 
     // Affects
+    void getAffects(bool includeAffectsT, bool BIP);
     void getAffects(string& procName, bool includeAffectsT, bool BIP);
-    void getAffects(string& procName, bool includeAffectsT, bool BIP, map<string, set<int>>& lastModifiedTable);
 
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
@@ -609,16 +609,13 @@ class PKBPQLEvaluator
     set<pair<int, int>> affectsTList;
     map<int, set<pair<int, int>>> affectsTHelperTable;
 
-    void computeAffects(shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
-        map<string, set<int>>& lastModifiedTable);
+    void computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures);
     void handleAffectsAssign(int index, bool includeAffectsT,
         map<string, set<int>>& lastModifiedTable);
     void handleAffectsRead(int index, bool includeAffectsT,
         map<string, set<int>>& lastModifiedTable);
     void handleAffectsCall(int index, bool includeAffectsT, bool BIP,
-        map<string, set<int>>& lastModifiedTable);
-    void handleAffectsIf(int index, bool includeAffectsT, bool BIP,
-        map<string, set<int>>& lastModifiedTable);
-    void handleAffectsWhile(int index, bool includeAffectsT, bool BIP,
-        map<string, set<int>>& lastModifiedTable);
+        map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures);
+
 };

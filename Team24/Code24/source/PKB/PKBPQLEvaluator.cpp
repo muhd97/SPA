@@ -2238,13 +2238,15 @@ void PKBPQLEvaluator::handleAffectsRead(int index, bool includeAffectsT,
 }
 
 void PKBPQLEvaluator::handleAffectsCall(int index, bool includeAffectsT, bool BIP,
-	map<string, set<int>>& lastModifiedTable)
+	map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures)
 {
 	if (BIP) {
 		PKBStmt::SharedPtr stmt;
 		if (mpPKB->getStatement(index, stmt)) {
 			string calledProcName = mpPKB->callStmtToProcNameTable[to_string(index)];
-			getAffects(calledProcName, includeAffectsT, BIP, lastModifiedTable);
+			seenProcedures.insert(calledProcName);
+			const shared_ptr<BasicBlock>& procBlock = mpPKB->cfg->getCFG(calledProcName);
+			computeAffects(procBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
 		}
 	}
 
@@ -2260,32 +2262,35 @@ void PKBPQLEvaluator::handleAffectsCall(int index, bool includeAffectsT, bool BI
 	}
 }
 
-void PKBPQLEvaluator::handleAffectsIf(int index, bool includeAffectsT, bool BIP,
-	map<string, set<int>>& lastModifiedTable)
-{
-
-}
-
-void PKBPQLEvaluator::handleAffectsWhile(int index, bool includeAffectsT, bool BIP,
-	map<string, set<int>>& lastModifiedTable)
-{
-}
-
+// so far useless
 void PKBPQLEvaluator::getAffects(string& procName, bool includeAffectsT, bool BIP) {
-	shared_ptr<BasicBlock> firstBlock = mpPKB->cfg->getCFG(procName);
+	const shared_ptr<BasicBlock>& firstBlock = mpPKB->cfg->getCFG(procName);
 	map<string, set<int>> lastModifiedTable;
-	vector<map<string, set<int>>> lastModifiedStack;
-	computeAffects(firstBlock, includeAffectsT, BIP, lastModifiedTable);
+	computeAffects(firstBlock, includeAffectsT, BIP, lastModifiedTable, set<string>());
 }
 
-void PKBPQLEvaluator::getAffects(string& procName, bool includeAffectsT, bool BIP, 
-	map<string, set<int>>& lastModifiedTable) {
-	shared_ptr<BasicBlock> firstBlock = mpPKB->cfg->getCFG(procName);
-	computeAffects(firstBlock, includeAffectsT, BIP, lastModifiedTable);
+void PKBPQLEvaluator::getAffects(bool includeAffectsT, bool BIP) {
+	const unordered_map<string, shared_ptr<BasicBlock>>& cfgMap = mpPKB->cfg->getAllCFGs();
+	if (BIP) {
+		set<string> seenProcedures;
+		for (auto const& cfg : cfgMap) {
+			if (seenProcedures.count(cfg.first) == 0) {
+				seenProcedures.insert(cfg.first);
+				map<string, set<int>> lastModifiedTable;
+				computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+			}
+		}
+	}
+	else {
+		for (auto const& cfg : cfgMap) {
+			map<string, set<int>> lastModifiedTable;
+			computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, set<string>());
+		}
+	}
 }
 
-void PKBPQLEvaluator::computeAffects(shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
-	map<string, set<int>>& lastModifiedTable) {
+void PKBPQLEvaluator::computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
+map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures) {
 
 	vector<shared_ptr<CFGStatement>>& statements = basicBlock->getStatements();
 
@@ -2299,21 +2304,21 @@ void PKBPQLEvaluator::computeAffects(shared_ptr<BasicBlock>& basicBlock, bool in
 			handleAffectsRead(index, includeAffectsT, lastModifiedTable);
 		}
 		else if (stmt->type == PKBDesignEntity::Call) {
-			handleAffectsCall(index, includeAffectsT, BIP, lastModifiedTable);
+			handleAffectsCall(index, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
 		}
 		else if (stmt->type == PKBDesignEntity::If) {
 			map<string, set<int>> lastModifiedTableCopy = lastModifiedTable;
 
 			if (basicBlock->getNext().size() == 1) {
-				shared_ptr<BasicBlock>& nextBlock = (basicBlock->getNext())[0];
-				computeAffects(nextBlock, includeAffectsT, BIP, lastModifiedTable);
+				shared_ptr<BasicBlock>& nextBlock = basicBlock->getNext()[0];
+				computeAffects(nextBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
 			} 
 			else if (basicBlock->getNext().size() == 2) {
-				shared_ptr<BasicBlock>& ifBlock = (basicBlock->getNext())[0];
-				shared_ptr<BasicBlock>& elseBlock = (basicBlock->getNext())[1];
+				shared_ptr<BasicBlock>& ifBlock = basicBlock->getNext()[0];
+				shared_ptr<BasicBlock>& elseBlock = basicBlock->getNext()[1];
 
-				computeAffects(ifBlock, includeAffectsT, BIP, lastModifiedTable);
-				computeAffects(elseBlock, includeAffectsT, BIP, lastModifiedTableCopy);
+				computeAffects(ifBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+				computeAffects(elseBlock, includeAffectsT, BIP, lastModifiedTableCopy, seenProcedures);
 
 				for (const auto& [varName, intSet] : lastModifiedTableCopy) {
 					set<int>& original = lastModifiedTable[varName];
@@ -2323,15 +2328,15 @@ void PKBPQLEvaluator::computeAffects(shared_ptr<BasicBlock>& basicBlock, bool in
 		}
 		else if (stmt->type == PKBDesignEntity::While) {
 			map<string, set<int>> lastModifiedTableCopy;
-			shared_ptr<BasicBlock>& nestedBlock = (basicBlock->getNext())[0];
+			shared_ptr<BasicBlock>& nestedBlock = basicBlock->getNext()[0];
 			while (lastModifiedTableCopy != lastModifiedTable) {
 				lastModifiedTableCopy = lastModifiedTable;
-				computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTable);
+				computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
 			}
 
 			if (basicBlock->getNext().size() == 2) {
-				shared_ptr<BasicBlock>& afterWhileBlock = (basicBlock->getNext())[1];
-				computeAffects(afterWhileBlock, includeAffectsT, BIP, lastModifiedTable);
+				shared_ptr<BasicBlock>& afterWhileBlock = basicBlock->getNext()[1];
+				computeAffects(afterWhileBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
 			}
 		}
 	}

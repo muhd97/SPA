@@ -54,6 +54,9 @@ public:
 		this->roots = roots;
 	}
 	shared_ptr<BasicBlock> getCFG(string procName);
+	unordered_map<string, shared_ptr<BasicBlock>> getAllCFGs() {
+		return this->roots;
+	}
 	string format();
 };
 
