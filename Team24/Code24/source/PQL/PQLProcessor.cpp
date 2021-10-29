@@ -2122,7 +2122,7 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
             }
         }
         else if (rightType == StmtRefType::SYNONYM) {
-            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP);
+            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP, leftArg);
             set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
             if (!givenSynonymMatchesMultipleTypes(selectCl, stmtRefRight->getStringVal(),
                 { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
@@ -2153,12 +2153,12 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
             { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
             return; // invalid query
         }
-        pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP);
-        set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
 
         const string& leftAssignKey = stmtRefLeft->getStringVal();
         if (rightType == StmtRefType::INTEGER) {
             int rightArg = stmtRefRight->getIntVal();
+            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP, rightArg);
+            set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
             for (const auto& p : relevantRes) {
                 if (p.second == rightArg) { 
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -2172,6 +2172,8 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
                 { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
                 return; // invalid query
             }
+            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP, 0);
+            set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
             const string& rightAssignKey = stmtRefRight->getStringVal();
             for (auto& p : relevantRes) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -2182,6 +2184,8 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
             }
         }
         else if (rightType == StmtRefType::UNDERSCORE) {
+            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP, 0);
+            set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
             set<int> seen;
             for (const auto& p : relevantRes) {
                 if (!seen.count(p.first)) {
@@ -2209,7 +2213,7 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
                 { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
                 return; // invalid query
             }
-            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP);
+            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP, 0);
             set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
 
             const string& rightAssignKey = stmtRefRight->getStringVal();

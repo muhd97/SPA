@@ -2204,8 +2204,6 @@ bool PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 					if (insertAffectsSucceed && terminateEarly &&
 						((leftInt == 0 && (rightInt == 0 || rightInt == index)) || 
 							(leftInt == s && (rightInt == 0 || rightInt == index)))) {
-						cout << endl << "REQUIREMENTS: " << leftInt << ", " << rightInt << endl;
-						cout << endl << "TERMINATE EARLY: " << s << ", " << index << endl;
 						return true;
 					}
 					// handle affects*
@@ -2218,8 +2216,6 @@ bool PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 							if (insertAffectsTSucceed && terminateEarly &&
 								((leftInt == 0 && (rightInt == 0 || rightInt == index)) ||
 									(leftInt == p.first && (rightInt == 0 || rightInt == index)))) {
-								cout << endl << "REQUIREMENTS: " << leftInt << ", " << rightInt << endl;
-								cout << endl << "TERMINATE EARLY: " << p.first << ", " << index << endl;
 								return true;
 							}
 							affectsTHelperTable[index].insert(affectsTClause);
@@ -2312,28 +2308,40 @@ bool PKBPQLEvaluator::getAffects(int leftInt, int rightInt, bool includeAffectsT
 }
 
 // 5 cases: (int, syn) (syn, int) (syn, syn) (syn, _) (_, syn)
-pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLEvaluator::getAffects(bool includeAffectsT, bool BIP) {
+pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLEvaluator::getAffects(bool includeAffectsT, bool BIP, int referenceStatement) {
 	affectsList.clear();
 	affectsTList.clear();
-	const unordered_map<string, shared_ptr<BasicBlock>>& cfgMap = mpPKB->cfg->getAllCFGs();
-	if (BIP) {
-		set<string> seenProcedures;
-		for (auto const& cfg : cfgMap) {
-			if (seenProcedures.count(cfg.first) == 0) {
-				seenProcedures.insert(cfg.first);
-				map<string, set<int>> lastModifiedTable;
-				computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, seenProcedures, shared_ptr<BasicBlock>(), false, 0, 0);
+	if (referenceStatement == 0 || BIP) { // (syn, syn) (syn, _) (_, syn)
+		const unordered_map<string, shared_ptr<BasicBlock>>& cfgMap = mpPKB->cfg->getAllCFGs();
+		if (BIP) {
+			set<string> seenProcedures;
+			for (auto const& cfg : cfgMap) {
+				if (seenProcedures.count(cfg.first) == 0) {
+					seenProcedures.insert(cfg.first);
+					map<string, set<int>> lastModifiedTable;
+					computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, seenProcedures, shared_ptr<BasicBlock>(), false, 0, 0);
+				}
 			}
 		}
-	}
-	else {
-		for (auto const& cfg : cfgMap) {
-			map<string, set<int>> lastModifiedTable;
-			computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, set<string>(), shared_ptr<BasicBlock>(), false, 0, 0);
+		else {
+			for (auto const& cfg : cfgMap) {
+				map<string, set<int>> lastModifiedTable;
+				computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, set<string>(), shared_ptr<BasicBlock>(), false, 0, 0);
+			}
 		}
+		return make_pair(affectsList, affectsTList);
 	}
-	return make_pair(affectsList, affectsTList);
+	else {		// (int, syn) (syn, int)
+		string& targetProcName = mpPKB->stmtToProcNameTable[referenceStatement];
+		if (targetProcName != "") {
+			const shared_ptr<BasicBlock>& firstBlock = mpPKB->cfg->getCFG(targetProcName);
+			computeAffects(firstBlock, includeAffectsT, BIP, map<string, set<int>>(), set<string>(), shared_ptr<BasicBlock>(), false, 0, 0);
+		}
+		return make_pair(affectsList, affectsTList);
+	}
 }
+
+
 
 bool PKBPQLEvaluator::computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
 map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures, shared_ptr<BasicBlock>& lastBlock,
