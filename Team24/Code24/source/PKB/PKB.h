@@ -188,6 +188,8 @@ class PKB
 
     unordered_map<PKBDesignEntity, unordered_set<int>> stmtTypeToSetOfStmtNoTable;
 
+    unordered_map<int, string> stmtToProcNameTable;
+
     /* ==================================== RELATIONSHIP TABLES ==================================== */
 
     /* ======================== Uses ======================== */
@@ -308,13 +310,13 @@ class PKB
     PKBVariable::SharedPtr getVariable(string name);
 
     PKBProcedure::SharedPtr extractProcedure(shared_ptr<Procedure> &procedure);
-    PKBStmt::SharedPtr extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
+    PKBStmt::SharedPtr extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName);
 
     PKBStmt::SharedPtr extractAssignStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
     PKBStmt::SharedPtr extractReadStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
     PKBStmt::SharedPtr extractPrintStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
-    PKBStmt::SharedPtr extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
-    PKBStmt::SharedPtr extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
+    PKBStmt::SharedPtr extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName);
+    PKBStmt::SharedPtr extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName);
     PKBStmt::SharedPtr extractCallStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
 
     PKBStmt::SharedPtr createPKBStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);

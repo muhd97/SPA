@@ -2186,8 +2186,8 @@ unordered_set<int> PKBPQLEvaluator::getNextTIntSyn(int fromIndex, PKBDesignEntit
 	return toResult;
 }
 
-void PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
-	map<string, set<int>>& lastModifiedTable)
+bool PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
+	map<string, set<int>>& lastModifiedTable, bool terminateEarly, int leftInt, int rightInt)
 {
 	PKBStmt::SharedPtr stmt;
 	if (mpPKB->getStatement(index, stmt)) {
@@ -2201,14 +2201,27 @@ void PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 				for (int s : affectingStatements) {
 					pair<int, int>& affectClause = make_pair(s, index);
 					bool insertAffectsSucceed = affectsList.insert(affectClause).second;
-
+					if (insertAffectsSucceed && terminateEarly &&
+						((leftInt == 0 && (rightInt == 0 || rightInt == index)) || 
+							(leftInt == s && (rightInt == 0 || rightInt == index)))) {
+						cout << endl << "REQUIREMENTS: " << leftInt << ", " << rightInt << endl;
+						cout << endl << "TERMINATE EARLY: " << s << ", " << index << endl;
+						return true;
+					}
 					// handle affects*
 					if (includeAffectsT && insertAffectsSucceed) {
 						affectsTList.insert(affectClause);
 						affectsTHelperTable[index].insert(affectClause);
 						for (const auto& p : affectsTHelperTable[s]) {
 							pair<int, int> affectsTClause = make_pair(p.first, index);
-							affectsTList.insert(affectsTClause);
+							bool insertAffectsTSucceed = affectsTList.insert(affectsTClause).second;
+							if (insertAffectsTSucceed && terminateEarly &&
+								((leftInt == 0 && (rightInt == 0 || rightInt == index)) ||
+									(leftInt == p.first && (rightInt == 0 || rightInt == index)))) {
+								cout << endl << "REQUIREMENTS: " << leftInt << ", " << rightInt << endl;
+								cout << endl << "TERMINATE EARLY: " << p.first << ", " << index << endl;
+								return true;
+							}
 							affectsTHelperTable[index].insert(affectsTClause);
 						}
 					}
@@ -2221,6 +2234,7 @@ void PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 			lastModifiedTable[modVar->getName()].insert(index);
 		}
 	}
+	return false;
 }
 
 void PKBPQLEvaluator::handleAffectsRead(int index, bool includeAffectsT,
@@ -2235,8 +2249,8 @@ void PKBPQLEvaluator::handleAffectsRead(int index, bool includeAffectsT,
 	}
 }
 
-void PKBPQLEvaluator::handleAffectsCall(int index, bool includeAffectsT, bool BIP,
-	map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures)
+bool PKBPQLEvaluator::handleAffectsCall(int index, bool includeAffectsT, bool BIP,
+	map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures, bool terminateEarly, int leftInt, int rightInt)
 {
 	if (BIP) {
 		PKBStmt::SharedPtr stmt;
@@ -2244,7 +2258,8 @@ void PKBPQLEvaluator::handleAffectsCall(int index, bool includeAffectsT, bool BI
 			string calledProcName = mpPKB->callStmtToProcNameTable[to_string(index)];
 			seenProcedures.insert(calledProcName);
 			const shared_ptr<BasicBlock>& procBlock = mpPKB->cfg->getCFG(calledProcName);
-			computeAffects(procBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+			return computeAffects(procBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures, shared_ptr<BasicBlock>(),
+				terminateEarly, leftInt, rightInt);
 		}
 	}
 	else {
@@ -2256,15 +2271,47 @@ void PKBPQLEvaluator::handleAffectsCall(int index, bool includeAffectsT, bool BI
 			}
 		}
 	}
+	return false;
 }
 
-// so far useless
-void PKBPQLEvaluator::getAffects(string& procName, bool includeAffectsT, bool BIP) {
-	const shared_ptr<BasicBlock>& firstBlock = mpPKB->cfg->getCFG(procName);
-	map<string, set<int>> lastModifiedTable;
-	computeAffects(firstBlock, includeAffectsT, BIP, lastModifiedTable, set<string>());
+// 4 cases: (int, int) (int, _) (_, int) (_, _)
+bool PKBPQLEvaluator::getAffects(int leftInt, int rightInt, bool includeAffectsT, bool BIP) {
+	affectsList.clear();
+	affectsTList.clear();
+	string targetProcName;
+	if (leftInt == 0 && rightInt == 0) {
+		set<string> seenProcedures;
+		for (const auto & p : mpPKB->cfg->getAllCFGs()) {
+			if (!seenProcedures.count(p.first)) {
+				seenProcedures.insert(p.first);
+				if (computeAffects(p.second, includeAffectsT, BIP, map<string, set<int>>(), set<string>(), shared_ptr<BasicBlock>(), true, leftInt, rightInt)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	else if (leftInt == 0) {
+		targetProcName = mpPKB->stmtToProcNameTable[rightInt];
+	}
+	else if (rightInt == 0) {
+		targetProcName = mpPKB->stmtToProcNameTable[leftInt];
+	}
+	else {
+		targetProcName = mpPKB->stmtToProcNameTable[leftInt];
+		string& rightProcName = mpPKB->stmtToProcNameTable[rightInt];
+		if (rightProcName == "" || (!BIP && targetProcName != rightProcName)) {
+			return false;
+		}
+	}
+	if (targetProcName == "") {
+		return false;
+	}
+	const shared_ptr<BasicBlock>& firstBlock = mpPKB->cfg->getCFG(targetProcName);
+	return computeAffects(firstBlock, includeAffectsT, BIP, map<string, set<int>>(), set<string>(), shared_ptr<BasicBlock>(), true, leftInt, rightInt);
 }
 
+// 5 cases: (int, syn) (syn, int) (syn, syn) (syn, _) (_, syn)
 pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLEvaluator::getAffects(bool includeAffectsT, bool BIP) {
 	affectsList.clear();
 	affectsTList.clear();
@@ -2275,50 +2322,59 @@ pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLEvaluator::getAffects(bool 
 			if (seenProcedures.count(cfg.first) == 0) {
 				seenProcedures.insert(cfg.first);
 				map<string, set<int>> lastModifiedTable;
-				computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+				computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, seenProcedures, shared_ptr<BasicBlock>(), false, 0, 0);
 			}
 		}
 	}
 	else {
 		for (auto const& cfg : cfgMap) {
 			map<string, set<int>> lastModifiedTable;
-			computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, set<string>());
+			computeAffects(cfg.second, includeAffectsT, BIP, lastModifiedTable, set<string>(), shared_ptr<BasicBlock>(), false, 0, 0);
 		}
 	}
 	return make_pair(affectsList, affectsTList);
 }
 
-const shared_ptr<BasicBlock> PKBPQLEvaluator::computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
-map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures) {
+bool PKBPQLEvaluator::computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
+map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures, shared_ptr<BasicBlock>& lastBlock,
+bool terminateEarly, int leftInt, int rightInt) {
 	vector<shared_ptr<CFGStatement>>& statements = basicBlock->getStatements();
 
 	if (statements.size() == 0) {
 		if (basicBlock->getNext().size() > 0) {
-			return computeAffects(basicBlock->getNext().back(), includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+			return computeAffects(basicBlock->getNext().back(), includeAffectsT, BIP, lastModifiedTable, seenProcedures, lastBlock, terminateEarly, leftInt, rightInt);
 		}
 		else {
-			return basicBlock;
+			lastBlock = basicBlock;
+			return false;
 		}
 	}
 	for (shared_ptr<CFGStatement>& stmt : statements) {
 		int index = stmt->index;
-
 		if (stmt->type == PKBDesignEntity::Assign) {
-			handleAffectsAssign(index, includeAffectsT, lastModifiedTable);
+			if (handleAffectsAssign(index, includeAffectsT, lastModifiedTable, terminateEarly, leftInt, rightInt)) {
+				return true;
+			};
 		}
 		else if (stmt->type == PKBDesignEntity::Read) {
 			handleAffectsRead(index, includeAffectsT, lastModifiedTable);
 		}
 		else if (stmt->type == PKBDesignEntity::Call) {
-			handleAffectsCall(index, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+			if (handleAffectsCall(index, includeAffectsT, BIP, lastModifiedTable, seenProcedures, terminateEarly, leftInt, rightInt)) {
+				return true;
+			};
 		}
 		else if (stmt->type == PKBDesignEntity::If) {
 			map<string, set<int>> lastModifiedTableCopy = lastModifiedTable;
 			vector<shared_ptr<BasicBlock>>& nextBlocks = basicBlock->getNext();
 			shared_ptr<BasicBlock>& ifBlock = nextBlocks[0];
 			shared_ptr<BasicBlock>& elseBlock = nextBlocks[1];
-			computeAffects(ifBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures);
-			auto lastBlock = computeAffects(elseBlock, includeAffectsT, BIP, lastModifiedTableCopy, seenProcedures);
+			if (computeAffects(ifBlock, includeAffectsT, BIP, lastModifiedTable, seenProcedures, lastBlock, terminateEarly, leftInt, rightInt)) {
+				return true;
+			}
+			if (computeAffects(elseBlock, includeAffectsT, BIP, lastModifiedTableCopy, seenProcedures, lastBlock, terminateEarly, leftInt, rightInt)) {
+				return true;
+			}
 
 			for (const auto& [varName, intSet] : lastModifiedTableCopy) {
 				set<int>& original = lastModifiedTable[varName];
@@ -2326,11 +2382,8 @@ map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures) {
 			}
 			PKBStmt::SharedPtr thisStmt;
 			PKBStmt::SharedPtr nextStmt;
-			if (mpPKB->getStatement(index, thisStmt) && // we can get this statement
-				lastBlock->getNextImmediateStatements().size() > 0 && // this next block has statements
-				mpPKB->getStatement(lastBlock->getNextImmediateStatements().back()->index, nextStmt) && // we can get a statement from next block
-				thisStmt->getGroup() == nextStmt->getGroup()) { // that statement is in the same nesting level as our if statement
-				return computeAffects(lastBlock->getNext().back(), includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+			if (basicBlock->goNext) {
+				return computeAffects(lastBlock->getNext().back(), includeAffectsT, BIP, lastModifiedTable, seenProcedures, lastBlock, terminateEarly, leftInt, rightInt);
 			}
 		}
 		else if (stmt->type == PKBDesignEntity::While) {
@@ -2338,7 +2391,9 @@ map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures) {
 			map<string, set<int>> lastModifiedTableCopy2 = lastModifiedTable;
 			vector<shared_ptr<BasicBlock>>& nextBlocks = basicBlock->getNext();
 			shared_ptr<BasicBlock>& nestedBlock = nextBlocks[0];
-			computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTableCopy2, seenProcedures);
+			if (computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTableCopy2, seenProcedures, lastBlock, terminateEarly, leftInt, rightInt)) {
+				return true;
+			};
 
 			if (lastModifiedTable != lastModifiedTableCopy2) {
 				do {
@@ -2347,18 +2402,22 @@ map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures) {
 						original.insert(intSet.begin(), intSet.end());
 					}
 					lastModifiedTableCopy = lastModifiedTableCopy2;
-					computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTableCopy2, seenProcedures);
+					if (computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTableCopy2, seenProcedures, lastBlock, terminateEarly, leftInt, rightInt)) {
+						return true;
+					};
 				} while ((lastModifiedTableCopy != lastModifiedTableCopy2));
 			}
 			if (basicBlock->goNext) {
-				return computeAffects(nextBlocks[1], includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+				return computeAffects(nextBlocks[1], includeAffectsT, BIP, lastModifiedTable, seenProcedures, lastBlock, terminateEarly, leftInt, rightInt);
 			}
-			return basicBlock;
+			lastBlock = basicBlock;
+			return false;
 		}
 	}
 	// differentiate end of a block and before while statement in same block
 	if (basicBlock->goNext) {
-		return computeAffects(basicBlock->getNext()[0], includeAffectsT, BIP, lastModifiedTable, seenProcedures);
+		return computeAffects(basicBlock->getNext()[0], includeAffectsT, BIP, lastModifiedTable, seenProcedures, lastBlock, terminateEarly, leftInt, rightInt);
 	}
-	return basicBlock;
+	lastBlock = basicBlock;
+	return false;
 }

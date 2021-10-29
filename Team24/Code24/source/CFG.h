@@ -25,6 +25,7 @@ private:
 public:
 	BasicBlock(int id) {
 		this->id = id;
+		this->goNext = false;
 	}
 	int getId();
 	bool isEmpty();

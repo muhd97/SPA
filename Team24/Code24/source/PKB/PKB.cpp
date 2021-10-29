@@ -185,8 +185,17 @@ void PKB::computeGoNextCFG(shared_ptr<CFG> cfg)
                 firstStmt->getGroup() == nextStmt->getGroup()) {
                 current->goNext = true;
             }
-            else {
-                current->goNext = false;
+        }
+        else if (current->getStatements().size() > 0 && current->getStatements().back()->type == PKBDesignEntity::If) {
+            PKBStmt::SharedPtr thisStmt;
+            getStatement(current->getStatements().back()->index, thisStmt);
+            PKBGroup::SharedPtr grp = thisStmt->getGroup();
+            vector<int>& members = grp->getMembers(PKBDesignEntity::AllStatements);
+            for (size_t i = 0; i < members.size(); i++) {
+                if (thisStmt->getIndex() == members[i] && i != members.size() - 1) {
+                    current->goNext = true;
+                    break;
+                }
             }
         }
         else if (current->getNextImmediateStatements().size() == 1) {
@@ -198,21 +207,16 @@ void PKB::computeGoNextCFG(shared_ptr<CFG> cfg)
                 thisStmt->getGroup() == nextStmt->getGroup()) {
                 current->goNext = true;
             }
-            else {
-                current->goNext = false;
-            }
         }
-        else {
-            current->goNext = false;
-        }
+
     }
 }
 
-PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group)
+PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group, string& procName)
 {
     // determine statement type
     PKBDesignEntity designEntity = simpleToPKBType(statement->getStatementType());
-
+    stmtToProcNameTable[statement->getIndex()] = procName;
     switch (designEntity)
     {
     case PKBDesignEntity::Read:
@@ -224,9 +228,9 @@ PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGr
     case PKBDesignEntity::Call:
         return extractCallStatement(statement, group);
     case PKBDesignEntity::While:
-        return extractWhileStatement(statement, group);
+        return extractWhileStatement(statement, group, procName);
     case PKBDesignEntity::If:
-        return extractIfStatement(statement, group);
+        return extractIfStatement(statement, group, procName);
     case PKBDesignEntity::AllStatements:
         throw("_ statement found in procedure, this should not occur");
     default:
@@ -256,7 +260,7 @@ PKBProcedure::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSi
 
     for (shared_ptr<Statement> ss : simpleStatements)
     {
-        PKBStmt::SharedPtr child = extractStatement(ss, group);
+        PKBStmt::SharedPtr child = extractStatement(ss, group, procedureSimple->getName());
 
         // add the statementIndex to our group member list
         group->addMember(child->getIndex(), child->getType());
@@ -440,7 +444,7 @@ PKBStmt::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statement, 
     return res;
 }
 
-PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName)
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -482,7 +486,7 @@ PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKB
 
     for (shared_ptr<Statement> ss : consequentStatements)
     {
-        PKBStmt::SharedPtr child = extractStatement(ss, consequentGroup);
+        PKBStmt::SharedPtr child = extractStatement(ss, consequentGroup, procName);
 
         // add the statementIndex to our group member list
         consequentGroup->addMember(child->getIndex(), child->getType());
@@ -494,7 +498,7 @@ PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKB
 
     for (shared_ptr<Statement> ss : alternativeStatements)
     {
-        PKBStmt::SharedPtr child = extractStatement(ss, alternativeGroup);
+        PKBStmt::SharedPtr child = extractStatement(ss, alternativeGroup, procName);
 
         // add the statementIndex to our group member list
         alternativeGroup->addMember(child->getIndex(), child->getType());
@@ -546,7 +550,7 @@ PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKB
     return res;
 }
 
-PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName)
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -591,7 +595,7 @@ PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, 
     vector<shared_ptr<Statement>> simpleStatements = whileStatement->getStatementList();
     for (shared_ptr<Statement> ss : simpleStatements)
     {
-        PKBStmt::SharedPtr child = extractStatement(ss, group);
+        PKBStmt::SharedPtr child = extractStatement(ss, group, procName);
 
         // add the statementIndex to our group member list
         group->addMember(child->getIndex(), child->getType());
@@ -1564,14 +1568,11 @@ vector<string> PKB::getIdentifiers(shared_ptr<ConditionalExpression> expr)
 
 void PKB::insertCallsRelationship(const string &caller, string &called)
 {
-    // cout << "caller: " << caller << endl;
-    // cout << "called: " << called << endl;
     pair<string, string> res = make_pair(caller, called);
 
     // add to CallsT upstream (upstream, called)
     for (auto &downstream : callsTTable[called])
     {
-        // cout << "downstream: " << downstream.first + ", " + downstream.second << endl;
         pair<string, string> toAdd = make_pair(caller, downstream.second);
         calledTTable[downstream.second].insert(toAdd);
         callsTTable[caller].insert(toAdd);
@@ -1579,7 +1580,6 @@ void PKB::insertCallsRelationship(const string &caller, string &called)
     // add to CallsT downstream (caller, downstream)
     for (auto &upstream : calledTTable[caller])
     {
-        // cout << "upstream: " << upstream.first + ", " + upstream.second << endl;
         pair<string, string> toAdd = make_pair(upstream.first, called);
         callsTTable[upstream.first].insert(toAdd);
         calledTTable[called].insert(toAdd);
@@ -1590,8 +1590,6 @@ void PKB::insertCallsRelationship(const string &caller, string &called)
     {
         for (auto &upstream : calledTTable[caller])
         {
-            // cout << "Tdownstream: " << downstream.first + ", " + downstream.second << endl;
-            // cout << "Tupstream: " << upstream.first + ", " + upstream.second << endl;
             pair<string, string> toAdd = make_pair(upstream.first, downstream.second);
             callsTTable[upstream.first].insert(toAdd);
             calledTTable[downstream.second].insert(toAdd);

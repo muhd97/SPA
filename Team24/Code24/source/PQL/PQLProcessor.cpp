@@ -2108,8 +2108,6 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
             stmtRefRight = static_pointer_cast<Affects>(suchThatCl->relRef)->stmtRef2;
         }
     }
-    pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP);
-    set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
     StmtRefType leftType = stmtRefLeft->getStmtRefType();
     StmtRefType rightType = stmtRefRight->getStmtRefType();
 
@@ -2117,22 +2115,21 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
         int leftArg = stmtRefLeft->getIntVal();
         if (rightType == StmtRefType::INTEGER) {
             int rightArg = stmtRefRight->getIntVal();
-            cout << relevantRes.count(make_pair(leftArg, rightArg)) << endl;
-            if (relevantRes.count(make_pair(leftArg, rightArg)) > 0) {
+            if (evaluator->getAffects(leftArg, rightArg, isT, isBIP)) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                 tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
                 toReturn.emplace_back(tupleToAdd);
             }
         }
         else if (rightType == StmtRefType::SYNONYM) {
+            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP);
+            set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
             if (!givenSynonymMatchesMultipleTypes(selectCl, stmtRefRight->getStringVal(),
                 { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
                 return; // invalid query
             }
             const string& rightAssignKey = stmtRefRight->getStringVal();
             for (const auto& p : relevantRes) {
-                cout << p.first << endl;
-
                 if (p.first == leftArg) {
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                     tupleToAdd->insertKeyValuePair(rightAssignKey, to_string(p.second));
@@ -2142,13 +2139,11 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
         }
 
         else if (rightType == StmtRefType::UNDERSCORE) {
-            for (const auto& p : relevantRes) {
-                if (p.first == leftArg) {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
-                    toReturn.emplace_back(move(tupleToAdd));
-                    return;
-                }
+            if (evaluator->getAffects(leftArg, 0, isT, isBIP)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
+                toReturn.emplace_back(move(tupleToAdd));
+                return;
             }
         }
     }
@@ -2158,12 +2153,13 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
             { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
             return; // invalid query
         }
-        const string& leftAssignKey = stmtRefLeft->getStringVal();
+        pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP);
+        set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
 
+        const string& leftAssignKey = stmtRefLeft->getStringVal();
         if (rightType == StmtRefType::INTEGER) {
             int rightArg = stmtRefRight->getIntVal();
             for (const auto& p : relevantRes) {
-                cout << p.second << endl;
                 if (p.second == rightArg) { 
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                     tupleToAdd->insertKeyValuePair(leftAssignKey, to_string(p.first));
@@ -2201,13 +2197,11 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
     else { // leftType == StmtRefType::UNDERSCORE 
         if (rightType == StmtRefType::INTEGER) {
             const auto& rightArg = stmtRefRight->getIntVal();
-            for (const auto& p : relevantRes) {
-                if (p.second == rightArg) {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
-                    toReturn.emplace_back(move(tupleToAdd));
-                    return;
-                }
+            if (evaluator->getAffects(0, rightArg, isT, isBIP)) {
+                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+                tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
+                toReturn.emplace_back(move(tupleToAdd));
+                return;
             }
         }
         else if (rightType == StmtRefType::SYNONYM) {
@@ -2215,6 +2209,9 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
                 { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
                 return; // invalid query
             }
+            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP);
+            set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
+
             const string& rightAssignKey = stmtRefRight->getStringVal();
             set<int> seen;
             for (const auto& p : relevantRes) {
@@ -2227,7 +2224,7 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
             }
         }
         else if (rightType == StmtRefType::UNDERSCORE) {
-            if (!relevantRes.empty()) {
+            if (evaluator->getAffects(0, 0, isT, isBIP)) {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                 tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
                 toReturn.emplace_back(move(tupleToAdd));
