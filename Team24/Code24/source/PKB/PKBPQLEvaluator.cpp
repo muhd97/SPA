@@ -2195,19 +2195,19 @@ void PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 		set<PKBVariable::SharedPtr>& modVars = stmt->getModifiedVariables();
 
 		// handle used variables
-		for (PKBVariable::SharedPtr var : usedVars) {
+		for (const auto& var : usedVars) {
 			set<int>& affectingStatements = lastModifiedTable[var->getName()];
 			if (affectingStatements.size() > 0) {
 				for (int s : affectingStatements) {
 					pair<int, int>& affectClause = make_pair(s, index);
 					//cout << "affect inserted: " << s << ", " << index << endl;
-					affectsList.insert(affectClause);
+					bool insertAffectsSucceed = affectsList.insert(affectClause).second;
 
 					// handle affects*
-					if (includeAffectsT) {
+					if (includeAffectsT && insertAffectsSucceed) {
 						affectsTList.insert(affectClause);
 						affectsTHelperTable[index].insert(affectClause);
-						for (pair<int, int> p : affectsTHelperTable[s]) {
+						for (const auto& p : affectsTHelperTable[s]) {
 							pair<int, int> affectsTClause = make_pair(p.first, index);
 							affectsTList.insert(affectsTClause);
 							affectsTHelperTable[index].insert(affectsTClause);
@@ -2218,7 +2218,7 @@ void PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 		}
 
 		// handle modified variables
-		for (PKBVariable::SharedPtr modVar : modVars) {
+		for (const auto& modVar : modVars) {
 			lastModifiedTable[modVar->getName()].clear();
 			lastModifiedTable[modVar->getName()].insert(index);
 		}
@@ -2232,7 +2232,7 @@ void PKBPQLEvaluator::handleAffectsRead(int index, bool includeAffectsT,
 	if (mpPKB->getStatement(index, stmt)) {
 		set<PKBVariable::SharedPtr>& modVars = stmt->getModifiedVariables();
 
-		for (PKBVariable::SharedPtr modVar : modVars) {
+		for (const auto& modVar : modVars) {
 			lastModifiedTable[modVar->getName()].clear();
 		}
 	}
@@ -2256,7 +2256,7 @@ void PKBPQLEvaluator::handleAffectsCall(int index, bool includeAffectsT, bool BI
 		if (mpPKB->getStatement(index, stmt)) {
 			set<PKBVariable::SharedPtr> modVars = stmt->getModifiedVariables();
 
-			for (PKBVariable::SharedPtr modVar : modVars) {
+			for (const auto& modVar : modVars) {
 				lastModifiedTable[modVar->getName()].clear();
 			}
 		}
@@ -2368,44 +2368,30 @@ map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures) {
 			map<string, set<int>> lastModifiedTableCopy2 = lastModifiedTable;
 			vector<shared_ptr<BasicBlock>>& nextBlocks = basicBlock->getNext();
 			shared_ptr<BasicBlock>& nestedBlock = nextBlocks[0];
-			do {
-				//cout << "NOT THE SAME" << endl;
-				for (const auto& [varName, intSet] : lastModifiedTableCopy2) {
-					set<int>& original = lastModifiedTable[varName];
-					original.insert(intSet.begin(), intSet.end());
-				}
-				lastModifiedTableCopy = lastModifiedTableCopy2;
-				computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTableCopy2, seenProcedures);
-			} while ((lastModifiedTableCopy != lastModifiedTableCopy2));
-			//cout << "ITS THE SAME" << endl;
+			computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTableCopy2, seenProcedures);
 
-			PKBStmt::SharedPtr firstStmt;
-			PKBStmt::SharedPtr nextStmt;
-			if (basicBlock->getNextImmediateStatements().size() > 1 && 
-			mpPKB->getStatement(basicBlock->getNextImmediateStatements()[1]->index, nextStmt) &&
-			mpPKB->getStatement(basicBlock->getFirstStatement()->index, firstStmt) &&
-			firstStmt->getGroup() == nextStmt->getGroup()) {
-				//cout << "contuining same nesting elvel" << endl;
+			if (lastModifiedTable != lastModifiedTableCopy2) {
+				do {
+					//cout << "NOT THE SAME" << endl;
+					for (const auto& [varName, intSet] : lastModifiedTableCopy2) {
+						set<int>& original = lastModifiedTable[varName];
+						original.insert(intSet.begin(), intSet.end());
+					}
+					lastModifiedTableCopy = lastModifiedTableCopy2;
+					computeAffects(nestedBlock, includeAffectsT, BIP, lastModifiedTableCopy2, seenProcedures);
+				} while ((lastModifiedTableCopy != lastModifiedTableCopy2));
+			}
+
+			//cout << "ITS THE SAME" << endl;
+			if (basicBlock->goNext) {
 				return computeAffects(nextBlocks[1], includeAffectsT, BIP, lastModifiedTable, seenProcedures);
 			}
-			//cout << " NOT contuining same nesting elvel" << endl;
-			//cout << basicBlock->getFirstStatement()->index << endl;
 			return basicBlock;
 		}
 	}
 	// differentiate end of a block and before while statement in same block
-	if (basicBlock->getNextImmediateStatements().size() == 1) {
-		PKBStmt::SharedPtr thisStmt;
-		PKBStmt::SharedPtr nextStmt;
-		if (mpPKB->getStatement(basicBlock->getNextImmediateStatements().back()->index, nextStmt) && // we can get the next statement
-			basicBlock->getStatements().size() > 0 && // this block has at least one statement
-			mpPKB->getStatement(basicBlock->getFirstStatement()->index, thisStmt) &&
-			thisStmt->getGroup() == nextStmt->getGroup()) {
-			//cout << "contuining basic block" << endl;
-			return computeAffects(basicBlock->getNext()[0], includeAffectsT, BIP, lastModifiedTable, seenProcedures);
-		}
+	if (basicBlock->goNext) {
+		return computeAffects(basicBlock->getNext()[0], includeAffectsT, BIP, lastModifiedTable, seenProcedures);
 	}
-	//cout << "returning basic block" << endl;
-
 	return basicBlock;
 }

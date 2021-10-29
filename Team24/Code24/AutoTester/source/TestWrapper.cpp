@@ -62,6 +62,7 @@ void TestWrapper::parse(std::string filename) {
         this->pkb->initialise();
         this->pkb->extractDesigns(root);
         this->pkb->initializeCFG(root);
+        this->pkb->computeGoNextCFG(pkb->cfg);
         this->pkb->initializeRelationshipTables();
         this->pkb->initializeWithTables();
         this->evaluator = PKBPQLEvaluator::create(this->pkb);

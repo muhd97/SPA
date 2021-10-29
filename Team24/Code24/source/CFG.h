@@ -28,6 +28,7 @@ public:
 	}
 	int getId();
 	bool isEmpty();
+	bool goNext; // for affects
 	void addNext(shared_ptr<BasicBlock> bb);
 	vector<shared_ptr<BasicBlock>> getNext();
 	void addStatement(shared_ptr<CFGStatement> statement);

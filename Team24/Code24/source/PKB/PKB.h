@@ -22,6 +22,7 @@ class PKB
     void initializeCFG(shared_ptr<Program> program);
     void initializeRelationshipTables();
     void initializeWithTables();
+    void computeGoNextCFG(shared_ptr<CFG> cfg);
 
     // Program AST
     shared_ptr<Program> program;

@@ -2110,9 +2110,6 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
     }
     pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP);
     set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
-    for (auto p : relevantRes) {
-        cout << "(" << p.first << ", " << p.second << "), ";
-    }
     StmtRefType leftType = stmtRefLeft->getStmtRefType();
     StmtRefType rightType = stmtRefRight->getStmtRefType();
 
@@ -2164,13 +2161,10 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
         const string& leftAssignKey = stmtRefLeft->getStringVal();
 
         if (rightType == StmtRefType::INTEGER) {
-            cout << "IVE BEEN DIRECTED HERE" << endl;
             int rightArg = stmtRefRight->getIntVal();
-            cout << "RIGHT ARG: " << rightArg << endl;
             for (const auto& p : relevantRes) {
                 cout << p.second << endl;
                 if (p.second == rightArg) { 
-                    cout << "IVE BEEN ADDED" << endl;
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
                     tupleToAdd->insertKeyValuePair(leftAssignKey, to_string(p.first));
                     toReturn.emplace_back(move(tupleToAdd));

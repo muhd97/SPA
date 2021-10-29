@@ -156,6 +156,58 @@ void PKB::initializeWithTables()
     }
 }
 
+void PKB::computeGoNextCFG(shared_ptr<CFG> cfg)
+{
+    set<shared_ptr<BasicBlock>> seen;
+    vector<shared_ptr<BasicBlock>> frontier;
+    shared_ptr<BasicBlock> current;
+    for (const auto& p : cfg->getAllCFGs()) {
+        seen.insert(p.second);
+        frontier.emplace_back(p.second);
+    }
+
+    while (!frontier.empty()) {
+        current = frontier.back();
+        frontier.pop_back();
+        for (const auto& bb : current->getNext()) {
+            if (!seen.count(bb)) {
+                seen.insert(bb);
+                frontier.emplace_back(bb);
+            }
+        }
+        // is while block
+        if (current->getStatements().size() == 1 && current->getStatements()[0]->type == PKBDesignEntity::While) {
+            PKBStmt::SharedPtr firstStmt;
+            PKBStmt::SharedPtr nextStmt;
+            if (current->getNextImmediateStatements().size() > 1 &&
+                getStatement(current->getNextImmediateStatements()[1]->index, nextStmt) &&
+                getStatement(current->getFirstStatement()->index, firstStmt) &&
+                firstStmt->getGroup() == nextStmt->getGroup()) {
+                current->goNext = true;
+            }
+            else {
+                current->goNext = false;
+            }
+        }
+        else if (current->getNextImmediateStatements().size() == 1) {
+            PKBStmt::SharedPtr thisStmt;
+            PKBStmt::SharedPtr nextStmt;
+            if (getStatement(current->getNextImmediateStatements().back()->index, nextStmt) && // we can get the next statement
+                current->getStatements().size() > 0 && // this block has at least one statement
+                getStatement(current->getFirstStatement()->index, thisStmt) &&
+                thisStmt->getGroup() == nextStmt->getGroup()) {
+                current->goNext = true;
+            }
+            else {
+                current->goNext = false;
+            }
+        }
+        else {
+            current->goNext = false;
+        }
+    }
+}
+
 PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group)
 {
     // determine statement type
