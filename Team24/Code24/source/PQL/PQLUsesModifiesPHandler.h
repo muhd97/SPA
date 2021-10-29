@@ -28,6 +28,6 @@ protected:
 	UsesModifiesPHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<EntRef> leftArg, shared_ptr<EntRef> rightArg);
 
 public:
-	void evaluate(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toReturn) override;
+	void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) override;
 
 };

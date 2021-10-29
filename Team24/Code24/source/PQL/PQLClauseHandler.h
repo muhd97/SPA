@@ -38,5 +38,5 @@ protected:
 	ClauseHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl);
 
 public:
-	virtual void evaluate(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
 };

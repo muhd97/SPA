@@ -22,7 +22,7 @@ FollowsParentHandler::FollowsParentHandler(shared_ptr<PKBPQLEvaluator>& evaluato
 	this->rightArg = rightArg;
 }
 
-void FollowsParentHandler::evaluate(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void FollowsParentHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
 {
 	validateArguments();
 

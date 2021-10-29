@@ -22,7 +22,7 @@ UsesModifiesSHandler::UsesModifiesSHandler(shared_ptr<PKBPQLEvaluator>& evaluato
 	this->rightArg = rightArg;
 }
 
-void UsesModifiesSHandler::evaluate(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void UsesModifiesSHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
 {
 	validateArguments();
 
