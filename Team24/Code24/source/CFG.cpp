@@ -122,13 +122,7 @@ PKBDesignEntity toPKBType(StatementType simpleStatementType)
 
 shared_ptr<CFGStatement> toCFGStatement(shared_ptr<Statement> simpleStatement) {
 	PKBDesignEntity de = toPKBType(simpleStatement->getStatementType());
-	if (de == PKBDesignEntity::Call) {
-		shared_ptr<CallStatement> callStmt = static_pointer_cast<CallStatement>(simpleStatement);
-		return make_shared<CFGStatement>(de, simpleStatement->getIndex(), callStmt->getProcId()->getName());
-	}
-	else {
-		return make_shared<CFGStatement>(de, simpleStatement->getIndex());
-	}
+	return make_shared<CFGStatement>(de, simpleStatement->getIndex());
 }
 
 shared_ptr<BasicBlock> buildIfCFG(shared_ptr<IfStatement> ifStatement, shared_ptr<BasicBlock> condBlock) {

@@ -1312,11 +1312,6 @@ void PKB::initializeNextTables()
 
                     if (following.empty()) {
                         lastStatmenetsInProc[proc->getName()].insert(statements[i]);
-
-                        // statement is a tail call
-                        if (statements[i]->type == PKBDesignEntity::Call) {
-                            tailCallsInProc[proc->getName()].insert(statements[i]->callProc);
-                        }
                     }
 
                     for (auto toStatement : following)
@@ -1345,10 +1340,7 @@ void PKB::initializeNextTables()
 
                  
                 // For NextBip we need next relationships without those originating from call statements
-                if (p.first->type == PKBDesignEntity::Call) {
-                    nextCallPairs.push_back(p);
-                }
-                else {
+                if (p.first->type != PKBDesignEntity::Call) {
                     nextWithoutCallsIntIntTable.insert(make_pair(p.first->index, p.second->index));
                     nextWithoutCallsSynIntTable[p.second->index][p.first->type].insert(p.first->index);
                     nextWithoutCallsSynIntTable[p.second->index][PKBDesignEntity::AllStatements].insert(p.first->index);

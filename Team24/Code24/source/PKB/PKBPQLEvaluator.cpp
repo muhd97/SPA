@@ -2193,6 +2193,84 @@ unordered_set<int> PKBPQLEvaluator::getNextTIntSyn(int fromIndex, PKBDesignEntit
 set<pair<int, int>> getNextBipCallStatements(shared_ptr<PKB> pkb, StatementType from, StatementType to, int fromIndex, int toIndex, bool canExitEarly)
 {
 	set<pair<int, int>> result = {};
+
+	auto allCallStatements = pkb->stmtTypeToSetOfStmtNoTable[PKBDesignEntity::Call];
+
+	for (auto callStatementInd : allCallStatements) {
+		string callee = pkb->callStmtToProcNameTable[to_string(callStatementInd)];
+		unordered_set<int> followingFromCall = pkb->nextIntSynTable[callStatementInd][PKBDesignEntity::AllStatements];
+
+		// step 1: add call statement to first of proc being called
+		bool isTypeP = StatementType::CALL == from || from == StatementType::STATEMENT || callStatementInd == fromIndex;
+
+		if (isTypeP) {
+			if (pkb->firstStatementInProc.find(callee) != pkb->firstStatementInProc.end()) {
+				auto firstInCalleProc = pkb->firstStatementInProc[callee];
+				bool isTypeQ = getStatementType(firstInCalleProc->type) == to || to == StatementType::STATEMENT || firstInCalleProc->index == toIndex;
+				if (isTypeP && isTypeQ) {
+					result.insert(pair<int, int>(callStatementInd, firstInCalleProc->index));
+					if (canExitEarly) {
+						return result;
+					}
+				}
+			}
+			// If callee function is empty
+			else {
+				for (int following : followingFromCall) {
+					shared_ptr<PKBStmt> stmt;
+					pkb->getStatement(following, stmt);
+					bool isTypeQ = getStatementType(stmt->getType()) == to || to == StatementType::STATEMENT || following == toIndex;
+
+					if (isTypeP && isTypeQ) {
+						result.insert(pair<int, int>(callStatementInd, following));
+						if (canExitEarly) {
+							return result;
+						}
+					}
+				}
+			}
+		}
+
+		// step 2: add next back from last statmeents to statement imm after the call
+		for (int following : followingFromCall) {
+			shared_ptr<PKBStmt> stmt;
+			pkb->getStatement(following, stmt);
+			bool isTypeQ = getStatementType(stmt->getType()) == to || to == StatementType::STATEMENT || following == toIndex;
+
+			for (auto last : pkb->lastStatmenetsInProc[callee]) {
+				bool isTypeP = getStatementType(last->type) == from || from == StatementType::STATEMENT || last->index == fromIndex;
+
+				if (isTypeP && isTypeQ) {
+					result.insert(pair<int, int>(last->index, following));
+					if (canExitEarly) {
+						return result;
+					}
+				}
+			}
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
+
 	for (auto p : pkb->nextCallPairs) {
 		// add next: call statement to first of proc being called
 		bool isTypeP = getStatementType(p.first->type) == from || from == StatementType::STATEMENT || p.first->index == fromIndex;
@@ -2237,7 +2315,7 @@ set<pair<int, int>> getNextBipCallStatements(shared_ptr<PKB> pkb, StatementType 
 			}
 		}
 	}
-
+	*/
 	return result;
 }
 // Use for NextBip(_, _)
