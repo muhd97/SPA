@@ -2189,93 +2189,53 @@ unordered_set<int> PKBPQLEvaluator::getNextTIntSyn(int fromIndex, PKBDesignEntit
 // ===============================================
 // NextBip
 // NextBip(p, q)
-void getNextBipStatemetList(vector<shared_ptr < Statement>> list, StatementType from, StatementType to, int fromIndex,
-	int toIndex, set<pair<int, int>>* result, bool canExitEarly, set<string> visited)
+// only gets the call instructions NextBip
+set<pair<int, int>> getNextBipCallStatements(shared_ptr<PKB> pkb, StatementType from, StatementType to, int fromIndex, int toIndex, bool canExitEarly)
 {
-	for (auto stmt : list)
-	{
-		if (canExitEarly && result->begin() != result->end())
-		{
-			return;
+	set<pair<int, int>> result = {};
+	for (auto p : pkb->nextCallPairs) {
+		// add next: call statement to first of proc being called
+		bool isTypeP = getStatementType(p.first->type) == from || from == StatementType::STATEMENT || p.first->index == fromIndex;
+		string callee = p.first->callProc;
+		bool isTypeQ;
+		int qVal;
+
+		if (pkb->firstStatementInProc.find(callee) != pkb->firstStatementInProc.end()) {
+			auto firstInCalleProc = pkb->firstStatementInProc[callee];
+			isTypeQ = getStatementType(firstInCalleProc->type) == to || to == StatementType::STATEMENT || firstInCalleProc->index == toIndex;
+			qVal = firstInCalleProc->index;
 		}
-		/*
-		// NONE is used to represent AllStatements
-		if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex)
-		{
-			for (auto p : *seenP)
-			{
-				result->insert(make_pair(p, stmt->getIndex()));
+		else {
+			isTypeQ = getStatementType(p.second->type) == to || to == StatementType::STATEMENT || p.second->index == toIndex;
+			qVal = p.second->index;
+		}
+
+		if (isTypeP && isTypeQ) {
+			result.insert(pair<int, int>(p.first->index, qVal));
+			if (canExitEarly) {
+				return result;
 			}
-
-			if (canExitEarly)
-			{
-				return;
-			}
 		}
 
-		// NONE is used to represent AllStatements
-		if (stmt->getStatementType() == from || from == StatementType::STATEMENT || stmt->getIndex() == fromIndex)
-		{
-			seenP->insert(stmt->getIndex());
-		}
+		// add next: back from last statmeents to statement imm after the call
+		unordered_set<int> followingFromCall = pkb->nextIntSynTable[p.first->index][PKBDesignEntity::AllStatements];
 
-		if (stmt->getStatementType() == StatementType::IF)
-		{
-			shared_ptr<IfStatement> ifS = static_pointer_cast<IfStatement> (stmt);
-			set<pair<int, int>> cloneResult = set<pair<int, int>>(*result);
-			set<int> cloneSeenP = set<int>(*seenP);
+		for (int following: followingFromCall) {
+			shared_ptr<PKBStmt> stmt;
+			pkb->getStatement(following, stmt);
+			isTypeQ = getStatementType(stmt->getType()) == to || to == StatementType::STATEMENT || following == toIndex;
 
-			getNextTStatmtList(ifS->getConsequent()->getStatements(), from, to, fromIndex, toIndex, &cloneResult, &cloneSeenP, canExitEarly);
-			getNextTStatmtList(ifS->getAlternative()->getStatements(), from, to, fromIndex, toIndex, result, seenP,
-				canExitEarly);
+			for (auto last : pkb->lastStatmenetsInProc[callee]) {
+				bool isTypeP = getStatementType(last->type) == from || from == StatementType::STATEMENT || last->index == fromIndex;
 
-			result->insert(cloneResult.begin(), cloneResult.end());
-			seenP->insert(cloneSeenP.begin(), cloneSeenP.end());
-		}
-		else if (stmt->getStatementType() == StatementType::WHILE)
-		{
-			shared_ptr<WhileStatement> whiles = static_pointer_cast<WhileStatement> (stmt);
-
-			auto sizeP = seenP->size();
-			getNextTStatmtList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP, canExitEarly);
-
-			if (sizeP < seenP->size())
-			{
-				// if there are new things in seenP we wanna do another pass
-				getNextTStatmtList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP,
-					canExitEarly);
-			}
-
-			// While to while loop!
-			if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex)
-			{
-				for (auto p : *seenP)
-				{
-					result->insert(make_pair(p, stmt->getIndex()));
+				if (isTypeP && isTypeQ) {
+					result.insert(pair<int, int>(last->index, following));
+					if (canExitEarly) {
+						return result;
+					}
 				}
 			}
 		}
-		*/
-	}
-}
-
-// only gets the call instructions NextBip
-set<pair<int, int>> getNextBipCallStatements(shared_ptr<Program> program, StatementType from, StatementType to, int fromIndex,
-	int toIndex, bool canExitEarly)
-{
-	set<pair<int, int>> result = {};
-	const auto procs = program->getProcedures();
-	if (procs.empty()) return result;
-
-	set<string> visited = {};
-
-	for (auto procedure : procs) {
-		if (visited.find(procedure->getName()) != visited.end()) {
-			continue;
-		}
-
-		set<pair<int, int>> procResult = {};
-		getNextBipStatemetList(procedure->getStatementList()->getStatements(), from, to, fromIndex, toIndex, &result, false, visited);
 	}
 
 	return result;
@@ -2289,7 +2249,7 @@ bool PKBPQLEvaluator::getNextBipUnderscoreUnderscore()
 	}
 	else {
 		set<pair<int, int>> result =
-			getNextBipCallStatements(mpPKB->program, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, true);
+			getNextBipCallStatements(mpPKB, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, true);
 		return result.begin() != result.end();
 
 	}
@@ -2322,9 +2282,12 @@ set<pair<int, int>> PKBPQLEvaluator::getNextBipSynSyn(PKBDesignEntity from, PKBD
 {
 
 	auto typePair = make_pair(from, to);
-	auto res =  mpPKB->nextWithoutCallsSynSynTable[typePair];
+	auto withoutCalls =  mpPKB->nextWithoutCallsSynSynTable[typePair];
 
-	return res;
+	set<pair<int, int>> result =
+		getNextBipCallStatements(mpPKB, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, false);
+	result.insert(withoutCalls.begin(), withoutCalls.end());
+	return result;
 }
 
 // Case 5: NextBip(syn, _)

@@ -299,10 +299,10 @@ class PKB
     unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextWithoutCallsIntSynTable;
 
     /* Table of first statements in each proc */
-    unordered_map<string, int> firstStatementInProc;
+    unordered_map<string, shared_ptr<CFGStatement>> firstStatementInProc;
 
     /* Table of last statements in each proc */
-    unordered_map<string, unordered_set<int>> lastStatmenetsInProc;
+    unordered_map<string, unordered_set<shared_ptr<CFGStatement>>> lastStatmenetsInProc;
 
     /* Mapping of tail calls in each procedure*/
     unordered_map<string, unordered_set<string>> tailCallsInProc;

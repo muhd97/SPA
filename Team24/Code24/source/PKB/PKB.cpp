@@ -1298,7 +1298,7 @@ void PKB::initializeNextTables()
             {
                 if (!visitedFirstStatementInProc) {
                     visitedFirstStatementInProc = true;
-                    firstStatementInProc[proc->getName()] = statements[i]->index;
+                    firstStatementInProc[proc->getName()] = statements[i];
                 }
                 // is not last statement
                 if (i < statements.size() - 1)
@@ -1311,7 +1311,7 @@ void PKB::initializeNextTables()
                     auto following = curr->getNextImmediateStatements();
 
                     if (following.empty()) {
-                        lastStatmenetsInProc[proc->getName()].insert(statements[i]->index);
+                        lastStatmenetsInProc[proc->getName()].insert(statements[i]);
 
                         // statement is a tail call
                         if (statements[i]->type == PKBDesignEntity::Call) {
@@ -1345,7 +1345,10 @@ void PKB::initializeNextTables()
 
                  
                 // For NextBip we need next relationships without those originating from call statements
-                if (p.first->type != PKBDesignEntity::Call) {
+                if (p.first->type == PKBDesignEntity::Call) {
+                    nextCallPairs.push_back(p);
+                }
+                else {
                     nextWithoutCallsIntIntTable.insert(make_pair(p.first->index, p.second->index));
                     nextWithoutCallsSynIntTable[p.second->index][p.first->type].insert(p.first->index);
                     nextWithoutCallsSynIntTable[p.second->index][PKBDesignEntity::AllStatements].insert(p.first->index);
@@ -1360,9 +1363,6 @@ void PKB::initializeNextTables()
                         make_pair(p.first->index, p.second->index));
                     nextWithoutCallsSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(
                         make_pair(p.first->index, p.second->index));
-                }
-                else {
-                    nextCallPairs.push_back(p);
                 }
             }
 
