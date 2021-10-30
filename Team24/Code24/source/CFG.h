@@ -8,13 +8,22 @@ using namespace std;
 
 class CFGStatement {
 public:
+	CFGStatement(PKBDesignEntity type, int index, string callProc) {
+		this->type = type;
+		this->index = index;
+		this->callProc = callProc;
+	}
+
 	CFGStatement(PKBDesignEntity type, int index) {
 		this->type = type;
 		this->index = index;
+		this->callProc = "";
 	}
 
 	PKBDesignEntity type;
 	int index;
+	// for call statements
+	string callProc;
 };
 
 class BasicBlock {

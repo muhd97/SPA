@@ -1312,6 +1312,11 @@ void PKB::initializeNextTables()
 
                     if (following.empty()) {
                         lastStatmenetsInProc[proc->getName()].insert(statements[i]->index);
+
+                        // statement is a tail call
+                        if (statements[i]->type == PKBDesignEntity::Call) {
+                            tailCallsInProc[proc->getName()].insert(statements[i]->callProc);
+                        }
                     }
 
                     for (auto toStatement : following)
@@ -1355,6 +1360,9 @@ void PKB::initializeNextTables()
                         make_pair(p.first->index, p.second->index));
                     nextWithoutCallsSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(
                         make_pair(p.first->index, p.second->index));
+                }
+                else {
+                    nextCallPairs.push_back(p);
                 }
             }
 

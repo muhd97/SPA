@@ -304,6 +304,12 @@ class PKB
     /* Table of last statements in each proc */
     unordered_map<string, unordered_set<int>> lastStatmenetsInProc;
 
+    /* Mapping of tail calls in each procedure*/
+    unordered_map<string, unordered_set<string>> tailCallsInProc;
+
+    /* Table of call next pairs within each proc */
+    vector<pair<shared_ptr<CFGStatement>, shared_ptr<CFGStatement>>> nextCallPairs;
+
     /* ======================== Pattern for While/If ======================== */
 
     /* pattern w(v, _, _) -> Table of all (w, v) that satisfy this */
