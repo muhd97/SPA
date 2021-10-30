@@ -4,12 +4,13 @@
 using namespace std;
 
 
-void PQLAssignPatternHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType, bool& retflag, vector<shared_ptr<ResultTuple>>& toReturn1)
+AssignPatternHandler::AssignPatternHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<PatternCl>& patternCl)
+    : PatternHandler(move(evaluator), move(selectCl), move(patternCl))
 {
- 
-    retflag = true;
+}
 
-    validateArguments(synonymType, patternCl);
+void AssignPatternHandler::evaluateAssign(vector<shared_ptr<ResultTuple>>& toReturn)
+{
 
     shared_ptr<EntRef> entRef = patternCl->entRef;
     vector<pair<int, string>> pairsStmtIndexAndVariables;
@@ -59,21 +60,8 @@ void PQLAssignPatternHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator, co
             tupleToAdd->insertKeyValuePair(entRef->getStringVal(), pair.second);
 
         }
-        toReturn1.emplace_back(move(tupleToAdd));
+        toReturn.emplace_back(move(tupleToAdd));
     }
-    retflag = false;
     return ;
 }
 
-void PQLAssignPatternHandler::validateArguments(const std::string& synonymType, const std::shared_ptr<PatternCl>& patternCl)
-{
-    if (synonymType != DesignEntity::ASSIGN) {
-        throw "Invalid synonym type of (" + synonymType + ") for pattern clauses\n";
-    }
-
-    /* pattern a(?, ?) */
-
-    if (patternCl->hasThirdArg) {
-        throw "Invalid pattern clause. Pattern for assign can only have 2 arguments\n";
-    }
-}

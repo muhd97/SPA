@@ -4,12 +4,14 @@
 #include "..\PKB\PKBPQLEvaluator.h"
 #include "PQLParser.h"
 #pragma optimize( "gty", on )
+# include "PQLPatternHandler.h"
 
 using namespace std;
 
-class PQLAssignPatternHandler
+class AssignPatternHandler : public PatternHandler
 {
+private:
+    void evaluateAssign(vector<shared_ptr<ResultTuple>>& toReturn) override;
 public:
-    static void evaluate(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType, bool& retflag, vector<shared_ptr<ResultTuple>>& toReturn);
-    static void validateArguments(const std::string& synonymType, const std::shared_ptr<PatternCl>& patternCl);
+    AssignPatternHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<PatternCl>& patternCl);
 };
