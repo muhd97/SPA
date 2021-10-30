@@ -4,24 +4,12 @@
 using namespace std;
 
 
-//{
-//	validateArguments();
-//}
-
 void PQLAssignPatternHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType, bool& retflag, vector<shared_ptr<ResultTuple>>& toReturn1)
 {
  
     retflag = true;
 
-    if (synonymType != DesignEntity::ASSIGN) {
-        throw "Invalid synonym type of (" + synonymType + ") for pattern clauses\n";
-    }
-
-    /* pattern a(?, ?) */
-
-    if (patternCl->hasThirdArg) {
-        throw "Invalid pattern clause. Pattern for assign can only have 2 arguments\n";
-    }
+    validateArguments(synonymType, patternCl);
 
     shared_ptr<EntRef> entRef = patternCl->entRef;
     vector<pair<int, string>> pairsStmtIndexAndVariables;
@@ -75,4 +63,17 @@ void PQLAssignPatternHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator, co
     }
     retflag = false;
     return ;
+}
+
+void PQLAssignPatternHandler::validateArguments(const std::string& synonymType, const std::shared_ptr<PatternCl>& patternCl)
+{
+    if (synonymType != DesignEntity::ASSIGN) {
+        throw "Invalid synonym type of (" + synonymType + ") for pattern clauses\n";
+    }
+
+    /* pattern a(?, ?) */
+
+    if (patternCl->hasThirdArg) {
+        throw "Invalid pattern clause. Pattern for assign can only have 2 arguments\n";
+    }
 }
