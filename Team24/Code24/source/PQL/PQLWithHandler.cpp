@@ -1,15 +1,14 @@
-#include "PQLClauseHandlerWith.h"
+#include "PQLWithHandler.h"
 #include "PQLProcessorUtils.h"
 #pragma optimize( "gty", on )
 
 using namespace std;
 
-//void evaluateClause()
 //{
 //	validateArguments();
 //}
 
-void PQLClauseHandlerWith::handleWithClause(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLWithHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     /* Throws an exception if the with clause is semantically invalid. */
     validateWithClause(selectCl, withCl);
@@ -36,7 +35,7 @@ void PQLClauseHandlerWith::handleWithClause(shared_ptr<PKBPQLEvaluator> evaluato
 }
 
 /* PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both strings) */
-void PQLClauseHandlerWith::handleWithFirstArgIdent(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLWithHandler::handleWithFirstArgIdent(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     const shared_ptr<Ref> lhs = withCl->lhs;
     assert(lhs->getRefType() == RefType::IDENT);
@@ -115,7 +114,7 @@ void PQLClauseHandlerWith::handleWithFirstArgIdent(shared_ptr<PKBPQLEvaluator> e
 }
 
 /* PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both integers) */
-void PQLClauseHandlerWith::handleWithFirstArgInt(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLWithHandler::handleWithFirstArgInt(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     const shared_ptr<Ref> lhs = withCl->lhs;
     assert(lhs->getRefType() == RefType::INTEGER);
@@ -192,7 +191,7 @@ void PQLClauseHandlerWith::handleWithFirstArgInt(shared_ptr<PKBPQLEvaluator> eva
 }
 
 /* PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both integers OR both strings) */
-void PQLClauseHandlerWith::handleWithFirstArgAttrRef(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLWithHandler::handleWithFirstArgAttrRef(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
 
     const shared_ptr<Ref> lhs = withCl->lhs;
@@ -424,7 +423,7 @@ void PQLClauseHandlerWith::handleWithFirstArgAttrRef(shared_ptr<PKBPQLEvaluator>
 TODO: @kohyida1997: write test cases for this with case.
 
 */
-void PQLClauseHandlerWith::handleWithFirstArgSyn(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLWithHandler::handleWithFirstArgSyn(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     const shared_ptr<Ref> lhs = withCl->lhs;
     assert(lhs->getRefType() == RefType::SYNONYM);
