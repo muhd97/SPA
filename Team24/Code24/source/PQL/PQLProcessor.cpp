@@ -2165,6 +2165,7 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
 
         for (auto& p : evaluator->getNextBipSynSyn(leftArgType, rightArgType))
         {
+            
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
