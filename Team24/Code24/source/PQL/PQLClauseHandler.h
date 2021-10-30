@@ -1,5 +1,4 @@
 #pragma once
-
 #include <string>
 #include <vector>
 #include "PQLParser.h"
@@ -16,7 +15,6 @@ class ClauseHandler
 {
 private:
 	shared_ptr<PKBPQLEvaluator> evaluator;
-	shared_ptr<SelectCl> selectCl;
 
 	bool givenSynonymMatchesMultipleTypes(const string& toCheck,
 		initializer_list<string> list);
@@ -28,6 +26,7 @@ private:
 	void validateProcSyn(const string& syn, const string& relationshipType);
 	void validateProcIdent(const string& ident, const string& relationshipType);
 protected:
+	shared_ptr<SelectCl> selectCl;
 	void validateStmtRef(const shared_ptr<StmtRef>& stmtRef, const string& relationshipType);
 	void validateProcEntRef(const shared_ptr<EntRef>& entRef, const string& relationshipType);
 	void validateVarEntRef(const shared_ptr<EntRef>& entRef, const string& relationshipType);
