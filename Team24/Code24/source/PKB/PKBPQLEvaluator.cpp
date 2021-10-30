@@ -2204,29 +2204,12 @@ set<pair<int, int>> getNextBipCallStatements(shared_ptr<PKB> pkb, StatementType 
 		bool isTypeP = StatementType::CALL == from || from == StatementType::STATEMENT || callStatementInd == fromIndex;
 
 		if (isTypeP) {
-			if (pkb->firstStatementInProc.find(callee) != pkb->firstStatementInProc.end()) {
-				auto firstInCalleProc = pkb->firstStatementInProc[callee];
-				bool isTypeQ = getStatementType(firstInCalleProc->type) == to || to == StatementType::STATEMENT || firstInCalleProc->index == toIndex;
-				if (isTypeP && isTypeQ) {
-					result.insert(pair<int, int>(callStatementInd, firstInCalleProc->index));
-					if (canExitEarly) {
-						return result;
-					}
-				}
-			}
-			// If callee function is empty
-			else {
-				for (int following : followingFromCall) {
-					shared_ptr<PKBStmt> stmt;
-					pkb->getStatement(following, stmt);
-					bool isTypeQ = getStatementType(stmt->getType()) == to || to == StatementType::STATEMENT || following == toIndex;
-
-					if (isTypeP && isTypeQ) {
-						result.insert(pair<int, int>(callStatementInd, following));
-						if (canExitEarly) {
-							return result;
-						}
-					}
+			auto firstInCalleProc = pkb->firstStatementInProc[callee];
+			bool isTypeQ = getStatementType(firstInCalleProc->type) == to || to == StatementType::STATEMENT || firstInCalleProc->index == toIndex;
+			if (isTypeP && isTypeQ) {
+				result.insert(pair<int, int>(callStatementInd, firstInCalleProc->index));
+				if (canExitEarly) {
+					return result;
 				}
 			}
 		}
@@ -2237,9 +2220,8 @@ set<pair<int, int>> getNextBipCallStatements(shared_ptr<PKB> pkb, StatementType 
 			pkb->getStatement(following, stmt);
 			bool isTypeQ = getStatementType(stmt->getType()) == to || to == StatementType::STATEMENT || following == toIndex;
 
-			for (auto last : pkb->lastStatmenetsInProc[callee]) {
+			for (auto last : pkb->terminalStatmenetsInProc[callee]) {
 				bool isTypeP = getStatementType(last->type) == from || from == StatementType::STATEMENT || last->index == fromIndex;
-
 				if (isTypeP && isTypeQ) {
 					result.insert(pair<int, int>(last->index, following));
 					if (canExitEarly) {
@@ -2252,6 +2234,7 @@ set<pair<int, int>> getNextBipCallStatements(shared_ptr<PKB> pkb, StatementType 
 
 	return result;
 }
+
 // Use for NextBip(_, _)
 bool PKBPQLEvaluator::getNextBipUnderscoreUnderscore()
 {

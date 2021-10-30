@@ -304,6 +304,9 @@ class PKB
     /* Table of last statements in each proc */
     unordered_map<string, unordered_set<shared_ptr<CFGStatement>>> lastStatmenetsInProc;
 
+    /* Table of terminal statements in each proc (across procedures) */
+    unordered_map<string, unordered_set<shared_ptr<CFGStatement>>> terminalStatmenetsInProc;
+
     /* ======================== Pattern for While/If ======================== */
 
     /* pattern w(v, _, _) -> Table of all (w, v) that satisfy this */
@@ -351,4 +354,5 @@ class PKB
     shared_ptr<PKBProcedure> currentProcedureToExtract;
     // calls relationship table helper
     void PKB::insertCallsRelationship(const string &caller, string &called);
+    void buildTerminalStatements(string procedure, unordered_set<string> visited);
 };
