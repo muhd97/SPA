@@ -7,17 +7,16 @@
 using namespace std;
 
 
-//void evaluateClause()
-//{
+
 //	validateArguments();
 //}
 
 /* ======================== WITH CLAUSE ======================== */
-class PQLClauseHandlerWith
+class PQLWithHandler
 {
 public:
 
-	static void handleWithClause(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
+	static void evaluate(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
 	static void handleWithFirstArgIdent(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
 

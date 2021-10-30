@@ -10,8 +10,8 @@
 #include "PQLLexer.h"
 #include <execution>
 #include <algorithm>
-#include "PQLClauseHandlerPattern.h"
-#include "PQLClauseHandlerWith.h"
+#include "PQLPatternHandler.h"
+#include "PQLWithHandler.h"
 
 /* Initialize static variables for PQLProcessor.cpp */
 string Result::dummy = "BaseResult: getResultAsString()";
@@ -2942,13 +2942,13 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
 {
     const auto type = evalCl->getEvalClType();
     if (type == EvalClType::Pattern) {
-        PQLClauseHandlerPattern::handlePatternClause(evaluator, selectCl, static_pointer_cast<PatternCl>(evalCl), toPopulate);
+        PQLPatternHandler::evaluate(evaluator, selectCl, static_pointer_cast<PatternCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::SuchThat) {
         handleSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::With) {
-        PQLClauseHandlerWith::handleWithClause(evaluator, selectCl, static_pointer_cast<WithCl>(evalCl), toPopulate);
+        PQLWithHandler::evaluate(evaluator, selectCl, static_pointer_cast<WithCl>(evalCl), toPopulate);
     }
 }
 
