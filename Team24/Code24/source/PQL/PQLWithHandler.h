@@ -18,6 +18,8 @@ public:
 
 	static void evaluate(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
+	static void validateArguments(const std::shared_ptr<SelectCl>& selectCl, const std::shared_ptr<WithCl>& withCl);
+
 	static void evaluateWithFirstArgIdent(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
 	static void evaluateWithFirstArgInt(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
