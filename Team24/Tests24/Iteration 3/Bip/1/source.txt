@@ -1,0 +1,56 @@
+procedure procedure1 {
+	call procedure11;				
+	while (x != y) {
+		b = c;
+		while (d > z) {
+			y = x / 2;
+			x = y * 1;
+			read y;
+			print x;
+		}
+		call procedure11;
+	}		
+	y = d;
+	print y;
+	read d;
+}
+
+procedure procedure11 {
+	call procedure111;
+	e = y;
+	call procedure11111;		
+	while ( (ifs < 1000) || (e != 4) ) {
+		ifs = z + b * e;
+		if ( e >= 1) then {
+			call procedure11111;
+			e = t / 1;
+		} else {
+			call procedure1111;
+		}
+	}
+	call procedure1111;
+	if ( y != 2) then {
+		x = y;
+	} else {
+		r = y;
+		print ifs;
+		read y;
+	}
+}
+
+procedure procedure111 {
+	read e;
+}
+
+procedure procedure1111 {
+	while ( x >= (z+5/1)) {
+			y = y;
+			d = 1;
+			z = z - 1;
+			call procedure111;
+	}
+}
+
+procedure procedure11111 {
+	b = b;
+}

@@ -1,0 +1,35 @@
+1 - AffectsBip
+stmt s2;
+Select s2 such that AffectsBip(32, s2)
+32
+5000
+2 - AffectsBip
+stmt s;
+Select BOOLEAN such that AffectsBip(s, _)
+TRUE
+5000
+3 - AffectsBip 
+stmt s;
+Select s such that AffectsBip(32, s)
+32
+5000
+4 - AffectsBip (without modifying)
+stmt s;
+Select s such that AffectsBip(30, 29)
+none
+5000
+5 - AffectsBip
+stmt s1, s2;
+Select <s1> such that AffectsBip(s1, 26)
+none
+5000
+6 - AffectsBip (multiple clause with 1 common syn) 
+prog_line n; prog_line n1; if ifs; while w;
+Select n such that AffectsBip (n, n1) and Next(n,n1) and Parent*(w, n1) pattern w(_,_)
+5
+5000
+7 - AffectsBip (Invalid)
+stmt s; read r; print pr;
+Select s such that AffectsBip(r, s)
+none
+5000
