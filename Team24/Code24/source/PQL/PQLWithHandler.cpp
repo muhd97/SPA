@@ -17,25 +17,25 @@ void PQLWithHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator, const share
     const shared_ptr<Ref>& rhs = withCl->rhs;
 
     if (lhs->getRefType() == RefType::IDENT) {
-        handleWithFirstArgIdent(evaluator, selectCl, withCl, toReturn);
+        evaluateWithFirstArgIdent(evaluator, selectCl, withCl, toReturn);
     }
 
     if (lhs->getRefType() == RefType::INTEGER) {
-        handleWithFirstArgInt(evaluator,selectCl, withCl, toReturn);
+        evaluateWithFirstArgInt(evaluator,selectCl, withCl, toReturn);
     }
 
     if (lhs->getRefType() == RefType::ATTR) {
-        handleWithFirstArgAttrRef(evaluator,selectCl, withCl, toReturn);
+        evaluateWithFirstArgAttrRef(evaluator,selectCl, withCl, toReturn);
 
     }
 
     if (lhs->getRefType() == RefType::SYNONYM) {
-        handleWithFirstArgSyn(evaluator,selectCl, withCl, toReturn);
+        evaluateWithFirstArgSyn(evaluator,selectCl, withCl, toReturn);
     }
 }
 
 /* PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both strings) */
-void PQLWithHandler::handleWithFirstArgIdent(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLWithHandler::evaluateWithFirstArgIdent(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     const shared_ptr<Ref> lhs = withCl->lhs;
     assert(lhs->getRefType() == RefType::IDENT);
@@ -114,7 +114,7 @@ void PQLWithHandler::handleWithFirstArgIdent(shared_ptr<PKBPQLEvaluator> evaluat
 }
 
 /* PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both integers) */
-void PQLWithHandler::handleWithFirstArgInt(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLWithHandler::evaluateWithFirstArgInt(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     const shared_ptr<Ref> lhs = withCl->lhs;
     assert(lhs->getRefType() == RefType::INTEGER);
@@ -191,7 +191,7 @@ void PQLWithHandler::handleWithFirstArgInt(shared_ptr<PKBPQLEvaluator> evaluator
 }
 
 /* PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both integers OR both strings) */
-void PQLWithHandler::handleWithFirstArgAttrRef(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLWithHandler::evaluateWithFirstArgAttrRef(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
 
     const shared_ptr<Ref> lhs = withCl->lhs;
@@ -423,7 +423,7 @@ void PQLWithHandler::handleWithFirstArgAttrRef(shared_ptr<PKBPQLEvaluator> evalu
 TODO: @kohyida1997: write test cases for this with case.
 
 */
-void PQLWithHandler::handleWithFirstArgSyn(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PQLWithHandler::evaluateWithFirstArgSyn(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
     const shared_ptr<Ref> lhs = withCl->lhs;
     assert(lhs->getRefType() == RefType::SYNONYM);
