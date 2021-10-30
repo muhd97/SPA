@@ -1278,6 +1278,9 @@ void PKB::initializeNextTables()
             throw "Cannot find CFG for " + proc->getName();
         }
 
+
+        bool visitedFirstStatementInProc = false;
+
         queue<shared_ptr<BasicBlock>> frontier;
         unordered_set<int> seen;
         frontier.push(root);
@@ -1293,6 +1296,10 @@ void PKB::initializeNextTables()
 
             for (unsigned int i = 0; i < statements.size(); i++)
             {
+                if (!visitedFirstStatementInProc) {
+                    visitedFirstStatementInProc = true;
+                    firstStatementInProc[proc->getName()] = statements[i]->index;
+                }
                 // is not last statement
                 if (i < statements.size() - 1)
                 {
@@ -1302,6 +1309,11 @@ void PKB::initializeNextTables()
                 else
                 {
                     auto following = curr->getNextImmediateStatements();
+
+                    if (following.empty()) {
+                        lastStatmenetsInProc[proc->getName()].insert(statements[i]->index);
+                    }
+
                     for (auto toStatement : following)
                     {
                         relationships.push_back(make_pair(statements[i], toStatement));

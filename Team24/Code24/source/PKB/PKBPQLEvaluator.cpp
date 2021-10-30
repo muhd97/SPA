@@ -2190,7 +2190,7 @@ unordered_set<int> PKBPQLEvaluator::getNextTIntSyn(int fromIndex, PKBDesignEntit
 // NextBip
 // NextBip(p, q)
 void getNextBipStatemetList(vector<shared_ptr < Statement>> list, StatementType from, StatementType to, int fromIndex,
-	int toIndex, set<pair<int, int>>* result, bool canExitEarly)
+	int toIndex, set<pair<int, int>>* result, bool canExitEarly, set<string> visited)
 {
 	for (auto stmt : list)
 	{
@@ -2275,8 +2275,7 @@ set<pair<int, int>> getNextBipCallStatements(shared_ptr<Program> program, Statem
 		}
 
 		set<pair<int, int>> procResult = {};
-		getNextBipStatemetList(procedure->getStatementList()->getStatements(), from, to, fromIndex, toIndex, &result, false);
-		result.insert(procResult.begin(), procResult.end());
+		getNextBipStatemetList(procedure->getStatementList()->getStatements(), from, to, fromIndex, toIndex, &result, false, visited);
 	}
 
 	return result;

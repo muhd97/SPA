@@ -298,6 +298,12 @@ class PKB
     /* Table of all Next(int, syn) without call statements */
     unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextWithoutCallsIntSynTable;
 
+    /* Table of first statements in each proc */
+    unordered_map<string, int> firstStatementInProc;
+
+    /* Table of last statements in each proc */
+    unordered_map<string, unordered_set<int>> lastStatmenetsInProc;
+
     /* ======================== Pattern for While/If ======================== */
 
     /* pattern w(v, _, _) -> Table of all (w, v) that satisfy this */
