@@ -4,6 +4,8 @@
 #define DEBUG_SORT_JOIN 0
 #define DEBUG_HASH_JOIN 0
 #define DEBUG_CARTESIAN 0
+#define PARALLELIZE_HASH_JOIN 1
+#define HASH_JOIN_PARALLEL_THRESHOLD 1000
 #define DEBUG_SINGLE_EVAL 0
 #define DEBUG_FILTERING 0
 #define DEBUG_GENERAL 0
@@ -2631,6 +2633,54 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
 #if DEBUG_HASH_JOIN
     cout << "Build Phase Done\n";
 #endif
+
+#if PARALLELIZE_HASH_JOIN
+    if (largerRes.size() > HASH_JOIN_PARALLEL_THRESHOLD) { // Parallelize
+        int rightBound = largerRes.size();
+        unsigned int n = thread::hardware_concurrency();
+        int each = (largerRes.size() + n - 1) / n;
+        vector<vector<shared_ptr<ResultTuple>>> res(n);
+        auto* baseAddr = &res[0];
+        std::for_each(execution::par_unseq, res.begin(), res.end(), [&largerRes, &leftHashTable, rightBound, baseAddr, each, &joinKeysVec](auto&& vec) {
+            int idx = &vec - baseAddr;
+            int start = min(rightBound, idx * each);
+            int end = min(rightBound, (idx + 1) * each);
+            for (int i = start; i < end; i++) {
+                const auto& tup = largerRes[i];
+                string stringToHash;
+                for (auto& joinKey : joinKeysVec) {
+                    stringToHash.append(tup->get(joinKey));
+                    stringToHash.push_back('$');
+                }
+                if (leftHashTable.count(stringToHash)) {
+                    auto& setToCompute = leftHashTable[stringToHash];
+                    for (const auto& i : setToCompute) {
+                        const auto& otherTup = i;
+                        shared_ptr<ResultTuple> toAdd =
+                            make_shared<ResultTuple>(tup->synonymKeyToValMap.size());
+                        /* Copy over the key-values */
+                        for (const auto& leftPair : tup->synonymKeyToValMap)
+                            toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+                        for (const auto& rightPair : otherTup->synonymKeyToValMap)
+                        {
+                            if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
+                            {
+                                toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
+                            }
+                        }
+                        vec.emplace_back(move(toAdd));
+                    }
+                }
+            }
+        });
+        for (auto& v : res)
+            for (const auto& ptr : v)
+                newResults.emplace_back(move(ptr));
+        return;
+    }
+#endif
+
+
     /* Probe phase */
     for (auto& tup : largerRes) {
         string stringToHash;
@@ -2658,14 +2708,10 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
             }
         }
     }
-
 #if DEBUG_HASH_JOIN
     cout << "Probe Phase Done\n";
 #endif
-
     return;
-
-
 }
 
 void PQLProcessor::sortMergeJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults, unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults)
