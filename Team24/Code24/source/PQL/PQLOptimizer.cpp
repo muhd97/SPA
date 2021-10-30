@@ -110,33 +110,23 @@ inline void PQLOptimizer::sortClauseGroups(vector<shared_ptr<ClauseGroup>>& vec)
 
 void PQLOptimizer::filterTuples(vector<shared_ptr<ResultTuple>>& resultsFromClauseGroup, vector<shared_ptr<ResultTuple>>& filteredResults)
 {
-
     unordered_set<string> seenBeforeTuples;
-
-    for (const auto& ptr : resultsFromClauseGroup) {
-        
+    for (const auto& ptr : resultsFromClauseGroup) {        
         string tempHash = "";
-
         for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
-
-            if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
-            
+            if (!ptr->synonymKeyAlreadyExists(synKey)) continue;            
             tempHash += ptr->get(synKey);
             tempHash.push_back('$');
         }
-
         if (!seenBeforeTuples.count(tempHash)) {
             shared_ptr<ResultTuple> candidate = make_shared<ResultTuple>();
-
             for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
                 if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
                 candidate->synonymKeyToValMap.insert(move(*(ptr->synonymKeyToValMap.find(synKey))));
             }
-
             filteredResults.emplace_back(move(candidate));
             seenBeforeTuples.insert(tempHash);
         }
-
     }
 }
 
