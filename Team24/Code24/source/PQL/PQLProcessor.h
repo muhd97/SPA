@@ -88,6 +88,8 @@ class PQLProcessor
     void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
         unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults);
 
+    void sortMergeJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults, unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults);
+
     void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftResults,
                                       vector<shared_ptr<ResultTuple>>& rightResults,
                                       vector<shared_ptr<ResultTuple>> &newResults);

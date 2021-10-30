@@ -1,8 +1,10 @@
 #pragma optimize( "gty", on )
 //#pragma once
 
+#define DEBUG_SORT_JOIN 0
 #define DEBUG_HASH_JOIN 0
 #define DEBUG_CARTESIAN 0
+#define DEBUG_SINGLE_EVAL 0
 #define DEBUG_FILTERING 0
 #define DEBUG_GENERAL 0
 
@@ -125,7 +127,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
         }
 
 
-        if (duplicateHelperSet.find(temp) == duplicateHelperSet.end()) {
+        if (!duplicateHelperSet.count(temp)) {
             //toReturn.emplace_back(make_shared<OrderedStringTupleResult>(move(orderedStrings)));
             toReturn.emplace_back(make_shared<StringSingleResult>(temp));
             duplicateHelperSet.insert(move(temp));
@@ -2585,7 +2587,6 @@ void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<Such
 
 void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults, unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults)
 {
-
     int leftSize = leftResults.size();
     int rightSize = rightResults.size();
 #if DEBUG_HASH_JOIN
@@ -2607,36 +2608,29 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
 #if DEBUG_HASH_JOIN
     cout << "Hash Join Smaller Res Size = " << smallerRes.size() << endl;
 #endif
-
     unordered_map<string, unordered_set<ResultTuple*>> leftHashTable;
     vector<string> joinKeysVec(joinKeys.begin(), joinKeys.end());
-
     /* Build phase */
     int smallerResSize = smallerRes.size();
 
     for (int i = 0; i < smallerResSize; i++) {
-
         auto& tup = smallerRes[i];
-        // compute hash and insert into hashtable
         string stringToHash;
         for (auto& joinKey : joinKeysVec) {
             stringToHash.append(tup->get(joinKey));
             stringToHash.push_back('$');
         }
-
-        if (leftHashTable.find(stringToHash) == leftHashTable.end()) {
+        if (!leftHashTable.count(stringToHash)) {
             leftHashTable[stringToHash] = unordered_set<ResultTuple*>();
             leftHashTable[stringToHash].insert(tup.get());
         }
-        else {
+        else
             leftHashTable[stringToHash].insert(tup.get());
-        }
+        
     }
-
 #if DEBUG_HASH_JOIN
     cout << "Build Phase Done\n";
 #endif
-
     /* Probe phase */
     for (auto& tup : largerRes) {
         string stringToHash;
@@ -2644,21 +2638,15 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
             stringToHash.append(tup->get(joinKey));
             stringToHash.push_back('$');
         }
-
         if (leftHashTable.count(stringToHash)) {
             auto& setToCompute = leftHashTable[stringToHash];
             for (const auto& i : setToCompute) {
-                const auto& otherTup = i;//smallerRes[i];
-
-                // build the actual merged result tuple
+                const auto& otherTup = i;
                 shared_ptr<ResultTuple> toAdd =
                     make_shared<ResultTuple>(tup->synonymKeyToValMap.size());
-
                 /* Copy over the key-values */
                 for (const auto& leftPair : tup->synonymKeyToValMap)
-                {
                     toAdd->insertKeyValuePair(leftPair.first, leftPair.second);   
-                }
                 for (const auto& rightPair : otherTup->synonymKeyToValMap)
                 {
                     if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
@@ -2668,7 +2656,6 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
                 }
                 newResults.emplace_back(move(toAdd));
             }
-
         }
     }
 
@@ -2678,6 +2665,77 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
 
     return;
 
+
+}
+
+void PQLProcessor::sortMergeJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults, unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults)
+{
+#if DEBUG_SORT_JOIN
+    cout << "Sort Merge Join ========= Num LeftResults = " << leftResults.size() << ", Num RightResults = " << rightResults.size() << ", joinKeysSize = " << joinKeys.size() << endl;
+#endif
+    vector<string> joinKeysVec(joinKeys.begin(), joinKeys.end());
+
+    auto sortFunc = [&joinKeysVec](const auto& tup1, const auto& tup2) {    
+        for (const auto& key : joinKeysVec) {
+            const auto& key1 = tup1->get(key);
+            const auto& key2 = tup2->get(key);
+            if (key1 == key2) continue;
+            return key1 < key2;
+        }
+        return tup1.get() < tup2.get();
+    };
+    
+    sort(execution::par_unseq, leftResults.begin(), leftResults.end(), sortFunc);
+    sort(execution::par_unseq, rightResults.begin(), rightResults.end(), sortFunc);
+
+    int i = 0, leftSize = leftResults.size();
+    int j = 0, rightSize = rightResults.size();
+    int k = j;
+
+    auto* leftTup = leftResults[0].get();
+    auto* rightTup = rightResults[0].get();
+    auto* rightTupPrime = rightResults[k].get();
+
+    while (i < leftSize && j < rightSize && k < rightSize) {
+        while (compareTuplesByKeyStrict(leftTup, rightTupPrime, joinKeysVec, true)) {
+            i++;
+            if (i >= leftSize) break;
+            leftTup = leftResults[i].get();
+        }
+        while (compareTuplesByKeyStrict(leftTup, rightTupPrime, joinKeysVec, false)) {
+            k++;
+            if (k >= rightSize) break;
+            rightTupPrime = rightResults[k].get();
+        }
+        j = k;
+        rightTup = rightTupPrime;
+        while (compareTuplesEqual(leftTup, rightTupPrime, joinKeysVec)) {
+            j = k;
+            rightTup = rightTupPrime;
+            while (compareTuplesEqual(leftTup, rightTup, joinKeysVec)) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>(leftTup->synonymKeyToValMap.size());
+                for (const auto& leftPair : leftTup->synonymKeyToValMap)
+                    toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+                for (const auto& rightPair : rightTup->synonymKeyToValMap)
+                {
+                    if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
+                        toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
+                }
+                newResults.emplace_back(move(toAdd));
+                j++;
+                if (j >= rightSize) break;
+                rightTup = rightResults[j].get();
+            }
+            i++;
+            if (i >= leftSize) break;
+            leftTup = leftResults[i].get();
+        }
+        k = j;
+        rightTupPrime = rightTup;
+    }
+#if DEBUG_SORT_JOIN
+    cout << "Sort Merge Join Done!\n";
+#endif
 
 }
 
@@ -2732,14 +2790,17 @@ void PQLProcessor::cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>&
                 
                 for (const auto& rightPair : rightPtr->synonymKeyToValMap)
                 {
-                    if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
-                    {
+                    /*if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
+                    {*/
                         toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
-                    }
+                    //}
                 }
                 newResults[i * X + j] = move(toAdd);
             }
         });
+#if DEBUG_CARTESIAN
+    cout << "Cartesian Product Done!\n";
+#endif
 }
 
 /* PRE-CONDITION: At least ONE targetSynonym appears in the suchThat/pattern/with clauses*/
@@ -2831,7 +2892,7 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
                 temp.append(val);
                 if (i != targetElems.size() - 1) temp.push_back(' ');
             }
-            if (existingResults.find(temp) == existingResults.end()) {
+            if (!existingResults.count(temp)) {
                 toReturn.emplace_back(make_shared<StringSingleResult>(temp));
                 existingResults.insert(move(temp));
             }
@@ -2954,13 +3015,15 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
 void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<EvalCl> evalCl)
 {
 
+#if DEBUG_SINGLE_EVAL
+    cout << "Evaluating: " << evalCl->format() << endl;
+#endif
 
     const auto type = evalCl->getEvalClType();
     if (type == EvalClType::Pattern) {
         PQLPatternHandler::evaluate(evaluator, selectCl, static_pointer_cast<PatternCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::SuchThat) {
-        //cout << "---------------- Single Eval Clause (SuchThat) ----------------\n";
         handleSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::With) {

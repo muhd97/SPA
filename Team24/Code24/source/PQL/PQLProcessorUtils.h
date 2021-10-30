@@ -5,6 +5,31 @@
 
 #include "PQLLexer.h"
 
+inline bool compareTuplesByKeyStrict(ResultTuple* tup1, ResultTuple* tup2, const vector<string>& compareKeys, bool lessThan) {
+
+    for (auto& key : compareKeys) {
+        const auto& key1 = tup1->get(key);
+        const auto& key2 = tup2->get(key);
+
+        if (key1 == key2) continue;
+        return lessThan ? key1 < key2 : key1 > key2;
+    }
+    return false;
+
+}
+
+inline bool compareTuplesEqual(ResultTuple* tup1, ResultTuple* tup2, const vector<string>& compareKeys) {
+
+    for (auto& key : compareKeys) {
+        const auto& key1 = tup1->get(key);
+        const auto& key2 = tup2->get(key);
+
+        if (key1 != key2) return false;
+     }
+    return true;
+
+}
+
 inline shared_ptr<ResultTuple> getResultTuple(const initializer_list<pair<string, string>>& args) {
 
     shared_ptr<ResultTuple> res = make_shared<ResultTuple>();

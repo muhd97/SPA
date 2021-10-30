@@ -1,5 +1,6 @@
 #include "PQLOptimizer.h"
 #include "PQLParser.h"
+#include "PQLProcessorUtils.h"
 #include <algorithm>
 #include <queue>
 
@@ -115,20 +116,25 @@ void PQLOptimizer::filterTuples(vector<shared_ptr<ResultTuple>>& resultsFromClau
     for (const auto& ptr : resultsFromClauseGroup) {
         
         string tempHash = "";
-        shared_ptr<ResultTuple> candidate = make_shared<ResultTuple>();
+
         for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
 
             if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
             
             tempHash += ptr->get(synKey);
             tempHash.push_back('$');
-            candidate->synonymKeyToValMap.insert(move(*(ptr->synonymKeyToValMap.find(synKey))));
-            //candidate->insertKeyValuePair(synKey, ptr->get(synKey));
         }
 
         if (!seenBeforeTuples.count(tempHash)) {
+            shared_ptr<ResultTuple> candidate = make_shared<ResultTuple>();
+
+            for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
+                if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
+                candidate->synonymKeyToValMap.insert(move(*(ptr->synonymKeyToValMap.find(synKey))));
+            }
+
             filteredResults.emplace_back(move(candidate));
-            seenBeforeTuples.insert(move(tempHash));
+            seenBeforeTuples.insert(tempHash);
         }
 
     }

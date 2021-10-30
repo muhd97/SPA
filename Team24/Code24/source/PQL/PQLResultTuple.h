@@ -70,7 +70,7 @@ public:
 
     inline bool synonymKeyAlreadyExists(const string& key)
     {
-        return synonymKeyToValMap.find(key) != synonymKeyToValMap.end();
+        return synonymKeyToValMap.count(key);
     }
 
     inline const unordered_map<string, string>& getMap() const
