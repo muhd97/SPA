@@ -64,10 +64,7 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
             OptNode* synNodePtr = synNodes[s];
             currNeighbours.emplace_back(synNodePtr);
             adjList[synNodePtr].push_back(clauseNode);
-
         }
-
-        
         adjList[clauseNode] = move(currNeighbours);
     }
 
@@ -111,7 +108,7 @@ inline void PQLOptimizer::sortClauseGroups(vector<shared_ptr<ClauseGroup>>& vec)
 void PQLOptimizer::filterTuples(vector<shared_ptr<ResultTuple>>& resultsFromClauseGroup, vector<shared_ptr<ResultTuple>>& filteredResults)
 {
     unordered_set<string> seenBeforeTuples;
-    for (const auto& ptr : resultsFromClauseGroup) {        
+    for (auto& ptr : resultsFromClauseGroup) {        
         string tempHash = "";
         for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
             if (!ptr->synonymKeyAlreadyExists(synKey)) continue;            
@@ -119,13 +116,25 @@ void PQLOptimizer::filterTuples(vector<shared_ptr<ResultTuple>>& resultsFromClau
             tempHash.push_back('$');
         }
         if (!seenBeforeTuples.count(tempHash)) {
-            shared_ptr<ResultTuple> candidate = make_shared<ResultTuple>();
-            for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
-                if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
-                candidate->synonymKeyToValMap.insert(move(*(ptr->synonymKeyToValMap.find(synKey))));
+
+            auto& underlyingMap = ptr->synonymKeyToValMap;
+            for (auto it = underlyingMap.cbegin(); it != underlyingMap.cend() /* not hoisted */; /* no increment */)
+            {
+                if (!synonymsUsedInResultClause.count((*it).first)) it = underlyingMap.erase(it);
+                else ++it;
             }
-            filteredResults.emplace_back(move(candidate));
-            seenBeforeTuples.insert(tempHash);
+
+            filteredResults.emplace_back(move(ptr));
+            seenBeforeTuples.insert(move(tempHash));
+
+
+            //shared_ptr<ResultTuple> candidate = make_shared<ResultTuple>();
+            //for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
+            //    if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
+            //    candidate->synonymKeyToValMap.insert(move(*(ptr->synonymKeyToValMap.find(synKey))));
+            //}
+            //filteredResults.emplace_back(move(candidate));
+            //seenBeforeTuples.insert(move(tempHash));
         }
     }
 }
@@ -163,14 +172,9 @@ inline void PQLOptimizer::DFS(OptNode* curr, unordered_map<OptNode*, vector<OptN
 void PQLOptimizer::BFS(OptNode* start, unordered_map<OptNode*, vector<OptNode*>>& adjList, unordered_set<OptNode*>& visited, shared_ptr<ClauseGroup>& cg)
 {
     queue<OptNode*> q;
-
-    //visited.insert(start);
-
     q.push(start);
-
     while (!q.empty()) {
         OptNode* curr = q.front();
-
         if (visited.count(curr)) {
             q.pop();
             continue;

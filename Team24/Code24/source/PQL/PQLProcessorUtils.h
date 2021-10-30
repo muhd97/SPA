@@ -10,7 +10,7 @@
 
 #define DEBUG_HASH_JOIN 0
 #define PARALLELIZE_HASH_JOIN 1
-#define HASH_JOIN_PARALLEL_THRESHOLD 1000
+#define HASH_JOIN_PARALLEL_THRESHOLD 250
 #define DEBUG_CARTESIAN 0
 #define DEBUG_SORT_JOIN 0
 
@@ -431,7 +431,6 @@ inline bool isStatementDesignEntity(PKBDesignEntity ent) {
         || ent == PKBDesignEntity::AllStatements;
 }
 
-
 inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults, unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults)
 {
     int leftSize = leftResults.size();
@@ -519,11 +518,12 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
             }
             });
         for (auto& v : res)
-            for (const auto& ptr : v)
+            for (auto& ptr : v)
                 newResults.emplace_back(move(ptr));
         return;
     }
 #endif
+
     /* Probe phase */
     for (auto& tup : largerRes) {
         string stringToHash;
