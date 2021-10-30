@@ -1,0 +1,105 @@
+1 - NextBip
+stmt s;
+Select s such that NextBip(s, 25)
+23
+5000
+2 - NextBip
+stmt stmt;
+Select stmt such that NextBip(13, stmt)
+28
+5000
+3 - NextBip
+stmt s1;
+Select s1 such that NextBip(25, s1)
+26
+5000
+4 - NextBip
+stmt s;
+Select s such that NextBip(s, 3)
+2
+5000
+5 - NextBip
+stmt s;
+Select s such that NextBip(34, s)
+16, 20
+5000
+6 - NextBip
+stmt s;
+Select s such that NextBip(33, 31)
+
+5000
+7 - NextBip
+stmt s2;
+Select s2 such that NextBip(s2, 33)
+32
+5000
+8 - NextBip
+stmt s;
+Select <s> such that NextBip(s, 5)
+4
+5000
+9 - Nextbip
+stmt s1, s2;
+Select <s2, s1> such that NextBip(s2, 22) and NextBip(s2, s1)
+16 17, 16 22
+5000
+10 - NextBip
+stmt s;
+Select <s> such that NextBip(22, 29)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34 
+5000
+11 - Nextbip
+stmt s; assign a; if ifs;
+Select ifs such that NextBip(8, 24)
+
+5000
+12 - Nextbip (with 2 common syn)
+call c; prog_line n;
+Select c such that NextBip(n, _) and NextBip(n, c)
+33, 21, 19, 22, 15, 13, 9 
+5000
+1e - NextBip*
+
+Select BOOLEAN such that NextBip*(3, 33)
+TRUE
+5000
+14 - NextBip*
+
+Select BOOLEAN such that NextBip*(32, 34)
+TRUE
+5000
+15 - NextBip*
+stmt s; assign a;
+Select s such that NextBip*(s, a)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34 
+5000
+16 - NextBip*
+stmt s; assign a; while w;
+Select w such that NextBip(w, a) and NextBip(a, s)
+2, 4, 16, 29 
+5000
+17 - NextBip* (no common)
+prog_line p, p1, p2, p3, p4, p5; stmt s, s1;
+Select s1 such that NextBip*(s, s1) and NextBip*(p, p1) and NextBip*(p2, p3) and NextBip*(p4, p5)
+13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 34, 29, 30, 31, 32, 33, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 
+5000
+18 - NextBip (multiple clause)
+assign a; stmt s2, s1; while w;
+Select <s2,s1,a,w> such that NextBip(20, s2) and NextBip(s2, s1) and NextBip(s1, a) and NextBip(a, w)
+
+5000
+19 - NextBip (Invalid)
+stmt s; variable v; constant c;
+Select s such that NextBip()
+
+5000
+20 - NextBip (Invalid)
+constant c; procedure p; prog_line n;
+Select c such that NextBip(c, n)
+
+5000
+21 - NextBip* (Invalid)
+procedure p; variable v; assign a;
+Select v such that NextBip(v, a)
+
+5000
