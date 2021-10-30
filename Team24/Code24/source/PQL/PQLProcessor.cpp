@@ -3,6 +3,8 @@
 
 #define DEBUG_HASH_JOIN 0
 #define DEBUG_CARTESIAN 0
+#define DEBUG_FILTERING 0
+#define DEBUG_GENERAL 0
 
 #include "PQLOptimizer.h"
 #include "PQLProcessor.h"
@@ -2602,6 +2604,10 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
     const auto& smallerRes = *smallerVec;
     const auto& largerRes = *largerVec;
 
+#if DEBUG_HASH_JOIN
+    cout << "Hash Join Smaller Res Size = " << smallerRes.size() << endl;
+#endif
+
     unordered_map<string, unordered_set<ResultTuple*>> leftHashTable;
     vector<string> joinKeysVec(joinKeys.begin(), joinKeys.end());
 
@@ -2627,6 +2633,10 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
         }
     }
 
+#if DEBUG_HASH_JOIN
+    cout << "Build Phase Done\n";
+#endif
+
     /* Probe phase */
     for (auto& tup : largerRes) {
         string stringToHash;
@@ -2635,11 +2645,10 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
             stringToHash.push_back('$');
         }
 
-        auto setPtr = leftHashTable.find(stringToHash);
-        if (setPtr != leftHashTable.end()) {
+        if (leftHashTable.count(stringToHash)) {
             auto& setToCompute = leftHashTable[stringToHash];
-            for (auto i : setToCompute) {
-                auto otherTup = i;//smallerRes[i];
+            for (const auto& i : setToCompute) {
+                const auto& otherTup = i;//smallerRes[i];
 
                 // build the actual merged result tuple
                 shared_ptr<ResultTuple> toAdd =
@@ -2662,6 +2671,10 @@ void PQLProcessor::hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftRes
 
         }
     }
+
+#if DEBUG_HASH_JOIN
+    cout << "Probe Phase Done\n";
+#endif
 
     return;
 
@@ -2940,6 +2953,8 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
 
 void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<EvalCl> evalCl)
 {
+
+
     const auto type = evalCl->getEvalClType();
     if (type == EvalClType::Pattern) {
         PQLPatternHandler::evaluate(evaluator, selectCl, static_pointer_cast<PatternCl>(evalCl), toPopulate);
@@ -2963,9 +2978,17 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
         if (isFirst) {
             handleSingleEvalClause(selectCl, toPopulate, clPtr);
+
+#if DEBUG_GENERAL
+            cout << "Handled First Clause:\n";
+            cout << clPtr->format();
+            cout << "SIZE ============= " << toPopulate.size() << endl;      
+#endif
+
             if (toPopulate.empty()) {
                 return;
             }
+
             isFirst = false;
         }
         else {
@@ -2974,7 +2997,7 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
             if (currRes.empty()) { // Early termination
                 toPopulate = move(currRes);
-                break;
+                return;
             }
 
             /* No synonyms, we just want to check if any of the clauses become empty. */
@@ -2994,7 +3017,29 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
             toPopulate = move(combinedRes);
         }
+
     }
+
+#if DEBUG_FILTERING
+    cout << "Begin Filtering ====================================================\n";
+
+    cout << "BEFORE FILTERING ==========\n";
+    for (auto& x : toPopulate) cout << x->toString() << endl;
+    cout << endl;
+#endif
+
+    if (clauseGroup->synonymsInsideResultCl) {
+        vector<shared_ptr<ResultTuple>> toReturn;
+        opt->filterTuples(toPopulate, toReturn);
+        toPopulate = move(toReturn);
+    }
+
+#if DEBUG_FILTERING
+    cout << "AFTER FILTERING ==========\n";
+    for (auto& x : toPopulate) cout << x->toString() << endl;
+    cout << endl;
+    cout << "Finish ClauseGroup====================================================\n";
+#endif
 }
 
 /* ======================== EXPOSED PUBLIC METHODS ======================== */
@@ -3011,10 +3056,9 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         return move(handleNoSuchThatOrPatternCase(move(selectCl)));
     }
 
-
     /* Get Clause Groups */
-    PQLOptimizer opt = PQLOptimizer(selectCl);
-    const auto& clauseGroups = opt.getClauseGroups();
+    opt = make_shared<PQLOptimizer>(selectCl);
+    const auto& clauseGroups = opt->getClauseGroups();
 
     /* Final Results to Return */
     vector<shared_ptr<Result>> res;
@@ -3033,7 +3077,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
             if (i == 0) {
                 handleClauseGroup(selectCl, currTups, currGroup);
 
-                if (currTups.empty() && hasSynonymsInResultCl) break;;
+                //if (currTups.empty() && hasSynonymsInResultCl) break;
+                if (currTups.empty()) break;
 
                 /* The synonyms for this group don't appear in the target synonyms */
                 if (!hasSynonymsInResultCl) {
@@ -3051,7 +3096,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
                 vector<shared_ptr<ResultTuple>> tempRes;
                 handleClauseGroup(selectCl, tempRes, currGroup);
 
-                if (currTups.empty() && hasSynonymsInResultCl) break;
+                if (currTups.empty()) break;
+                //if (currTups.empty() && hasSynonymsInResultCl) break;
 
                 /* The synonyms for this group don't appear in the target synonyms */
                 if (!hasSynonymsInResultCl) {

@@ -107,6 +107,33 @@ inline void PQLOptimizer::sortClauseGroups(vector<shared_ptr<ClauseGroup>>& vec)
     sort(vec.begin(), vec.end(), f);
 }
 
+void PQLOptimizer::filterTuples(vector<shared_ptr<ResultTuple>>& resultsFromClauseGroup, vector<shared_ptr<ResultTuple>>& filteredResults)
+{
+
+    unordered_set<string> seenBeforeTuples;
+
+    for (const auto& ptr : resultsFromClauseGroup) {
+        
+        string tempHash = "";
+        shared_ptr<ResultTuple> candidate = make_shared<ResultTuple>();
+        for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
+
+            if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
+            
+            tempHash += ptr->get(synKey);
+            tempHash.push_back('$');
+            candidate->synonymKeyToValMap.insert(move(*(ptr->synonymKeyToValMap.find(synKey))));
+            //candidate->insertKeyValuePair(synKey, ptr->get(synKey));
+        }
+
+        if (!seenBeforeTuples.count(tempHash)) {
+            filteredResults.emplace_back(move(candidate));
+            seenBeforeTuples.insert(move(tempHash));
+        }
+
+    }
+}
+
 inline void PQLOptimizer::DFS(OptNode* curr, unordered_map<OptNode*, vector<OptNode*>>& adjList, unordered_set<OptNode*>& visited, shared_ptr<ClauseGroup>& cg) {
     if (visited.count(curr)) return;
 
