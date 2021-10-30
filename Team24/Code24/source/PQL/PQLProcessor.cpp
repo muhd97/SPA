@@ -784,6 +784,16 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         handleNextT(selectCl, nextTCl, toReturn);
         break;
     }
+    case RelRefType::NEXT_BIP: {
+        shared_ptr<NextBip> nextBipCl = static_pointer_cast<NextBip>(suchThatCl->relRef);
+        handleNextBip(selectCl, nextBipCl, toReturn);
+        break;
+    }
+    case RelRefType::NEXT_BIP_T: {
+        shared_ptr<NextBipT> nextBipTCl = static_pointer_cast<NextBipT>(suchThatCl->relRef);
+        handleNextBipT(selectCl, nextBipTCl, toReturn);
+        break;
+    }
     case RelRefType::AFFECTS: {
         handleAffects(selectCl, suchThatCl, toReturn, false, false);
         break;
@@ -2083,6 +2093,17 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
         }
 
 }
+
+void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
+    shared_ptr<NextBip>& nextBipCl,
+    vector<shared_ptr<ResultTuple>>& toReturn) {
+}
+
+void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
+    shared_ptr<NextBipT>& nextBipTCl,
+    vector<shared_ptr<ResultTuple>>& toReturn) {
+}
+
 
 void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn, bool isT, bool isBIP)
 {

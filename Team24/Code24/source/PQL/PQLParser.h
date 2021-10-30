@@ -500,6 +500,8 @@ enum class RelRefType
     CALLS_T,
     NEXT,
     NEXT_T,
+    NEXT_BIP,
+    NEXT_BIP_T,
     AFFECTS,
     AFFECTS_T,
     AFFECTS_BIP,
@@ -1254,7 +1256,7 @@ public:
 
     inline RelRefType getType()
     {
-        return RelRefType::NEXT;
+        return RelRefType::NEXT_BIP;
     }
 
     vector<string> getAllSynonymsAsString()
@@ -1313,7 +1315,7 @@ public:
 
     inline RelRefType getType()
     {
-        return RelRefType::NEXT_T;
+        return RelRefType::NEXT_BIP_T;
     }
 
     vector<string> getAllSynonymsAsString()

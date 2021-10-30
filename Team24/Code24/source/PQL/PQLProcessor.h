@@ -74,6 +74,11 @@ class PQLProcessor
 
     void handleNextT(shared_ptr<SelectCl>& selectCl, shared_ptr<NextT>& nextTCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
+    void handleNextBip(shared_ptr<SelectCl>& selectCl, shared_ptr<NextBip>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn);
+
+    void handleNextBipT(shared_ptr<SelectCl>& selectCl, shared_ptr<NextBipT>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn);
+
+
     /* ======================== Affects ======================== */
 
     void handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn, bool isT, bool isBIP);
