@@ -143,7 +143,7 @@ stmt s; assign a; variable v;
 Select BOOLEAN such that Uses(a, v)
 TRUE 
 5000
-45 - Select BOOLEAN such that Uses(w, v) == FALSE
+45 - Select BOOLEAN such that Uses(w, v) 
 stmt s; assign a; variable v; while w;
 Select BOOLEAN such that Uses(w, v)
 TRUE 
