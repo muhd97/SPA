@@ -1,14 +1,14 @@
-#include "PQLClauseHandlerAssignPattern.h"
+#include "PQLAssignPatternHandler.h"
 #pragma optimize( "gty", on )
 
 using namespace std;
 
-//void evaluateClause()
+
 //{
 //	validateArguments();
 //}
 
-void PQLClauseHandlerAssignPattern::handleAssignPatternClause(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType, bool& retflag, vector<shared_ptr<ResultTuple>>& toReturn1)
+void PQLAssignPatternHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType, bool& retflag, vector<shared_ptr<ResultTuple>>& toReturn1)
 {
  
     retflag = true;
