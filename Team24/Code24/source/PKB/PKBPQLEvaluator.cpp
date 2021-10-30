@@ -2278,7 +2278,7 @@ unordered_set<int> PKBPQLEvaluator::getNextBipUnderscoreSyn(PKBDesignEntity to)
 		result.insert(p.second);
 	}
 
-	auto allPairs = getNextBipCallStatements(mpPKB, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, false);
+	auto allPairs = getNextBipCallStatements(mpPKB, StatementType::STATEMENT, getStatementType(to), 0, 0, false);
 
 	for (auto p : allPairs) {
 		result.insert(p.second);
@@ -2308,7 +2308,7 @@ set<pair<int, int>> PKBPQLEvaluator::getNextBipSynSyn(PKBDesignEntity from, PKBD
 	auto withoutCalls =  mpPKB->nextWithoutCallsSynSynTable[typePair];
 
 	set<pair<int, int>> result =
-		getNextBipCallStatements(mpPKB, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, false);
+		getNextBipCallStatements(mpPKB, getStatementType(from), getStatementType(to), 0, 0, false);
 	result.insert(withoutCalls.begin(), withoutCalls.end());
 	return result;
 }

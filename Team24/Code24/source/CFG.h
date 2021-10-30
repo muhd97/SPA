@@ -8,13 +8,21 @@ using namespace std;
 
 class CFGStatement {
 public:
+	CFGStatement() {
+		this->type = PKBDesignEntity::AllStatements;
+		this->index = -1;
+		this->isEOFStatement = true;
+	}
+
 	CFGStatement(PKBDesignEntity type, int index) {
 		this->type = type;
 		this->index = index;
+		this->isEOFStatement = false;
 	}
 
 	PKBDesignEntity type;
 	int index;
+	bool isEOFStatement; 
 };
 
 class BasicBlock {

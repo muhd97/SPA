@@ -169,6 +169,12 @@ void PKB::computeGoNextCFG(shared_ptr<CFG> cfg)
     while (!frontier.empty()) {
         current = frontier.back();
         frontier.pop_back();
+
+        // Check for End of Procedure delimiter
+        if (current->getStatements().size() == 1 && current->getStatements()[0]->isEOFStatement) {
+            continue;
+        }
+
         for (const auto& bb : current->getNext()) {
             if (!seen.count(bb)) {
                 seen.insert(bb);
@@ -1310,10 +1316,6 @@ void PKB::initializeNextTables()
                 {
                     auto following = curr->getNextImmediateStatements();
 
-                    if (following.empty()) {
-                        lastStatmenetsInProc[proc->getName()].insert(statements[i]);
-                    }
-
                     for (auto toStatement : following)
                     {
                         relationships.push_back(make_pair(statements[i], toStatement));
@@ -1323,6 +1325,11 @@ void PKB::initializeNextTables()
 
             for (auto p : relationships)
             {
+                if (p.second->isEOFStatement) {
+                    lastStatmenetsInProc[proc->getName()].insert(p.first);
+                    continue;
+                }
+
                 nextIntIntTable.insert(make_pair(p.first->index, p.second->index));
                 nextSynIntTable[p.second->index][p.first->type].insert(p.first->index);
                 nextSynIntTable[p.second->index][PKBDesignEntity::AllStatements].insert(p.first->index);
