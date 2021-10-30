@@ -2945,6 +2945,7 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
         PQLClauseHandlerPattern::handlePatternClause(evaluator, selectCl, static_pointer_cast<PatternCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::SuchThat) {
+        //cout << "---------------- Single Eval Clause (SuchThat) ----------------\n";
         handleSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::With) {
