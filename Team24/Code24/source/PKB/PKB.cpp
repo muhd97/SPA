@@ -1345,7 +1345,7 @@ void PKB::initializeNextTables()
                 nextSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(
                     make_pair(p.first->index, p.second->index));
 
-                 
+
                 // For NextBip we need next relationships without those originating from call statements
                 if (p.first->type != PKBDesignEntity::Call) {
                     nextWithoutCallsIntIntTable.insert(make_pair(p.first->index, p.second->index));
@@ -1375,7 +1375,42 @@ void PKB::initializeNextTables()
             }
         }
     }
+
+    unordered_set<string> visited = {};
+
+    for (auto proc : mAllProcedures)
+    {   
+        buildTerminalStatements(proc->getName(), visited);
+    }
+
+
+    
 }
+
+// terminal statements are possible bip last statements for each procedure!
+void PKB::buildTerminalStatements(string procedure, unordered_set<string> visited) {
+    if (visited.find(procedure) != visited.end()) {
+        return;
+    }
+    visited.insert(procedure);
+    unordered_set<shared_ptr<CFGStatement>> result = {};
+
+    for (auto stmt : lastStatmenetsInProc[procedure]) {
+        if (stmt->type == PKBDesignEntity::Call) {
+            string callee = callStmtToProcNameTable[to_string(stmt->index)];
+            buildTerminalStatements(callee, visited);
+
+            for (auto s : terminalStatmenetsInProc[callee]) {
+                result.insert(s);
+            }
+        }
+        else {
+            result.insert(stmt);
+        }
+    }
+    terminalStatmenetsInProc[procedure] = result;
+}
+
 
 void PKB::addStatement(PKBStmt::SharedPtr &statement, PKBDesignEntity designEntity)
 {

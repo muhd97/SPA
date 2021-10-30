@@ -10,8 +10,7 @@ using namespace std;
 
 void PQLWithHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator, const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn)
 {
-    /* Throws an exception if the with clause is semantically invalid. */
-    validateWithClause(selectCl, withCl);
+    validateArguments(selectCl, withCl);
 
     const shared_ptr<Ref>& lhs = withCl->lhs;
     const shared_ptr<Ref>& rhs = withCl->rhs;
@@ -32,6 +31,12 @@ void PQLWithHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator, const share
     if (lhs->getRefType() == RefType::SYNONYM) {
         evaluateWithFirstArgSyn(evaluator,selectCl, withCl, toReturn);
     }
+}
+
+void PQLWithHandler::validateArguments(const std::shared_ptr<SelectCl>& selectCl, const std::shared_ptr<WithCl>& withCl)
+{
+    /* Throws an exception if the with clause is semantically invalid. */
+    validateWithClause(selectCl, withCl);
 }
 
 /* PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both strings) */
