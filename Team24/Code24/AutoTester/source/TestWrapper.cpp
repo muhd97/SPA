@@ -104,10 +104,10 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
 #if DEBUG
         cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
 #endif
-        vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
+        const vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
 
         for (auto& r : res) {
-            results.emplace_back(r->getResultAsString());
+            results.emplace_back(move(r->getResultAsString()));
         }
     }
 

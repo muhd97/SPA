@@ -3,6 +3,7 @@
 #include "PQLParser.h"
 #include <functional>
 #include <algorithm>
+#include "PQLResultTuple.h"
 
 
 using namespace std;
@@ -66,16 +67,21 @@ public:
             evalClauses.emplace_back(cl);
         }
         
-        for (const auto& ptr : selectCl->getTarget()->getElements()) synonymsUsedInResultClause.insert(ptr->getSynonymString());
-
+        for (const auto& ptr : selectCl->getTarget()->getElements()) {
+            synonymsUsedInResultClauseOrdered.emplace_back(ptr->getSynonymString());
+            synonymsUsedInResultClause.insert(ptr->getSynonymString());
+        }
     }
 
     vector<shared_ptr<ClauseGroup>> getClauseGroups();
 
     inline void sortClauseGroups(vector<shared_ptr<ClauseGroup>>& vec);
 
+    void filterTuples(vector<shared_ptr<ResultTuple>>& resultsFromClauseGroup, vector<shared_ptr<ResultTuple>>& filteredResults);
+
 private:
     unordered_set<string> synonymsUsedInResultClause;
+    vector<string> synonymsUsedInResultClauseOrdered;
     vector<shared_ptr<EvalCl>> evalClauses;
     shared_ptr<SelectCl> selectCl;
     void DFS(OptNode* curr, unordered_map<OptNode*, vector<OptNode*>>& adjList, unordered_set<OptNode*>& visited, shared_ptr<ClauseGroup>& cg);
@@ -101,6 +107,7 @@ private:
 
         return sizeDiff < 0;
     };
+
 
 };
 

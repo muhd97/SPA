@@ -32,7 +32,9 @@ class PQLProcessor
     vector<shared_ptr<Result>> processPQLQuery(shared_ptr<SelectCl>& selectCl);
 
   private:
-    vector<shared_ptr<Result>> handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl);
+      shared_ptr<PQLOptimizer> opt = nullptr;
+      
+      vector<shared_ptr<Result>> handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl);
 
     void handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
                               vector<shared_ptr<ResultTuple>> &toReturn);
