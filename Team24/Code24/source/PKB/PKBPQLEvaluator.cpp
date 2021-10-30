@@ -2250,78 +2250,12 @@ set<pair<int, int>> getNextBipCallStatements(shared_ptr<PKB> pkb, StatementType 
 		}
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/*
-
-	for (auto p : pkb->nextCallPairs) {
-		// add next: call statement to first of proc being called
-		bool isTypeP = getStatementType(p.first->type) == from || from == StatementType::STATEMENT || p.first->index == fromIndex;
-		string callee = p.first->callProc;
-		bool isTypeQ;
-		int qVal;
-
-		if (pkb->firstStatementInProc.find(callee) != pkb->firstStatementInProc.end()) {
-			auto firstInCalleProc = pkb->firstStatementInProc[callee];
-			isTypeQ = getStatementType(firstInCalleProc->type) == to || to == StatementType::STATEMENT || firstInCalleProc->index == toIndex;
-			qVal = firstInCalleProc->index;
-		}
-		else {
-			isTypeQ = getStatementType(p.second->type) == to || to == StatementType::STATEMENT || p.second->index == toIndex;
-			qVal = p.second->index;
-		}
-
-		if (isTypeP && isTypeQ) {
-			result.insert(pair<int, int>(p.first->index, qVal));
-			if (canExitEarly) {
-				return result;
-			}
-		}
-
-		// add next: back from last statmeents to statement imm after the call
-		unordered_set<int> followingFromCall = pkb->nextIntSynTable[p.first->index][PKBDesignEntity::AllStatements];
-
-		for (int following: followingFromCall) {
-			shared_ptr<PKBStmt> stmt;
-			pkb->getStatement(following, stmt);
-			isTypeQ = getStatementType(stmt->getType()) == to || to == StatementType::STATEMENT || following == toIndex;
-
-			for (auto last : pkb->lastStatmenetsInProc[callee]) {
-				bool isTypeP = getStatementType(last->type) == from || from == StatementType::STATEMENT || last->index == fromIndex;
-
-				if (isTypeP && isTypeQ) {
-					result.insert(pair<int, int>(last->index, following));
-					if (canExitEarly) {
-						return result;
-					}
-				}
-			}
-		}
-	}
-	*/
 	return result;
 }
 // Use for NextBip(_, _)
 bool PKBPQLEvaluator::getNextBipUnderscoreUnderscore()
 {
-	if (mpPKB->nextIntIntTable.begin() != mpPKB->nextIntIntTable.end()) {
+	if (mpPKB->nextWithoutCallsIntIntTable.begin() != mpPKB->nextWithoutCallsIntIntTable.end()) {
 		// has next already
 		return true;
 	}
@@ -2331,20 +2265,24 @@ bool PKBPQLEvaluator::getNextBipUnderscoreUnderscore()
 		return result.begin() != result.end();
 
 	}
-	return false;
 }
 
 // Case 2: NextBip(_, syn)
 unordered_set<int> PKBPQLEvaluator::getNextBipUnderscoreSyn(PKBDesignEntity to)
 {
-	auto typePair = make_pair(PKBDesignEntity::AllStatements, to);
 	unordered_set<int> result;
-	for (auto p : mpPKB->nextWithoutCallsSynSynTable[typePair])
-	{
+	auto typePair = make_pair(PKBDesignEntity::AllStatements, to);
+	auto withoutCalls = mpPKB->nextWithoutCallsSynSynTable[typePair];
+
+	for (auto p : withoutCalls) {
 		result.insert(p.second);
 	}
 
-	// get call relationships
+	auto allPairs = getNextBipCallStatements(mpPKB, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, false);
+
+	for (auto p : allPairs) {
+		result.insert(p.second);
+	}
 
 	return result;
 }
@@ -2352,13 +2290,20 @@ unordered_set<int> PKBPQLEvaluator::getNextBipUnderscoreSyn(PKBDesignEntity to)
 // Case 3: NextBip(_, int)
 bool PKBPQLEvaluator::getNextBipUnderscoreInt(int toIndex)
 {
-	return mpPKB->nextWithoutCallsSynIntTable.find(toIndex) != mpPKB->nextWithoutCallsSynIntTable.end();
+	if (mpPKB->nextWithoutCallsSynIntTable.find(toIndex) != mpPKB->nextWithoutCallsSynIntTable.end()) {
+		// has next already
+		return true;
+	}
+	else {
+		set<pair<int, int>> result =
+			getNextT(mpPKB->program, StatementType::STATEMENT, StatementType::NONE, 0, toIndex, true);
+		return result.begin() != result.end();
+	}
 }
 
 // Case 4: NextBip(syn, syn)
 set<pair<int, int>> PKBPQLEvaluator::getNextBipSynSyn(PKBDesignEntity from, PKBDesignEntity to)
 {
-
 	auto typePair = make_pair(from, to);
 	auto withoutCalls =  mpPKB->nextWithoutCallsSynSynTable[typePair];
 
@@ -2378,36 +2323,66 @@ unordered_set<int> PKBPQLEvaluator::getNextBipSynUnderscore(PKBDesignEntity from
 		result.insert(p.first);
 	}
 
+	auto allPairs = getNextBipCallStatements(mpPKB, getStatementType(from), StatementType::STATEMENT, 0, 0, false);
+
+	for (auto p : allPairs) {
+		result.insert(p.first);
+	}
+
 	return result;
 }
 
 // Case 6: NextBip(syn, int)
 unordered_set<int> PKBPQLEvaluator::getNextBipSynInt(PKBDesignEntity from, int toIndex)
 {
-	return mpPKB->nextWithoutCallsSynIntTable[toIndex][from];
+	unordered_set<int> result = mpPKB->nextWithoutCallsSynIntTable[toIndex][from];
+
+	auto allPairs = getNextBipCallStatements(mpPKB, getStatementType(from), StatementType::NONE, 0, toIndex, false);
+
+	for (auto p : allPairs) {
+		result.insert(p.first);
+	}
+
+	return result;
 }
 
 // Case 7: NextBip(int, int)
 bool PKBPQLEvaluator::getNextBipIntInt(int fromIndex, int toIndex)
 {
-
-	for (auto item : mpPKB->nextWithoutCallsIntIntTable) {
-		cout << item.first;
+	if (mpPKB->nextWithoutCallsIntIntTable.find(pair<int, int>(fromIndex, toIndex)) != mpPKB->nextWithoutCallsIntIntTable.end()) {
+		return true;
 	}
-	auto typePair = make_pair(fromIndex, toIndex);
-	return mpPKB->nextWithoutCallsIntIntTable.find(typePair) != mpPKB->nextWithoutCallsIntIntTable.end();
+	else {
+		set<pair<int, int>> result =
+			getNextT(mpPKB->program, StatementType::NONE, StatementType::NONE, fromIndex, toIndex, true);
+		return result.begin() != result.end();
+	}
 }
 
 // Case 8: NextBip(int, _)
 bool PKBPQLEvaluator::getNextBipIntUnderscore(int fromIndex)
 {
-	return mpPKB->nextWithoutCallsIntSynTable.find(fromIndex) != mpPKB->nextWithoutCallsIntSynTable.end();
+	if (mpPKB->nextWithoutCallsIntSynTable.find(fromIndex) != mpPKB->nextWithoutCallsIntSynTable.end()) {
+		return true;
+	}
+	else {
+		set<pair<int, int>> result =
+			getNextT(mpPKB->program, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0, true);
+		return result.begin() != result.end();
+	}
 }
 
 // Case 9: NextBip(int, syn)
 unordered_set<int> PKBPQLEvaluator::getNextBipIntSyn(int fromIndex, PKBDesignEntity to)
 {
-	return mpPKB->nextWithoutCallsIntSynTable[fromIndex][to];
+	unordered_set<int> result = mpPKB->nextWithoutCallsIntSynTable[fromIndex][to];
+
+	set<pair<int, int>> allPairs =
+			getNextT(mpPKB->program, StatementType::NONE, getStatementType(to), fromIndex, 0, true);
+	for (auto p : allPairs) {
+		result.insert(p.second);
+	}
+	return result;
 }
 
 // NextBipT
