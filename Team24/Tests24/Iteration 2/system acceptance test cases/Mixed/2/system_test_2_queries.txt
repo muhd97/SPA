@@ -1779,7 +1779,7 @@ Select <w, r> such that Affects(264, 265)
 
 50000
 355 - Select BOOLEAN such that Affects(s, #) where # is the start of new if/while block
-
+stmt s;
 Select BOOLEAN such that Affects(s, 40)
 FALSE
 50000
@@ -1904,7 +1904,7 @@ Select <w, r> such that Affects*(264, 265)
 
 50000
 380 - Select BOOLEAN such that Affects*(s, #) where # is the start of new if/while block
-
+stmt s;
 Select BOOLEAN such that Affects*(s, 40)
 FALSE
 50000
