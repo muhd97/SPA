@@ -1325,6 +1325,25 @@ void PKB::initializeNextTables()
                     make_pair(p.first->index, p.second->index));
                 nextSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(
                     make_pair(p.first->index, p.second->index));
+
+                 
+                // For NextBip we need next relationships without those originating from call statements
+                if (p.first->type != PKBDesignEntity::Call) {
+                    nextWithoutCallsIntIntTable.insert(make_pair(p.first->index, p.second->index));
+                    nextWithoutCallsSynIntTable[p.second->index][p.first->type].insert(p.first->index);
+                    nextWithoutCallsSynIntTable[p.second->index][PKBDesignEntity::AllStatements].insert(p.first->index);
+                    nextWithoutCallsIntSynTable[p.first->index][p.second->type].insert(p.second->index);
+                    nextWithoutCallsIntSynTable[p.first->index][PKBDesignEntity::AllStatements].insert(p.second->index);
+
+                    nextWithoutCallsSynSynTable[make_pair(p.first->type, p.second->type)].insert(
+                        make_pair(p.first->index, p.second->index));
+                    nextWithoutCallsSynSynTable[make_pair(PKBDesignEntity::AllStatements, p.second->type)].insert(
+                        make_pair(p.first->index, p.second->index));
+                    nextWithoutCallsSynSynTable[make_pair(p.first->type, PKBDesignEntity::AllStatements)].insert(
+                        make_pair(p.first->index, p.second->index));
+                    nextWithoutCallsSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(
+                        make_pair(p.first->index, p.second->index));
+                }
             }
 
             for (auto n : curr->getNext())

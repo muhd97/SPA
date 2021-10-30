@@ -286,6 +286,18 @@ class PKB
     /* Table of all Next(int, syn) */
     unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextIntSynTable;
 
+    /* Table of all Next(int, int) without call statements */
+    unordered_set<pair<int, int>, pair_hash> nextWithoutCallsIntIntTable;
+
+    /* Table of all Next(syn, syn) without call statements */
+    unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> nextWithoutCallsSynSynTable;
+
+    /* Table of all Next(syn, int) without call statements */
+    unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextWithoutCallsSynIntTable;
+
+    /* Table of all Next(int, syn) without call statements */
+    unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextWithoutCallsIntSynTable;
+
     /* ======================== Pattern for While/If ======================== */
 
     /* pattern w(v, _, _) -> Table of all (w, v) that satisfy this */
