@@ -4,29 +4,15 @@
 
 using namespace std;
 
-//	validateArguments();
-//}
-    
 
 void PQLWhileAndIfPatternHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator1, const shared_ptr<SelectCl>& selectCl1, const shared_ptr<PatternCl>& patternCl1, const string& DesignEntityType1, vector<shared_ptr<ResultTuple>>& toReturn1) {
-    
     
     const shared_ptr<EntRef>& entRef1 = patternCl1->entRef;
     const auto& entRefType1 = entRef1->getEntRefType();
     const auto& patternSyn1 = patternCl1->synonym->getSynonymString();
 
-    if (!patternCl1->exprSpec->isAnything) {
-        throw "Invalid pattern clause. 2nd and 3rd arguments of pattern with WHILE and IFS must be UNDERSCORE\n";
-    }
+    validateArguments(patternCl1, DesignEntityType1, selectCl1, 0);
 
-    if (DesignEntityType1 == DesignEntity::WHILE && patternCl1->hasThirdArg) {
-        throw "Invalid pattern clause. Pattern with WHILE only has 2 arguments.\n";
-    }
-
-    if (DesignEntityType1 == DesignEntity::IF && !patternCl1->hasThirdArg) {
-        /* Third argument having to be UNDERSCORE is caught in parsing stage. */
-        throw "Invalid pattern clause. Pattern with IF needs to have 3 arguments.\n";
-    }
     const auto& patternTable1 = DesignEntityType1 == DesignEntity::WHILE ? evaluator1->mpPKB->whilePatternTable : evaluator1->mpPKB->ifPatternTable;
     
     function<bool(pair<int, unordered_set<string>>)> additionalCond;
@@ -51,9 +37,7 @@ void PQLWhileAndIfPatternHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator
         const auto& entRefSyn = entRef1->getStringVal();
         const auto& entRefSynType = selectCl1->getDesignEntityTypeBySynonym(entRefSyn);
 
-        if (entRefSynType != DesignEntity::VARIABLE) {
-            throw "Invalid pattern clause. EntRef must be declared variable\n";
-        }
+        validateArguments(patternCl1, DesignEntityType1, selectCl1, 1);
 
         for (const auto& p : patternTable1) {
             for (const auto& v : p.second) {
@@ -64,4 +48,27 @@ void PQLWhileAndIfPatternHandler::evaluate(shared_ptr<PKBPQLEvaluator> evaluator
     }
     return ;
 
+}
+
+void PQLWhileAndIfPatternHandler::validateArguments(const std::shared_ptr<PatternCl>& patternCl1, const std::string& DesignEntityType1, const shared_ptr<SelectCl>& selectCl1, int mode)
+{
+    if (mode == 0) {
+        if (!patternCl1->exprSpec->isAnything) {
+            throw "Invalid pattern clause. 2nd and 3rd arguments of pattern with WHILE and IFS must be UNDERSCORE\n";
+        }
+
+        if (DesignEntityType1 == DesignEntity::WHILE && patternCl1->hasThirdArg) {
+            throw "Invalid pattern clause. Pattern with WHILE only has 2 arguments.\n";
+        }
+
+        if (DesignEntityType1 == DesignEntity::IF && !patternCl1->hasThirdArg) {
+            /* Third argument having to be UNDERSCORE is caught in parsing stage. */
+            throw "Invalid pattern clause. Pattern with IF needs to have 3 arguments.\n";
+        }
+    } 
+    else{
+        if (selectCl1->getDesignEntityTypeBySynonym(patternCl1->entRef->getStringVal()) != DesignEntity::VARIABLE) {
+            throw "Invalid pattern clause. EntRef must be declared variable\n";
+        }
+    }
 }
