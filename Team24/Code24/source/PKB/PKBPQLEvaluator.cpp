@@ -2190,7 +2190,7 @@ unordered_set<int> PKBPQLEvaluator::getNextTIntSyn(int fromIndex, PKBDesignEntit
 // Use for NextBip(_, _)
 bool PKBPQLEvaluator::getNextBipUnderscoreUnderscore()
 {
-	return mpPKB->nextIntIntTable.begin() != mpPKB->nextIntIntTable.end();
+	return mpPKB->nextWithoutCallsIntIntTable.begin() != mpPKB->nextWithoutCallsIntIntTable.end();
 }
 
 // Case 2: NextBip(_, syn)
@@ -2198,7 +2198,7 @@ unordered_set<int> PKBPQLEvaluator::getNextBipUnderscoreSyn(PKBDesignEntity to)
 {
 	auto typePair = make_pair(PKBDesignEntity::AllStatements, to);
 	unordered_set<int> result;
-	for (auto p : mpPKB->nextSynSynTable[typePair])
+	for (auto p : mpPKB->nextWithoutCallsSynSynTable[typePair])
 	{
 		result.insert(p.second);
 	}
@@ -2209,14 +2209,14 @@ unordered_set<int> PKBPQLEvaluator::getNextBipUnderscoreSyn(PKBDesignEntity to)
 // Case 3: NextBip(_, int)
 bool PKBPQLEvaluator::getNextBipUnderscoreInt(int toIndex)
 {
-	return mpPKB->nextSynIntTable.find(toIndex) != mpPKB->nextSynIntTable.end();
+	return mpPKB->nextWithoutCallsSynIntTable.find(toIndex) != mpPKB->nextWithoutCallsSynIntTable.end();
 }
 
 // Case 4: NextBip(syn, syn)
 set<pair<int, int>> PKBPQLEvaluator::getNextBipSynSyn(PKBDesignEntity from, PKBDesignEntity to)
 {
 	auto typePair = make_pair(from, to);
-	return mpPKB->nextSynSynTable[typePair];
+	return mpPKB->nextWithoutCallsSynSynTable[typePair];
 }
 
 // Case 5: NextBip(syn, _)
@@ -2224,7 +2224,7 @@ unordered_set<int> PKBPQLEvaluator::getNextBipSynUnderscore(PKBDesignEntity from
 {
 	auto typePair = make_pair(from, PKBDesignEntity::AllStatements);
 	unordered_set<int> result;
-	for (auto p : mpPKB->nextSynSynTable[typePair])
+	for (auto p : mpPKB->nextWithoutCallsSynSynTable[typePair])
 	{
 		result.insert(p.first);
 	}
@@ -2235,30 +2235,30 @@ unordered_set<int> PKBPQLEvaluator::getNextBipSynUnderscore(PKBDesignEntity from
 // Case 6: NextBip(syn, int)
 unordered_set<int> PKBPQLEvaluator::getNextBipSynInt(PKBDesignEntity from, int toIndex)
 {
-	return mpPKB->nextSynIntTable[toIndex][from];
+	return mpPKB->nextWithoutCallsSynIntTable[toIndex][from];
 }
 
 // Case 7: NextBip(int, int)
 bool PKBPQLEvaluator::getNextBipIntInt(int fromIndex, int toIndex)
 {
 	auto typePair = make_pair(fromIndex, toIndex);
-	return mpPKB->nextIntIntTable.find(typePair) != mpPKB->nextIntIntTable.end();
+	return mpPKB->nextWithoutCallsIntIntTable.find(typePair) != mpPKB->nextWithoutCallsIntIntTable.end();
 }
 
 // Case 8: NextBip(int, _)
 bool PKBPQLEvaluator::getNextBipIntUnderscore(int fromIndex)
 {
-	return mpPKB->nextIntSynTable.find(fromIndex) != mpPKB->nextIntSynTable.end();
+	return mpPKB->nextWithoutCallsIntSynTable.find(fromIndex) != mpPKB->nextWithoutCallsIntSynTable.end();
 }
 
 // Case 9: NextBip(int, syn)
 unordered_set<int> PKBPQLEvaluator::getNextBipIntSyn(int fromIndex, PKBDesignEntity to)
 {
-	return mpPKB->nextIntSynTable[fromIndex][to];
+	return mpPKB->nextWithoutCallsIntSynTable[fromIndex][to];
 }
 
-
-// NextBipT(_, _)
+// NextBipT
+// Case 1: NextBipT(_, _)
 bool PKBPQLEvaluator::getNextBipTUnderscoreUnderscore()
 {
 	set<pair<int, int>> result =

@@ -2115,22 +2115,22 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
         }
     }
 
-    // Case 1: Next(_, _)
+    // Case 1: NextBip(_, _)
     if (firstRef == StmtRefType::UNDERSCORE && secondRef == StmtRefType::UNDERSCORE) {
-        if (evaluator->getNextUnderscoreUnderscore()) {
+        if (evaluator->getNextBipUnderscoreUnderscore()) {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
             toReturn.emplace_back(move(tupleToAdd));
         }
     }
 
-    // Case 2: Next(_, syn) 
+    // Case 2: NextBip(_, syn) 
     else if (firstRef == StmtRefType::UNDERSCORE && secondRef == StmtRefType::SYNONYM) {
         const string& rightSyn = nextBipCl->stmtRef2->getStringVal();
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
-        for (const int& x : evaluator->getNextUnderscoreSyn(rightArgType))
+        for (const int& x : evaluator->getNextBipUnderscoreSyn(rightArgType))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2140,10 +2140,10 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
         }
     }
 
-    // Case 3: Next(_, int) 
+    // Case 3: NextBip(_, int) 
     else if (firstRef == StmtRefType::UNDERSCORE && secondRef == StmtRefType::INTEGER) {
         int rightValue = nextBipCl->stmtRef2->getIntVal();
-        if (evaluator->getNextUnderscoreInt(rightValue)) {
+        if (evaluator->getNextBipUnderscoreInt(rightValue)) {
             int rightValue = nextBipCl->stmtRef2->getIntVal();
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -2154,7 +2154,7 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
         }
     }
 
-    // Case 4: Next(syn, syn) 
+    // Case 4: NextBip(syn, syn) 
     else if (firstRef == StmtRefType::SYNONYM && secondRef == StmtRefType::SYNONYM) {
         const string& leftSyn = nextBipCl->stmtRef1->getStringVal();
         const string& rightSyn = nextBipCl->stmtRef2->getStringVal();
@@ -2163,7 +2163,7 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
-        for (auto& p : evaluator->getNextSynSyn(leftArgType, rightArgType))
+        for (auto& p : evaluator->getNextBipSynSyn(leftArgType, rightArgType))
         {
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -2176,13 +2176,13 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
         }
     }
 
-    // Case 5: Next(syn, _) 
+    // Case 5: NextBip(syn, _) 
     else if (firstRef == StmtRefType::SYNONYM && secondRef == StmtRefType::UNDERSCORE) {
         const string& leftSyn = nextBipCl->stmtRef1->getStringVal();
         PKBDesignEntity leftArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(leftSyn));
 
-        for (const int& x : evaluator->getNextSynUnderscore(leftArgType))
+        for (const int& x : evaluator->getNextBipSynUnderscore(leftArgType))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2192,7 +2192,7 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
         }
     }
 
-    // Case 6: Next(syn, int) 
+    // Case 6: NextBip(syn, int) 
     else if (firstRef == StmtRefType::SYNONYM && secondRef == StmtRefType::INTEGER) {
         const string& leftSyn = nextBipCl->stmtRef1->getStringVal();
         PKBDesignEntity leftArgType =
@@ -2200,7 +2200,7 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
 
         int rightValue = nextBipCl->stmtRef2->getIntVal();
 
-        for (const int& x : evaluator->getNextSynInt(leftArgType, rightValue))
+        for (const int& x : evaluator->getNextBipSynInt(leftArgType, rightValue))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2210,12 +2210,12 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
         }
     }
 
-    // Case 7: Next(int, int) 
+    // Case 7: NextBip(int, int) 
     else if (firstRef == StmtRefType::INTEGER && secondRef == StmtRefType::INTEGER) {
         int leftValue = nextBipCl->stmtRef1->getIntVal();
         int rightValue = nextBipCl->stmtRef2->getIntVal();
 
-        if (evaluator->getNextIntInt(leftValue, rightValue))
+        if (evaluator->getNextBipIntInt(leftValue, rightValue))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2225,11 +2225,11 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
         }
     }
 
-    // Case 8: Next(int, _) 
+    // Case 8: NextBip(int, _) 
     else if (firstRef == StmtRefType::INTEGER && secondRef == StmtRefType::UNDERSCORE) {
         int leftValue = nextBipCl->stmtRef1->getIntVal();
 
-        if (evaluator->getNextIntUnderscore(leftValue))
+        if (evaluator->getNextBipIntUnderscore(leftValue))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2239,14 +2239,14 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
         }
     }
 
-    // Case 9: Next(int, syn) 
+    // Case 9: NextBip(int, syn) 
     else if (firstRef == StmtRefType::INTEGER && secondRef == StmtRefType::SYNONYM) {
         int leftValue = nextBipCl->stmtRef1->getIntVal();
         const string& rightSyn = nextBipCl->stmtRef2->getStringVal();
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
-        for (const int& x : evaluator->getNextIntSyn(leftValue, rightArgType))
+        for (const int& x : evaluator->getNextBipIntSyn(leftValue, rightArgType))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2282,7 +2282,7 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
 
     // Case 1: NextBipT(_, _)
     if (firstRef == StmtRefType::UNDERSCORE && secondRef == StmtRefType::UNDERSCORE) {
-        if (evaluator->getNextTUnderscoreUnderscore()) {
+        if (evaluator->getNextBipTUnderscoreUnderscore()) {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
             toReturn.emplace_back(move(tupleToAdd));
@@ -2295,7 +2295,7 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
-        for (const int& x : evaluator->getNextTUnderscoreSyn(rightArgType))
+        for (const int& x : evaluator->getNextBipTUnderscoreSyn(rightArgType))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2308,7 +2308,7 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
     // Case 3: NextBipT(_, int) 
     else if (firstRef == StmtRefType::UNDERSCORE && secondRef == StmtRefType::INTEGER) {
         int rightValue = nextBipTCl->stmtRef2->getIntVal();
-        if (evaluator->getNextTUnderscoreInt(rightValue)) {
+        if (evaluator->getNextBipTUnderscoreInt(rightValue)) {
             int rightValue = nextBipTCl->stmtRef2->getIntVal();
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -2329,7 +2329,7 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
 
-        for (const auto& p : evaluator->getNextTSynSyn(leftArgType, rightArgType))
+        for (const auto& p : evaluator->getNextBipTSynSyn(leftArgType, rightArgType))
         {
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -2348,7 +2348,7 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
         PKBDesignEntity leftArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(leftSyn));
 
-        for (const int& x : evaluator->getNextTSynUnderscore(leftArgType))
+        for (const int& x : evaluator->getNextBipTSynUnderscore(leftArgType))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2366,7 +2366,7 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
 
         int rightValue = nextBipTCl->stmtRef2->getIntVal();
 
-        for (const int& x : evaluator->getNextTSynInt(leftArgType, rightValue))
+        for (const int& x : evaluator->getNextBipTSynInt(leftArgType, rightValue))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2381,7 +2381,7 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
         int leftValue = nextBipTCl->stmtRef1->getIntVal();
         int rightValue = nextBipTCl->stmtRef2->getIntVal();
 
-        if (evaluator->getNextTIntInt(leftValue, rightValue))
+        if (evaluator->getNextBipTIntInt(leftValue, rightValue))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2396,7 +2396,7 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
     else if (firstRef == StmtRefType::INTEGER && secondRef == StmtRefType::UNDERSCORE) {
         int leftValue = nextBipTCl->stmtRef1->getIntVal();
 
-        if (evaluator->getNextTIntUnderscore(leftValue))
+        if (evaluator->getNextBipTIntUnderscore(leftValue))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2413,7 +2413,7 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
         PKBDesignEntity rightArgType =
             resolvePQLDesignEntityToPKBDesignEntity(selectCl->getDesignEntityTypeBySynonym(rightSyn));
 
-        for (const int& x : evaluator->getNextTIntSyn(leftValue, rightArgType))
+        for (const int& x : evaluator->getNextBipTIntSyn(leftValue, rightArgType))
         {
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -2422,7 +2422,6 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
             toReturn.emplace_back(move(tupleToAdd));
         }
     }
-
 }
 
 
