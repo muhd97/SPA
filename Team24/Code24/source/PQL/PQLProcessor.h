@@ -85,14 +85,6 @@ class PQLProcessor
 
     void handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn, bool isT, bool isBIP);
 
-    void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
-        unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults);
-
-    void sortMergeJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults, unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults);
-
-    void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftResults,
-                                      vector<shared_ptr<ResultTuple>>& rightResults,
-                                      vector<shared_ptr<ResultTuple>> &newResults);
     void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);
 
     const string& resolveAttrRef(const string& syn, shared_ptr<AttrRef>& attrRef, const shared_ptr<SelectCl>& selectCl, shared_ptr<ResultTuple>& tup);

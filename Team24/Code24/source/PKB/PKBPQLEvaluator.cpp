@@ -1991,8 +1991,8 @@ StatementType getStatementType(PKBDesignEntity de)
 }
 
 // NextT(p, q)
-void getNextTStatmtList(vector<shared_ptr < Statement>> list, StatementType from, StatementType to, int fromIndex,
-	int toIndex, set<pair<int, int>>* result, set< int >* seenP, bool canExitEarly)
+void getNextTStatementList(vector<shared_ptr <Statement>> list, StatementType from, StatementType to, int fromIndex,
+	int toIndex, set<pair<int, int>>* result, set<int>* seenP, bool canExitEarly)
 {
 	for (auto stmt : list)
 	{
@@ -2001,21 +2001,16 @@ void getNextTStatmtList(vector<shared_ptr < Statement>> list, StatementType from
 			return;
 		}
 
-		// NONE is used to represent AllStatements
+		// Statement is used to represent AllStatements
 		if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex)
 		{
 			for (auto p : *seenP)
 			{
 				result->insert(make_pair(p, stmt->getIndex()));
 			}
-
-			if (canExitEarly)
-			{
-				return;
-			}
 		}
 
-		// NONE is used to represent AllStatements
+		// Statement is used to represent AllStatements
 		if (stmt->getStatementType() == from || from == StatementType::STATEMENT || stmt->getIndex() == fromIndex)
 		{
 			seenP->insert(stmt->getIndex());
@@ -2027,8 +2022,8 @@ void getNextTStatmtList(vector<shared_ptr < Statement>> list, StatementType from
 			set<pair<int, int>> cloneResult = set<pair<int, int>>(*result);
 			set<int> cloneSeenP = set<int>(*seenP);
 
-			getNextTStatmtList(ifS->getConsequent()->getStatements(), from, to, fromIndex, toIndex, &cloneResult, &cloneSeenP, canExitEarly);
-			getNextTStatmtList(ifS->getAlternative()->getStatements(), from, to, fromIndex, toIndex, result, seenP,
+			getNextTStatementList(ifS->getConsequent()->getStatements(), from, to, fromIndex, toIndex, &cloneResult, &cloneSeenP, canExitEarly);
+			getNextTStatementList(ifS->getAlternative()->getStatements(), from, to, fromIndex, toIndex, result, seenP,
 				canExitEarly);
 
 			result->insert(cloneResult.begin(), cloneResult.end());
@@ -2039,12 +2034,12 @@ void getNextTStatmtList(vector<shared_ptr < Statement>> list, StatementType from
 			shared_ptr<WhileStatement> whiles = static_pointer_cast<WhileStatement> (stmt);
 
 			auto sizeP = seenP->size();
-			getNextTStatmtList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP, canExitEarly);
+			getNextTStatementList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP, canExitEarly);
 
 			if (sizeP < seenP->size())
 			{
 				// if there are new things in seenP we wanna do another pass
-				getNextTStatmtList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP,
+				getNextTStatementList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, seenP,
 					canExitEarly);
 			}
 
@@ -2078,7 +2073,7 @@ set<pair<int, int>> getNextT(shared_ptr<Program> program, StatementType from, St
 			const auto& procedure = procs[idx];
 
 			set<int> seenP = {};
-			getNextTStatmtList(procedure->getStatementList()->getStatements(), from, to, fromIndex, toIndex, &procSets[idx], &seenP, false);
+			getNextTStatementList(procedure->getStatementList()->getStatements(), from, to, fromIndex, toIndex, &procSets[idx], &seenP, false);
 		}
 
 	);
@@ -2368,19 +2363,143 @@ unordered_set<int> PKBPQLEvaluator::getNextBipIntSyn(int fromIndex, PKBDesignEnt
 	return result;
 }
 
+// ===========================================================================================================
 // NextBipT
+void buildSeen(vector<shared_ptr<Statement>>* statements, StatementType fromType, int fromIndex, 
+	StatementType toType, int toIndex, unordered_set<int> seenP, unordered_set<int> seenQ) {
+	
+	for (auto stmt : *statements) {
+		if (stmt->getStatementType() == fromType || fromType == StatementType::STATEMENT || stmt->getIndex() == fromIndex) {
+			seenP.insert(stmt->getIndex());
+		}
+		if (stmt->getStatementType() == toType || toType == StatementType::STATEMENT || stmt->getIndex() == toIndex) {
+			seenP.insert(stmt->getIndex());
+		}
+
+		if (stmt->getStatementType() == StatementType::IF) {
+			buildSeen(&stmt->getStatementList(), fromType, fromIndex, toType, toIndex, seenP, seenQ);
+		}
+		else if (stmt->getStatementType() == StatementType::WHILE) {
+			buildSeen(&stmt->getStatementList(), fromType, fromIndex, toType, toIndex, seenP, seenQ);
+		}
+	}
+}
+
+// NextT(p, q)
+void getNextBipTStatementList(vector<shared_ptr <Statement>>* list, StatementType from, StatementType to, int fromIndex, int toIndex, 
+	set<pair<int, int>>* result, bool canExitEarly, unordered_map<string, unordered_set<int>>*  procSeenP, unordered_map<string, unordered_set<int>>* procSeenQ, set<int>* seenP)
+{
+	for (auto stmt : *list)
+	{
+		if (canExitEarly && result->begin() != result->end())
+		{
+			return;
+		}
+
+		// Statement is used to represent AllStatements
+		if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex)
+		{
+			for (auto p : *seenP)
+			{
+				result->insert(make_pair(p, stmt->getIndex()));
+			}
+		}
+
+		// Statement is used to represent AllStatements
+		if (stmt->getStatementType() == from || from == StatementType::STATEMENT || stmt->getIndex() == fromIndex)
+		{
+			seenP->insert(stmt->getIndex());
+		}
+
+		if (stmt->getStatementType() == StatementType::IF)
+		{
+			shared_ptr<IfStatement> ifs = static_pointer_cast<IfStatement> (stmt);
+			set<pair<int, int>> cloneResult = set<pair<int, int>>(*result);
+			set<int> cloneSeenP = set<int>(*seenP);
+
+			getNextBipTStatementList(&ifs->getConsequent()->getStatements(), from, to, fromIndex, toIndex, &cloneResult, canExitEarly, procSeenP, procSeenQ,  &cloneSeenP);
+			getNextBipTStatementList(&ifs->getAlternative()->getStatements(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, seenP);
+
+			result->insert(cloneResult.begin(), cloneResult.end());
+			seenP->insert(cloneSeenP.begin(), cloneSeenP.end());
+		}
+		else if (stmt->getStatementType() == StatementType::WHILE)
+		{
+			shared_ptr<WhileStatement> whiles = static_pointer_cast<WhileStatement> (stmt);
+
+			auto sizeP = seenP->size();
+			getNextBipTStatementList(&whiles->getStatementList(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, seenP);
+
+			if (sizeP < seenP->size())
+			{
+				// if there are new things in seenP we wanna do another pass
+				getNextBipTStatementList(&whiles->getStatementList(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, seenP);
+			}
+
+			// While to while loop!
+			if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex)
+			{
+				for (auto p : *seenP)
+				{
+					result->insert(make_pair(p, stmt->getIndex()));
+				}
+			}
+		}
+		else if (stmt->getStatementType() == StatementType::CALL) {
+
+		}
+	}
+}
+
+void getNextBipTProcedure(shared_ptr<Procedure>* proc, StatementType from, StatementType to, int fromIndex,
+	int toIndex, set<pair<int, int>>* result, bool canExitEarly,
+	unordered_map<string, unordered_set<int>>*  procSeenP, unordered_map<string, unordered_set<int>>* procSeenQ, unordered_set<string>* visited) {
+	if ((*visited).find((*proc)->getName()) != (*visited).end()) {
+		return;
+	}
+	(*visited).insert((*proc)->getName());
+	getNextBipTStatementList(&(*proc)->getStatementList()->getStatements(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, {});
+}
+
+
+set<pair<int, int>> getNextBipT(shared_ptr<Program>* program, StatementType from, StatementType to, int fromIndex,
+	int toIndex, bool canExitEarly)
+{
+	// NextBipT(p, q)
+	unordered_map<string, unordered_set<int>> procSeenP = {};
+	unordered_map<string, unordered_set<int>> procSeenQ = {};
+
+	// build seenP and seenQ
+	for (auto proc: (*program)->getProcedures()) {
+		unordered_set<int> seenPResult = {};
+		unordered_set<int> seenQResult = {};
+		buildSeen(&proc->getStatementList()->getStatements(), from, fromIndex, to, toIndex, seenPResult, seenQResult);
+		procSeenP[proc->getName()] = seenPResult;
+		procSeenQ[proc->getName()] = seenQResult;
+	}
+
+	// run dfs though all the connected componenets
+	set<pair<int, int>> result = {};
+	unordered_set<string> visited = {};
+	for (auto proc : (*program)->getProcedures()) {
+		getNextBipTProcedure(&proc, from, to, fromIndex, toIndex, &result, canExitEarly, &procSeenP, &procSeenQ, &visited);
+	}
+
+	return result;
+}
+
 // Case 1: NextBipT(_, _)
 bool PKBPQLEvaluator::getNextBipTUnderscoreUnderscore()
 {
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, true);
+		getNextBipT(&mpPKB->program, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, true);
 	return result.begin() != result.end();
 }
 
-// Case 2: NextT(_, syn)
+// Case 2: NextBipT(_, syn)
 unordered_set<int> PKBPQLEvaluator::getNextBipTUnderscoreSyn(PKBDesignEntity to)
 {
-	set<pair<int, int>> result = getNextT(mpPKB->program, StatementType::STATEMENT, getStatementType(to), 0, 0, false);
+	set<pair<int, int>> result = getNextBipT(&mpPKB->program, StatementType::STATEMENT, getStatementType(to), 0, 0, false);
 	unordered_set<int> toResult = {};
 	for (auto p : result)
 	{
@@ -2390,25 +2509,25 @@ unordered_set<int> PKBPQLEvaluator::getNextBipTUnderscoreSyn(PKBDesignEntity to)
 	return move(toResult);
 }
 
-// Case 3: NextT(_, int)
+// Case 3: NextBipT(_, int)
 bool PKBPQLEvaluator::getNextBipTUnderscoreInt(int toIndex)
 {
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, StatementType::STATEMENT, StatementType::NONE, 0, toIndex, true);
+		getNextBipT(&mpPKB->program, StatementType::STATEMENT, StatementType::NONE, 0, toIndex, true);
 	return result.begin() != result.end();
 }
 
-// Case 4: NextT(syn, syn)
+// Case 4: NextBipT(syn, syn)
 set<pair<int, int>> PKBPQLEvaluator::getNextBipTSynSyn(PKBDesignEntity from, PKBDesignEntity to)
 {
-	return getNextT(mpPKB->program, getStatementType(from), getStatementType(to), 0, 0, false);
+	return getNextBipT(&mpPKB->program, getStatementType(from), getStatementType(to), 0, 0, false);
 }
 
-// Case 5: NextT(syn, _)
+// Case 5: NextBipT(syn, _)
 unordered_set<int> PKBPQLEvaluator::getNextBipTSynUnderscore(PKBDesignEntity from)
 {
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, getStatementType(from), StatementType::STATEMENT, 0, 0, false);
+		getNextBipT(&mpPKB->program, getStatementType(from), StatementType::STATEMENT, 0, 0, false);
 	unordered_set<int> fromResult = {};
 	for (auto p : result)
 	{
@@ -2418,11 +2537,11 @@ unordered_set<int> PKBPQLEvaluator::getNextBipTSynUnderscore(PKBDesignEntity fro
 	return move(fromResult);
 }
 
-// Case 6: NextT(syn, int)
+// Case 6: NextBipT(syn, int)
 unordered_set<int> PKBPQLEvaluator::getNextBipTSynInt(PKBDesignEntity from, int toIndex)
 {
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, getStatementType(from), StatementType::NONE, 0, toIndex, false);
+		getNextBipT(&mpPKB->program, getStatementType(from), StatementType::NONE, 0, toIndex, false);
 	unordered_set<int> fromResult = {};
 	for (auto p : result)
 	{
@@ -2432,29 +2551,29 @@ unordered_set<int> PKBPQLEvaluator::getNextBipTSynInt(PKBDesignEntity from, int 
 	return move(fromResult);
 }
 
-// Case 7: NextT(int, int)
+// Case 7: NextBipT(int, int)
 bool PKBPQLEvaluator::getNextBipTIntInt(int fromIndex, int toIndex)
 {
 	// Todo optimize (@jiachen247) Can exit early after first is found match
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, StatementType::NONE, StatementType::NONE, fromIndex, toIndex, true);
+		getNextBipT(&mpPKB->program, StatementType::NONE, StatementType::NONE, fromIndex, toIndex, true);
 	return result.begin() != result.end();
 }
 
-// Case 8: NextT(int, _)
+// Case 8: NextBipT(int, _)
 bool PKBPQLEvaluator::getNextBipTIntUnderscore(int fromIndex)
 {
 	// Todo optimize (@jiachen247) Can exit early after first is found match
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0, true);
+		getNextBipT(&mpPKB->program, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0, true);
 	return result.begin() != result.end();
 }
 
-// Case 9: NextT(int, syn)
+// Case 9: NextBipT(int, syn)
 unordered_set<int> PKBPQLEvaluator::getNextBipTIntSyn(int fromIndex, PKBDesignEntity to)
 {
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, StatementType::NONE, getStatementType(to), fromIndex, 0, false);
+		getNextBipT(&mpPKB->program, StatementType::NONE, getStatementType(to), fromIndex, 0, false);
 	unordered_set<int> toResult = {};
 	for (auto p : result)
 	{
@@ -2464,7 +2583,7 @@ unordered_set<int> PKBPQLEvaluator::getNextBipTIntSyn(int fromIndex, PKBDesignEn
 	return toResult;
 }
 
-
+// ======================================================================================================
 // Affects
 bool PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 	map<string, set<int>>& lastModifiedTable, bool terminateEarly, int leftInt, int rightInt)

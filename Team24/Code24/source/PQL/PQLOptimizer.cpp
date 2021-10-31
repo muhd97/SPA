@@ -2,9 +2,12 @@
 #include "PQLParser.h"
 #include "PQLProcessorUtils.h"
 #include <algorithm>
+#include <execution>
 #include <queue>
+#include "PQLOptimizerUtils.h"
 
 #define DEBUG_GROUPS 0
+#define DEBUG_SORT_WITHIN_GROUP 0
 
 using namespace std;
 
@@ -64,10 +67,7 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
             OptNode* synNodePtr = synNodes[s];
             currNeighbours.emplace_back(synNodePtr);
             adjList[synNodePtr].push_back(clauseNode);
-
         }
-
-        
         adjList[clauseNode] = move(currNeighbours);
     }
 
@@ -82,11 +82,8 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
             toReturn.emplace_back(move(cg));
         }
     }
-
     if (!cgForNoSynClauses->clauses.empty()) toReturn.emplace_back(cgForNoSynClauses);
-
     sortClauseGroups(toReturn);
-
 #if DEBUG_GROUPS
     /* Debugging: */
     for (const auto& cg : toReturn) {
@@ -94,49 +91,48 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
     cout << "\n";
     }
 #endif
-
     /* DO CLEANUP OF NODES */
-    for (OptNode* n : allNodes) {
+    for (OptNode* n : allNodes) 
         delete n;
-    }
-
 
     return move(toReturn);
 }
 
 inline void PQLOptimizer::sortClauseGroups(vector<shared_ptr<ClauseGroup>>& vec) {
     sort(vec.begin(), vec.end(), f);
+    std::for_each(execution::par_unseq, vec.begin(), vec.end(), [this](auto&& v) {this->sortSingleClauseGroup(v); });
+
 }
 
 void PQLOptimizer::filterTuples(vector<shared_ptr<ResultTuple>>& resultsFromClauseGroup, vector<shared_ptr<ResultTuple>>& filteredResults)
 {
-
     unordered_set<string> seenBeforeTuples;
-
-    for (const auto& ptr : resultsFromClauseGroup) {
-        
+    for (auto& ptr : resultsFromClauseGroup) {        
         string tempHash = "";
-
         for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
-
-            if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
-            
+            if (!ptr->synonymKeyAlreadyExists(synKey)) continue;            
             tempHash += ptr->get(synKey);
             tempHash.push_back('$');
         }
-
         if (!seenBeforeTuples.count(tempHash)) {
-            shared_ptr<ResultTuple> candidate = make_shared<ResultTuple>();
-
-            for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
-                if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
-                candidate->synonymKeyToValMap.insert(move(*(ptr->synonymKeyToValMap.find(synKey))));
+            auto& underlyingMap = ptr->synonymKeyToValMap;
+            for (auto it = underlyingMap.cbegin(); it != underlyingMap.cend() /* not hoisted */; /* no increment */)
+            {
+                if (!synonymsUsedInResultClause.count((*it).first)) it = underlyingMap.erase(it);
+                else ++it;
             }
+            filteredResults.emplace_back(move(ptr));
+            seenBeforeTuples.insert(move(tempHash));
 
-            filteredResults.emplace_back(move(candidate));
-            seenBeforeTuples.insert(tempHash);
+
+            //shared_ptr<ResultTuple> candidate = make_shared<ResultTuple>();
+            //for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
+            //    if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
+            //    candidate->synonymKeyToValMap.insert(move(*(ptr->synonymKeyToValMap.find(synKey))));
+            //}
+            //filteredResults.emplace_back(move(candidate));
+            //seenBeforeTuples.insert(move(tempHash));
         }
-
     }
 }
 
@@ -157,14 +153,6 @@ inline void PQLOptimizer::DFS(OptNode* curr, unordered_map<OptNode*, vector<OptN
     }
 
     const auto& neighbours = adjList[curr];
-
-    //sort(neighbours.begin(), neighbours.end(), 
-    //    [](auto* ptr1, auto* ptr2) {
-
-
-
-    //});
-
     for (OptNode* ptr : neighbours) {
         DFS(ptr, adjList, visited, cg);
     }
@@ -173,14 +161,9 @@ inline void PQLOptimizer::DFS(OptNode* curr, unordered_map<OptNode*, vector<OptN
 void PQLOptimizer::BFS(OptNode* start, unordered_map<OptNode*, vector<OptNode*>>& adjList, unordered_set<OptNode*>& visited, shared_ptr<ClauseGroup>& cg)
 {
     queue<OptNode*> q;
-
-    //visited.insert(start);
-
     q.push(start);
-
     while (!q.empty()) {
         OptNode* curr = q.front();
-
         if (visited.count(curr)) {
             q.pop();
             continue;
@@ -208,3 +191,68 @@ void PQLOptimizer::BFS(OptNode* start, unordered_map<OptNode*, vector<OptNode*>>
     }
 
 }
+
+inline void PQLOptimizer::sortSingleClauseGroup(shared_ptr<ClauseGroup>& cg)
+{
+#if DEBUG_SORT_WITHIN_GROUP
+    cout << "Sort Within ClauseGroup\n";
+#endif
+    auto& currClauses = cg->clauses;
+    int currGroupSize = currClauses.size();
+    int firstClauseIdx = -1;
+    int bestPrioritySeen = INT32_MAX;
+    for (int i = 0; i < currGroupSize; i++) {
+        int currPriority = getEvalClPriority(currClauses[i], this->selectCl);
+        if (currPriority < bestPrioritySeen) {
+            bestPrioritySeen = currPriority;
+            firstClauseIdx = i;
+        }
+    }
+#if DEBUG_SORT_WITHIN_GROUP
+    cout << "Sorted\n";
+#endif
+    unordered_set<EvalCl*> seenClauses;
+    vector<shared_ptr<EvalCl>> finalSortedOrder;
+    unordered_set<string> seenSynonyms;
+    const auto& firstClause = currClauses[firstClauseIdx];
+    finalSortedOrder.emplace_back(firstClause);
+    seenClauses.insert(firstClause.get());
+    for (const auto& syn : firstClause->getAllSynonymsAsString()) seenSynonyms.insert(syn);
+#if DEBUG_SORT_WITHIN_GROUP
+    cout << "Before While\n";
+#endif
+    while (finalSortedOrder.size() != currGroupSize) {
+        int bestIdx = -1;
+        int bestOverlap = -1;
+        int bestPriority = 999999;
+        for (int x = 0; x < currGroupSize; x++) {
+            const auto& curr = currClauses[x];
+            if (seenClauses.count(curr.get())) continue;
+            int localOverlap = 0;
+            for (const auto& syn : curr->getAllSynonymsAsString())
+                localOverlap += seenSynonyms.count(syn) ? 1 : 0;
+            if (localOverlap == bestOverlap) {
+                int currEvalClPriority = getEvalClPriority(curr, this->selectCl);
+                // CHOOSE
+                if (currEvalClPriority < bestPriority) {
+                    bestIdx = x;
+                    bestPriority = currEvalClPriority;
+                }
+            }
+            // CHOOSE
+            else if (localOverlap > bestOverlap) {
+                bestOverlap = localOverlap;
+                bestIdx = x;
+                bestPriority = getEvalClPriority(curr, this->selectCl);
+            }
+        }
+        if (bestIdx == -1) throw "Critical Error, failed to elect next best clause in group";
+        const auto& bestNextClause = currClauses[bestIdx];
+        for (const auto& syn : bestNextClause->getAllSynonymsAsString())
+            seenSynonyms.insert(syn);
+        finalSortedOrder.emplace_back(bestNextClause);
+        seenClauses.insert(bestNextClause.get());
+    }
+    cg->clauses = move(finalSortedOrder);
+}
+

@@ -2,8 +2,19 @@
 #pragma once
 #include "PQLProcessor.h"
 #include <initializer_list>
-
+#include <thread>
+#include <execution>
+#include <algorithm>
+#include "PQLResultTuple.h"
 #include "PQLLexer.h"
+
+#define DEBUG_HASH_JOIN 0
+#define PARALLELIZE_HASH_JOIN 1
+#define HASH_JOIN_PARALLEL_THRESHOLD 150
+#define DEBUG_CARTESIAN 0
+#define DEBUG_SORT_JOIN 0
+
+static const unsigned int HARDWARE_CONCURRENCY = thread::hardware_concurrency();
 
 inline bool compareTuplesByKeyStrict(ResultTuple* tup1, ResultTuple* tup2, const vector<string>& compareKeys, bool lessThan) {
 
@@ -420,4 +431,261 @@ inline bool isStatementDesignEntity(PKBDesignEntity ent) {
         || ent == PKBDesignEntity::While
         || ent == PKBDesignEntity::If
         || ent == PKBDesignEntity::AllStatements;
+}
+
+inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults, unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults)
+{
+    int leftSize = leftResults.size();
+    int rightSize = rightResults.size();
+#if DEBUG_HASH_JOIN
+    cout << "hash join ========= Num LeftResults = " << leftSize << ", Num RightResults = " << rightSize << ", joinKeysSize = " << joinKeys.size() << endl;
+#endif
+    vector<shared_ptr<ResultTuple>>* smallerVec = nullptr;
+    vector<shared_ptr<ResultTuple>>* largerVec = nullptr;
+    if (leftSize < rightSize) {
+        smallerVec = &leftResults;
+        largerVec = &rightResults;
+    }
+    else {
+        smallerVec = &rightResults;
+        largerVec = &leftResults;
+    }
+    const auto& smallerRes = *smallerVec;
+    const auto& largerRes = *largerVec;
+
+#if DEBUG_HASH_JOIN
+    cout << "Hash Join Smaller Res Size = " << smallerRes.size() << endl;
+#endif
+    unordered_map<string, unordered_set<ResultTuple*>> leftHashTable;
+    vector<string> joinKeysVec(joinKeys.begin(), joinKeys.end());
+    /* Build phase */
+    int smallerResSize = smallerRes.size();
+
+    for (int i = 0; i < smallerResSize; i++) {
+        auto& tup = smallerRes[i];
+        string stringToHash;
+        for (auto& joinKey : joinKeysVec) {
+            stringToHash.append(tup->get(joinKey));
+            stringToHash.push_back('$');
+        }
+        if (!leftHashTable.count(stringToHash)) {
+            leftHashTable[stringToHash] = unordered_set<ResultTuple*>();
+            leftHashTable[stringToHash].insert(tup.get());
+        }
+        else
+            leftHashTable[stringToHash].insert(tup.get());
+
+    }
+#if DEBUG_HASH_JOIN
+    cout << "Build Phase Done\n";
+#endif
+
+#if PARALLELIZE_HASH_JOIN
+    if (largerRes.size() > HASH_JOIN_PARALLEL_THRESHOLD) { // Parallelize
+        int rightBound = largerRes.size();
+        unsigned int n = HARDWARE_CONCURRENCY;
+        int each = (largerRes.size() + n - 1) / n;
+        vector<vector<shared_ptr<ResultTuple>>> res(n);
+        auto* baseAddr = &res[0];
+        std::for_each(execution::par_unseq, res.begin(), res.end(), [&largerRes, &leftHashTable, rightBound, baseAddr, each, &joinKeysVec](auto&& vec) {
+            int idx = &vec - baseAddr;
+            int start = min(rightBound, idx * each);
+            int end = min(rightBound, (idx + 1) * each);
+            for (int i = start; i < end; i++) {
+                const auto& tup = largerRes[i];
+                string stringToHash;
+                for (auto& joinKey : joinKeysVec) {
+                    stringToHash.append(tup->get(joinKey));
+                    stringToHash.push_back('$');
+                }
+                if (leftHashTable.count(stringToHash)) {
+                    auto& setToCompute = leftHashTable[stringToHash];
+                    for (const auto& i : setToCompute) {
+                        const auto& otherTup = i;
+                        shared_ptr<ResultTuple> toAdd =
+                            make_shared<ResultTuple>(tup->synonymKeyToValMap.size());
+                        /* Copy over the key-values */
+                        for (const auto& leftPair : tup->synonymKeyToValMap)
+                            toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+                        for (const auto& rightPair : otherTup->synonymKeyToValMap)
+                            if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
+                                toAdd->insertKeyValuePair(rightPair.first, rightPair.second)
+                        vec.emplace_back(move(toAdd));
+                    }
+                }
+            }
+            });
+        for (auto& v : res)
+            for (auto& ptr : v)
+                newResults.emplace_back(move(ptr));
+        return;
+    }
+#endif
+
+    /* Probe phase */
+    for (auto& tup : largerRes) {
+        string stringToHash;
+        for (auto& joinKey : joinKeysVec) {
+            stringToHash.append(tup->get(joinKey));
+            stringToHash.push_back('$');
+        }
+        if (leftHashTable.count(stringToHash)) {
+            auto& setToCompute = leftHashTable[stringToHash];
+            for (const auto& i : setToCompute) {
+                const auto& otherTup = i;
+                shared_ptr<ResultTuple> toAdd =
+                    make_shared<ResultTuple>(tup->synonymKeyToValMap.size());
+                /* Copy over the key-values */
+                for (const auto& leftPair : tup->synonymKeyToValMap)
+                    toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+                for (const auto& rightPair : otherTup->synonymKeyToValMap)
+                {
+                    if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
+                    {
+                        toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
+                    }
+                }
+                newResults.emplace_back(move(toAdd));
+            }
+        }
+    }
+#if DEBUG_HASH_JOIN
+    cout << "Probe Phase Done\n";
+#endif
+    return;
+}
+
+inline void sortMergeJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults, unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults)
+{
+#if DEBUG_SORT_JOIN
+    cout << "Sort Merge Join ========= Num LeftResults = " << leftResults.size() << ", Num RightResults = " << rightResults.size() << ", joinKeysSize = " << joinKeys.size() << endl;
+#endif
+    vector<string> joinKeysVec(joinKeys.begin(), joinKeys.end());
+
+    auto sortFunc = [&joinKeysVec](const auto& tup1, const auto& tup2) {
+        for (const auto& key : joinKeysVec) {
+            const auto& key1 = tup1->get(key);
+            const auto& key2 = tup2->get(key);
+            if (key1 == key2) continue;
+            return key1 < key2;
+        }
+        return tup1.get() < tup2.get();
+    };
+
+    sort(execution::par_unseq, leftResults.begin(), leftResults.end(), sortFunc);
+    sort(execution::par_unseq, rightResults.begin(), rightResults.end(), sortFunc);
+
+    int i = 0, leftSize = leftResults.size();
+    int j = 0, rightSize = rightResults.size();
+    int k = j;
+
+    auto* leftTup = leftResults[0].get();
+    auto* rightTup = rightResults[0].get();
+    auto* rightTupPrime = rightResults[k].get();
+
+    while (i < leftSize && j < rightSize && k < rightSize) {
+        while (compareTuplesByKeyStrict(leftTup, rightTupPrime, joinKeysVec, true)) {
+            i++;
+            if (i >= leftSize) break;
+            leftTup = leftResults[i].get();
+        }
+        while (compareTuplesByKeyStrict(leftTup, rightTupPrime, joinKeysVec, false)) {
+            k++;
+            if (k >= rightSize) break;
+            rightTupPrime = rightResults[k].get();
+        }
+        j = k;
+        rightTup = rightTupPrime;
+        while (compareTuplesEqual(leftTup, rightTupPrime, joinKeysVec)) {
+            j = k;
+            rightTup = rightTupPrime;
+            while (compareTuplesEqual(leftTup, rightTup, joinKeysVec)) {
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>(leftTup->synonymKeyToValMap.size());
+                for (const auto& leftPair : leftTup->synonymKeyToValMap)
+                    toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+                for (const auto& rightPair : rightTup->synonymKeyToValMap)
+                {
+                    if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
+                        toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
+                }
+                newResults.emplace_back(move(toAdd));
+                j++;
+                if (j >= rightSize) break;
+                rightTup = rightResults[j].get();
+            }
+            i++;
+            if (i >= leftSize) break;
+            leftTup = leftResults[i].get();
+        }
+        k = j;
+        rightTupPrime = rightTup;
+    }
+#if DEBUG_SORT_JOIN
+    cout << "Sort Merge Join Done!\n";
+#endif
+
+}
+
+inline void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftResults,
+    vector<shared_ptr<ResultTuple>>& rightResults,
+    vector<shared_ptr<ResultTuple>>& newResults)
+{
+#if DEBUG_CARTESIAN
+    cout << "cartesian ==== LeftSize = " << leftResults.size() << ", RightSize = " << rightResults.size() << ", Product = " << leftResults.size() * rightResults.size() << endl;
+#endif
+    if (leftResults.size() == 0)
+    {
+        newResults = rightResults;
+        return;
+    }
+
+    if (rightResults.size() == 0)
+    {
+        newResults = leftResults;
+        return;
+    }
+
+    int N = leftResults.size();
+    int X = rightResults.size();
+    /* Parallel version */
+    vector<shared_ptr<ResultTuple>>* smallerVec = &rightResults;
+    vector<shared_ptr<ResultTuple>>* largerVec = &leftResults;
+    if (N < X) {
+        smallerVec = &leftResults;
+        largerVec = &rightResults;
+    }
+    auto& smaller = *smallerVec;
+    auto& larger = *largerVec;
+    X = smaller.size();
+    N = larger.size();
+    newResults.resize(N * X);
+    auto* baseAddress = &larger[0];
+    std::for_each(execution::par_unseq, larger.begin(), larger.end(),
+        [baseAddress, X, &smaller, &newResults](auto&& item)
+        {
+            int i = (&item - baseAddress);
+            auto& leftPtr = item;
+            int j;
+            for (j = 0; j < X; j++)
+            {
+                auto& rightPtr = smaller[j];
+                shared_ptr<ResultTuple> toAdd =
+                    make_shared<ResultTuple>(leftPtr->synonymKeyToValMap.size() + rightPtr->synonymKeyToValMap.size());
+
+                for (const auto& leftPair : leftPtr->synonymKeyToValMap)
+                    toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+
+                for (const auto& rightPair : rightPtr->synonymKeyToValMap)
+                {
+                    /*if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
+                    {*/
+                    toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
+                    //}
+                }
+                newResults[i * X + j] = move(toAdd);
+            }
+        });
+#if DEBUG_CARTESIAN
+    cout << "Cartesian Product Done!\n";
+#endif
 }
