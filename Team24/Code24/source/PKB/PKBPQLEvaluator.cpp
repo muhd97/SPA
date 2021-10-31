@@ -2365,30 +2365,29 @@ unordered_set<int> PKBPQLEvaluator::getNextBipIntSyn(int fromIndex, PKBDesignEnt
 
 // ===========================================================================================================
 // NextBipT
-void buildSeen(vector<shared_ptr<Statement>>& statements, StatementType fromType, int fromIndex, 
-	StatementType toType, int toIndex, unordered_set<int>& seenP, unordered_set<int>& seenQ) {
-	
-	for (auto stmt : statements) {
-		if (stmt->getStatementType() == fromType || fromType == StatementType::STATEMENT || stmt->getIndex() == fromIndex) {
-			seenP.insert(stmt->getIndex());
-		}
-		if (stmt->getStatementType() == toType || toType == StatementType::STATEMENT || stmt->getIndex() == toIndex) {
-			seenQ.insert(stmt->getIndex());
-		}
+void getNextBipTStatementList(vector<shared_ptr <Statement>>& list, StatementType from, StatementType to, int fromIndex, int toIndex,
+	set<pair<int, int>>* result, bool canExitEarly, unordered_map<string, unordered_set<int>>* procSeenP, unordered_map<string,
+	unordered_set<int>>*procSeenQ, unordered_set<int>* seenP, unordered_set<int>* seenQ, unordered_set<string>* visited, unordered_map<string, shared_ptr<Procedure>>* procs);
 
-		if (stmt->getStatementType() == StatementType::IF) {
-			buildSeen(stmt->getStatementList(), fromType, fromIndex, toType, toIndex, seenP, seenQ);
-		}
-		else if (stmt->getStatementType() == StatementType::WHILE) {
-			buildSeen(stmt->getStatementList(), fromType, fromIndex, toType, toIndex, seenP, seenQ);
-		}
+void getNextBipTProcedure(shared_ptr<Procedure>& proc, StatementType from, StatementType to, int fromIndex,
+	int toIndex, set<pair<int, int>>* result, bool canExitEarly,
+	unordered_map<string, unordered_set<int>>* procSeenP, unordered_map<string, unordered_set<int>>* procSeenQ,
+	unordered_set<string>* visited, unordered_map<string, shared_ptr<Procedure>>* procs) {
+	if ((*visited).find(proc->getName()) != (*visited).end()) {
+		return;
 	}
+	(*visited).insert(proc->getName());
+	unordered_set<int> seenP = {};
+	unordered_set<int> seenQ = {};
+	getNextBipTStatementList(proc->getStatementList()->getStatements(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, &seenP, &seenQ, visited, procs);
+	(*procSeenP)[proc->getName()] = seenP;
+	(*procSeenQ)[proc->getName()] = seenQ;
 }
 
 // NextBipT(p, q)
 void getNextBipTStatementList(vector<shared_ptr <Statement>>& list, StatementType from, StatementType to, int fromIndex, int toIndex, 
 	set<pair<int, int>>* result, bool canExitEarly, unordered_map<string, unordered_set<int>>*  procSeenP, unordered_map<string,
-	unordered_set<int>>* procSeenQ, set<int>* seenP, unordered_set<string>* visited, unordered_map<string, shared_ptr<Procedure>>* procs)
+	unordered_set<int>>* procSeenQ, unordered_set<int>* seenP, unordered_set<int>* seenQ, unordered_set<string>* visited, unordered_map<string, shared_ptr<Procedure>>* procs)
 {
 	for (auto stmt : list)
 	{
@@ -2400,9 +2399,10 @@ void getNextBipTStatementList(vector<shared_ptr <Statement>>& list, StatementTyp
 		// Statement is used to represent AllStatements
 		if (stmt->getStatementType() == to || to == StatementType::STATEMENT || stmt->getIndex() == toIndex)
 		{
+			seenQ->insert(stmt->getIndex());
 			for (auto p : (*seenP))
 			{
-				result->insert(make_pair(p, stmt->getIndex()));
+					result->insert(make_pair(p, stmt->getIndex()));
 			}
 		}
 
@@ -2416,10 +2416,11 @@ void getNextBipTStatementList(vector<shared_ptr <Statement>>& list, StatementTyp
 		{
 			shared_ptr<IfStatement> ifs = static_pointer_cast<IfStatement> (stmt);
 			set<pair<int, int>> cloneResult = set<pair<int, int>>(*result);
-			set<int> cloneSeenP = set<int>(*seenP);
+			unordered_set<int> cloneSeenP = unordered_set<int>(*seenP);
+			unordered_set<int> cloneSeenQ = unordered_set<int>(*seenQ);
 
-			getNextBipTStatementList(ifs->getConsequent()->getStatements(), from, to, fromIndex, toIndex, &cloneResult, canExitEarly, procSeenP, procSeenQ, &cloneSeenP, visited, procs);
-			getNextBipTStatementList(ifs->getAlternative()->getStatements(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, seenP, visited, procs);
+			getNextBipTStatementList(ifs->getConsequent()->getStatements(), from, to, fromIndex, toIndex, &cloneResult, canExitEarly, procSeenP, procSeenQ, &cloneSeenP, seenQ, visited, procs);
+			getNextBipTStatementList(ifs->getAlternative()->getStatements(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, seenP, seenQ, visited, procs);
 
 			result->insert(cloneResult.begin(), cloneResult.end());
 			seenP->insert(cloneSeenP.begin(), cloneSeenP.end());
@@ -2429,12 +2430,11 @@ void getNextBipTStatementList(vector<shared_ptr <Statement>>& list, StatementTyp
 			shared_ptr<WhileStatement> whiles = static_pointer_cast<WhileStatement> (stmt);
 
 			auto sizeP = seenP->size();
-			getNextBipTStatementList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, seenP, visited, procs);
+			getNextBipTStatementList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, seenP, seenQ, visited, procs);
 
 			if (sizeP < seenP->size())
 			{
-				// if there are new things in seenP we wanna do another pass
-				getNextBipTStatementList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, seenP, visited, procs);
+				getNextBipTStatementList(whiles->getStatementList(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, seenP, seenQ, visited, procs);
 			}
 
 			// While to while loop!
@@ -2450,34 +2450,21 @@ void getNextBipTStatementList(vector<shared_ptr <Statement>>& list, StatementTyp
 		{
 			shared_ptr<CallStatement> callStmt = static_pointer_cast<CallStatement> (stmt);
 			string callee = callStmt->getProcId()->getName();
-			// getNextBipTProcedure(callee, from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, visited, procs);
+			getNextBipTProcedure((*procs)[callee], from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, visited, procs);
 
 			auto calleeSeenP = (*procSeenP)[callee];
 			auto calleeSeenQ = (*procSeenQ)[callee];
 			for (auto q : calleeSeenQ) {
 				for (auto p : *seenP) {
-					cout << "NEXTBIP* (" << p << ", " << q << ")" << endl;
 					result->insert(make_pair(p, q));
 				}
 			}
 
 			seenP->insert(calleeSeenP.begin(), calleeSeenP.end());
+			seenQ->insert(calleeSeenQ.begin(), calleeSeenQ.end());
 		}
 	}
 }
-
-void getNextBipTProcedure(shared_ptr<Procedure>& proc, StatementType from, StatementType to, int fromIndex,
-	int toIndex, set<pair<int, int>>* result, bool canExitEarly,
-	unordered_map<string, unordered_set<int>>*  procSeenP, unordered_map<string, unordered_set<int>>* procSeenQ, 
-	unordered_set<string>* visited, unordered_map<string, shared_ptr<Procedure>>* procs) {
-	if ((*visited).find(proc->getName()) != (*visited).end()) {
-		return;
-	}
-	(*visited).insert(proc->getName());
-	set<int> seenP = {};
-	getNextBipTStatementList(proc->getStatementList()->getStatements(), from, to, fromIndex, toIndex, result, canExitEarly, procSeenP, procSeenQ, &seenP, visited, procs);
-}
-
 
 set<pair<int, int>> getNextBipT(shared_ptr<Program>& program, StatementType from, StatementType to, int fromIndex,
 	int toIndex, bool canExitEarly)
@@ -2490,18 +2477,11 @@ set<pair<int, int>> getNextBipT(shared_ptr<Program>& program, StatementType from
 	// build seenP and seenQ
 	for (auto proc: program->getProcedures()) {
 		procsMap[proc->getName()] = proc;
-		unordered_set<int> seenPResult = {};
-		unordered_set<int> seenQResult = {};
-		buildSeen(proc->getStatementList()->getStatements(), from, fromIndex, to, toIndex, seenPResult, seenQResult);
-		procSeenP[proc->getName()] = seenPResult;
-		procSeenQ[proc->getName()] = seenQResult;
 	}
 
 	// run dfs though all the connected componenets
 	set<pair<int, int>> result = {};
 	unordered_set<string> visited = {};
-
-
 	for (auto proc : program->getProcedures()) {
 		getNextBipTProcedure(proc, from, to, fromIndex, toIndex, &result, canExitEarly, &procSeenP, &procSeenQ, &visited, &procsMap);
 	}
