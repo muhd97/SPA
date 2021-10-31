@@ -1,5 +1,5 @@
 #pragma optimize( "gty", on )
-
+#pragma once
 #define DEBUG_HASH_JOIN 0
 #define DEBUG_CARTESIAN 0
 
@@ -9,7 +9,7 @@
 #include "PQLLexer.h"
 #include <execution>
 #include <algorithm>
-
+#include "PQLParentHandler.h"
 /* Initialize static variables for PQLProcessor.cpp */
 string Result::dummy = "BaseResult: getResultAsString()";
 string Result::FALSE_STRING = "FALSE";
@@ -762,6 +762,9 @@ void PQLProcessor::handleWithFirstArgSyn(const shared_ptr<SelectCl>& selectCl, c
 void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
+    //special case to handle to separate UsesS and UsesP and ModifiesS and ModifiesP when first arg is synonym
+
+    //TODO Manas: remember to check for synonym type in ModifiesS and UsesS to make sure if they are proc or not.
     switch (suchThatCl->relRef->getType())
     {
     case RelRefType::USES_S: /* Uses(s, v) where s MUST be a
@@ -815,8 +818,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
     }
     case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
     {
-
-
         shared_ptr<ModifiesS> modifiesCl = static_pointer_cast<ModifiesS>(suchThatCl->relRef);
         shared_ptr<StmtRef>& stmtRef = modifiesCl->stmtRef;
         shared_ptr<EntRef>& entRef = modifiesCl->entRef;
@@ -1102,27 +1103,30 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         break;
     }
     case RelRefType::PARENT: {
-        shared_ptr<Parent> parentCl = static_pointer_cast<Parent>(suchThatCl->relRef);
-        StmtRefType leftType = parentCl->stmtRef1->getStmtRefType();
-        /* Parent (_, ?) */
-        if (leftType == StmtRefType::UNDERSCORE)
-        {
-            handleParentFirstArgUnderscore(selectCl, parentCl, toReturn);
-            break;
-        }
-        /* Parent (1, ?) */
-        if (leftType == StmtRefType::INTEGER)
-        {
-            handleParentFirstArgInteger(selectCl, parentCl, toReturn);
-            break;
-        }
+        //shared_ptr<Parent> parentCl = static_pointer_cast<Parent>(suchThatCl->relRef);
+        //StmtRefType leftType = parentCl->stmtRef1->getStmtRefType();
+        ///* Parent (_, ?) */
+        //if (leftType == StmtRefType::UNDERSCORE)
+        //{
+        //    handleParentFirstArgUnderscore(selectCl, parentCl, toReturn);
+        //    break;
+        //}
+        ///* Parent (1, ?) */
+        //if (leftType == StmtRefType::INTEGER)
+        //{
+        //    handleParentFirstArgInteger(selectCl, parentCl, toReturn);
+        //    break;
+        //}
 
-        /* Parent (syn, ?) */
-        if (leftType == StmtRefType::SYNONYM)
-        {
-            handleParentFirstArgSyn(selectCl, parentCl, toReturn);
-            break;
-        }
+        ///* Parent (syn, ?) */
+        //if (leftType == StmtRefType::SYNONYM)
+        //{
+        //    handleParentFirstArgSyn(selectCl, parentCl, toReturn);
+        //    break;
+        //}
+
+        shared_ptr<ParentHandler> parentHandler = make_shared<ParentHandler>(move(evaluator), move(selectCl), static_pointer_cast<Parent>(suchThatCl->relRef));
+        parentHandler->evaluate(move(toReturn));
 
         break;
     }
