@@ -174,7 +174,7 @@ unordered_set<string> getSetOfSynonymsToJoinOn(shared_ptr<T> cl1, shared_ptr<R> 
     return move(toReturn);
 }
 
-unordered_set<string> getSetOfSynonymsToJoinOn(const vector<shared_ptr<ResultTuple>>& leftRes, const vector<shared_ptr<ResultTuple>>& rightRes)
+inline unordered_set<string> getSetOfSynonymsToJoinOn(const vector<shared_ptr<ResultTuple>>& leftRes, const vector<shared_ptr<ResultTuple>>& rightRes)
 {
     unordered_set<string> toReturn;
 
@@ -285,7 +285,7 @@ inline bool allTargetSynonymsExistInTuple(const vector<shared_ptr<Element>>& syn
 }
 
 /* A synonym that is independent is one that is inside the TargetSynonym set, but does not appear in any SuchThat, With or Pattern clauses. */
-unordered_set<shared_ptr<Element>> getSetOfIndependentSynonymsInTargetSynonyms(const shared_ptr<SelectCl>& selectCl) {
+inline unordered_set<shared_ptr<Element>> getSetOfIndependentSynonymsInTargetSynonyms(const shared_ptr<SelectCl>& selectCl) {
     const auto& temp = selectCl->getTarget()->getElements();
     unordered_set<string> allowedSynonyms;
     unordered_set<shared_ptr<Element>> independentElements;
@@ -321,7 +321,7 @@ unordered_set<shared_ptr<Element>> getSetOfIndependentSynonymsInTargetSynonyms(c
 
 }
 
-bool dependentElementsAllExistInTupleKeys(const vector<shared_ptr<ResultTuple>>& tuples, const unordered_set<shared_ptr<Element>>& independentElements, const vector<shared_ptr<Element>>& allTargetElements) {
+inline bool dependentElementsAllExistInTupleKeys(const vector<shared_ptr<ResultTuple>>& tuples, const unordered_set<shared_ptr<Element>>& independentElements, const vector<shared_ptr<Element>>& allTargetElements) {
     const auto& sampleTuple = tuples[0];
     
     for (const auto& ptr : allTargetElements) {
