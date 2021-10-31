@@ -1,5 +1,7 @@
 #pragma optimize("gty", on)
 
+#define WARMUP_THREADS 1
+
 #include "PKB.h"
 
 #include <iostream>
@@ -11,8 +13,20 @@
 #include "PKBProcedure.h"
 #include "PKBStmt.h"
 
+#include <thread>
+#include <execution>
+#include <algorithm>
+
 void PKB::initialise()
 {
+#if WARMUP_THREADS
+    vector<vector<int>> dummy(max(std::thread::hardware_concurrency() - 1, 1U));
+    std::for_each(execution::par, dummy.begin(), dummy.end(), [](auto&& v) {
+        int i = 0;
+        while (i < 5000)
+            i++;
+    }); 
+#endif
     for (PKBDesignEntity de : PKBDesignEntityIterator())
     {
         mStatements[de] = {};
@@ -49,7 +63,7 @@ void PKB::extractDesigns(shared_ptr<Program> program)
     // sort all the vectors of statements in ascending order
     for (auto &vec : mStatements)
     {
-        std::sort(vec.second.begin(), vec.second.end(),
+        std::sort(execution::par_unseq, vec.second.begin(), vec.second.end(),
                   [](const PKBStmt::SharedPtr &a, const PKBStmt::SharedPtr &b) -> bool {
                       return a->getIndex() < b->getIndex();
                   });

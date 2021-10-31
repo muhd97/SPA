@@ -56,6 +56,10 @@ public:
         synonymKeyToValMap.reserve(sizeToReserve);
     }
 
+    ResultTuple(const unordered_map<string, string>& map) : synonymKeyToValMap(map) {
+
+    }
+
     inline void insertKeyValuePair(const string& key, const string& value)
     {
         /* Yida note: Pass by ref argument, please don't use move(value) or else

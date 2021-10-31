@@ -502,11 +502,7 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
                     auto& setToCompute = leftHashTable[stringToHash];
                     for (const auto& i : setToCompute) {
                         const auto& otherTup = i;
-                        shared_ptr<ResultTuple> toAdd =
-                            make_shared<ResultTuple>(tup->synonymKeyToValMap.size());
-                        /* Copy over the key-values */
-                        for (const auto& leftPair : tup->synonymKeyToValMap)
-                            toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+                        shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>(tup->synonymKeyToValMap);
                         for (const auto& rightPair : otherTup->synonymKeyToValMap)
                             if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
                                 toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
@@ -533,11 +529,7 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
             auto& setToCompute = leftHashTable[stringToHash];
             for (const auto& i : setToCompute) {
                 const auto& otherTup = i;
-                shared_ptr<ResultTuple> toAdd =
-                    make_shared<ResultTuple>(tup->synonymKeyToValMap.size());
-                /* Copy over the key-values */
-                for (const auto& leftPair : tup->synonymKeyToValMap)
-                    toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
+                shared_ptr<ResultTuple> toAdd = make_shared<ResultTuple>(tup->synonymKeyToValMap);
                 for (const auto& rightPair : otherTup->synonymKeyToValMap)
                 {
                     if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
@@ -670,11 +662,7 @@ inline void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftRe
             {
                 auto& rightPtr = smaller[j];
                 shared_ptr<ResultTuple> toAdd =
-                    make_shared<ResultTuple>(leftPtr->synonymKeyToValMap.size() + rightPtr->synonymKeyToValMap.size());
-
-                for (const auto& leftPair : leftPtr->synonymKeyToValMap)
-                    toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
-
+                    make_shared<ResultTuple>(leftPtr->synonymKeyToValMap);
                 for (const auto& rightPair : rightPtr->synonymKeyToValMap)
                 {
                     /*if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
