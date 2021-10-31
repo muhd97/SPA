@@ -2368,19 +2368,62 @@ unordered_set<int> PKBPQLEvaluator::getNextBipIntSyn(int fromIndex, PKBDesignEnt
 	return result;
 }
 
+// ===========================================================================================================
 // NextBipT
+void buildSeen(vector<shared_ptr<Statement>> statements, StatementType fromType, int fromIndex, 
+	StatementType toType, int toIndex, unordered_set<int> seenP, unordered_set<int> seenQ) {
+	
+	for (auto stmt : statements) {
+		if (stmt->getStatementType() == fromType || fromType == StatementType::STATEMENT || stmt->getIndex() == fromIndex) {
+			seenP.insert(stmt->getIndex());
+		}
+		if (stmt->getStatementType() == toType || toType == StatementType::STATEMENT || stmt->getIndex() == toIndex) {
+			seenP.insert(stmt->getIndex());
+		}
+
+		if (stmt->getStatementType() == StatementType::IF) {
+			buildSeen(stmt->getStatementList(), fromType, fromIndex, toType, toIndex, seenP, seenQ);
+		}
+		else if (stmt->getStatementType() == StatementType::WHILE) {
+			buildSeen(stmt->getStatementList(), fromType, fromIndex, toType, toIndex, seenP, seenQ);
+		}
+	}
+}
+
+set<pair<int, int>> getNextBipT(shared_ptr<Program> program, StatementType from, StatementType to, int fromIndex,
+	int toIndex, bool canExitEarly)
+{
+	// NextBipT(p, q)
+	unordered_map<string, unordered_set<int>> seenP = {};
+	unordered_map<string, unordered_set<int>> seenQ = {};
+
+	// build seenP and seenQ
+	for (auto proc: program->getProcedures()) {
+		unordered_set<int> seenPResult = {};
+		unordered_set<int> seenQResult = {};
+		buildSeen(proc->getStatementList()->getStatements(), from, fromIndex, to, toIndex, seenPResult, seenQResult);
+		seenP[proc->getName()] = seenPResult;
+		seenP[proc->getName()] = seenQResult;
+	}
+
+	// run dfs though all the connected componenets
+
+
+	return {};
+}
+
 // Case 1: NextBipT(_, _)
 bool PKBPQLEvaluator::getNextBipTUnderscoreUnderscore()
 {
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, true);
+		getNextBipT(mpPKB->program, StatementType::STATEMENT, StatementType::STATEMENT, 0, 0, true);
 	return result.begin() != result.end();
 }
 
-// Case 2: NextT(_, syn)
+// Case 2: NextBipT(_, syn)
 unordered_set<int> PKBPQLEvaluator::getNextBipTUnderscoreSyn(PKBDesignEntity to)
 {
-	set<pair<int, int>> result = getNextT(mpPKB->program, StatementType::STATEMENT, getStatementType(to), 0, 0, false);
+	set<pair<int, int>> result = getNextBipT(mpPKB->program, StatementType::STATEMENT, getStatementType(to), 0, 0, false);
 	unordered_set<int> toResult = {};
 	for (auto p : result)
 	{
@@ -2390,25 +2433,25 @@ unordered_set<int> PKBPQLEvaluator::getNextBipTUnderscoreSyn(PKBDesignEntity to)
 	return move(toResult);
 }
 
-// Case 3: NextT(_, int)
+// Case 3: NextBipT(_, int)
 bool PKBPQLEvaluator::getNextBipTUnderscoreInt(int toIndex)
 {
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, StatementType::STATEMENT, StatementType::NONE, 0, toIndex, true);
+		getNextBipT(mpPKB->program, StatementType::STATEMENT, StatementType::NONE, 0, toIndex, true);
 	return result.begin() != result.end();
 }
 
-// Case 4: NextT(syn, syn)
+// Case 4: NextBipT(syn, syn)
 set<pair<int, int>> PKBPQLEvaluator::getNextBipTSynSyn(PKBDesignEntity from, PKBDesignEntity to)
 {
-	return getNextT(mpPKB->program, getStatementType(from), getStatementType(to), 0, 0, false);
+	return getNextBipT(mpPKB->program, getStatementType(from), getStatementType(to), 0, 0, false);
 }
 
-// Case 5: NextT(syn, _)
+// Case 5: NextBipT(syn, _)
 unordered_set<int> PKBPQLEvaluator::getNextBipTSynUnderscore(PKBDesignEntity from)
 {
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, getStatementType(from), StatementType::STATEMENT, 0, 0, false);
+		getNextBipT(mpPKB->program, getStatementType(from), StatementType::STATEMENT, 0, 0, false);
 	unordered_set<int> fromResult = {};
 	for (auto p : result)
 	{
@@ -2418,11 +2461,11 @@ unordered_set<int> PKBPQLEvaluator::getNextBipTSynUnderscore(PKBDesignEntity fro
 	return move(fromResult);
 }
 
-// Case 6: NextT(syn, int)
+// Case 6: NextBipT(syn, int)
 unordered_set<int> PKBPQLEvaluator::getNextBipTSynInt(PKBDesignEntity from, int toIndex)
 {
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, getStatementType(from), StatementType::NONE, 0, toIndex, false);
+		getNextBipT(mpPKB->program, getStatementType(from), StatementType::NONE, 0, toIndex, false);
 	unordered_set<int> fromResult = {};
 	for (auto p : result)
 	{
@@ -2432,29 +2475,29 @@ unordered_set<int> PKBPQLEvaluator::getNextBipTSynInt(PKBDesignEntity from, int 
 	return move(fromResult);
 }
 
-// Case 7: NextT(int, int)
+// Case 7: NextBipT(int, int)
 bool PKBPQLEvaluator::getNextBipTIntInt(int fromIndex, int toIndex)
 {
 	// Todo optimize (@jiachen247) Can exit early after first is found match
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, StatementType::NONE, StatementType::NONE, fromIndex, toIndex, true);
+		getNextBipT(mpPKB->program, StatementType::NONE, StatementType::NONE, fromIndex, toIndex, true);
 	return result.begin() != result.end();
 }
 
-// Case 8: NextT(int, _)
+// Case 8: NextBipT(int, _)
 bool PKBPQLEvaluator::getNextBipTIntUnderscore(int fromIndex)
 {
 	// Todo optimize (@jiachen247) Can exit early after first is found match
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0, true);
+		getNextBipT(mpPKB->program, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0, true);
 	return result.begin() != result.end();
 }
 
-// Case 9: NextT(int, syn)
+// Case 9: NextBipT(int, syn)
 unordered_set<int> PKBPQLEvaluator::getNextBipTIntSyn(int fromIndex, PKBDesignEntity to)
 {
 	set<pair<int, int>> result =
-		getNextT(mpPKB->program, StatementType::NONE, getStatementType(to), fromIndex, 0, false);
+		getNextBipT(mpPKB->program, StatementType::NONE, getStatementType(to), fromIndex, 0, false);
 	unordered_set<int> toResult = {};
 	for (auto p : result)
 	{
@@ -2464,7 +2507,7 @@ unordered_set<int> PKBPQLEvaluator::getNextBipTIntSyn(int fromIndex, PKBDesignEn
 	return toResult;
 }
 
-
+// ======================================================================================================
 // Affects
 bool PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 	map<string, set<int>>& lastModifiedTable, bool terminateEarly, int leftInt, int rightInt)
