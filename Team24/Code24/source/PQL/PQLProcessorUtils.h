@@ -10,9 +10,11 @@
 
 #define DEBUG_HASH_JOIN 0
 #define PARALLELIZE_HASH_JOIN 1
-#define HASH_JOIN_PARALLEL_THRESHOLD 250
+#define HASH_JOIN_PARALLEL_THRESHOLD 150
 #define DEBUG_CARTESIAN 0
 #define DEBUG_SORT_JOIN 0
+
+static const unsigned int HARDWARE_CONCURRENCY = thread::hardware_concurrency();
 
 inline bool compareTuplesByKeyStrict(ResultTuple* tup1, ResultTuple* tup2, const vector<string>& compareKeys, bool lessThan) {
 
@@ -481,7 +483,7 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
 #if PARALLELIZE_HASH_JOIN
     if (largerRes.size() > HASH_JOIN_PARALLEL_THRESHOLD) { // Parallelize
         int rightBound = largerRes.size();
-        unsigned int n = thread::hardware_concurrency();
+        unsigned int n = HARDWARE_CONCURRENCY;
         int each = (largerRes.size() + n - 1) / n;
         vector<vector<shared_ptr<ResultTuple>>> res(n);
         auto* baseAddr = &res[0];
@@ -506,12 +508,8 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
                         for (const auto& leftPair : tup->synonymKeyToValMap)
                             toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
                         for (const auto& rightPair : otherTup->synonymKeyToValMap)
-                        {
                             if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
-                            {
-                                toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
-                            }
-                        }
+                                toAdd->insertKeyValuePair(rightPair.first, rightPair.second)
                         vec.emplace_back(move(toAdd));
                     }
                 }

@@ -1725,6 +1725,8 @@ public:
     }
 };
 
+enum class PatternClType { PatternIf, PatternWhile, PatternAssign };
+
 class PatternCl : public EvalCl
 {
 private:
@@ -1774,6 +1776,22 @@ public:
     {
         return synonymsUsed;
     }
+
+    inline const string& getSynonymType(unordered_map<string, shared_ptr<Declaration>>& synonymToParentDeclarationMap)
+    {
+        auto it = synonymToParentDeclarationMap.find(synonym->getValue());
+        if (it == synonymToParentDeclarationMap.end()) throw "Failed to resolve synonym. It was not declared";
+        return (*it).second->getDesignEntity()->getEntityTypeName();
+    }
+    inline PatternClType getPatternClType(unordered_map<string, shared_ptr<Declaration>>& synonymToParentDeclarationMap)
+    {
+        const string& synonymType = getSynonymType(synonymToParentDeclarationMap);
+        if (synonymType == DesignEntity::ASSIGN) return PatternClType::PatternAssign;
+        else if (synonymType == DesignEntity::WHILE) return PatternClType::PatternWhile;
+        else if (synonymType == DesignEntity::IF) return PatternClType::PatternIf;
+        else throw "Unsupported Synonym Type for Pattern Clause";
+    }
+
 };
 
 

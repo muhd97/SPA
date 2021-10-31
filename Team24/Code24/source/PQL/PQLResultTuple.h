@@ -31,7 +31,7 @@ public:
     {
         return ResultType::StringSingleResult;
     }
-    virtual const string& getResultAsString() const
+    virtual string& getResultAsString()
     {
         return dummy;
     }
@@ -108,7 +108,7 @@ public:
         return ResultType::StringSingleResult;
     }
 
-    const string& getResultAsString() const override
+    string& getResultAsString() override
     {
         return res;
     }

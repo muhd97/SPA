@@ -2820,46 +2820,35 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
         if (isFirst) {
             handleSingleEvalClause(selectCl, toPopulate, clPtr);
-
 #if DEBUG_GENERAL
             cout << "Handled First Clause:\n";
             cout << clPtr->format();
             cout << "SIZE ============= " << toPopulate.size() << endl;      
 #endif
-
-            if (toPopulate.empty()) {
-                return;
-            }
-
+            if (toPopulate.empty()) return;
             isFirst = false;
         }
         else {
             vector<shared_ptr<ResultTuple>> currRes;
             handleSingleEvalClause(selectCl, currRes, clPtr);
-
             if (currRes.empty()) { // Early termination
                 toPopulate = move(currRes);
                 return;
             }
-
             /* No synonyms, we just want to check if any of the clauses become empty. */
             if (!hasSynonyms) {
                 toPopulate = move(currRes);
                 continue;
             }
-
             vector<shared_ptr<ResultTuple>> combinedRes;
             unordered_set<string>& setOfSynonymsToJoinOn =
                 getSetOfSynonymsToJoinOn(toPopulate, currRes);
-
             if (!setOfSynonymsToJoinOn.empty())
                 hashJoinResultTuples(toPopulate, currRes, setOfSynonymsToJoinOn, combinedRes);
             else
                 cartesianProductResultTuples(toPopulate, currRes, combinedRes);
-
             toPopulate = move(combinedRes);
         }
-
     }
 
 #if DEBUG_FILTERING
