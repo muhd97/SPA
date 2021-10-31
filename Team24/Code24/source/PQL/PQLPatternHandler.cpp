@@ -9,59 +9,73 @@ using namespace std;
 
 
 void PatternHandler::validateArguments() {
-    
-    if (synonymType != DesignEntity::ASSIGN) {
-        throw "Invalid synonym type of (" + synonymType + ") for pattern clauses\n";
-    }
-    /* pattern a(?, ?) */
+}
 
-    if (patternCl->hasThirdArg) {
-        throw "Invalid pattern clause. Pattern for assign can only have 2 arguments\n";
+void PatternHandler::validateArguments(int mode, int w) {
+    
+    //validate assign
+    if (mode == 1) {
+        const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
+        if (synonymType != DesignEntity::ASSIGN) {
+            throw "Invalid synonym type of (" + synonymType + ") for pattern clauses\n";
+        }
+
+        /* pattern a(?, ?) */
+
+        if (patternCl->hasThirdArg) {
+            throw "Invalid pattern clause. Pattern for assign can only have 2 arguments\n";
+        }
     }
-    if (!patternCl->exprSpec->isAnything) {
-        throw "Invalid pattern clause. 2nd and 3rd arguments of pattern with WHILE and IFS must be UNDERSCORE\n";
-    }
-    if (synonymType == DesignEntity::WHILE && patternCl->hasThirdArg) {
+    //validate whileAndIf
+    else {
+        const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
+     if (w == 2) {
+
+        if (!patternCl->exprSpec->isAnything) {
+            throw "Invalid pattern clause. 2nd and 3rd arguments of pattern with WHILE and IFS must be UNDERSCORE\n";
+        }
+        if (synonymType == DesignEntity::WHILE && patternCl->hasThirdArg) {
             throw "Invalid pattern clause. Pattern with WHILE only has 2 arguments.\n";
-    }
-    if (synonymType == DesignEntity::IF && !patternCl->hasThirdArg) {
+        }
+        if (synonymType == DesignEntity::IF && !patternCl->hasThirdArg) {
             /* Third argument having to be UNDERSCORE is caught in parsing stage. */
             throw "Invalid pattern clause. Pattern with IF needs to have 3 arguments.\n";
+        }
     }
-    if (selectCl->getDesignEntityTypeBySynonym(patternCl->entRef->getStringVal()) != DesignEntity::VARIABLE) {
-            throw "Invalid pattern clause. EntRef must be declared variable\n";
+        if ( w == 3) {
+            if (selectCl->getDesignEntityTypeBySynonym(patternCl->entRef->getStringVal()) != DesignEntity::VARIABLE) {
+                throw "Invalid pattern clause. EntRef must be declared variable\n";
+            }
+        }
     }
     
 }
-
-//PatternHandler::PatternHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType)
-//    : ClauseHandler(move(evaluator), move(selectCl)), patternCl(patternCl), synonymType(synonymType)
-//{
-//    
-//}
 
 void PatternHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
 {
     validateArguments();
     //TODO: @kohyida1997. Do typechecking for different kinds of pattern clauses. If/assign/while have different pattern logic and syntax.
 
-    //const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
+    const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
 
     if (synonymType == DesignEntity::IF || synonymType == DesignEntity::WHILE) {
-        evaluateWhileAndIf(move(toReturn));
+        validateArguments(0, 0);
+        evaluateWhileAndIf(synonymType,toReturn);
         return;
     }
     else
     {
-        evaluateAssign(move(toReturn));
-        return;
+        bool retflag;
+        validateArguments(1, 0);
+        evaluateAssign(synonymType, retflag, toReturn);
+        if (retflag) return;
     }
 }
 
 
-void PatternHandler::evaluateAssign(vector<shared_ptr<ResultTuple>>& toReturn)
+void PatternHandler::evaluateAssign(const string& synonymType, bool& retflag, vector<shared_ptr<ResultTuple>>& toReturn)
 {
-
+    retflag = true;
     shared_ptr<EntRef> entRef = patternCl->entRef;
     vector<pair<int, string>> pairsStmtIndexAndVariables;
     string LHS;
@@ -115,13 +129,15 @@ void PatternHandler::evaluateAssign(vector<shared_ptr<ResultTuple>>& toReturn)
     return;
 }
 
-void PatternHandler::evaluateWhileAndIf(vector<shared_ptr<ResultTuple>>& toReturn) {
+void PatternHandler::evaluateWhileAndIf(const string& DesignEntityType, vector<shared_ptr<ResultTuple>>& toReturn) {
 
     const shared_ptr<EntRef>& entRef1 = patternCl->entRef;
     const auto& entRefType1 = entRef1->getEntRefType();
     const auto& patternSyn1 = patternCl->synonym->getSynonymString();
 
-    const auto& patternTable1 = synonymType == DesignEntity::WHILE ? evaluator->mpPKB->whilePatternTable : evaluator->mpPKB->ifPatternTable;
+    validateArguments(0, 2);
+
+    const auto& patternTable1 = DesignEntityType == DesignEntity::WHILE ? evaluator->mpPKB->whilePatternTable : evaluator->mpPKB->ifPatternTable;
 
     function<bool(pair<int, unordered_set<string>>)> additionalCond;
 
@@ -144,6 +160,8 @@ void PatternHandler::evaluateWhileAndIf(vector<shared_ptr<ResultTuple>>& toRetur
 
         const auto& entRefSyn = entRef1->getStringVal();
         const auto& entRefSynType = selectCl->getDesignEntityTypeBySynonym(entRefSyn);
+
+        validateArguments(0, 3);
 
         for (const auto& p : patternTable1) {
             for (const auto& v : p.second) {
