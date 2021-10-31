@@ -457,7 +457,7 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
     else if (curr.type == PQLTokenType::NEXT_BIP_T)
     {
         // NextBip*
-        eat(PQLTokenType::NEXT_T);
+        eat(PQLTokenType::NEXT_BIP_T);
         eat(PQLTokenType::LEFT_PAREN);
         auto ref1 = parseStmtRef();
         eat(PQLTokenType::COMMA);
