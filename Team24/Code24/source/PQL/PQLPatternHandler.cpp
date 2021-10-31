@@ -14,7 +14,7 @@ void PatternHandler::validateArguments() {
 void PatternHandler::validateArguments(int mode, int w) {
     
     //validate assign
-    if (mode == 1) {
+    if (mode == 0) {
         const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
         if (synonymType != DesignEntity::ASSIGN) {
             throw "Invalid synonym type of (" + synonymType + ") for pattern clauses\n";
@@ -29,7 +29,7 @@ void PatternHandler::validateArguments(int mode, int w) {
     //validate whileAndIf
     else {
         const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
-     if (w == 2) {
+     if (w == 1) {
 
         if (!patternCl->exprSpec->isAnything) {
             throw "Invalid pattern clause. 2nd and 3rd arguments of pattern with WHILE and IFS must be UNDERSCORE\n";
@@ -42,7 +42,7 @@ void PatternHandler::validateArguments(int mode, int w) {
             throw "Invalid pattern clause. Pattern with IF needs to have 3 arguments.\n";
         }
     }
-        if ( w == 3) {
+        if ( w == 2) {
             if (selectCl->getDesignEntityTypeBySynonym(patternCl->entRef->getStringVal()) != DesignEntity::VARIABLE) {
                 throw "Invalid pattern clause. EntRef must be declared variable\n";
             }
@@ -53,22 +53,21 @@ void PatternHandler::validateArguments(int mode, int w) {
 
 void PatternHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
 {
-    validateArguments();
     //TODO: @kohyida1997. Do typechecking for different kinds of pattern clauses. If/assign/while have different pattern logic and syntax.
 
     const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
 
-    if (synonymType == DesignEntity::IF || synonymType == DesignEntity::WHILE) {
+    if (!(synonymType == DesignEntity::IF || synonymType == DesignEntity::WHILE)) {
+        bool retflag;
         validateArguments(0, 0);
-        evaluateWhileAndIf(synonymType,toReturn);
-        return;
+        evaluateAssign(synonymType, retflag, toReturn);
+        if (retflag) return;
     }
     else
     {
-        bool retflag;
         validateArguments(1, 0);
-        evaluateAssign(synonymType, retflag, toReturn);
-        if (retflag) return;
+        evaluateWhileAndIf(synonymType, toReturn);
+        return;
     }
 }
 
@@ -135,7 +134,7 @@ void PatternHandler::evaluateWhileAndIf(const string& DesignEntityType, vector<s
     const auto& entRefType1 = entRef1->getEntRefType();
     const auto& patternSyn1 = patternCl->synonym->getSynonymString();
 
-    validateArguments(0, 2);
+    validateArguments(1, 1);
 
     const auto& patternTable1 = DesignEntityType == DesignEntity::WHILE ? evaluator->mpPKB->whilePatternTable : evaluator->mpPKB->ifPatternTable;
 
@@ -161,7 +160,7 @@ void PatternHandler::evaluateWhileAndIf(const string& DesignEntityType, vector<s
         const auto& entRefSyn = entRef1->getStringVal();
         const auto& entRefSynType = selectCl->getDesignEntityTypeBySynonym(entRefSyn);
 
-        validateArguments(0, 3);
+        validateArguments(1, 2);
 
         for (const auto& p : patternTable1) {
             for (const auto& v : p.second) {
