@@ -21,6 +21,17 @@
     <ClCompile Include="..\source\PQL\PQLClauseHandlerAssignPattern.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandlerWith.cpp" />
+    <ClCompile Include="..\source\PQL\PQLFollowsParentHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLUsesModifiesSHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLUsesModifiesPHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLUsesSHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLModifiesSHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLModifiesPHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLUsesPHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLFollowsHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLFollowsTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLParentHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLParentTHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
@@ -45,5 +56,17 @@
     <ClInclude Include="..\source\PQL\PQLClauseHandlerAssignPattern.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandlerWith.h" />
+    <ClInclude Include="..\source\PQL\PQLSuchThatHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLFollowsParentHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLUsesModifiesSHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLUsesModifiesPHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLUsesSHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLModifiesSHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLModifiesPHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLUsesPHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLFollowsHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLFollowsTHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLParentHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLParentTHandler.h" />
   </ItemGroup>
 </Project>
