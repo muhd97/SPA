@@ -16,16 +16,12 @@ void WithHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
     if (lhs->getRefType() == RefType::IDENT) {
         evaluateWithFirstArgIdent(toReturn);
     }
-
     if (lhs->getRefType() == RefType::INTEGER) {
         evaluateWithFirstArgInt(toReturn);
     }
-
     if (lhs->getRefType() == RefType::ATTR) {
         evaluateWithFirstArgAttrRef(toReturn);
-
     }
-
     if (lhs->getRefType() == RefType::SYNONYM) {
         evaluateWithFirstArgSyn(toReturn);
     }
@@ -48,22 +44,18 @@ void WithHandler::evaluateWithFirstArgIdent(vector<shared_ptr<ResultTuple>>& toR
 
     /* with (ident, ident)*/
     if (rightType == RefType::IDENT) {
-
         if (rhs->getStringVal() == lhs->getStringVal()) {
             toReturn.emplace_back(getResultTuple({ {ResultTuple::IDENT_PLACEHOLDER, ""} }));
         }
         return;
     }
 
-    /* with (ident, int) -> illegal.*/
-
-    /* with (ident, syn) -> illegal as syn must be prog_line, which is INTEGER. */
-
-    /* with (ident, attrRef) */
+    /* with (ident, int) -> illegal.
+       with (ident, syn) -> illegal as syn must be prog_line, which is INTEGER. 
+       with (ident, attrRef) */
     if (rightType == RefType::ATTR) {
 
         /* By the pre-condition, the attrName is guaranteed to be procName OR varName. */
-
         const auto& synonym = rhs->getAttrRef()->getSynonym();
         const auto& attrName = rhs->getAttrRef()->getAttrName();
         const auto& synType = selectCl->getDesignEntityTypeBySynonym(synonym);
@@ -139,11 +131,6 @@ void WithHandler::evaluateWithFirstArgInt(vector<shared_ptr<ResultTuple>>& toRet
 
         const auto& synonymStringVal = rhs->getStringVal();
 
-        /* TODO: @kohyida1997 we might not need to do this check. */
-        if (selectCl->getDesignEntityTypeBySynonym(synonymStringVal) != DesignEntity::PROG_LINE) {
-            throw "Synonym in with-clause must be declared prog-line\n";
-        }
-
         PKBStmt::SharedPtr temp;
         if (evaluator->mpPKB->getStatement(leftVal, temp)) {
             toReturn.emplace_back(getResultTuple({ {synonymStringVal, to_string(leftVal)} }));
@@ -154,16 +141,9 @@ void WithHandler::evaluateWithFirstArgInt(vector<shared_ptr<ResultTuple>>& toRet
     /* with (int, syn.stmt#) */
     if (rightType == RefType::ATTR) {
 
-
         const auto& attrRef = rhs->getAttrRef();
         const auto& attrName = attrRef->getAttrName();
         const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(attrRef->getSynonym());
-
-        /* TODO: @kohyida1997 we might not need to do this check. */
-        /*if (attrName->getAttrNameType() != AttrNameType::STMT_NUMBER || attrName->getAttrNameType() != AttrNameType::VALUE) {
-            throw "AttrName must be stmt# when comparing integers in with-clause\n";
-        }*/
-
 
         if (attrName->getAttrNameType() == AttrNameType::STMT_NUMBER) {
             PKBStmt::SharedPtr temp;
@@ -185,8 +165,6 @@ void WithHandler::evaluateWithFirstArgInt(vector<shared_ptr<ResultTuple>>& toRet
 
             }
         }
-
-
         return;
     }
 
@@ -245,9 +223,7 @@ void WithHandler::evaluateWithFirstArgAttrRef(vector<shared_ptr<ResultTuple>>& t
                         toReturn.emplace_back(getResultTuple({ {leftSynKey, to_string(x->getIndex())}, {rightSynKey, to_string(x->getIndex())} }));
                     }
                 }
-
                 return;
-
             }
             else if (rightAttrNameType == AttrNameType::VALUE) { /* With (STMT#, CONST) */
                 const auto& temp2 = selectCl->getDesignEntityTypeBySynonym(rightAttrRef->getSynonymString());
@@ -258,9 +234,7 @@ void WithHandler::evaluateWithFirstArgAttrRef(vector<shared_ptr<ResultTuple>>& t
                         toReturn.emplace_back(getResultTuple({ {leftSynKey, str}, {rightSynKey, str} }));
                     }
                 }
-
                 return;
-
             }
         }
 
@@ -281,7 +255,6 @@ void WithHandler::evaluateWithFirstArgAttrRef(vector<shared_ptr<ResultTuple>>& t
                 return;
             }
         }
-
         return;
     }
 
@@ -298,24 +271,18 @@ void WithHandler::evaluateWithFirstArgAttrRef(vector<shared_ptr<ResultTuple>>& t
             if (attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
                 throw "Procedure attribute must be procName\n";
             }
-
             if (evaluator->mpPKB->procedureNameToProcedureMap.count(rightVal)) {
                 toReturn.emplace_back(getResultTuple({ {synonym->getSynonymString(), rightVal} }));
             }
             return;
         }
-
         if (synType == DesignEntity::VARIABLE) {
             if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
                 throw "Variable attribute must be varName\n";
             }
-
-
             if (evaluator->mpPKB->mVariables.count(rightVal)) {
                 toReturn.emplace_back(getResultTuple({ {synonym->getSynonymString(), rightVal} }));
             }
-
-
             return;
         }
 
@@ -323,36 +290,29 @@ void WithHandler::evaluateWithFirstArgAttrRef(vector<shared_ptr<ResultTuple>>& t
             if (attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
                 throw "Call attribute must be procName\n";
             }
-
             for (const auto& x : evaluator->mpPKB->procNameToCallStmtTable[rightVal]) {
                 toReturn.emplace_back(getResultTuple({ {synonym->getSynonymString(), x} }));
             }
-
             return;
         }
-
         if (synType == DesignEntity::READ) {
             if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
                 throw "Read attribute must be varName\n";
             }
-
             for (const auto& x : evaluator->mpPKB->varNameToReadStmtTable[rightVal]) {
                 toReturn.emplace_back(getResultTuple({ {synonym->getSynonymString(), x} }));
             }
             return;
         }
-
         if (synType == DesignEntity::PRINT) {
             if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
                 throw "Print attribute must be varName\n";
             }
-
             for (const auto& x : evaluator->mpPKB->varNameToPrintStmtTable[rightVal]) {
                 toReturn.emplace_back(getResultTuple({ {synonym->getSynonymString(), x} }));
             }
             return;
         }
-
     }
 
     /* with attrRef = synonym */
@@ -363,11 +323,9 @@ void WithHandler::evaluateWithFirstArgAttrRef(vector<shared_ptr<ResultTuple>>& t
         const string& leftSynString = lhs->getAttrRef()->getSynonymString();
 
         if (leftAttrNameType == AttrNameType::VALUE) { /* with const.value = prog_line */
-
             for (const auto& str : evaluator->mpPKB->stmtsWithIndexAsConstantsTable[PKBDesignEntity::AllStatements]) {
                 toReturn.emplace_back(getResultTuple({ {leftSynString, str}, {rightSynString, str} }));
             }
-
         }
 
         else if (leftAttrNameType == AttrNameType::STMT_NUMBER) { /* with stmt.stmt# = prog_line */
@@ -377,12 +335,10 @@ void WithHandler::evaluateWithFirstArgAttrRef(vector<shared_ptr<ResultTuple>>& t
             if (leftDesignEntity == PKBDesignEntity::Constant || leftDesignEntity == PKBDesignEntity::Variable || leftDesignEntity == PKBDesignEntity::Procedure) {
                 throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
             }
-
             for (auto& ptr : evaluator->mpPKB->getStatements(leftDesignEntity)) {
                 string indexToString = to_string(ptr->getIndex());
                 toReturn.emplace_back(getResultTuple({ {leftSynString, indexToString}, {rightSynString, indexToString} }));
             }
-
         }
         return;
     }
@@ -402,7 +358,6 @@ void WithHandler::evaluateWithFirstArgAttrRef(vector<shared_ptr<ResultTuple>>& t
                 throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
             }
 
-
             if (evaluator->mpPKB->stmtTypeToSetOfStmtNoTable[leftDesignEntity].count(rightVal)) {
                 toReturn.emplace_back(getResultTuple({ {leftSynString, to_string(rightVal)} }));
             }
@@ -421,11 +376,8 @@ void WithHandler::evaluateWithFirstArgAttrRef(vector<shared_ptr<ResultTuple>>& t
     }
 }
 
-/* PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both integers)
+// PRE-CONDITION: given withCl is semantically valid, has same types on both sides of equality op. (Both integers)
 
-TODO: @kohyida1997: write test cases for this with case.
-
-*/
 void WithHandler::evaluateWithFirstArgSyn(vector<shared_ptr<ResultTuple>>& toReturn)
 {
     const shared_ptr<Ref> lhs = withCl->lhs;
@@ -441,7 +393,6 @@ void WithHandler::evaluateWithFirstArgSyn(vector<shared_ptr<ResultTuple>>& toRet
     }
 
     if (rightType == RefType::INTEGER) {
-
         int rightIntVal = rhs->getIntVal();
         if (evaluator->mpPKB->stmtTypeToSetOfStmtNoTable[PKBDesignEntity::AllStatements].count(rightIntVal)) {
 
@@ -452,7 +403,6 @@ void WithHandler::evaluateWithFirstArgSyn(vector<shared_ptr<ResultTuple>>& toRet
 
     else if (rightType == RefType::SYNONYM) {
         const auto& rightSynonymString = rhs->getStringVal();
-
         const auto& rightEntityType = selectCl->getDesignEntityTypeBySynonym(rightSynonymString);
 
         if (rightEntityType != DesignEntity::PROG_LINE) {
@@ -473,7 +423,6 @@ void WithHandler::evaluateWithFirstArgSyn(vector<shared_ptr<ResultTuple>>& toRet
         auto rightDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
 
         if (rightAttrNameType == AttrNameType::VALUE) { /* with prog_line = const.value */
-
             if (rightDesignEntity != PKBDesignEntity::Constant) {
                 throw "Value attribute is only applicable to synonyms which are of type Constant\n";
             }
@@ -485,7 +434,6 @@ void WithHandler::evaluateWithFirstArgSyn(vector<shared_ptr<ResultTuple>>& toRet
         }
 
         else if (rightAttrNameType == AttrNameType::STMT_NUMBER) { /* with prog_line == stmt.stmt# */
-
             if (rightDesignEntity == PKBDesignEntity::Constant || rightDesignEntity == PKBDesignEntity::Variable || rightDesignEntity == PKBDesignEntity::Procedure) {
                 throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
             }
@@ -494,9 +442,7 @@ void WithHandler::evaluateWithFirstArgSyn(vector<shared_ptr<ResultTuple>>& toRet
                 string indexToString = to_string(ptr->getIndex());
                 toReturn.emplace_back(getResultTuple({ {leftSynonymString, indexToString}, {rightSynonymString, indexToString} }));
             }
-
         }
     }
-
     /* Cannot be with PROG_LINE = "IDENT" as the types are different */
 }
