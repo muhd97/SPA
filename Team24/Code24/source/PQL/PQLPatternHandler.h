@@ -12,23 +12,19 @@ class PatternHandler : public ClauseHandler
 {
 protected:
 
-	shared_ptr<PatternCl>& patternCl;
-	string& synonymType;
-
-	PatternHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl) : ClauseHandler(move(evaluator), move(selectCl))
-	{
-	}
+	const shared_ptr<PatternCl>& patternCl;
+	const string& synonymType;
 
 	void validateArguments() override;
-
-	virtual void evaluateWhileAndIf(vector<shared_ptr<ResultTuple>>& toReturn);
-
-	virtual void evaluateAssign(vector<shared_ptr<ResultTuple>>& toReturn);
-
-	PatternHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl);
+	void evaluateAssign(vector<shared_ptr<ResultTuple>>& toReturn);
+	void evaluateWhileAndIf(vector<shared_ptr<ResultTuple>>& toReturn);
 
 public:
-	void evaluate(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toReturn) override;
+	PatternHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType) : ClauseHandler(move(evaluator), move(selectCl)), patternCl(patternCl), synonymType(synonymType)
+	{
+	}
+	
+	void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) override;
 };
 
 

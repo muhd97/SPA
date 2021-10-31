@@ -1,6 +1,5 @@
 #include "PQLPatternHandler.h"
-#include "PQLAssignPatternHandler.h"
-#include "PQLWhileAndIfPatternHandler.h"
+#include "PQLProcessorUtils.h"
 
 using namespace std;
 #pragma optimize( "gty", on )
@@ -10,7 +9,7 @@ using namespace std;
 
 
 void PatternHandler::validateArguments() {
-    this->synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
+    
     if (synonymType != DesignEntity::ASSIGN) {
         throw "Invalid synonym type of (" + synonymType + ") for pattern clauses\n";
     }
@@ -35,29 +34,123 @@ void PatternHandler::validateArguments() {
     
 }
 
-PatternHandler::PatternHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl)
-    : ClauseHandler(move(evaluator), move(selectCl))
-{
-    this->patternCl = patternCl;
-    
-}
+//PatternHandler::PatternHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl, const string& synonymType)
+//    : ClauseHandler(move(evaluator), move(selectCl)), patternCl(patternCl), synonymType(synonymType)
+//{
+//    
+//}
 
-void PatternHandler::evaluate(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toReturn)
+void PatternHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
 {
     validateArguments();
     //TODO: @kohyida1997. Do typechecking for different kinds of pattern clauses. If/assign/while have different pattern logic and syntax.
 
-    const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
+    //const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
 
     if (synonymType == DesignEntity::IF || synonymType == DesignEntity::WHILE) {
-
         evaluateWhileAndIf(move(toReturn));
         return;
     }
     else
     {
-        bool retflag;
         evaluateAssign(move(toReturn));
         return;
     }
+}
+
+
+void PatternHandler::evaluateAssign(vector<shared_ptr<ResultTuple>>& toReturn)
+{
+
+    shared_ptr<EntRef> entRef = patternCl->entRef;
+    vector<pair<int, string>> pairsStmtIndexAndVariables;
+    string LHS;
+    string RHS;
+    switch (entRef->getEntRefType())
+    {
+    case EntRefType::SYNONYM: {
+        if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != DesignEntity::VARIABLE)
+        {
+            // invalid query
+            //return;
+            break;
+        }
+        LHS = "_";
+        break;
+    }
+    case EntRefType::UNDERSCORE: {
+        LHS = "_";
+        break;
+    }
+    case EntRefType::IDENT: {
+        LHS = entRef->getStringVal();
+        break;
+    }
+    }
+    // RHS
+    shared_ptr<ExpressionSpec> exprSpec = patternCl->exprSpec;
+    if (exprSpec->isAnything)
+    {
+        pairsStmtIndexAndVariables = evaluator->matchAnyPattern(LHS);
+    }
+    else if (exprSpec->isPartialMatch)
+    {
+        pairsStmtIndexAndVariables = evaluator->matchPartialPattern(LHS, exprSpec->expression);
+    }
+    else
+    {
+        pairsStmtIndexAndVariables = evaluator->matchExactPattern(LHS, exprSpec->expression);
+    }
+    for (auto& pair : pairsStmtIndexAndVariables)
+    {
+        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
+        tupleToAdd->insertKeyValuePair(patternCl->synonym->getValue(), to_string(pair.first));
+        if (entRef->getEntRefType() == EntRefType::SYNONYM)
+        {
+            tupleToAdd->insertKeyValuePair(entRef->getStringVal(), pair.second);
+
+        }
+        toReturn.emplace_back(move(tupleToAdd));
+    }
+    return;
+}
+
+void PatternHandler::evaluateWhileAndIf(vector<shared_ptr<ResultTuple>>& toReturn) {
+
+    const shared_ptr<EntRef>& entRef1 = patternCl->entRef;
+    const auto& entRefType1 = entRef1->getEntRefType();
+    const auto& patternSyn1 = patternCl->synonym->getSynonymString();
+
+    const auto& patternTable1 = synonymType == DesignEntity::WHILE ? evaluator->mpPKB->whilePatternTable : evaluator->mpPKB->ifPatternTable;
+
+    function<bool(pair<int, unordered_set<string>>)> additionalCond;
+
+    if (entRefType1 == EntRefType::UNDERSCORE || entRefType1 == EntRefType::IDENT) {
+        if (entRefType1 == EntRefType::UNDERSCORE) {
+            additionalCond = [](auto& pair) {return !pair.second.empty(); };
+        }
+        else {
+            additionalCond = [&entRef1](auto& pair) {return pair.second.count(entRef1->getStringVal()); };
+        }
+
+        for (const auto& p : patternTable1) {
+            if (additionalCond(p)) {
+                toReturn.emplace_back(getResultTuple({ {patternSyn1, to_string(p.first)} }));
+            }
+        }
+    }
+    /* pattern x(SYN, _, _,) */
+    else {
+
+        const auto& entRefSyn = entRef1->getStringVal();
+        const auto& entRefSynType = selectCl->getDesignEntityTypeBySynonym(entRefSyn);
+
+        for (const auto& p : patternTable1) {
+            for (const auto& v : p.second) {
+                toReturn.emplace_back(getResultTuple({ {patternSyn1, to_string(p.first)}, {entRefSyn, v} }));
+            }
+        }
+    }
+    return;
+
 }

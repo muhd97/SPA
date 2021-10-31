@@ -3021,7 +3021,8 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
 
     const auto type = evalCl->getEvalClType();
     if (type == EvalClType::Pattern) {
-        PQLPatternHandler::evaluate(evaluator, selectCl, static_pointer_cast<PatternCl>(evalCl), toPopulate);
+        PatternHandler ph(evaluator, selectCl, static_pointer_cast<PatternCl>(evalCl), selectCl->getDesignEntityTypeBySynonym(static_pointer_cast<PatternCl>(evalCl)->synonym));
+        ph.evaluate(toPopulate);
     }
     else if (type == EvalClType::SuchThat) {
         handleSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
