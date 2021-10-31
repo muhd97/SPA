@@ -31,7 +31,7 @@ public:
     {
         return ResultType::StringSingleResult;
     }
-    virtual const string& getResultAsString() const
+    virtual string& getResultAsString()
     {
         return dummy;
     }
@@ -54,6 +54,10 @@ public:
     ResultTuple(int sizeToReserve)
     {
         synonymKeyToValMap.reserve(sizeToReserve);
+    }
+
+    ResultTuple(const unordered_map<string, string>& map) : synonymKeyToValMap(map) {
+
     }
 
     inline void insertKeyValuePair(const string& key, const string& value)
@@ -108,7 +112,7 @@ public:
         return ResultType::StringSingleResult;
     }
 
-    const string& getResultAsString() const override
+    string& getResultAsString() override
     {
         return res;
     }

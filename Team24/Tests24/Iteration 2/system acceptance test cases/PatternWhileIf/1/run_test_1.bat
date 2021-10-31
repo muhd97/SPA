@@ -6,8 +6,8 @@ title Running calls system acceptance test case!
 
 findstr "failed" out-test_calls1.xml
 findstr "crash" out-test_calls1.xml
-findstr "missing" out-test_calls1.xml
-findstr "additional" out-test_calls1.xml
+findstr "timeout" out-test_calls1.xml
+findstr "exception" out-test_calls1.xml
 
 echo The End!
 pause
