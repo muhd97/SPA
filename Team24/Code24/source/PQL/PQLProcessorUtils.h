@@ -509,7 +509,7 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
                             toAdd->insertKeyValuePair(leftPair.first, leftPair.second);
                         for (const auto& rightPair : otherTup->synonymKeyToValMap)
                             if (!toAdd->synonymKeyAlreadyExists(rightPair.first))
-                                toAdd->insertKeyValuePair(rightPair.first, rightPair.second)
+                                toAdd->insertKeyValuePair(rightPair.first, rightPair.second);
                         vec.emplace_back(move(toAdd));
                     }
                 }
