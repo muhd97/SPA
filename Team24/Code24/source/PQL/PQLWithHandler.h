@@ -7,16 +7,10 @@
 
 using namespace std;
 
-
-
-//	validateArguments();
-//}
-
 /* ======================== WITH CLAUSE ======================== */
 class WithHandler : public ClauseHandler
 {
-
-protected:
+private:
 	const shared_ptr<WithCl>& withCl;
 
 	void validateArguments() override;
@@ -30,7 +24,6 @@ public:
 	{
 
 	}
-
 	void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) override;
 };
 

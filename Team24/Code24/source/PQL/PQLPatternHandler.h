@@ -10,7 +10,7 @@ using namespace std;
 
 class PatternHandler : public ClauseHandler
 {
-protected:
+private:
 
 	const shared_ptr<PatternCl>& patternCl;
 
@@ -24,7 +24,6 @@ public:
 	{
 		
 	}
-	
 	void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) override;
 };
 
