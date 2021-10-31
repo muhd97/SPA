@@ -2,6 +2,7 @@
 #include "PQLParser.h"
 #include "..\PKB\PKBPQLEvaluator.h"
 #include "PQLResultTuple.h"
+#include "PQLClauseHandler.h"
 #pragma optimize( "gty", on )
 
 using namespace std;
@@ -12,19 +13,27 @@ using namespace std;
 //}
 
 /* ======================== WITH CLAUSE ======================== */
-class PQLWithHandler
+class WithHandler : public ClauseHandler
 {
+
+protected:
+	const shared_ptr<WithCl>& withCl;
+
+	void validateArguments() override;
+	void evaluateWithFirstArgIdent(vector<shared_ptr<ResultTuple>>& toReturn);
+	void evaluateWithFirstArgInt(vector<shared_ptr<ResultTuple>>& toReturn);
+	void evaluateWithFirstArgAttrRef(vector<shared_ptr<ResultTuple>>& toReturn);
+	void evaluateWithFirstArgSyn(vector<shared_ptr<ResultTuple>>& toReturn);
+
 public:
+	WithHandler(shared_ptr<PKBPQLEvaluator> evaluator, shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl) : ClauseHandler(evaluator, move(selectCl)), withCl(move(withCl))
+	{
 
-	static void evaluate(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
+	}
 
-	static void validateArguments(const std::shared_ptr<SelectCl>& selectCl, const std::shared_ptr<WithCl>& withCl);
-
-	static void evaluateWithFirstArgIdent(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
-
-	static void evaluateWithFirstArgInt(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
-
-	static void evaluateWithFirstArgAttrRef(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
-
-	static void evaluateWithFirstArgSyn(shared_ptr<PKBPQLEvaluator> evaluator,const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl, vector<shared_ptr<ResultTuple>>& toReturn);
+	void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) override;
 };
+
+
+
+

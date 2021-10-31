@@ -2807,7 +2807,9 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
         handleSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::With) {
-        PQLWithHandler::evaluate(evaluator, selectCl, static_pointer_cast<WithCl>(evalCl), toPopulate);
+        WithHandler wh(evaluator, selectCl, static_pointer_cast<WithCl>(evalCl));
+        wh.evaluate(toPopulate);
+        
     }
 }
 
