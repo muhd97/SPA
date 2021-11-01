@@ -15,12 +15,12 @@ protected:
 	void validateArguments() override;
 
 	/* 9 possible cases shared by UsesS and ModifiesS. */
-	virtual void evaluateIntIdent(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateIntSyn(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateIntUnderscore(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateSynIdent(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn);
+	virtual void evaluateIntIdent(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateIntSyn(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateIntUnderscore(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateSynIdent(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
 
 	shared_ptr<StmtRef>& getLeftArg();
 	shared_ptr<EntRef>& getRightArg();

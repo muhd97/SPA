@@ -2,8 +2,6 @@
 #include "PQLSuchThatHandler.h"
 #include "PQLResult.h"
 
-using namespace std;
-
 class FollowsParentHandler : public SuchThatHandler
 {
 private:
@@ -15,15 +13,15 @@ protected:
 	void validateArguments() override;
 
 	/* 9 possible cases shared by Follows and Parent. */
-	virtual void evaluateIntInt(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateIntSyn(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateIntUnderscore(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateSynInt(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateUnderscoreInt(vector<shared_ptr<ResultTuple>>& toReturn);
-	virtual void evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>>& toReturn);
+	virtual void evaluateIntInt(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateIntSyn(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateIntUnderscore(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateSynInt(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateUnderscoreInt(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
 
 	shared_ptr<StmtRef>& getLeftArg();
 	shared_ptr<StmtRef>& getRightArg();
