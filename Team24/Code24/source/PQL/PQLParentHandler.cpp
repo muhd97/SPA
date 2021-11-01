@@ -1,4 +1,3 @@
-#pragma once
 #include "PQLParentHandler.h"
 //TODO: replace all the tuple creations with getResultTuple method from PQLProcessorUtils.h
 
@@ -36,7 +35,6 @@ void ParentHandler::evaluateIntSyn(vector<shared_ptr<ResultTuple>>& toReturn)
 {
     const string& rightSynonym = getRightArg()->getStringVal();
     PKBDesignEntity pkbDe = getPKBDesignEntityOfSynonym(rightSynonym);
-
     for (auto& i : getEvaluator()->getChildren(pkbDe, getLeftArg()->getIntVal()))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
