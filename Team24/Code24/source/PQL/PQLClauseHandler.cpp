@@ -122,7 +122,7 @@ void evaluateClause()
 {
 }
 
-ClauseHandler::ClauseHandler(shared_ptr<PKBPQLEvaluator> evaluator, shared_ptr<SelectCl>& selectCl)
+ClauseHandler::ClauseHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl)
 {
     this->evaluator = evaluator;
     this->selectCl = selectCl;
