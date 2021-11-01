@@ -149,7 +149,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
 {
     //special case to handle to separate UsesS and UsesP and ModifiesS and ModifiesP when first arg is synonym
 
-    //TODO Manas: remember to check for synonym type in ModifiesS and UsesS to make sure if they are proc or not.
     switch (suchThatCl->relRef->getType())
     {
     case RelRefType::USES_S: /* Uses(s, v) where s MUST be a
@@ -239,7 +238,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
                         /* Add this tuple into the vector to tuples to return.
                          */
                         toReturn.emplace_back(move(tupleToAdd));
-                        // toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
                     }
                 }
             }
@@ -518,14 +516,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
             {
                 shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
                 PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-                /* Follows (1, syn), syn is NOT a variable */
-                // if
-                // (selectCl->getDesignEntityTypeBySynonym(stmtRef2->getStringVal())
-                // != VARIABLE) {
-                //    throw "TODO: Handle error case. Follows(1, p), but p is
-                //    not a variable delcaration.\n";
-                //}
-
+               
                 for (auto& s : evaluator->getAfter(pkbDe, stmtRef1->getIntVal()))
                 {
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -538,11 +529,8 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
                 }
             }
 
-            // maybe later need to optimize this to return just 1 result if
-            // there are any at all
             if (rightType == StmtRefType::UNDERSCORE)
             {
-                // if (evaluator->checkFollowed(stmtRef1->getIntVal())) {
                 /* Create the result tuple */
                 for (auto& s : evaluator->getAfter(PKBDesignEntity::AllStatements, stmtRef1->getIntVal()))
                 {
@@ -550,11 +538,8 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
                     tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(s));
                     toReturn.emplace_back(tupleToAdd);
                 }
-                //}
             }
 
-            // very unoptimized, need a way to just check if follows(int, int)
-            // is true
             if (rightType == StmtRefType::INTEGER)
             {
                 int s1 = stmtRef1->getIntVal();
@@ -600,8 +585,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
                     /* Map the value returned to this particular synonym. */
                     tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s));
 
-                    //    tupleToAdd->insertKeyValuePair(leftSynonymKey,
-                    //    to_string(s->getIndex()));
                     toReturn.emplace_back(move(tupleToAdd));
                 }
             }
@@ -609,7 +592,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
             /* Follows(syn, syn) */
             if (rightType == StmtRefType::SYNONYM)
             {
-                // cout << "\n syn, syn case \n";
                 if (!givenSynonymMatchesMultipleTypes(selectCl, rightSynonymKey,
                     { DesignEntity::ASSIGN, DesignEntity::CALL, DesignEntity::IF,
                      DesignEntity::PRINT, DesignEntity::READ, DesignEntity::STMT,
