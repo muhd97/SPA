@@ -21,6 +21,7 @@
     <ClCompile Include="..\source\PQL\PQLClauseHandlerAssignPattern.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandlerWith.cpp" />
+    <ClCompile Include="..\source\PQL\PQLSuchThatHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLFollowsParentHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesModifiesSHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesModifiesPHandler.cpp" />
@@ -57,7 +58,6 @@
     <ClInclude Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandlerWith.h" />
     <ClInclude Include="..\source\PQL\PQLSuchThatHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLFollowsParentHandler.h" />
     <ClInclude Include="..\source\PQL\PQLUsesModifiesSHandler.h" />
     <ClInclude Include="..\source\PQL\PQLUsesModifiesPHandler.h" />
     <ClInclude Include="..\source\PQL\PQLUsesSHandler.h" />
@@ -68,5 +68,6 @@
     <ClInclude Include="..\source\PQL\PQLFollowsTHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParentHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParentTHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLFollowsParentHandler.h" />
   </ItemGroup>
 </Project>
