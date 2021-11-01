@@ -11,6 +11,7 @@
 #include <execution>
 #include <algorithm>
 #include "PQLFollowsHandler.h"
+#include "PQLFollowsTHandler.h"
 #include "PQLParentHandler.h"
 #include "PQLPatternHandler.h"
 #include "PQLWithHandler.h"
@@ -498,25 +499,8 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
     }
 
     case RelRefType::FOLLOWS_T: {
-        shared_ptr<FollowsT> followstCl = static_pointer_cast<FollowsT>(suchThatCl->relRef);
-        shared_ptr<StmtRef>& stmtRef1 = followstCl->stmtRef1;
-        StmtRefType leftType = stmtRef1->getStmtRefType();
-        /* FollowsT (1, ?) */
-        if (leftType == StmtRefType::INTEGER)
-        {
-            handleFollowsTFirstArgInteger(selectCl, followstCl, toReturn);
-        }
-
-        /* FollowsT (syn, ?) */
-        if (leftType == StmtRefType::SYNONYM)
-        {
-            handleFollowsTFirstArgSyn(selectCl, followstCl, toReturn);
-        }
-
-        if (leftType == StmtRefType::UNDERSCORE)
-        {
-            handleFollowsTFirstArgUnderscore(selectCl, followstCl, toReturn);
-        }
+        shared_ptr<FollowsTHandler> followsTHandler = make_shared<FollowsTHandler>(move(evaluator), move(selectCl), static_pointer_cast<FollowsT>(suchThatCl->relRef));
+        followsTHandler->evaluate(move(toReturn));
         break;
     }
     case RelRefType::CALLS: {
@@ -2706,6 +2690,15 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
 
             }
         }
+    }
+    catch (const exception& e) {
+        if (isBooleanReturnType) {
+            res.push_back(make_shared<StringSingleResult>("FALSE"));
+        }
+        else {
+            throw e;
+        }
+        return move(res);
     }
     catch (...) {
         if (isBooleanReturnType) {
