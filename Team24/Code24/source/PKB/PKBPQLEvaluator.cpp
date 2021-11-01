@@ -295,7 +295,6 @@ set<pair<int, int>> PKBPQLEvaluator::getParentsT(PKBDesignEntity parentType, PKB
 	return res;
 }
 
-// todo @nicholas: this function confirm will have bugs, dont need to say
 bool PKBPQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType,
 	PKBDesignEntity childType, unordered_set<int>& setResult)
 {
@@ -315,8 +314,6 @@ set<pair<int, int>> PKBPQLEvaluator::getParentsT(PKBDesignEntity childType)
 {
 	set<pair<int, int>> res;
 
-	//todo @nicholas can optimise this ALOT, but not urgent for now
-	//(specifically, can optimise for procedure and AllExceptProcedure)
 	return res;
 }
 
@@ -333,7 +330,6 @@ set<int> PKBPQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentInde
 	return res;
 }
 
-// todo @nicholas probably missing some edge case testing
 set<pair<int, int>> PKBPQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
 	set<pair<int, int>> res;
@@ -700,8 +696,6 @@ vector<int> PKBPQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntit
 	vector<int> res;
 
 	// get results manually
-	// todo @nicholas: add optimization to go through shorter list of synonym
-	// (since both ways cost the same)
 	vector<PKBStmt::SharedPtr > stmts = mpPKB->getStatements(beforeType);
 	PKBStmt::SharedPtr stmtAfter;
 	for (auto& stmt : stmts)
@@ -732,8 +726,6 @@ set<pair<int, int>> PKBPQLEvaluator::getAfterPairs(PKBDesignEntity beforeType, P
 	// check if res is cached, if so return results
 
 	// get results manually
-	// todo @nicholas: add optimization to go through shorter list of synonym
-	// (since both ways cost the same)
 	vector<PKBStmt::SharedPtr > stmts = mpPKB->getStatements(beforeType);
 	PKBStmt::SharedPtr stmtAfter;
 	for (auto& stmt : stmts)
@@ -1100,10 +1092,6 @@ vector<int> PKBPQLEvaluator::getUsers(PKBDesignEntity entityType)
 {
 	vector<PKBStmt::SharedPtr > stmts;
 
-	/*YIDA Todo: Check if using
-	 *getAllUseStmts(PKBDesignEntity::AllExceptProcedure) and getAllUseStmts() is
-	 *intended to be identical? It is currently not. */
-
 	set<PKBStmt::SharedPtr >& useStmtsToCopyOver =
 		entityType != PKBDesignEntity::AllStatements ? mpPKB->getAllUseStmts(entityType) : mpPKB->getAllUseStmts();
 
@@ -1257,7 +1245,6 @@ vector<string> PKBPQLEvaluator::getModified(int statementIndex)
 /*Get all variable names modified by the particular rightStatement */
 vector<string> PKBPQLEvaluator::getModified(PKBDesignEntity modifierType)
 {
-	/*YIDA: Potential bug??? mpPKB->getModifiedVariables() instead? */
 	set<PKBVariable::SharedPtr > vars = mpPKB->getModifiedVariables(modifierType);
 	return varToString(vars);
 }
@@ -1418,8 +1405,6 @@ vector<PKBVariable::SharedPtr > PKBPQLEvaluator::getAllVariables()
 	return move(vars);
 }
 
-/*TODO: @nicholasnge Provide function to return all Constants in the program.
- */
 const unordered_set<string>& PKBPQLEvaluator::getAllConstants()
 {
 	return mpPKB->getConstants();

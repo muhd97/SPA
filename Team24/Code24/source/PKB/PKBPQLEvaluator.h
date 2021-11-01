@@ -631,21 +631,12 @@ class PKBPQLEvaluator
 
     void addParentStmts(vector<PKBStmt::SharedPtr> &stmts)
     {
-        // not sure if its faster, but we dont want to iterate over all types, just
         // If, While, Procedure(the container types)
         vector<PKBStmt::SharedPtr> ifStmts = mpPKB->getStatements(PKBDesignEntity::If);
         vector<PKBStmt::SharedPtr> whileStmts = mpPKB->getStatements(PKBDesignEntity::While);
 
-        /* YIDA NOTE: PARENT IS NOT DEFINED FOR Procedures. A Procedure CANNOT be a
-         * parent of another statement. */
-
-        // vector<PKBStmt::SharedPtr> procedures =
-        // mpPKB->getStatements(PKBDesignEntity::Procedure);
-
         stmts.insert(stmts.end(), ifStmts.begin(), ifStmts.end());
         stmts.insert(stmts.end(), whileStmts.begin(), whileStmts.end());
-
-        // stmts.insert(stmts.end(), procedures.begin(), procedures.end());
     }
 
     // helper function for ParentT (getParentsT)

@@ -125,7 +125,6 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
 
 
         if (!duplicateHelperSet.count(temp)) {
-            //toReturn.emplace_back(make_shared<OrderedStringTupleResult>(move(orderedStrings)));
             toReturn.emplace_back(make_shared<StringSingleResult>(temp));
             duplicateHelperSet.insert(move(temp));
         }
@@ -231,7 +230,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
                         /* Add this tuple into the vector to tuples to return.
                          */
                         toReturn.emplace_back(move(tupleToAdd));
-                        // toReturn.emplace_back(make_shared<VariableNameSingleResult>(move(s)));
                     }
                 }
             }
@@ -553,14 +551,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
             {
                 shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
                 PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-                /* Follows (1, syn), syn is NOT a variable */
-                // if
-                // (selectCl->getDesignEntityTypeBySynonym(stmtRef2->getStringVal())
-                // != VARIABLE) {
-                //    throw "TODO: Handle error case. Follows(1, p), but p is
-                //    not a variable delcaration.\n";
-                //}
-
+                
                 for (auto& s : evaluator->getAfter(pkbDe, stmtRef1->getIntVal()))
                 {
                     shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -573,11 +564,8 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
                 }
             }
 
-            // maybe later need to optimize this to return just 1 result if
-            // there are any at all
             if (rightType == StmtRefType::UNDERSCORE)
             {
-                // if (evaluator->checkFollowed(stmtRef1->getIntVal())) {
                 /* Create the result tuple */
                 for (auto& s : evaluator->getAfter(PKBDesignEntity::AllStatements, stmtRef1->getIntVal()))
                 {
@@ -588,8 +576,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
                 //}
             }
 
-            // very unoptimized, need a way to just check if follows(int, int)
-            // is true
             if (rightType == StmtRefType::INTEGER)
             {
                 int s1 = stmtRef1->getIntVal();
@@ -635,8 +621,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
                     /* Map the value returned to this particular synonym. */
                     tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s));
 
-                    //    tupleToAdd->insertKeyValuePair(leftSynonymKey,
-                    //    to_string(s->getIndex()));
                     toReturn.emplace_back(move(tupleToAdd));
                 }
             }
@@ -644,7 +628,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
             /* Follows(syn, syn) */
             if (rightType == StmtRefType::SYNONYM)
             {
-                // cout << "\n syn, syn case \n";
                 if (!givenSynonymMatchesMultipleTypes(selectCl, rightSynonymKey,
                     { DesignEntity::ASSIGN, DesignEntity::CALL, DesignEntity::IF,
                      DesignEntity::PRINT, DesignEntity::READ, DesignEntity::STMT,
@@ -974,9 +957,7 @@ void PQLProcessor::handleUsesPFirstArgIdent(shared_ptr<SelectCl>& selectCl, shar
 
     /*  Uses ("PROC_IDENTIFER", _)*/
     if (rightEntType == EntRefType::UNDERSCORE)
-    {
-        /* TODO: @kohyida1997 check if syn v is variable */
-        if (evaluator->checkUsedByProcName(leftArgProc))
+    {   if (evaluator->checkUsedByProcName(leftArgProc))
             toReturn.emplace_back(getResultTuple({ {ResultTuple::IDENT_PLACEHOLDER, leftArgProc} }));
     }
 
@@ -1071,9 +1052,7 @@ void PQLProcessor::handleParentFirstArgSyn(shared_ptr<SelectCl>& selectCl, share
      * Procedure/Constant/Variable */
     if (!givenSynonymMatchesMultipleTypes(selectCl, leftSynonym,
         { DesignEntity::IF, DesignEntity::WHILE, DesignEntity::STMT, DesignEntity::PROG_LINE }))
-    {
-        //cout <<  "Special case. Parent(syn, ?), but syn is not a container type, " << "thus it must have no children.\n";
-        return;
+    {   return;
     }
 
     PKBDesignEntity leftArgType =
