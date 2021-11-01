@@ -45,21 +45,21 @@ void ClauseHandler::validateStmtSyn(const string& syn, const string& relationshi
     if (givenSynonymMatchesMultipleTypes(syn,
         { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE }))
     {
-        throw "The synonym \"" + syn + "\" is not declared as a stmt! Synonyms must be stmt type for " + relationshipType + ".\n";
+        throw runtime_error("The synonym \"" + syn + "\" is not declared as a stmt! Synonyms must be stmt type for " + relationshipType + ".\n");
     }
 }
 
 void ClauseHandler::validateStmtInt(int i)
 {
     if (!getEvaluator()->statementExists(i)) {
-        throw "The provided statement index " + to_string(i) + " does not exist in the SIMPLE program!\n";
+        throw runtime_error("The provided statement index " + to_string(i) + " does not exist in the SIMPLE program!\n");
     }
 }
 
 void ClauseHandler::validateVarIdent(const string& ident, const string& relationshipType)
 {
     if (!getEvaluator()->variableExists(move(ident))) {
-        throw "The provided identifier \"" + ident + "\" is not a variable in the SIMPLE program!\n";
+        throw runtime_error("The provided identifier \"" + ident + "\" is not a variable in the SIMPLE program!\n");
     }
 }
 
@@ -68,14 +68,14 @@ void ClauseHandler::validateVarSyn(const string& syn, const string& relationship
     const auto& de = selectCl->getDesignEntityTypeBySynonym(syn);
     if (de != DesignEntity::VARIABLE)
     {
-        throw "The provided synonym " + syn + " is not declared as a variable!\n";
+        throw runtime_error("The provided synonym " + syn + " is not declared as a variable!\n");
     }
 }
 
 void ClauseHandler::validateProcIdent(const string& ident, const string& relationshipType)
 {
     if (!evaluator->procExists(ident)) {
-        throw "The provided identifier \"" + ident + "\" is not a procedure in the SIMPLE program!\n";
+        throw runtime_error("The provided identifier \"" + ident + "\" is not a procedure in the SIMPLE program!\n");
     }
 }
 
@@ -84,7 +84,7 @@ void ClauseHandler::validateProcSyn(const string& syn, const string& relationshi
     const auto& de = selectCl->getDesignEntityTypeBySynonym(syn);
     if (de != DesignEntity::PROCEDURE)
     {
-        throw "The provided synonym " + syn + " is not declared as a procedure!\n";
+        throw runtime_error("The provided synonym " + syn + " is not declared as a procedure!\n");
     }
 }
 
