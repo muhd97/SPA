@@ -10,6 +10,14 @@
 #include <execution>
 #include <algorithm>
 #include "PQLParentHandler.h"
+#include "PQLParentTHandler.h"
+#include "PQLFollowsTHandler.h"
+#include "PQLFollowsHandler.h"
+#include "PQLUsesPHandler.h"
+#include "PQLUsesSHandler.h"
+#include "PQLModifiesPHandler.h"
+#include "PQLModifiesSHandler.h"
+
 /* Initialize static variables for PQLProcessor.cpp */
 string Result::dummy = "BaseResult: getResultAsString()";
 string Result::FALSE_STRING = "FALSE";
@@ -1103,59 +1111,13 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         break;
     }
     case RelRefType::PARENT: {
-        //shared_ptr<Parent> parentCl = static_pointer_cast<Parent>(suchThatCl->relRef);
-        //StmtRefType leftType = parentCl->stmtRef1->getStmtRefType();
-        ///* Parent (_, ?) */
-        //if (leftType == StmtRefType::UNDERSCORE)
-        //{
-        //    handleParentFirstArgUnderscore(selectCl, parentCl, toReturn);
-        //    break;
-        //}
-        ///* Parent (1, ?) */
-        //if (leftType == StmtRefType::INTEGER)
-        //{
-        //    handleParentFirstArgInteger(selectCl, parentCl, toReturn);
-        //    break;
-        //}
-
-        ///* Parent (syn, ?) */
-        //if (leftType == StmtRefType::SYNONYM)
-        //{
-        //    handleParentFirstArgSyn(selectCl, parentCl, toReturn);
-        //    break;
-        //}
-
         shared_ptr<ParentHandler> parentHandler = make_shared<ParentHandler>(move(evaluator), move(selectCl), static_pointer_cast<Parent>(suchThatCl->relRef));
         parentHandler->evaluate(move(toReturn));
-
         break;
     }
     case RelRefType::PARENT_T: {
-        shared_ptr<ParentT> parentCl = static_pointer_cast<ParentT>(suchThatCl->relRef);
-        StmtRefType leftType = parentCl->stmtRef1->getStmtRefType();
-
-        /* ParentT (_, ?) */
-        if (leftType == StmtRefType::UNDERSCORE)
-        {
-            handleParentTFirstArgUnderscore(selectCl, parentCl, toReturn);
-            break;
-        }
-
-        /* ParentT (1, ?) */
-        if (leftType == StmtRefType::INTEGER)
-        {
-            handleParentTFirstArgInteger(selectCl, parentCl, toReturn);
-            break;
-        }
-
-        /* ParentT (syn, ?) */
-
-        if (leftType == StmtRefType::SYNONYM)
-        {
-            handleParentTFirstArgSyn(selectCl, parentCl, toReturn);
-            break;
-        }
-
+        shared_ptr<ParentTHandler> parentTHandler = make_shared<ParentTHandler>(move(evaluator), move(selectCl), static_pointer_cast<ParentT>(suchThatCl->relRef));
+        parentTHandler->evaluate(move(toReturn));
         break;
     }
     case RelRefType::FOLLOWS: {
