@@ -251,8 +251,30 @@ enum class StmtRefType
     INTEGER
 };
 
+class ArgRef
+{
+protected:
+    string stringValue;
+public:
+    const string& getStringVal() const
+    {
+        return stringValue;
+    }
+    ArgRef() : stringValue("")
+    {
+    }
+
+    ArgRef(string s) : stringValue(move(s))
+    {
+    }
+
+    ~ArgRef() 
+    {
+    }
+};
+
 // TODO: @jiachen247 use inheritence to model this
-class StmtRef
+class StmtRef : public ArgRef
 {
 public:
     StmtRef(StmtRefType type)
@@ -260,7 +282,7 @@ public:
         stmtRefType = type;
     }
 
-    StmtRef(StmtRefType type, string s) : stringValue(move(s))
+    StmtRef(StmtRefType type, string s) : ArgRef(move(s))
     {
         stmtRefType = type;
     }
@@ -297,11 +319,6 @@ public:
         return "";
     }
 
-    const string& getStringVal() const
-    {
-        return stringValue;
-    }
-
     int getIntVal()
     {
         return intValue;
@@ -317,7 +334,6 @@ public:
     }
 
 private:
-    string stringValue;
     StmtRefType stmtRefType;
     int intValue = 0;
 };
@@ -329,10 +345,9 @@ enum class EntRefType
     IDENT
 };
 
-class EntRef
+class EntRef : public ArgRef
 {
 private:
-    string stringValue;
     EntRefType entRefType;
 
 public:
@@ -341,14 +356,9 @@ public:
         entRefType = type;
     }
 
-    EntRef(EntRefType type, string val) : stringValue(move(val))
+    EntRef(EntRefType type, string val) : ArgRef(move(val))
     {
         entRefType = type;
-    }
-
-    const string& getStringVal() const
-    {
-        return stringValue;
     }
 
     EntRefType getEntRefType()
