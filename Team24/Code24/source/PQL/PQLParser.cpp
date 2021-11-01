@@ -422,7 +422,7 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
         eat(PQLTokenType::RIGHT_PAREN);
         return make_shared<Calls>(entRef1, entRef2);
     }
-    if (curr.type == PQLTokenType::NEXT_T) {
+    else if (curr.type == PQLTokenType::NEXT_T) {
         // Next*
         eat(PQLTokenType::NEXT_T);
         eat(PQLTokenType::LEFT_PAREN);
@@ -442,6 +442,71 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
         auto ref2 = parseStmtRef();
         eat(PQLTokenType::RIGHT_PAREN);
         return make_shared<Next>(ref1, ref2);
+    }
+    else if (isKeyword(curr, PQL_NEXT_BIP))
+    {
+        // NextBip
+        eatKeyword(PQL_NEXT_BIP);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto ref1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto ref2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<NextBip>(ref1, ref2);
+    }
+    else if (curr.type == PQLTokenType::NEXT_BIP_T)
+    {
+        // NextBip*
+        eat(PQLTokenType::NEXT_BIP_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto ref1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto ref2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<NextBipT>(ref1, ref2);
+    }
+    else if (curr.type == PQLTokenType::AFFECTS_T) {
+        // Affects*
+        eat(PQLTokenType::AFFECTS_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto ref1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto ref2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<AffectsT>(ref1, ref2);
+    }
+    else if (isKeyword(curr, PQL_AFFECTS))
+    {
+        // Affects
+        eatKeyword(PQL_AFFECTS);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto ref1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto ref2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<Affects>(ref1, ref2);
+    }
+    else if (isKeyword(curr, PQL_AFFECTS_BIP))
+    {
+        // AffectsBip
+        eatKeyword(PQL_AFFECTS_BIP);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto ref1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto ref2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<AffectsBip>(ref1, ref2);
+    }
+    else if (curr.type == PQLTokenType::AFFECTS_BIP_T)
+    {
+        // AffectsBip*
+        eat(PQLTokenType::NEXT_T);
+        eat(PQLTokenType::LEFT_PAREN);
+        auto ref1 = parseStmtRef();
+        eat(PQLTokenType::COMMA);
+        auto ref2 = parseStmtRef();
+        eat(PQLTokenType::RIGHT_PAREN);
+        return make_shared<AffectsBip>(ref1, ref2);
     }
     else if (isKeyword(curr, PQL_USES))
     {

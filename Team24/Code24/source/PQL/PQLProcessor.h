@@ -6,7 +6,9 @@
 #include "..\PKB\PKBPQLEvaluator.h"
 #include "PQLParser.h"
 #include "PQLOptimizer.h"
-#include "PQLResult.h"
+#include "PQLResultTuple.h"
+
+
 
 using namespace std;
 
@@ -30,26 +32,12 @@ class PQLProcessor
     vector<shared_ptr<Result>> processPQLQuery(shared_ptr<SelectCl>& selectCl);
 
   private:
-    vector<shared_ptr<Result>> handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl);
+      shared_ptr<PQLOptimizer> opt = nullptr;
+      
+      vector<shared_ptr<Result>> handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl);
 
     void handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
                               vector<shared_ptr<ResultTuple>> &toReturn);
-
-    void handleWithClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void handleWithFirstArgIdent(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void handleWithFirstArgInt(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void handleWithFirstArgAttrRef(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
-    void handleWithFirstArgSyn(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl,
-        vector<shared_ptr<ResultTuple>>& toReturn);
-
     void handleUsesSFirstArgInteger(shared_ptr<SelectCl> &selectCl, shared_ptr<UsesS> &usesCl,
                                     vector<shared_ptr<ResultTuple>> &toReturn);
     void handleUsesSFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared_ptr<UsesS> &usesCl,
@@ -78,12 +66,6 @@ class PQLProcessor
     void handleFollowsTFirstArgUnderscore(shared_ptr<SelectCl> &selectCl, shared_ptr<FollowsT> &followsTCl,
                                           vector<shared_ptr<ResultTuple>> &toReturn);
 
-    void handlePatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
-                             vector<shared_ptr<ResultTuple>> &toReturn);
-
-    void handleWhileAndIfPatternClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<PatternCl>& patternCl,
-        vector<shared_ptr<ResultTuple>>& toReturn, const string& DesignEntityType);
-
     void handleCalls(shared_ptr<SelectCl> &selectCl, shared_ptr<Calls> &callsCl,
         vector<shared_ptr<ResultTuple>>& toReturn);
 
@@ -94,12 +76,15 @@ class PQLProcessor
 
     void handleNextT(shared_ptr<SelectCl>& selectCl, shared_ptr<NextT>& nextTCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
-    void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, vector<shared_ptr<ResultTuple>>& rightResults,
-        unordered_set<string>& joinKeys, vector<shared_ptr<ResultTuple>>& newResults);
+    void handleNextBip(shared_ptr<SelectCl>& selectCl, shared_ptr<NextBip>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn);
 
-    void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftResults,
-                                      vector<shared_ptr<ResultTuple>>& rightResults,
-                                      vector<shared_ptr<ResultTuple>> &newResults);
+    void handleNextBipT(shared_ptr<SelectCl>& selectCl, shared_ptr<NextBipT>& nextCl, vector<shared_ptr<ResultTuple>>& toReturn);
+
+
+    /* ======================== Affects ======================== */
+
+    void handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn, bool isT, bool isBIP);
+
     void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);
 
     const string& resolveAttrRef(const string& syn, shared_ptr<AttrRef>& attrRef, const shared_ptr<SelectCl>& selectCl, shared_ptr<ResultTuple>& tup);

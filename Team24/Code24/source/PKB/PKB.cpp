@@ -1,5 +1,7 @@
 #pragma optimize("gty", on)
 
+#define WARMUP_THREADS 1
+
 #include "PKB.h"
 
 #include <iostream>
@@ -11,8 +13,20 @@
 #include "PKBProcedure.h"
 #include "PKBStmt.h"
 
+#include <thread>
+#include <execution>
+#include <algorithm>
+
 void PKB::initialise()
 {
+#if WARMUP_THREADS
+    vector<vector<int>> dummy(max(std::thread::hardware_concurrency() - 1, 1U));
+    std::for_each(execution::par, dummy.begin(), dummy.end(), [](auto&& v) {
+        int i = 0;
+        while (i < 5000)
+            i++;
+    }); 
+#endif
     for (PKBDesignEntity de : PKBDesignEntityIterator())
     {
         mStatements[de] = {};
@@ -49,7 +63,7 @@ void PKB::extractDesigns(shared_ptr<Program> program)
     // sort all the vectors of statements in ascending order
     for (auto &vec : mStatements)
     {
-        std::sort(vec.second.begin(), vec.second.end(),
+        std::sort(execution::par_unseq, vec.second.begin(), vec.second.end(),
                   [](const PKBStmt::SharedPtr &a, const PKBStmt::SharedPtr &b) -> bool {
                       return a->getIndex() < b->getIndex();
                   });
@@ -156,11 +170,73 @@ void PKB::initializeWithTables()
     }
 }
 
-PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group)
+void PKB::computeGoNextCFG(shared_ptr<CFG> cfg)
+{
+    set<shared_ptr<BasicBlock>> seen;
+    vector<shared_ptr<BasicBlock>> frontier;
+    shared_ptr<BasicBlock> current;
+    for (const auto& p : cfg->getAllCFGs()) {
+        seen.insert(p.second);
+        frontier.emplace_back(p.second);
+    }
+
+    while (!frontier.empty()) {
+        current = frontier.back();
+        frontier.pop_back();
+
+        // Check for End of Procedure delimiter
+        if (current->getStatements().size() == 1 && current->getStatements()[0]->isEOFStatement) {
+            continue;
+        }
+
+        for (const auto& bb : current->getNext()) {
+            if (!seen.count(bb)) {
+                seen.insert(bb);
+                frontier.emplace_back(bb);
+            }
+        }
+        // is while block
+        if (current->getStatements().size() == 1 && current->getStatements()[0]->type == PKBDesignEntity::While) {
+            PKBStmt::SharedPtr firstStmt;
+            PKBStmt::SharedPtr nextStmt;
+            if (current->getNextImmediateStatements().size() > 1 &&
+                getStatement(current->getNextImmediateStatements()[1]->index, nextStmt) &&
+                getStatement(current->getFirstStatement()->index, firstStmt) &&
+                firstStmt->getGroup() == nextStmt->getGroup()) {
+                current->goNext = true;
+            }
+        }
+        else if (current->getStatements().size() > 0 && current->getStatements().back()->type == PKBDesignEntity::If) {
+            PKBStmt::SharedPtr thisStmt;
+            getStatement(current->getStatements().back()->index, thisStmt);
+            PKBGroup::SharedPtr grp = thisStmt->getGroup();
+            vector<int>& members = grp->getMembers(PKBDesignEntity::AllStatements);
+            for (size_t i = 0; i < members.size(); i++) {
+                if (thisStmt->getIndex() == members[i] && i != members.size() - 1) {
+                    current->goNext = true;
+                    break;
+                }
+            }
+        }
+        else if (current->getNextImmediateStatements().size() == 1) {
+            PKBStmt::SharedPtr thisStmt;
+            PKBStmt::SharedPtr nextStmt;
+            if (getStatement(current->getNextImmediateStatements().back()->index, nextStmt) && // we can get the next statement
+                current->getStatements().size() > 0 && // this block has at least one statement
+                getStatement(current->getFirstStatement()->index, thisStmt) &&
+                thisStmt->getGroup() == nextStmt->getGroup()) {
+                current->goNext = true;
+            }
+        }
+
+    }
+}
+
+PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group, string& procName)
 {
     // determine statement type
     PKBDesignEntity designEntity = simpleToPKBType(statement->getStatementType());
-
+    stmtToProcNameTable[statement->getIndex()] = procName;
     switch (designEntity)
     {
     case PKBDesignEntity::Read:
@@ -172,9 +248,9 @@ PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGr
     case PKBDesignEntity::Call:
         return extractCallStatement(statement, group);
     case PKBDesignEntity::While:
-        return extractWhileStatement(statement, group);
+        return extractWhileStatement(statement, group, procName);
     case PKBDesignEntity::If:
-        return extractIfStatement(statement, group);
+        return extractIfStatement(statement, group, procName);
     case PKBDesignEntity::AllStatements:
         throw("_ statement found in procedure, this should not occur");
     default:
@@ -204,7 +280,7 @@ PKBProcedure::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSi
 
     for (shared_ptr<Statement> ss : simpleStatements)
     {
-        PKBStmt::SharedPtr child = extractStatement(ss, group);
+        PKBStmt::SharedPtr child = extractStatement(ss, group, procedureSimple->getName());
 
         // add the statementIndex to our group member list
         group->addMember(child->getIndex(), child->getType());
@@ -388,7 +464,7 @@ PKBStmt::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statement, 
     return res;
 }
 
-PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName)
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -430,7 +506,7 @@ PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKB
 
     for (shared_ptr<Statement> ss : consequentStatements)
     {
-        PKBStmt::SharedPtr child = extractStatement(ss, consequentGroup);
+        PKBStmt::SharedPtr child = extractStatement(ss, consequentGroup, procName);
 
         // add the statementIndex to our group member list
         consequentGroup->addMember(child->getIndex(), child->getType());
@@ -442,7 +518,7 @@ PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKB
 
     for (shared_ptr<Statement> ss : alternativeStatements)
     {
-        PKBStmt::SharedPtr child = extractStatement(ss, alternativeGroup);
+        PKBStmt::SharedPtr child = extractStatement(ss, alternativeGroup, procName);
 
         // add the statementIndex to our group member list
         alternativeGroup->addMember(child->getIndex(), child->getType());
@@ -494,7 +570,7 @@ PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKB
     return res;
 }
 
-PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName)
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -539,7 +615,7 @@ PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, 
     vector<shared_ptr<Statement>> simpleStatements = whileStatement->getStatementList();
     for (shared_ptr<Statement> ss : simpleStatements)
     {
-        PKBStmt::SharedPtr child = extractStatement(ss, group);
+        PKBStmt::SharedPtr child = extractStatement(ss, group, procName);
 
         // add the statementIndex to our group member list
         group->addMember(child->getIndex(), child->getType());
@@ -1222,6 +1298,9 @@ void PKB::initializeNextTables()
             throw "Cannot find CFG for " + proc->getName();
         }
 
+
+        bool visitedFirstStatementInProc = false;
+
         queue<shared_ptr<BasicBlock>> frontier;
         unordered_set<int> seen;
         frontier.push(root);
@@ -1237,6 +1316,10 @@ void PKB::initializeNextTables()
 
             for (unsigned int i = 0; i < statements.size(); i++)
             {
+                if (!visitedFirstStatementInProc) {
+                    visitedFirstStatementInProc = true;
+                    firstStatementInProc[proc->getName()] = statements[i];
+                }
                 // is not last statement
                 if (i < statements.size() - 1)
                 {
@@ -1246,6 +1329,7 @@ void PKB::initializeNextTables()
                 else
                 {
                     auto following = curr->getNextImmediateStatements();
+
                     for (auto toStatement : following)
                     {
                         relationships.push_back(make_pair(statements[i], toStatement));
@@ -1255,6 +1339,11 @@ void PKB::initializeNextTables()
 
             for (auto p : relationships)
             {
+                if (p.second->isEOFStatement) {
+                    lastStatmenetsInProc[proc->getName()].insert(p.first);
+                    continue;
+                }
+
                 nextIntIntTable.insert(make_pair(p.first->index, p.second->index));
                 nextSynIntTable[p.second->index][p.first->type].insert(p.first->index);
                 nextSynIntTable[p.second->index][PKBDesignEntity::AllStatements].insert(p.first->index);
@@ -1269,6 +1358,25 @@ void PKB::initializeNextTables()
                     make_pair(p.first->index, p.second->index));
                 nextSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(
                     make_pair(p.first->index, p.second->index));
+
+
+                // For NextBip we need next relationships without those originating from call statements
+                if (p.first->type != PKBDesignEntity::Call) {
+                    nextWithoutCallsIntIntTable.insert(make_pair(p.first->index, p.second->index));
+                    nextWithoutCallsSynIntTable[p.second->index][p.first->type].insert(p.first->index);
+                    nextWithoutCallsSynIntTable[p.second->index][PKBDesignEntity::AllStatements].insert(p.first->index);
+                    nextWithoutCallsIntSynTable[p.first->index][p.second->type].insert(p.second->index);
+                    nextWithoutCallsIntSynTable[p.first->index][PKBDesignEntity::AllStatements].insert(p.second->index);
+
+                    nextWithoutCallsSynSynTable[make_pair(p.first->type, p.second->type)].insert(
+                        make_pair(p.first->index, p.second->index));
+                    nextWithoutCallsSynSynTable[make_pair(PKBDesignEntity::AllStatements, p.second->type)].insert(
+                        make_pair(p.first->index, p.second->index));
+                    nextWithoutCallsSynSynTable[make_pair(p.first->type, PKBDesignEntity::AllStatements)].insert(
+                        make_pair(p.first->index, p.second->index));
+                    nextWithoutCallsSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(
+                        make_pair(p.first->index, p.second->index));
+                }
             }
 
             for (auto n : curr->getNext())
@@ -1281,7 +1389,42 @@ void PKB::initializeNextTables()
             }
         }
     }
+
+    unordered_set<string> visited = {};
+
+    for (auto proc : mAllProcedures)
+    {   
+        buildTerminalStatements(proc->getName(), visited);
+    }
+
+
+    
 }
+
+// terminal statements are possible bip last statements for each procedure!
+void PKB::buildTerminalStatements(string procedure, unordered_set<string> visited) {
+    if (visited.find(procedure) != visited.end()) {
+        return;
+    }
+    visited.insert(procedure);
+    unordered_set<shared_ptr<CFGStatement>> result = {};
+
+    for (auto stmt : lastStatmenetsInProc[procedure]) {
+        if (stmt->type == PKBDesignEntity::Call) {
+            string callee = callStmtToProcNameTable[to_string(stmt->index)];
+            buildTerminalStatements(callee, visited);
+
+            for (auto s : terminalStatmenetsInProc[callee]) {
+                result.insert(s);
+            }
+        }
+        else {
+            result.insert(stmt);
+        }
+    }
+    terminalStatmenetsInProc[procedure] = result;
+}
+
 
 void PKB::addStatement(PKBStmt::SharedPtr &statement, PKBDesignEntity designEntity)
 {
@@ -1502,8 +1645,7 @@ vector<string> PKB::getIdentifiers(shared_ptr<ConditionalExpression> expr)
             break;
         }
         default:
-            throw("On that final day, not all who call upon this function will be "
-                  "called a ConditionalType");
+            break;
         }
     }
 
@@ -1513,14 +1655,11 @@ vector<string> PKB::getIdentifiers(shared_ptr<ConditionalExpression> expr)
 
 void PKB::insertCallsRelationship(const string &caller, string &called)
 {
-    // cout << "caller: " << caller << endl;
-    // cout << "called: " << called << endl;
     pair<string, string> res = make_pair(caller, called);
 
     // add to CallsT upstream (upstream, called)
     for (auto &downstream : callsTTable[called])
     {
-        // cout << "downstream: " << downstream.first + ", " + downstream.second << endl;
         pair<string, string> toAdd = make_pair(caller, downstream.second);
         calledTTable[downstream.second].insert(toAdd);
         callsTTable[caller].insert(toAdd);
@@ -1528,7 +1667,6 @@ void PKB::insertCallsRelationship(const string &caller, string &called)
     // add to CallsT downstream (caller, downstream)
     for (auto &upstream : calledTTable[caller])
     {
-        // cout << "upstream: " << upstream.first + ", " + upstream.second << endl;
         pair<string, string> toAdd = make_pair(upstream.first, called);
         callsTTable[upstream.first].insert(toAdd);
         calledTTable[called].insert(toAdd);
@@ -1539,8 +1677,6 @@ void PKB::insertCallsRelationship(const string &caller, string &called)
     {
         for (auto &upstream : calledTTable[caller])
         {
-            // cout << "Tdownstream: " << downstream.first + ", " + downstream.second << endl;
-            // cout << "Tupstream: " << upstream.first + ", " + upstream.second << endl;
             pair<string, string> toAdd = make_pair(upstream.first, downstream.second);
             callsTTable[upstream.first].insert(toAdd);
             calledTTable[downstream.second].insert(toAdd);

@@ -3,14 +3,14 @@
 #define PRINT_PARSED_PROGRAM 0
 #define DEBUG 0
 #define PRINT_FINISHED_HEADER 0
-#define PRINT_EXCEPTION_STATEMENTS 0
+#define PRINT_EXCEPTION_STATEMENTS 1
 
 #include "TestWrapper.h"
 #include "SimpleAST.h"
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 
 #include "PKB.h"
-#include "PQLParser.h"
+#include "../PQL/PQLParser.h"
 #include "../PQL/PQLLexer.h"
 #include "../PQL/PQLProcessor.h"
 #include "CFG.h"
@@ -54,7 +54,7 @@ void TestWrapper::parse(std::string filename) {
         printSimpleTokens(tokens);
 #endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
-       
+        cout << root->format();
 #if PRINT_PARSED_PROGRAM
         cout << root->format();
         cout << "\n==== Building PKB ====\n";
@@ -62,6 +62,7 @@ void TestWrapper::parse(std::string filename) {
         this->pkb->initialise();
         this->pkb->extractDesigns(root);
         this->pkb->initializeCFG(root);
+        this->pkb->computeGoNextCFG(pkb->cfg);
         this->pkb->initializeRelationshipTables();
         this->pkb->initializeWithTables();
         this->evaluator = PKBPQLEvaluator::create(this->pkb);
@@ -103,10 +104,10 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
 #if DEBUG
         cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
 #endif
-        vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
+        const vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
 
         for (auto& r : res) {
-            results.emplace_back(r->getResultAsString());
+            results.emplace_back(move(r->getResultAsString()));
         }
     }
 

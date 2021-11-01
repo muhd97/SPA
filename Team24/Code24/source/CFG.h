@@ -8,13 +8,21 @@ using namespace std;
 
 class CFGStatement {
 public:
+	CFGStatement() {
+		this->type = PKBDesignEntity::AllStatements;
+		this->index = -1;
+		this->isEOFStatement = true;
+	}
+
 	CFGStatement(PKBDesignEntity type, int index) {
 		this->type = type;
 		this->index = index;
+		this->isEOFStatement = false;
 	}
 
 	PKBDesignEntity type;
 	int index;
+	bool isEOFStatement; 
 };
 
 class BasicBlock {
@@ -25,9 +33,11 @@ private:
 public:
 	BasicBlock(int id) {
 		this->id = id;
+		this->goNext = false;
 	}
 	int getId();
 	bool isEmpty();
+	bool goNext; // for affects
 	void addNext(shared_ptr<BasicBlock> bb);
 	vector<shared_ptr<BasicBlock>> getNext();
 	void addStatement(shared_ptr<CFGStatement> statement);
@@ -54,6 +64,9 @@ public:
 		this->roots = roots;
 	}
 	shared_ptr<BasicBlock> getCFG(string procName);
+	unordered_map<string, shared_ptr<BasicBlock>> getAllCFGs() {
+		return this->roots;
+	}
 	string format();
 };
 

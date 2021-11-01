@@ -13,3 +13,8 @@ assign a, a1, a2; stmt s1, s2, s3; variable v1, v2; call c, k; if ifs;
 Select <s1, a, a1, v2> with ifs.stmt# = s3.stmt# such that Follows*(a1, a2) and Modifies(s1, "x") and Uses(s1, v1) and Modifies(a, v2) and Uses(5, "y") and Next(s2, s3) pattern a2("a", _) and a(v1, "x") with c.procName = "yida" and k.stmt# = 25 and 5 = 5
 
 5000
+4 - Test Ordering of Clauses to maximise overlap
+stmt s; assign a, a1; variable v, v1; while w; print p, q; read r; call c, x;procedure proc; constant kc; assign a2,a3,a4; variable v2,v3,v4; procedure proc1; procedure c1,c2; variable v5, v6; stmt ss1,ss2,ss3,ss4,ss5; variable vv;
+Select BOOLEAN such that Follows(a1, v1) and Follows(a2, a1) and Uses(a1, v2) and Uses(a2, v3) and Uses(a4, v1) and Uses(a2, v2)
+FALSE
+5000

@@ -1,7 +1,11 @@
 #pragma once
 #pragma optimize( "gty", on )
 
-#include <functional>
+//#include <functional>
+#include <vector>
+#include <string>
+#include "../PKB/PKBPQLEvaluator.h"
+#include "PQLParser.h"
 
 using namespace std;
 
@@ -27,7 +31,7 @@ public:
     {
         return ResultType::StringSingleResult;
     }
-    virtual const string& getResultAsString() const
+    virtual string& getResultAsString()
     {
         return dummy;
     }
@@ -52,6 +56,10 @@ public:
         synonymKeyToValMap.reserve(sizeToReserve);
     }
 
+    ResultTuple(const unordered_map<string, string>& map) : synonymKeyToValMap(map) {
+
+    }
+
     inline void insertKeyValuePair(const string& key, const string& value)
     {
         /* Yida note: Pass by ref argument, please don't use move(value) or else
@@ -66,7 +74,7 @@ public:
 
     inline bool synonymKeyAlreadyExists(const string& key)
     {
-        return synonymKeyToValMap.find(key) != synonymKeyToValMap.end();
+        return synonymKeyToValMap.count(key);
     }
 
     inline const unordered_map<string, string>& getMap() const
@@ -74,7 +82,7 @@ public:
         return synonymKeyToValMap;
     }
 
-    string toString() {
+     string toString() {
         string s = "[";
 
         for (const auto& kv : synonymKeyToValMap) {
@@ -104,7 +112,7 @@ public:
         return ResultType::StringSingleResult;
     }
 
-    const string& getResultAsString() const override
+    string& getResultAsString() override
     {
         return res;
     }

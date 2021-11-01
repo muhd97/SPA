@@ -1774,9 +1774,9 @@ Select <w, r> such that Affects(113, 114)
 
 5000
 355 - Select BOOLEAN such that Affects(s, #) where # is the start of new if/while block
-
+stmt s;
 Select BOOLEAN such that Affects(s, 33)
-FALSE
+TRUE
 5000
 356 - Select BOOLEAN such that Affects(#, s) where # is the start of new if/while block
 stmt s;
@@ -1899,9 +1899,9 @@ Select <w, r> such that Affects*(113, 114)
 
 5000
 380 - Select BOOLEAN such that Affects*(s, #) where # is the start of new if/while block
-
+stmt s;
 Select BOOLEAN such that Affects*(s, 33)
-FALSE
+TRUE
 5000
 381 - Select BOOLEAN such that Affects*(#, s) where # is the start of new if/while block
 stmt s;

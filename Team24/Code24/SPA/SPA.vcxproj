@@ -22,9 +22,8 @@
     <ClCompile Include="..\source\PKB\Statement.cpp" />
     <ClCompile Include="..\source\PKB\PKBVariable.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLClauseHandlerAssignPattern.cpp" />
-    <ClCompile Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.cpp" />
-    <ClCompile Include="..\source\PQL\PQLClauseHandlerWith.cpp" />
+    <ClCompile Include="..\source\PQL\PQLPatternHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLWithHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLSuchThatHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLFollowsParentHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesModifiesSHandler.cpp" />
@@ -58,11 +57,10 @@
     <ClInclude Include="..\source\PKB\PKBVariable.h" />
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
-    <ClInclude Include="..\source\PQL\PQLResult.h" />
+    <ClInclude Include="..\source\PQL\PQLResultTuple.h" />
     <ClInclude Include="..\source\PQL\PQLClauseHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLClauseHandlerAssignPattern.h" />
-    <ClInclude Include="..\source\PQL\PQLClauseHandlerWhileAndIfPattern.h" />
-    <ClInclude Include="..\source\PQL\PQLClauseHandlerWith.h" />
+    <ClInclude Include="..\source\PQL\PQLPatternHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLWithHandler.h" />
     <ClInclude Include="..\source\PQL\PQLSuchThatHandler.h" />
     <ClInclude Include="..\source\PQL\PQLUsesModifiesSHandler.h" />
     <ClInclude Include="..\source\PQL\PQLUsesModifiesPHandler.h" />
@@ -76,6 +74,7 @@
     <ClInclude Include="..\source\PQL\PQLParentTHandler.h" />
     <ClInclude Include="..\source\PQL\PQLProcessor.h" />
     <ClInclude Include="..\source\PQL\PQLOptimizer.h" />
+    <ClInclude Include="..\source\PQL\PQLOptimizerUtils.h" />
     <ClInclude Include="..\source\PQL\PQLProcessorUtils.h" />
     <ClInclude Include="..\source\PKB\PKBStmt.h" />
     <ClInclude Include="..\source\PKB\PKBProcedure.h" />

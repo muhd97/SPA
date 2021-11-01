@@ -3,7 +3,7 @@
 #include <vector>
 #include "PQLParser.h"
 #include "..\PKB\PKBPQLEvaluator.h"
-#include "PQLResult.h"
+#include "PQLResultTuple.h"
 
 using namespace std;
 
@@ -38,4 +38,5 @@ protected:
 
 public:
 	virtual void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+};
 };

@@ -483,6 +483,66 @@ class PKBPQLEvaluator
     // Case 9: NextT(int, syn)
     unordered_set<int> getNextTIntSyn(int fromIndex, PKBDesignEntity to);
 
+    // NextBip
+    // Case 1: NextBip(_, _)
+    bool getNextBipUnderscoreUnderscore();
+
+    // Case 2: NextBip(_, syn)
+    unordered_set<int> getNextBipUnderscoreSyn(PKBDesignEntity to);
+
+    // Case 3: NextBip(_, int)
+    bool getNextBipUnderscoreInt(int toIndex);
+
+    // Case 4: NextBip(syn, syn)
+    set<pair<int, int>> getNextBipSynSyn(PKBDesignEntity from, PKBDesignEntity to);
+
+    // Case 5: NextBip(syn, _)
+    unordered_set<int> getNextBipSynUnderscore(PKBDesignEntity from);
+
+    // Case 6: NextBip(syn, int)
+    unordered_set<int> getNextBipSynInt(PKBDesignEntity from, int toIndex);
+
+    // Case 7: NextBip(int, int)
+    bool getNextBipIntInt(int fromIndex, int toIndex);
+
+    // Case 8: NextBip(int, _)
+    bool getNextBipIntUnderscore(int fromIndex);
+
+    // Case 9: NextBip(int, syn)
+    unordered_set<int> getNextBipIntSyn(int fromIndex, PKBDesignEntity to);
+
+    // NextBipT
+    // Case 1: NextBipT(_, _)
+    bool getNextBipTUnderscoreUnderscore();
+
+    // Case 2: NextBipT(_, syn)
+    unordered_set<int> getNextBipTUnderscoreSyn(PKBDesignEntity to);
+
+    // Case 3: NextBipT(_, int)
+    bool getNextBipTUnderscoreInt(int toIndex);
+
+    // Case 4: NextBipT(syn, syn)
+    set<pair<int, int>> getNextBipTSynSyn(PKBDesignEntity from, PKBDesignEntity to);
+
+    // Case 5: NextBipT(syn, _)
+    unordered_set<int> getNextBipTSynUnderscore(PKBDesignEntity from);
+
+    // Case 6: NextBipT(syn, int)
+    unordered_set<int> getNextBipTSynInt(PKBDesignEntity from, int toIndex);
+
+    // Case 7: NextBipT(int, int)
+    bool getNextBipTIntInt(int fromIndex, int toIndex);
+
+    // Case 8: NextBipT(int, _)
+    bool getNextBipTIntUnderscore(int fromIndex);
+
+    // Case 9: NextBipT(int, syn)
+    unordered_set<int> getNextBipTIntSyn(int fromIndex, PKBDesignEntity to);
+
+    // Affects
+    pair<set<pair<int, int>>, set<pair<int, int>>> getAffects(bool includeAffectsT, bool BIP, int referenceStatement);
+    bool getAffects(int leftInt, int rightInt, bool includeAffectsT, bool BIP);
+
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
     const vector<PKBStmt::SharedPtr> &getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;
@@ -500,8 +560,6 @@ class PKBPQLEvaluator
     // mVariables;
     vector<PKBVariable::SharedPtr> getAllVariables();
 
-    /* TODO: @nicholasnge Provide function to return all Constants in the program.
-     */
     const unordered_set<string> &getAllConstants();
 
   protected:
@@ -573,21 +631,12 @@ class PKBPQLEvaluator
 
     void addParentStmts(vector<PKBStmt::SharedPtr> &stmts)
     {
-        // not sure if its faster, but we dont want to iterate over all types, just
         // If, While, Procedure(the container types)
         vector<PKBStmt::SharedPtr> ifStmts = mpPKB->getStatements(PKBDesignEntity::If);
         vector<PKBStmt::SharedPtr> whileStmts = mpPKB->getStatements(PKBDesignEntity::While);
 
-        /* YIDA NOTE: PARENT IS NOT DEFINED FOR Procedures. A Procedure CANNOT be a
-         * parent of another statement. */
-
-        // vector<PKBStmt::SharedPtr> procedures =
-        // mpPKB->getStatements(PKBDesignEntity::Procedure);
-
         stmts.insert(stmts.end(), ifStmts.begin(), ifStmts.end());
         stmts.insert(stmts.end(), whileStmts.begin(), whileStmts.end());
-
-        // stmts.insert(stmts.end(), procedures.begin(), procedures.end());
     }
 
     // helper function for ParentT (getParentsT)
@@ -599,4 +648,22 @@ class PKBPQLEvaluator
     vector<string> preOrderTraversalHelper(shared_ptr<Expression> expr);
     bool checkForSubTree(vector<string> &queryInOrder, vector<string> &assignInOrder);
     bool checkForExactTree(vector<string> &queryInOrder, vector<string> &assignInOrder);
+
+
+    // helpers for affects
+    /* ======================== Affects ======================== */
+    set<pair<int, int>> affectsList;
+    set<pair<int, int>> affectsTList;
+    map<int, set<pair<int, int>>> affectsTHelperTable;
+
+    bool computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures, shared_ptr<BasicBlock>& lastBlock,
+        bool terminateEarly, int leftInt, int rightInt);
+    bool handleAffectsAssign(int index, bool includeAffectsT,
+        map<string, set<int>>& lastModifiedTable, bool terminateEarly, int leftInt, int rightInt);
+    void handleAffectsRead(int index, bool includeAffectsT,
+        map<string, set<int>>& lastModifiedTable);
+    bool handleAffectsCall(int index, bool includeAffectsT, bool BIP,
+        map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures, bool terminateEarly, int leftInt, int rightInt);
+
 };

@@ -90,7 +90,7 @@ void ClauseHandler::validateProcSyn(const string& syn, const string& relationshi
 
 const shared_ptr<PKBPQLEvaluator>& ClauseHandler::getEvaluator() const
 {
-	return evaluator;
+    return evaluator;
 }
 
 /* Note: using PQLProcessorUtils may cause include errors. Hopefully pragma will take care.*/
@@ -115,7 +115,7 @@ bool ClauseHandler::givenSynonymMatchesMultipleTypes(const string& toCheck, init
 }
 
 void validateEntRef()
-{ 
+{
 }
 
 void evaluateClause()

@@ -22,6 +22,7 @@ class PKB
     void initializeCFG(shared_ptr<Program> program);
     void initializeRelationshipTables();
     void initializeWithTables();
+    void computeGoNextCFG(shared_ptr<CFG> cfg);
 
     // Program AST
     shared_ptr<Program> program;
@@ -187,6 +188,8 @@ class PKB
 
     unordered_map<PKBDesignEntity, unordered_set<int>> stmtTypeToSetOfStmtNoTable;
 
+    unordered_map<int, string> stmtToProcNameTable;
+
     /* ==================================== RELATIONSHIP TABLES ==================================== */
 
     /* ======================== Uses ======================== */
@@ -283,6 +286,27 @@ class PKB
     /* Table of all Next(int, syn) */
     unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextIntSynTable;
 
+    /* Table of all Next(int, int) without call statements */
+    unordered_set<pair<int, int>, pair_hash> nextWithoutCallsIntIntTable;
+
+    /* Table of all Next(syn, syn) without call statements */
+    unordered_map<pair<PKBDesignEntity, PKBDesignEntity>, set<pair<int, int>>, PKBDesignEntityPairHash> nextWithoutCallsSynSynTable;
+
+    /* Table of all Next(syn, int) without call statements */
+    unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextWithoutCallsSynIntTable;
+
+    /* Table of all Next(int, syn) without call statements */
+    unordered_map<int, unordered_map<PKBDesignEntity, unordered_set<int>>> nextWithoutCallsIntSynTable;
+
+    /* Table of first statements in each proc */
+    unordered_map<string, shared_ptr<CFGStatement>> firstStatementInProc;
+
+    /* Table of last statements in each proc */
+    unordered_map<string, unordered_set<shared_ptr<CFGStatement>>> lastStatmenetsInProc;
+
+    /* Table of terminal statements in each proc (across procedures) */
+    unordered_map<string, unordered_set<shared_ptr<CFGStatement>>> terminalStatmenetsInProc;
+
     /* ======================== Pattern for While/If ======================== */
 
     /* pattern w(v, _, _) -> Table of all (w, v) that satisfy this */
@@ -307,13 +331,13 @@ class PKB
     PKBVariable::SharedPtr getVariable(string name);
 
     PKBProcedure::SharedPtr extractProcedure(shared_ptr<Procedure> &procedure);
-    PKBStmt::SharedPtr extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
+    PKBStmt::SharedPtr extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName);
 
     PKBStmt::SharedPtr extractAssignStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
     PKBStmt::SharedPtr extractReadStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
     PKBStmt::SharedPtr extractPrintStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
-    PKBStmt::SharedPtr extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
-    PKBStmt::SharedPtr extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
+    PKBStmt::SharedPtr extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName);
+    PKBStmt::SharedPtr extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName);
     PKBStmt::SharedPtr extractCallStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
 
     PKBStmt::SharedPtr createPKBStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup);
@@ -330,4 +354,5 @@ class PKB
     shared_ptr<PKBProcedure> currentProcedureToExtract;
     // calls relationship table helper
     void PKB::insertCallsRelationship(const string &caller, string &called);
+    void buildTerminalStatements(string procedure, unordered_set<string> visited);
 };

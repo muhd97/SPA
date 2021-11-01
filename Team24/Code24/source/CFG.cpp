@@ -185,9 +185,14 @@ shared_ptr<CFG> buildCFG(shared_ptr<Program> root) {
 	for (auto proc : root->getProcedures()) {
 		shared_ptr<BasicBlock> start = make_shared<BasicBlock>(getNextBBId());
 		shared_ptr<BasicBlock> end = buildStatementListCFG(proc->getStatementList(), start);
+		shared_ptr<BasicBlock> endProcBlock = make_shared<BasicBlock>(getNextBBId());
+		end->addNext(endProcBlock);
+		endProcBlock->addStatement(make_shared<CFGStatement>()); // ADD End of Proc (EOP) Statement
 		roots.insert({ proc->getName(),  start});
 	}
-
-	return make_shared<CFG>(roots);
+	
+	shared_ptr<CFG> res = make_shared<CFG>(roots);
+	cout << res->format();
+	return res;
 }
 
