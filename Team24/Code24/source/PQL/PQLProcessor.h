@@ -57,20 +57,6 @@ class PQLProcessor
     void handleUsesPFirstArgIdent(shared_ptr<SelectCl> &selectCl, shared_ptr<UsesP> &usesCl,
                                   vector<shared_ptr<ResultTuple>> &toReturn);
 
-    void handleParentFirstArgInteger(shared_ptr<SelectCl> &selectCl, shared_ptr<Parent> &parentCl,
-                                     vector<shared_ptr<ResultTuple>> &toReturn);
-    void handleParentFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared_ptr<Parent> &parentCl,
-                                 vector<shared_ptr<ResultTuple>> &toReturn);
-    void handleParentFirstArgUnderscore(shared_ptr<SelectCl> &selectCl, shared_ptr<Parent> &parentCl,
-                                        vector<shared_ptr<ResultTuple>> &toReturn);
-
-    void handleParentTFirstArgInteger(shared_ptr<SelectCl> &selectCl, shared_ptr<ParentT> &parentCl,
-                                      vector<shared_ptr<ResultTuple>> &toReturn);
-    void handleParentTFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared_ptr<ParentT> &parentCl,
-                                  vector<shared_ptr<ResultTuple>> &toReturn);
-    void handleParentTFirstArgUnderscore(shared_ptr<SelectCl> &selectCl, shared_ptr<ParentT> &parentCl,
-                                         vector<shared_ptr<ResultTuple>> &toReturn);
-
     void handleFollowsTFirstArgSyn(shared_ptr<SelectCl> &selectCl, shared_ptr<FollowsT> &followsTCl,
                                    vector<shared_ptr<ResultTuple>> &toReturn);
     void handleFollowsTFirstArgInteger(shared_ptr<SelectCl> &selectCl, shared_ptr<FollowsT> &followsTCl,
