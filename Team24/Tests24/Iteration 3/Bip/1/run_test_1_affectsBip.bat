@@ -1,7 +1,7 @@
 @echo off
 title Running calls system acceptance test case!
 
-..\..\..\..\..\Code24\Debug\AutoTester.exe source.txt affectsBip_BipT_queries.txt out-test_affectsBip_BipT.xml
+..\..\..\..\Code24\Debug\AutoTester.exe source.txt affectsBip_BipT_queries.txt out-test_affectsBip_BipT.xml
 
 
 findstr "failed" out-test_affectsBip_BipT.xml
