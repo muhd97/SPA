@@ -9,7 +9,9 @@
 #include "PQLLexer.h"
 #include <execution>
 #include <algorithm>
+#include "PQLFollowsHandler.h"
 #include "PQLParentHandler.h"
+#include "PQLParentTHandler.h"
 /* Initialize static variables for PQLProcessor.cpp */
 string Result::dummy = "BaseResult: getResultAsString()";
 string Result::FALSE_STRING = "FALSE";
@@ -1103,269 +1105,20 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         break;
     }
     case RelRefType::PARENT: {
-        //shared_ptr<Parent> parentCl = static_pointer_cast<Parent>(suchThatCl->relRef);
-        //StmtRefType leftType = parentCl->stmtRef1->getStmtRefType();
-        ///* Parent (_, ?) */
-        //if (leftType == StmtRefType::UNDERSCORE)
-        //{
-        //    handleParentFirstArgUnderscore(selectCl, parentCl, toReturn);
-        //    break;
-        //}
-        ///* Parent (1, ?) */
-        //if (leftType == StmtRefType::INTEGER)
-        //{
-        //    handleParentFirstArgInteger(selectCl, parentCl, toReturn);
-        //    break;
-        //}
-
-        ///* Parent (syn, ?) */
-        //if (leftType == StmtRefType::SYNONYM)
-        //{
-        //    handleParentFirstArgSyn(selectCl, parentCl, toReturn);
-        //    break;
-        //}
-
         shared_ptr<ParentHandler> parentHandler = make_shared<ParentHandler>(move(evaluator), move(selectCl), static_pointer_cast<Parent>(suchThatCl->relRef));
         parentHandler->evaluate(move(toReturn));
 
         break;
     }
     case RelRefType::PARENT_T: {
-        shared_ptr<ParentT> parentCl = static_pointer_cast<ParentT>(suchThatCl->relRef);
-        StmtRefType leftType = parentCl->stmtRef1->getStmtRefType();
-
-        /* ParentT (_, ?) */
-        if (leftType == StmtRefType::UNDERSCORE)
-        {
-            handleParentTFirstArgUnderscore(selectCl, parentCl, toReturn);
-            break;
-        }
-
-        /* ParentT (1, ?) */
-        if (leftType == StmtRefType::INTEGER)
-        {
-            handleParentTFirstArgInteger(selectCl, parentCl, toReturn);
-            break;
-        }
-
-        /* ParentT (syn, ?) */
-
-        if (leftType == StmtRefType::SYNONYM)
-        {
-            handleParentTFirstArgSyn(selectCl, parentCl, toReturn);
-            break;
-        }
+        shared_ptr<ParentTHandler> parentTHandler = make_shared<ParentTHandler>(move(evaluator), move(selectCl), static_pointer_cast<ParentT>(suchThatCl->relRef));
+        parentTHandler->evaluate(move(toReturn));
 
         break;
     }
     case RelRefType::FOLLOWS: {
-        shared_ptr<Follows> followsCl = static_pointer_cast<Follows>(suchThatCl->relRef);
-
-        shared_ptr<StmtRef>& stmtRef1 = followsCl->stmtRef1;
-        shared_ptr<StmtRef>& stmtRef2 = followsCl->stmtRef2;
-        StmtRefType leftType = stmtRef1->getStmtRefType();
-        StmtRefType rightType = stmtRef2->getStmtRefType();
-
-        string leftSynonymKey = stmtRef1->getStringVal();
-        string rightSynonymKey = stmtRef2->getStringVal();
-
-        /* Follows (1, ?) */
-        if (leftType == StmtRefType::INTEGER)
-        {
-            vector<int> statementsFollowedByStmtNo =
-                evaluator->getAfter(PKBDesignEntity::AllStatements, stmtRef1->getIntVal());
-
-            if (rightType == StmtRefType::SYNONYM)
-            {
-                shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
-                PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-                /* Follows (1, syn), syn is NOT a variable */
-                // if
-                // (selectCl->getDesignEntityTypeBySynonym(stmtRef2->getStringVal())
-                // != VARIABLE) {
-                //    throw "TODO: Handle error case. Follows(1, p), but p is
-                //    not a variable delcaration.\n";
-                //}
-
-                for (auto& s : evaluator->getAfter(pkbDe, stmtRef1->getIntVal()))
-                {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                    /* Map the value returned to this particular synonym. */
-                    tupleToAdd->insertKeyValuePair(rightSynonymKey, to_string(s));
-
-                    /* Add this tuple into the vector to tuples to return. */
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-
-            // maybe later need to optimize this to return just 1 result if
-            // there are any at all
-            if (rightType == StmtRefType::UNDERSCORE)
-            {
-                // if (evaluator->checkFollowed(stmtRef1->getIntVal())) {
-                /* Create the result tuple */
-                for (auto& s : evaluator->getAfter(PKBDesignEntity::AllStatements, stmtRef1->getIntVal()))
-                {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(s));
-                    toReturn.emplace_back(tupleToAdd);
-                }
-                //}
-            }
-
-            // very unoptimized, need a way to just check if follows(int, int)
-            // is true
-            if (rightType == StmtRefType::INTEGER)
-            {
-                int s1 = stmtRef1->getIntVal();
-                int s2 = stmtRef2->getIntVal();
-                for (auto& s : evaluator->getAfter(PKBDesignEntity::AllStatements, s1))
-                {
-                    if (s == s2)
-                    {
-                        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                        tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(s1));
-                        tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(s2));
-                        toReturn.emplace_back(tupleToAdd);
-                        break;
-                    }
-                }
-            }
-        }
-
-        /* Follows (syn, ?) */
-        if (leftType == StmtRefType::SYNONYM)
-        {
-            /* Follows (syn, v) OR Follows(syn, AllExceptProcedure) */
-            if (!givenSynonymMatchesMultipleTypes(selectCl, leftSynonymKey,
-                { DesignEntity::ASSIGN, DesignEntity::CALL, DesignEntity::IF,
-                 DesignEntity::PRINT, DesignEntity::READ, DesignEntity::STMT,
-                 DesignEntity::WHILE, DesignEntity::PROG_LINE }))
-            {
-                throw "Follows Error: The synonyms in a Follows relationship "
-                    "must be "
-                    "statements!";
-            }
-
-            /* Follows(s, 5) */
-            if (rightType == StmtRefType::INTEGER)
-            {
-                shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[leftSynonymKey];
-                PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
-
-                for (auto& s : evaluator->getBefore(pkbDe1, stmtRef2->getIntVal()))
-                {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                    /* Map the value returned to this particular synonym. */
-                    tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s));
-
-                    //    tupleToAdd->insertKeyValuePair(leftSynonymKey,
-                    //    to_string(s->getIndex()));
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-
-            /* Follows(syn, syn) */
-            if (rightType == StmtRefType::SYNONYM)
-            {
-                // cout << "\n syn, syn case \n";
-                if (!givenSynonymMatchesMultipleTypes(selectCl, rightSynonymKey,
-                    { DesignEntity::ASSIGN, DesignEntity::CALL, DesignEntity::IF,
-                     DesignEntity::PRINT, DesignEntity::READ, DesignEntity::STMT,
-                     DesignEntity::WHILE, DesignEntity::PROG_LINE }))
-                {
-                    throw "Follows Error: The synonyms in a Follows "
-                        "relationship must "
-                        "be "
-                        "statements!";
-                }
-                // As a statement cannot follow itself,
-                // Special case: both synonyms in the Follows are the same:
-                // return empty result by not adding any tuples
-                if (rightSynonymKey == leftSynonymKey)
-                {
-                    break;
-                }
-
-                shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[leftSynonymKey];
-                PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
-
-                shared_ptr<Declaration>& parentDecl2 = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
-                PKBDesignEntity pkbDe2 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl2->getDesignEntity());
-
-                set<pair<int, int>> sPairs = evaluator->getAfterPairs(pkbDe1, pkbDe2);
-                for (auto& sPair : sPairs)
-                {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                    /* Map the value returned to this particular synonym. */
-                    tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(sPair.first));
-                    tupleToAdd->insertKeyValuePair(rightSynonymKey, to_string(sPair.second));
-
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-
-            if (rightType == StmtRefType::UNDERSCORE)
-            {
-                shared_ptr<Declaration>& parentDecl1 = selectCl->synonymToParentDeclarationMap[leftSynonymKey];
-                PKBDesignEntity pkbDe1 = resolvePQLDesignEntityToPKBDesignEntity(parentDecl1->getDesignEntity());
-                for (auto& s : evaluator->getBefore(pkbDe1, PKBDesignEntity::AllStatements))
-                {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                    /* Map the value returned to this particular synonym. */
-                    tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s));
-
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-        }
-
-        if (leftType == StmtRefType::UNDERSCORE)
-        {
-            if (rightType == StmtRefType::INTEGER)
-            {
-                for (auto& s : evaluator->getBefore(PKBDesignEntity::AllStatements, stmtRef2->getIntVal()))
-                {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(s));
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-
-            if (rightType == StmtRefType::SYNONYM)
-            {
-                shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
-                PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-
-                for (auto& s : evaluator->getAfter(PKBDesignEntity::AllStatements, pkbDe))
-                {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                    /* Map the value returned to this particular synonym. */
-                    tupleToAdd->insertKeyValuePair(rightSynonymKey, to_string(s));
-
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-
-            if (rightType == StmtRefType::UNDERSCORE)
-            {
-                if (evaluator->getFollowsUnderscoreUnderscore())
-                {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                    /* Map the value returned to this particular synonym. */
-                    tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER,
-                        ResultTuple::UNDERSCORE_PLACEHOLDER);
-
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-        }
+        shared_ptr<FollowsHandler> followsHandler = make_shared<FollowsHandler>(move(evaluator), move(selectCl), static_pointer_cast<Follows>(suchThatCl->relRef));
+        followsHandler->evaluate(move(toReturn));
         break;
     }
 
