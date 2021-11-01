@@ -1,6 +1,6 @@
 #pragma once
 #include "PQLSuchThatHandler.h"
-#include "PQLResult.h"
+#include "PQLResultTuple.h"
 
 class FollowsParentHandler : public SuchThatHandler
 {
