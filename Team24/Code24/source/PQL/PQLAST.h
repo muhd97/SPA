@@ -451,23 +451,6 @@ public:
     vector<string> getAllSynonymsAsString();
 };
 
-class NextT : public RelRef
-{
-public:
-    shared_ptr<StmtRef> stmtRef1;
-    shared_ptr<StmtRef> stmtRef2;
-
-    NextT(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : stmtRef1(move(sRef1)), stmtRef2(move(sRef2)) 
-    {
-
-    }
-
-    string format() override;
-    bool containsSynonym(shared_ptr<Element> s);
-    RelRefType getType() override;
-    vector<string> getAllSynonymsAsString();
-};
-
 class Next : public RelRef
 {
 public:
@@ -484,36 +467,39 @@ public:
     vector<string> getAllSynonymsAsString();
 };
 
-class NextBip : public RelRef
+class NextT : public Next
 {
 public:
-    shared_ptr<StmtRef> stmtRef1;
-    shared_ptr<StmtRef> stmtRef2;
-
-    NextBip(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : stmtRef1(move(sRef1)), stmtRef2(move(sRef2))
+    NextT(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : Next(sRef1, sRef2)
     {
     }
 
     string format() override;
-    bool containsSynonym(shared_ptr<Element> s);
     RelRefType getType() override;
-    vector<string> getAllSynonymsAsString();
 };
 
-class NextBipT : public RelRef
+
+
+class NextBip : public Next
 {
 public:
-    shared_ptr<StmtRef> stmtRef1;
-    shared_ptr<StmtRef> stmtRef2;
-
-    NextBipT(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : stmtRef1(move(sRef1)), stmtRef2(move(sRef2))
+    NextBip(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : Next(sRef1, sRef2)
     {
     }
 
     string format() override;
-    bool containsSynonym(shared_ptr<Element> s);
     RelRefType getType() override;
-    vector<string> getAllSynonymsAsString();
+};
+
+class NextBipT : public Next
+{
+public:
+    NextBipT(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : Next(sRef1, sRef2)
+    {
+    }
+
+    string format() override;
+    RelRefType getType() override;
 };
 
 class AffectsT : public RelRef

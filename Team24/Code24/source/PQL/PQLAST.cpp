@@ -592,39 +592,9 @@ string NextT::format()
     return "Next*(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
 }
 
-bool NextT::containsSynonym(shared_ptr<Element> s)
-{
-    bool flag = false;
-    if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
-    {
-        flag = stmtRef1->getStringVal() == s->getSynonymString();
-        if (flag)
-            return flag;
-    }
-
-    if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
-    {
-        flag = stmtRef2->getStringVal() == s->getSynonymString();
-    }
-
-    return flag;
-}
-
 RelRefType NextT::getType()
 {
     return RelRefType::NEXT_T;
-}
-
-vector<string> NextT::getAllSynonymsAsString()
-{
-    vector<string> toReturn;
-
-    if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
-        toReturn.emplace_back(stmtRef1->getStringVal());
-    if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
-        toReturn.emplace_back(stmtRef2->getStringVal());
-
-    return move(toReturn);
 }
 
 string Next::format()
@@ -672,39 +642,9 @@ string NextBip::format()
     return "NextBip(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
 }
 
-bool NextBip::containsSynonym(shared_ptr<Element> s)
-{
-    bool flag = false;
-    if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
-    {
-        flag = stmtRef1->getStringVal() == s->getSynonymString();
-        if (flag)
-            return flag;
-    }
-
-    if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
-    {
-        flag = stmtRef2->getStringVal() == s->getSynonymString();
-    }
-
-    return flag;
-}
-
 RelRefType NextBip::getType()
 {
     return RelRefType::NEXT_BIP;
-}
-
-vector<string> NextBip::getAllSynonymsAsString()
-{
-    vector<string> toReturn;
-
-    if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
-        toReturn.emplace_back(stmtRef1->getStringVal());
-    if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
-        toReturn.emplace_back(stmtRef2->getStringVal());
-
-    return move(toReturn);
 }
 
 string NextBipT::format()
@@ -712,39 +652,9 @@ string NextBipT::format()
     return "Next*(" + stmtRef1->getStmtRefTypeName() + ", " + stmtRef2->getStmtRefTypeName() + ")";
 }
 
-bool NextBipT::containsSynonym(shared_ptr<Element> s)
-{
-    bool flag = false;
-    if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
-    {
-        flag = stmtRef1->getStringVal() == s->getSynonymString();
-        if (flag)
-            return flag;
-    }
-
-    if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
-    {
-        flag = stmtRef2->getStringVal() == s->getSynonymString();
-    }
-
-    return flag;
-}
-
 RelRefType NextBipT::getType()
 {
     return RelRefType::NEXT_BIP_T;
-}
-
-vector<string> NextBipT::getAllSynonymsAsString()
-{
-    vector<string> toReturn;
-
-    if (stmtRef1->getStmtRefType() == StmtRefType::SYNONYM)
-        toReturn.emplace_back(stmtRef1->getStringVal());
-    if (stmtRef2->getStmtRefType() == StmtRefType::SYNONYM)
-        toReturn.emplace_back(stmtRef2->getStringVal());
-
-    return move(toReturn);
 }
 
 string AffectsT::format()
