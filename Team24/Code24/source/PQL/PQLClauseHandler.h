@@ -35,7 +35,7 @@ protected:
 	const shared_ptr<PKBPQLEvaluator>& getEvaluator() const;
 	virtual void validateArguments() = 0;
 
-	ClauseHandler(shared_ptr<PKBPQLEvaluator> evaluator, shared_ptr<SelectCl>& selectCl);
+	ClauseHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl);
 
 public:
 	virtual void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
