@@ -2333,3 +2333,13 @@ constant cs; prog_line n; variable v; if ifs; assign a;
 Select cs pattern ifs("d", _, _) such that Follows*(n, _) with n = 6 such that Uses(a, v) with v.varName = "p"
 0,1,10,2,20,3,4,5,6,8
 5000
+467 - Select c with 12 = 12
+call c;
+Select c.procName with 12 = 12
+A, B, C, D, E, F, Call, Assign, AssignY, Print, PrintX, Read, ReadY
+5000
+468 - Select c with 12 = 13
+call c;
+Select c.stmt# with 12 = 13
+
+5000
