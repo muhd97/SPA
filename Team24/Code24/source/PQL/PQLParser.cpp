@@ -7,19 +7,6 @@
 
 using namespace std;
 
-string DesignEntity::PRINT = "print";
-string DesignEntity::STMT = "stmt";
-string DesignEntity::READ = "read";
-string DesignEntity::WHILE = "while";
-string DesignEntity::IF = "if";
-string DesignEntity::ASSIGN = "assign";
-string DesignEntity::VARIABLE = "variable";
-string DesignEntity::CONSTANT = "constant";
-string DesignEntity::PROCEDURE = "procedure";
-string DesignEntity::CALL = "call";
-string DesignEntity::PROG_LINE = "prog_line";
-
-
 PQLToken PQLParser::peek()
 {
     return tokens[index];
