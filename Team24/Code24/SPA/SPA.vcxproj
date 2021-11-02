@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\PQL\PQLAST.cpp" />
     <ClCompile Include="..\source\PQL\PQLParser.cpp" />
     <ClCompile Include="..\source\CFG.cpp" />
     <ClCompile Include="..\source\SimpleAST.cpp" />
@@ -44,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\CFG.h" />
+    <ClInclude Include="..\source\PQL\PQLAST.h" />
     <ClInclude Include="..\source\PQL\PQLParser.h" />
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
     <ClInclude Include="..\source\SimpleAST.h" />

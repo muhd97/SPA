@@ -31,6 +31,7 @@
     <ClCompile Include="..\source\PQL\PQLFollowsTHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLParentHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLParentTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLAST.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
@@ -67,5 +68,6 @@
     <ClInclude Include="..\source\PQL\PQLFollowsTHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParentHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParentTHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLAST.h" />
   </ItemGroup>
 </Project>
