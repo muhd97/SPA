@@ -2259,7 +2259,7 @@ bool PKBPQLEvaluator::getNextBipUnderscoreInt(int toIndex)
 	}
 	else {
 		set<pair<int, int>> result =
-			getNextT(mpPKB->program, StatementType::STATEMENT, StatementType::NONE, 0, toIndex, true);
+			getNextBipCallStatements(mpPKB, StatementType::STATEMENT, StatementType::NONE, 0, toIndex, true);
 		return result.begin() != result.end();
 	}
 }
@@ -2317,7 +2317,7 @@ bool PKBPQLEvaluator::getNextBipIntInt(int fromIndex, int toIndex)
 	}
 	else {
 		set<pair<int, int>> result =
-			getNextT(mpPKB->program, StatementType::NONE, StatementType::NONE, fromIndex, toIndex, true);
+			getNextBipCallStatements(mpPKB, StatementType::NONE, StatementType::NONE, fromIndex, toIndex, true);
 		return result.begin() != result.end();
 	}
 }
@@ -2330,7 +2330,7 @@ bool PKBPQLEvaluator::getNextBipIntUnderscore(int fromIndex)
 	}
 	else {
 		set<pair<int, int>> result =
-			getNextT(mpPKB->program, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0, true);
+			getNextBipCallStatements(mpPKB, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0, true);
 		return result.begin() != result.end();
 	}
 }
@@ -2341,7 +2341,7 @@ unordered_set<int> PKBPQLEvaluator::getNextBipIntSyn(int fromIndex, PKBDesignEnt
 	unordered_set<int> result = mpPKB->nextWithoutCallsIntSynTable[fromIndex][to];
 
 	set<pair<int, int>> allPairs =
-			getNextT(mpPKB->program, StatementType::NONE, getStatementType(to), fromIndex, 0, true);
+		getNextBipCallStatements(mpPKB, StatementType::NONE, getStatementType(to), fromIndex, 0, true);
 	for (auto p : allPairs) {
 		result.insert(p.second);
 	}

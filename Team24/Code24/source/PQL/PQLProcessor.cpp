@@ -1443,6 +1443,11 @@ void PQLProcessor::handleNext(shared_ptr<SelectCl>& selectCl,
 
         for (auto& p : evaluator->getNextSynSyn(leftArgType, rightArgType))
         {
+            if ((leftSyn == rightSyn) && (p.first != p.second)) {
+                // special case wher Next...(s1, s1)
+                continue;
+            }
+
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -1611,6 +1616,11 @@ void PQLProcessor::handleNextT(shared_ptr<SelectCl>& selectCl,
 
         for (const auto& p : evaluator->getNextTSynSyn(leftArgType, rightArgType))
         {
+            if ((leftSyn == rightSyn) && (p.first != p.second)) {
+                // special case wher Next...(s1, s1)
+                continue;
+            }
+
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -1777,7 +1787,11 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
 
         for (auto& p : evaluator->getNextBipSynSyn(leftArgType, rightArgType))
         {
-            
+            if ((leftSyn == rightSyn) && (p.first != p.second)) {
+                // special case wher Next...(s1, s1)
+                continue;
+            }
+
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */
@@ -1786,6 +1800,7 @@ void PQLProcessor::handleNextBip(shared_ptr<SelectCl>& selectCl,
             tupleToAdd->insertKeyValuePair(rightSyn, to_string(p.second));
             /* Add this tuple into the vector to tuples to return. */
             toReturn.emplace_back(move(tupleToAdd));
+            
         }
     }
 
@@ -1944,6 +1959,11 @@ void PQLProcessor::handleNextBipT(shared_ptr<SelectCl>& selectCl,
 
         for (const auto& p : evaluator->getNextBipTSynSyn(leftArgType, rightArgType))
         {
+            if ((leftSyn == rightSyn) && (p.first != p.second)) {
+                // special case wher Next...(s1, s1)
+                continue;
+            }
+ 
             /* Create the result tuple */
             shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
             /* Map the value returned to this particular synonym. */

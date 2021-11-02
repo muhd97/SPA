@@ -184,7 +184,7 @@ void PKB::computeGoNextCFG(shared_ptr<CFG> cfg)
         current = frontier.back();
         frontier.pop_back();
 
-        // Check for End of Procedure delimiter
+        // Check for End of Procedure terminating delimiter
         if (current->getStatements().size() == 1 && current->getStatements()[0]->isEOFStatement) {
             continue;
         }
