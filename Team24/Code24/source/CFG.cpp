@@ -192,7 +192,7 @@ shared_ptr<CFG> buildCFG(shared_ptr<Program> root) {
 	}
 	
 	shared_ptr<CFG> res = make_shared<CFG>(roots);
-	cout << res->format();
+	// cout << res->format();
 	return res;
 }
 
