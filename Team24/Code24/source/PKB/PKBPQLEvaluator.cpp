@@ -2199,7 +2199,7 @@ set<pair<int, int>> getNextBipCallStatements(shared_ptr<PKB> pkb, StatementType 
 			shared_ptr<PKBStmt> stmt;
 			pkb->getStatement(following, stmt);
 			bool isTypeQ = getStatementType(stmt->getType()) == to || to == StatementType::STATEMENT || following == toIndex;
-
+			
 			for (auto last : pkb->terminalStatmenetsInProc[callee]) {
 				bool isTypeP = getStatementType(last->type) == from || from == StatementType::STATEMENT || last->index == fromIndex;
 				if (isTypeP && isTypeQ) {
@@ -2341,7 +2341,7 @@ unordered_set<int> PKBPQLEvaluator::getNextBipIntSyn(int fromIndex, PKBDesignEnt
 	unordered_set<int> result = mpPKB->nextWithoutCallsIntSynTable[fromIndex][to];
 
 	set<pair<int, int>> allPairs =
-		getNextBipCallStatements(mpPKB, StatementType::NONE, getStatementType(to), fromIndex, 0, true);
+		getNextBipCallStatements(mpPKB, StatementType::NONE, getStatementType(to), fromIndex, 0, false);
 	for (auto p : allPairs) {
 		result.insert(p.second);
 	}
