@@ -12,7 +12,13 @@ using namespace std;
 void ClauseHandler::validateStmtRef(const shared_ptr<StmtRef>& stmtRef, const string& relationshipType)
 {
     if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
-        validateStmtSyn(stmtRef->getStringVal(), relationshipType);
+        const string& synonym = stmtRef->getStringVal();
+        validateStmtSyn(synonym, relationshipType);
+
+        if (relationshipType == PQL_AFFECTS || relationshipType == PQL_AFFECTS_T
+            || relationshipType == PQL_AFFECTS_BIP || relationshipType == PQL_AFFECTS_BIP_T) {
+            validateAffectsTypeSyn(synonym, relationshipType);
+        }
     }
     if (stmtRef->getStmtRefType() == StmtRefType::INTEGER) {
         validateStmtInt(stmtRef->getIntVal());
@@ -46,6 +52,15 @@ void ClauseHandler::validateStmtSyn(const string& syn, const string& relationshi
         { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE }))
     {
         throw runtime_error("The synonym \"" + syn + "\" is not declared as a stmt! Synonyms must be stmt type for " + relationshipType + ".\n");
+    }
+}
+
+
+void ClauseHandler::validateAffectsTypeSyn(const string& syn, const string& relationshipType)
+{
+    if (!givenSynonymMatchesMultipleTypes(syn,
+        { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
+        throw runtime_error("The synonym \"" + syn + "\" is not declared as a stmt/prog_line/assign! Synonyms must be stmt type for " + relationshipType + ".\n");
     }
 }
 
