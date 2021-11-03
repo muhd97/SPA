@@ -16,6 +16,10 @@
 #include "PQLPatternHandler.h"
 #include "PQLWithHandler.h"
 #include "PQLParentTHandler.h"
+#include "PQLModifiesSHandler.h"
+#include "PQLModifiesPHandler.h"
+#include "PQLUsesSHandler.h"
+#include "PQLUsesPHandler.h"
 /* Initialize static variables for PQLProcessor.cpp */
 string Result::dummy = "BaseResult: getResultAsString()";
 string Result::FALSE_STRING = "FALSE";
@@ -149,335 +153,70 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
     case RelRefType::USES_S: /* Uses(s, v) where s MUST be a
                                 if/while/assign/stmt/read/print. */
     {
-        shared_ptr<UsesS> usesCl = static_pointer_cast<UsesS>(suchThatCl->relRef);
-        StmtRefType leftType = usesCl->stmtRef->getStmtRefType();
+        shared_ptr<UsesS> usesSCl = static_pointer_cast<UsesS>(suchThatCl->relRef);
 
-        /* Uses (_, ?) ERROR cannot have underscore as first arg!! */
-        if (leftType == StmtRefType::UNDERSCORE)
-        {
-            throw "TODO: Handle Uses error case. Uses (_, x) cannot have "
-                "first "
-                "argument as Underscore. \n";
-        }
-
-        /* Uses (1, ?) */
-        if (leftType == StmtRefType::INTEGER)
-        {
-            handleUsesSFirstArgInteger(selectCl, usesCl, toReturn);
-        }
-
-        /* Uses (syn, ?) */
-        if (leftType == StmtRefType::SYNONYM)
-        {
-
-            if (selectCl->getDesignEntityTypeBySynonym(usesCl->stmtRef->getStringVal()) == DesignEntity::CONSTANT)
+        //if else is to handle the case where UsesS stores information for UsesP when synonym
+        if (usesSCl->stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
+            try
             {
-                throw "TODO: Handle error case. Uses(syn, ?), but syn is a "
-                    "Constant "
-                    "declaration. This is semantically incorrect.\n";
+                shared_ptr<UsesSHandler> usesSHandler = make_shared<UsesSHandler>(move(evaluator), move(selectCl), usesSCl);
+                usesSHandler->evaluate(move(toReturn));
             }
-
-            handleUsesSFirstArgSyn(selectCl, usesCl, toReturn);
+            catch (const exception& ex) {
+                //When the synonym is not of type statement, try again with type UsesP
+                shared_ptr<UsesP> newUsesPCl = make_shared<UsesP>(
+                    make_shared<EntRef>(EntRefType::SYNONYM, usesSCl->stmtRef->getStringVal()),
+                    usesSCl->entRef
+                );
+                shared_ptr<UsesPHandler> usesPHandler = make_shared<UsesPHandler>(move(evaluator), move(selectCl), newUsesPCl);
+                usesPHandler->evaluate(move(toReturn));
+            }
         }
-
+        else {
+            shared_ptr<UsesSHandler> usesSHandler = make_shared<UsesSHandler>(move(evaluator), move(selectCl), usesSCl);
+            usesSHandler->evaluate(move(toReturn));
+        }
         break;
     }
     case RelRefType::USES_P: /* Uses("INDENT", v). "IDENT" MUST be a procedure
                                 identifier. */
     {
-        shared_ptr<UsesP> usesCl = static_pointer_cast<UsesP>(suchThatCl->relRef);
-        EntRefType leftType = usesCl->entRef1->getEntRefType();
-
-        if (leftType == EntRefType::IDENT)
-        {
-            handleUsesPFirstArgIdent(selectCl, usesCl, toReturn);
-        }
-
+        shared_ptr<UsesPHandler> usesPHandler = make_shared<UsesPHandler>(move(evaluator), move(selectCl), static_pointer_cast<UsesP>(suchThatCl->relRef));
+        usesPHandler->evaluate(move(toReturn));
         break;
     }
     case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
     {
-        shared_ptr<ModifiesS> modifiesCl = static_pointer_cast<ModifiesS>(suchThatCl->relRef);
-        shared_ptr<StmtRef>& stmtRef = modifiesCl->stmtRef;
-        shared_ptr<EntRef>& entRef = modifiesCl->entRef;
-        StmtRefType leftType = stmtRef->getStmtRefType();
-        EntRefType rightType = entRef->getEntRefType();
-
-        /* Modifies(_, x) ERROR cannot have underscore as first arg!! */
-        if (stmtRef->getStmtRefType() == StmtRefType::UNDERSCORE)
-        {
-            throw "Modifies clause cannot have '_' as first argument!";
-        }
-        if (stmtRef->getStmtRefType() == StmtRefType::INTEGER)
-        {
-            vector<string> variablesModifiedByStmtNo = evaluator->getModified(stmtRef->getIntVal());
-            if (entRef->getEntRefType() == EntRefType::SYNONYM)
+        shared_ptr<ModifiesS> modifiesSCl = static_pointer_cast<ModifiesS>(suchThatCl->relRef);
+        //if else is to handle the case where ModifiesS stores information for ModifiesP when synonym
+        if (modifiesSCl->stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
+            try
             {
-                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != PQL_VARIABLE)
-                { // Modifies (1, x), x is NOT a variable
-                    throw "Modifies(1, p), but p is not a variable "
-                        "delcaration.\n";
-                }
-                else
-                {
-                    const string& rightSynonymKey = entRef->getStringVal();
-                    for (auto& s : variablesModifiedByStmtNo)
-                    {
-                        /* Create the result tuple */
-                        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                        /* Map the value returned to this particular synonym.
-                         */
-                        tupleToAdd->insertKeyValuePair(rightSynonymKey, s);
-
-                        /* Add this tuple into the vector to tuples to return.
-                         */
-                        toReturn.emplace_back(move(tupleToAdd));
-                    }
-                }
+                shared_ptr<ModifiesSHandler> modifiesSHandler = make_shared<ModifiesSHandler>(move(evaluator), move(selectCl), modifiesSCl);
+                modifiesSHandler->evaluate(move(toReturn));
             }
-
-            // /* Modifies (1, "x") */
-            /* SPECIAL CASE */
-            if (rightType == EntRefType::IDENT)
-            {
-
-                if (evaluator->checkModified(stmtRef->getIntVal(), entRef->getStringVal()))
-                {
-                    /* Create the result tuple */
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    string ident = entRef->getStringVal();
-                    /* Use placeholder synonyms as keys in the no target
-                     * synonym case */
-                    tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(stmtRef->getIntVal()));
-                    tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, ident);
-                    toReturn.emplace_back(tupleToAdd);
-                }
-            }
-
-            // /* Modifies (1, _) */
-            /* SPECIAL CASE */
-            if (rightType == EntRefType::UNDERSCORE)
-            {
-                if (evaluator->checkModified(stmtRef->getIntVal()))
-                {
-                    /* Create the result tuple */
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    string ident = entRef->getStringVal();
-                    tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, to_string(stmtRef->getIntVal()));
-                    toReturn.emplace_back(tupleToAdd);
-                }
+            catch (const exception& ex) {
+                //When the synonym is not of type statement, try again with type ModifiesP
+                cout << "correctly trying again with ModifiesP\n";
+                shared_ptr<ModifiesP> newModifiesPCl = make_shared<ModifiesP>(
+                    make_shared<EntRef>(EntRefType::SYNONYM, modifiesSCl->stmtRef->getStringVal()),
+                    modifiesSCl->entRef
+                );
+                shared_ptr<ModifiesPHandler> modifiesPHandler = make_shared<ModifiesPHandler>(move(evaluator), move(selectCl), newModifiesPCl);
+                modifiesPHandler->evaluate(move(toReturn));
             }
         }
-        if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM)
-        {
-            // This is handling for both statement and procedure in
-            // Iteration 1. Need to change to make sure procedures are handled
-            // in ModifiesP
-            string leftSynonymKey = stmtRef->getStringVal();
-
-            /* Modifies (syn, v) */
-            if (rightType == EntRefType::SYNONYM)
-            {
-                if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != PQL_VARIABLE)
-                { // Modifies (s, x), x is NOT a variable
-                    throw "Modifies(s, p), but p is not a variable "
-                        "delcaration.\n";
-                }
-                string rightSynonymKey;
-                rightSynonymKey = entRef->getStringVal();
-
-                /* Modifies (syn, v) -> syn is NOT procedure. RETURN 2-TUPLES
-                 */
-                if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) != DesignEntity::PROCEDURE)
-                {
-                    shared_ptr<Declaration>& parentDecl =
-                        selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
-                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-
-                    for (auto& s : evaluator->mpPKB->getAllModifyingStmts(pkbDe))
-                    {
-                        for (auto& v : s->getModifiedVariables())
-                        {
-                            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                            /* Map the value returned to this particular
-                             * synonym. */
-                            tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s->getIndex()));
-                            tupleToAdd->insertKeyValuePair(rightSynonymKey, v->getName());
-
-                            toReturn.emplace_back(move(tupleToAdd));
-                        }
-                    }
-                }
-
-                /* Modifies (syn, v) -> syn is procedure. RETURN 2-TUPLES */
-                if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) == DesignEntity::PROCEDURE)
-                {
-                    shared_ptr<Declaration>& parentDecl =
-                        selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
-                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-
-                    for (auto p : evaluator->mpPKB->mProceduresThatModifyVars)
-                    {
-                        for (auto v : p->getModifiedVariables())
-                        {
-                            shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                            /* Map the value returned to this particular
-                             * synonym. */
-                            tupleToAdd->insertKeyValuePair(leftSynonymKey, p->getName());
-                            tupleToAdd->insertKeyValuePair(rightSynonymKey, v->getName());
-
-                            toReturn.emplace_back(move(tupleToAdd));
-                        }
-                    }
-                }
-            }
-
-            /* Modifies (syn, _) */
-            if (rightType == EntRefType::UNDERSCORE)
-            {
-                string rightSynonymKey;
-
-                /* Modifies (syn, _) -> syn is NOT procedure. RETURN 1-TUPLES
-                 */
-                if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) != DesignEntity::PROCEDURE)
-                {
-                    shared_ptr<Declaration>& parentDecl =
-                        selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
-                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-                    for (auto& s : evaluator->mpPKB->getAllModifyingStmts(pkbDe))
-                    {
-                        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                        /* Map the value returned to this particular synonym.
-                         */
-                        tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s->getIndex()));
-
-                        toReturn.emplace_back(move(tupleToAdd));
-                    }
-                }
-
-                /* Modifies (syn, _) -> syn is procedure. RETURN 2-TUPLES */
-                if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) == DesignEntity::PROCEDURE)
-                {
-                    shared_ptr<Declaration>& parentDecl =
-                        selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
-                    PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-
-                    for (auto& p : evaluator->mpPKB->mProceduresThatModifyVars)
-                    {
-                        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                        /* Map the value returned to this particular synonym.
-                         */
-                        tupleToAdd->insertKeyValuePair(leftSynonymKey, p->getName());
-
-                        toReturn.emplace_back(move(tupleToAdd));
-                    }
-                }
-            }
-
-            /* Modifies (syn, "IDENT") -> Return 1-tuple */
-            if (rightType == EntRefType::IDENT)
-            {
-
-                shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[stmtRef->getStringVal()];
-                PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
-                string identVarName = entRef->getStringVal();
-
-                /* Modifies (syn, "IDENT") -> syn is NOT a procedure. */
-                if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) != DesignEntity::PROCEDURE)
-                {
-                    for (auto& s : evaluator->getModifiers(pkbDe, move(identVarName)))
-                    {
-                        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                        /* Map the value returned to this particular synonym.
-                         */
-                        tupleToAdd->insertKeyValuePair(leftSynonymKey, to_string(s));
-
-                        toReturn.emplace_back(move(tupleToAdd));
-                    }
-                }
-
-                /* Modifies (syn, "IDENT") -> syn is a procedure. */
-                if (selectCl->getDesignEntityTypeBySynonym(leftSynonymKey) == DesignEntity::PROCEDURE)
-                {
-                    for (auto& p : evaluator->mpPKB->mVariableNameToProceduresThatModifyVarsMap[identVarName])
-                    {
-                        shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                        /* Map the value returned to this particular synonym.
-                         */
-                        tupleToAdd->insertKeyValuePair(leftSynonymKey, p->getName());
-
-                        toReturn.emplace_back(move(tupleToAdd));
-                    }
-                }
-            }
+        else {
+            shared_ptr<ModifiesSHandler> modifiesSHandler = make_shared<ModifiesSHandler>(move(evaluator), move(selectCl), modifiesSCl);
+            modifiesSHandler->evaluate(move(toReturn));
         }
-
         break;
     }
     case RelRefType::MODIFIES_P: /* Modifies("IDENT", ...) where IDENT must be
                                     a procedure */
     {
-        shared_ptr<ModifiesP> modifiesCl = static_pointer_cast<ModifiesP>(suchThatCl->relRef);
-        shared_ptr<EntRef>& entRefLeft = modifiesCl->entRef1;
-        shared_ptr<EntRef>& entRefRight = modifiesCl->entRef2;
-        EntRefType leftType = entRefLeft->getEntRefType();
-        EntRefType rightType = entRefRight->getEntRefType();
-
-        string leftArg = entRefLeft->getStringVal();
-
-        assert(leftType == EntRefType::IDENT);
-
-        /* Modifies ("PROC_IDENTIFER", v) Select variable v. */
-        if (rightType == EntRefType::SYNONYM)
-        {
-            if (selectCl->getDesignEntityTypeBySynonym(entRefRight->getStringVal()) != PQL_VARIABLE)
-            { // Modifies (s, x), x is NOT a variable
-                throw "Trying Modifies(p, v), but v is not a variable "
-                    "delcaration.\n";
-            }
-
-            const string& rightSynonymKey = entRefRight->getStringVal();
-            for (auto& s : evaluator->getModifiedByProcName(leftArg))
-            {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-
-                /* Map the value returned to this particular synonym. */
-                tupleToAdd->insertKeyValuePair(rightSynonymKey, s);
-
-                toReturn.emplace_back(move(tupleToAdd));
-            }
-        }
-
-        /*  Modifies ("PROC_IDENTIFER", _)*/
-        if (entRefRight->getEntRefType() == EntRefType::UNDERSCORE)
-        {
-            if (evaluator->checkModifiedByProcName(leftArg))
-            {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, leftArg);
-                toReturn.emplace_back(tupleToAdd);
-            }
-        }
-
-        /*  Modifies ("PROC_IDENTIFER", "IDENT") */
-        if (entRefRight->getEntRefType() == EntRefType::IDENT)
-        {
-            if (evaluator->checkModifiedByProcName(leftArg, entRefRight->getStringVal()))
-            {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                string rightArg = entRefRight->getStringVal();
-                tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, leftArg);
-                tupleToAdd->insertKeyValuePair(ResultTuple::IDENT_PLACEHOLDER, rightArg);
-                toReturn.emplace_back(tupleToAdd); /* Dummy Result Tuple */
-            }
-        }
+        shared_ptr<ModifiesPHandler> modifiesPHandler = make_shared<ModifiesPHandler>(move(evaluator), move(selectCl), static_pointer_cast<ModifiesP>(suchThatCl->relRef));
+        modifiesPHandler->evaluate(move(toReturn));
         break;
     }
     case RelRefType::PARENT: {
