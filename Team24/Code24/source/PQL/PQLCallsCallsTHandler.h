@@ -4,7 +4,7 @@
 
 using namespace std;
 
-class UsesModifiesPHandler : public SuchThatHandler
+class CallsCallsTHandler : public SuchThatHandler
 {
 private:
 	shared_ptr<EntRef> leftArg;
@@ -21,11 +21,14 @@ protected:
 	virtual void evaluateSynIdent(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
 	virtual void evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
 	virtual void evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateUnderscoreIdent(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
+	virtual void evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>>& toReturn) = 0;
 
 	shared_ptr<EntRef>& getLeftArg();
 	shared_ptr<EntRef>& getRightArg();
 
-	UsesModifiesPHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<EntRef> leftArg, shared_ptr<EntRef> rightArg);
+	CallsCallsTHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<EntRef> leftArg, shared_ptr<EntRef> rightArg);
 
 public:
 	void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) override;

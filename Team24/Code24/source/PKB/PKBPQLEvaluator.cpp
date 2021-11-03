@@ -1410,6 +1410,14 @@ const unordered_set<string>& PKBPQLEvaluator::getAllConstants()
 	return mpPKB->getConstants();
 }
 
+PKBDesignEntity PKBPQLEvaluator::getStmtType(int stmtIdx)
+{
+	PKBStmt::SharedPtr stmt;
+	if (mpPKB->getStatement(stmtIdx, stmt)) {
+		return stmt->getType();
+	}
+}
+
 // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
 // if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern
 // instead

@@ -105,10 +105,6 @@ inline void PQLOptimizer::sortClauseGroups(vector<shared_ptr<ClauseGroup>>& vec)
     sort(vec.begin(), vec.end(), f);
     std::for_each(execution::par_unseq, vec.begin(), vec.end(), [this](auto&& v) {this->sortSingleClauseGroup(v); });
 
-    //for (auto& cg : vec) sortSingleClauseGroup(cg);
-
-
-
 }
 
 void PQLOptimizer::filterTuples(vector<shared_ptr<ResultTuple>>& resultsFromClauseGroup, vector<shared_ptr<ResultTuple>>& filteredResults)

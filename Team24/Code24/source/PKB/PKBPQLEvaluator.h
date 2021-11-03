@@ -562,6 +562,9 @@ class PKBPQLEvaluator
 
     const unordered_set<string> &getAllConstants();
 
+    //Get statement type by index
+    PKBDesignEntity getStmtType(int stmtIdx);
+
   protected:
     PKBPQLEvaluator(PKB::SharedPtr pPKB)
     {

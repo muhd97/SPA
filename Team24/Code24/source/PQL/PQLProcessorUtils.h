@@ -555,9 +555,31 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
                 }
             }
             });
-        for (auto& v : res)
-            for (auto& ptr : v)
-                newResults.emplace_back(move(ptr));
+
+        vector<unsigned int> prefixSum(n);
+        unsigned int totalSize = 0;
+        for (unsigned int i = 0; i < n; i++) {
+            prefixSum[i] = i == 0 ? 0 : res[i - 1].size() + prefixSum[i - 1];
+            totalSize += res[i].size();
+        }
+
+        newResults.clear();
+        newResults.resize(totalSize);
+
+        std::for_each(execution::par_unseq, res.begin(), res.end(), 
+            [baseAddr, &newResults, &prefixSum, &totalSize](auto&& vec) {
+                int idx = &vec - baseAddr;
+                int displacement = prefixSum[idx];
+                int vecSize = vec.size();
+                for (int i = 0; i < vecSize; i++) {
+                    newResults[displacement + i] = move(vec[i]);
+                }
+            }
+        );
+
+        //for (auto& v : res)
+        //    for (auto& ptr : v)
+        //        newResults.emplace_back(move(ptr));
         return;
     }
 #endif

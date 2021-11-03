@@ -32,10 +32,15 @@ const string PQL_PARENT_T = "Parent*";
 const string PQL_USES = "Uses";
 const string PQL_MODIFIES = "Modifies";
 const string PQL_CALLS = "Calls";
+const string PQL_CALLS_T = "Calls*";
 const string PQL_NEXT = "Next";
+const string PQL_NEXT_T = "Next*";
 const string PQL_NEXT_BIP = "NextBip";
+const string PQL_NEXT_BIP_T = "NextBip*";
 const string PQL_AFFECTS = "Affects";
+const string PQL_AFFECTS_T = "Affects*";
 const string PQL_AFFECTS_BIP = "AffectsBip";
+const string PQL_AFFECTS_BIP_T = "AffectsBip*";
 const string PQL_PATTERN = "pattern";
 const string PQL_SUCH = "such";
 const string PQL_THAT = "that";
@@ -46,6 +51,28 @@ const string PQL_VAR_NAME = "varName";
 const string PQL_VALUE = "value";
 const string PQL_STMT_NUMBER = "stmt#";
 const string PQL_AND = "and";
+
+class ArgRef
+{
+protected:
+    string stringValue;
+public:
+    const string& getStringVal() const
+    {
+        return stringValue;
+    }
+    ArgRef() : stringValue("")
+    {
+    }
+
+    ArgRef(string s) : stringValue(move(s))
+    {
+    }
+
+    ~ArgRef() 
+    {
+    }
+};
 
 class PQLParser
 {

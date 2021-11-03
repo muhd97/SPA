@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "PQLParser.h"
+#include "PQLAST.h"
 #include "..\PKB\PKBPQLEvaluator.h"
 #include "PQLResultTuple.h"
 
@@ -14,8 +14,6 @@ enum class ClauseType {
 class ClauseHandler
 {
 private:
-	
-
 	bool givenSynonymMatchesMultipleTypes(const string& toCheck,
 		initializer_list<string> list);
 
@@ -25,6 +23,8 @@ private:
 	void validateVarSyn(const string& syn, const string& relationshipType);
 	void validateProcSyn(const string& syn, const string& relationshipType);
 	void validateProcIdent(const string& ident, const string& relationshipType);
+	void validateAffectsTypeSyn(const string& syn, const string& relationshipType);
+	void validateAffectsTypeInt(int stmtIdx, const string& relationshipType);
 protected:
 	shared_ptr<PKBPQLEvaluator> evaluator;
 	shared_ptr<SelectCl> selectCl;

@@ -2,7 +2,7 @@
 
 #include "PQLFollowsParentNextAffectsHandler.h"
 
-class ParentHandler : public FollowsParentNextAffectsHandler
+class AffectsTHandler : public FollowsParentNextAffectsHandler
 {
 private:
 	//use override method well to ensure OOP sanity
@@ -19,5 +19,5 @@ private:
 	const string& getRelationshipType() override;
 
 public:
-	ParentHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<Parent>& parentCl);
+	AffectsTHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsT>& affectsTCl);
 };
