@@ -175,11 +175,14 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         if (leftType == StmtRefType::SYNONYM)
         {
 
-            if (selectCl->getDesignEntityTypeBySynonym(usesCl->stmtRef->getStringVal()) == DesignEntity::CONSTANT)
+            const auto& leftSynonymKey = usesCl->stmtRef->getStringVal();
+
+            /* TO_ADD_HERE */
+            if (givenSynonymMatchesMultipleTypes(selectCl, leftSynonymKey,
+                { DesignEntity::CONSTANT, DesignEntity::VARIABLE, DesignEntity::READ }))
             {
                 throw "TODO: Handle error case. Uses(syn, ?), but syn is a "
-                    "Constant "
-                    "declaration. This is semantically incorrect.\n";
+                    "semantically incompatible\n";
             }
 
             handleUsesSFirstArgSyn(selectCl, usesCl, toReturn);
@@ -276,14 +279,13 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         }
         if (stmtRef->getStmtRefType() == StmtRefType::SYNONYM)
         {
-            // This is handling for both statement and procedure in
-            // Iteration 1. Need to change to make sure procedures are handled
-            // in ModifiesP
+
             string leftSynonymKey = stmtRef->getStringVal();
 
             /* Modifies (syn, v) */
             if (rightType == EntRefType::SYNONYM)
             {
+
                 if (selectCl->getDesignEntityTypeBySynonym(entRef->getStringVal()) != PQL_VARIABLE)
                 { // Modifies (s, x), x is NOT a variable
                     throw "Modifies(s, p), but p is not a variable "
@@ -659,6 +661,14 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
 
             if (rightType == StmtRefType::SYNONYM)
             {
+                /* TO_ADD_HERE */
+                if (givenSynonymMatchesMultipleTypes(selectCl, rightSynonymKey,
+                    { DesignEntity::PROCEDURE, DesignEntity::CONSTANT, DesignEntity::VARIABLE }))
+                {
+                    throw "Follows(_, s2) but s2 is not declared a type of statement. "
+                        "Follows() is only defined for statements\n";
+                }
+
                 shared_ptr<Declaration>& parentDecl = selectCl->synonymToParentDeclarationMap[rightSynonymKey];
                 PKBDesignEntity pkbDe = resolvePQLDesignEntityToPKBDesignEntity(parentDecl->getDesignEntity());
 
@@ -1157,6 +1167,10 @@ void PQLProcessor::handleCalls(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls>
             }
             const string& rightProcedureKey = entRefRight->getStringVal();
 
+
+            /* TO_ADD_HERE */
+            if (leftProcedureKey == rightProcedureKey) return;
+
             for (auto& p : evaluator->getCallsSynSyn())
             {
                 shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
@@ -1301,6 +1315,9 @@ void PQLProcessor::handleCallsT(shared_ptr<SelectCl>& selectCl, shared_ptr<Calls
                 return;
             }
             const string& rightProcedureKey = entRefRight->getStringVal();
+
+            /* TO_ADD_HERE */
+            if (rightProcedureKey == leftProcedureKey) return;
 
             for (auto& p : evaluator->getCallsTSynSyn())
             {
@@ -2515,25 +2532,24 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
      * being declared first. */
     validateSelectCl(selectCl);
      
+
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses() && !selectCl->hasWithClauses())
     {
         return move(handleNoSuchThatOrPatternCase(move(selectCl)));
     }
-
-    /* Get Clause Groups */
-    opt = make_shared<PQLOptimizer>(selectCl);
-    const auto& clauseGroups = opt->getClauseGroups();
-
+    
+    bool isBooleanReturnType = selectCl->target->isBooleanReturnType();
     /* Final Results to Return */
     vector<shared_ptr<Result>> res;
-
     vector<shared_ptr<ResultTuple>> currTups;
 
-    bool isBooleanReturnType = selectCl->target->isBooleanReturnType();
-    bool prevGroupHasSynonymsInResultCl = true;
-
     try {
+
+        opt = make_shared<PQLOptimizer>(selectCl);
+        const auto& clauseGroups = opt->getClauseGroups();
+
+        bool prevGroupHasSynonymsInResultCl = true;
         int groupSize = clauseGroups.size();
         for (int i = 0; i < groupSize; i++) {
             const auto& currGroup = clauseGroups[i];
@@ -2541,7 +2557,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
 
             if (i == 0) {
                 handleClauseGroup(selectCl, currTups, currGroup);
-
                 //if (currTups.empty() && hasSynonymsInResultCl) break;
                 if (currTups.empty()) break;
 

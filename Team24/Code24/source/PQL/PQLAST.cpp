@@ -915,7 +915,9 @@ PatternClType PatternCl::getPatternClType(unordered_map<string, shared_ptr<Decla
     if (synonymType == DesignEntity::ASSIGN) return PatternClType::PatternAssign;
     else if (synonymType == DesignEntity::WHILE) return PatternClType::PatternWhile;
     else if (synonymType == DesignEntity::IF) return PatternClType::PatternIf;
-    else throw "Unsupported Synonym Type for Pattern Clause";
+    else {
+        throw "Unsupported Synonym Type for Pattern Clause";
+    }
 }
 
 EvalClType WithCl::getEvalClType() {

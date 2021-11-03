@@ -34,7 +34,6 @@ TestWrapper::TestWrapper() {
   // create any objects here as instance variables of this class
   // as well as any initialization required for your spa program
     pkb = make_shared<PKB>();
-    //omp_set_num_threads(4);
 
 }
 
