@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "PQLParser.h"
+#include "PQLAST.h"
 #include "..\PKB\PKBPQLEvaluator.h"
 #include "PQLResultTuple.h"
 

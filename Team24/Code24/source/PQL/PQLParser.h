@@ -32,8 +32,11 @@ const string PQL_PARENT_T = "Parent*";
 const string PQL_USES = "Uses";
 const string PQL_MODIFIES = "Modifies";
 const string PQL_CALLS = "Calls";
+const string PQL_CALLS_T = "Calls*";
 const string PQL_NEXT = "Next";
+const string PQL_NEXT_T = "Next*";
 const string PQL_NEXT_BIP = "NextBip";
+const string PQL_NEXT_BIP_T = "NextBip*";
 const string PQL_AFFECTS = "Affects";
 const string PQL_AFFECTS_BIP = "AffectsBip";
 const string PQL_PATTERN = "pattern";
@@ -69,10 +72,6 @@ public:
     }
 };
 
-class StmtRef : public ArgRef
-    StmtRef(StmtRefType type, string s) : ArgRef(move(s))
-class EntRef : public ArgRef
-    EntRef(EntRefType type, string val) : ArgRef(move(val))
 class PQLParser
 {
 private:
