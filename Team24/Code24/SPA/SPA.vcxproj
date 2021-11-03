@@ -31,6 +31,10 @@
 	<ClCompile Include="..\source\PQL\PQLNextTHandler.cpp" />
 	<ClCompile Include="..\source\PQL\PQLNextBipHandler.cpp" />
 	<ClCompile Include="..\source\PQL\PQLNextBipTHandler.cpp" />
+	<ClCompile Include="..\source\PQL\PQLAffectsHandler.cpp" />
+	<ClCompile Include="..\source\PQL\PQLAffectsTHandler.cpp" />
+	<ClCompile Include="..\source\PQL\PQLAffectsBipHandler.cpp" />
+	<ClCompile Include="..\source\PQL\PQLAffectsBipTHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesModifiesSHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesModifiesPHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesSHandler.cpp" />
@@ -53,12 +57,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\CFG.h" />
-    <ClInclude Include="..\source\PQL\PQLFollowsParentNextAffectsHandlerHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLFollowsParentNextAffectsHandler.h" />
     <ClInclude Include="..\source\PQL\PQLAST.h" />
 	<ClInclude Include="..\source\PQL\PQLNextHandler.h" />
 	<ClInclude Include="..\source\PQL\PQLNextTHandler.h" />
 	<ClInclude Include="..\source\PQL\PQLNextBipHandler.h" />
 	<ClInclude Include="..\source\PQL\PQLNextBipTHandler.h" />
+	<ClInclude Include="..\source\PQL\PQLAffectsHandler.h" />
+	<ClInclude Include="..\source\PQL\PQLAffectsTHandler.h" />
+	<ClInclude Include="..\source\PQL\PQLAffectsBipHandler.h" />
+	<ClInclude Include="..\source\PQL\PQLAffectsBipTHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParser.h" />
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
     <ClInclude Include="..\source\SimpleAST.h" />

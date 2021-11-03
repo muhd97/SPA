@@ -31,6 +31,11 @@
 #include "PQLNextBipTHandler.h"
 #include "PQLCallsHandler.h"
 #include "PQLCallsTHandler.h"
+#include "PQLAffectsHandler.h"
+#include "PQLAffectsTHandler.h"
+#include "PQLAffectsBipHandler.h"
+#include "PQLAffectsBipTHandler.h"
+
 /* Initialize static variables for PQLProcessor.cpp */
 string Result::dummy = "BaseResult: getResultAsString()";
 string Result::FALSE_STRING = "FALSE";
@@ -291,11 +296,13 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         break;
     }
     case RelRefType::AFFECTS: {
-        handleAffects(selectCl, suchThatCl, toReturn, false, false);
+        shared_ptr<AffectsHandler> affectsHandler = make_shared<AffectsHandler>(move(evaluator), move(selectCl), static_pointer_cast<Affects>(suchThatCl->relRef));
+        affectsHandler->evaluate(move(toReturn));
         break;
     }
     case RelRefType::AFFECTS_T: {
-        handleAffects(selectCl, suchThatCl, toReturn, true, false);
+        shared_ptr<AffectsTHandler> affectsTHandler = make_shared<AffectsTHandler>(move(evaluator), move(selectCl), static_pointer_cast<AffectsT>(suchThatCl->relRef));
+        affectsTHandler->evaluate(move(toReturn));
         break;
     }
     case RelRefType::AFFECTS_BIP: {
