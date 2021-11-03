@@ -22,7 +22,7 @@
     <ClCompile Include="..\source\PQL\PQLWithHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLSuchThatHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLFollowsParentNextHandler.cpp" />
-	<ClCompile Include="..\source\PQL\PQLNextHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLNextHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesModifiesSHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesModifiesPHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesSHandler.cpp" />
@@ -33,6 +33,7 @@
     <ClCompile Include="..\source\PQL\PQLFollowsTHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLParentHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLParentTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLAST.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
@@ -69,6 +70,6 @@
     <ClInclude Include="..\source\PQL\PQLParentHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParentTHandler.h" />
     <ClInclude Include="..\source\PQL\PQLFollowsParentNextHandler.h" />
-	<ClInclude Include="..\source\PQL\PQLNextHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLNextHandler.h" />
   </ItemGroup>
 </Project>

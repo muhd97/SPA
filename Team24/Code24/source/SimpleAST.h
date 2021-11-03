@@ -13,7 +13,7 @@ class Node
   public:
     virtual string format(int level)
     {
-        return "not impl;\n";
+        return "node;\n";
     }
 };
 
@@ -28,10 +28,7 @@ enum class ExpressionType
 class Expression : public Node
 {
   public:
-    virtual ExpressionType getExpressionType()
-    {
-        return ExpressionType::NONE;
-    }
+      virtual ExpressionType getExpressionType();
 };
 
 class Constant : public Expression
@@ -45,11 +42,7 @@ class Constant : public Expression
         this->value = value;
     }
 
-    string getValue()
-    {
-        return value;
-    }
-
+    string getValue();
     string format(int _);
     ExpressionType getExpressionType();
 };
@@ -85,26 +78,10 @@ class CombinationExpression : public Expression
         this->lhs = NULL;
     }
 
-    void setLeft(shared_ptr<Expression> left)
-    {
-        this->lhs = left;
-    }
-
-    shared_ptr<Expression> getLHS()
-    {
-        return lhs;
-    }
-
-    shared_ptr<Expression> getRHS()
-    {
-        return rhs;
-    }
-
-    Bop getOp()
-    {
-        return op;
-    }
-
+    void setLeft(shared_ptr<Expression> left);
+    shared_ptr<Expression> getLHS();
+    shared_ptr<Expression> getRHS();
+    Bop getOp();
     string format(int level);
     ExpressionType getExpressionType();
 };
@@ -120,10 +97,7 @@ enum class ConditionalType
 class ConditionalExpression : public Node
 {
   public:
-    virtual ConditionalType getConditionalType()
-    {
-        return ConditionalType::NONE;
-    }
+      virtual ConditionalType getConditionalType();
 };
 
 enum class BooleanOperator
@@ -154,21 +128,9 @@ class BooleanExpression : public ConditionalExpression
         this->lhs = NULL;
     }
 
-    void setLeft(shared_ptr<ConditionalExpression> lhs)
-    {
-        this->lhs = lhs;
-    }
-
-    shared_ptr<ConditionalExpression> getLHS()
-    {
-        return lhs;
-    }
-
-    shared_ptr<ConditionalExpression> getRHS()
-    {
-        return rhs;
-    }
-
+    void setLeft(shared_ptr<ConditionalExpression> lhs);
+    shared_ptr<ConditionalExpression> getLHS();
+    shared_ptr<ConditionalExpression> getRHS();
     string format(int level);
     ConditionalType getConditionalType();
 };
@@ -184,11 +146,7 @@ class NotExpression : public ConditionalExpression
         this->expr = expr;
     }
 
-    shared_ptr<ConditionalExpression> getExpr()
-    {
-        return expr;
-    }
-
+    shared_ptr<ConditionalExpression> getExpr();
     string format(int level);
     ConditionalType getConditionalType();
 };
@@ -218,16 +176,8 @@ class RelationalExpression : public ConditionalExpression
         this->rhs = rhs;
     }
 
-    shared_ptr<Expression> getLHS()
-    {
-        return lhs;
-    }
-
-    shared_ptr<Expression> getRHS()
-    {
-        return rhs;
-    }
-
+    shared_ptr<Expression> getLHS();
+    shared_ptr<Expression> getRHS();
     string format(int level);
     ConditionalType getConditionalType();
 };
@@ -254,26 +204,14 @@ class Statement : public Node
     string getStatementLabel();
 
   public:
-    virtual vector<shared_ptr<Statement>> getStatementList()
-    {
-        return {};
-    }
-
-    virtual StatementType getStatementType()
-    {
-        return StatementType::NONE;
-    }
-
-    int getIndex()
-    {
-        return index;
-    }
-
     Statement(int index)
     {
         this->index = index;
     }
 
+    virtual vector<shared_ptr<Statement>> getStatementList();
+    virtual StatementType getStatementType();
+    int getIndex();
     string format(int level);
 };
 
@@ -293,11 +231,7 @@ class StatementList : public Node
         this->statements = statements;
     }
 
-    vector<shared_ptr<Statement>> getStatements()
-    {
-        return statements;
-    }
-
+    vector<shared_ptr<Statement>> getStatements();
     string format(int level);
 };
 
@@ -316,11 +250,7 @@ class Identifier : public Expression
         this->name = name;
     }
 
-    string getName()
-    {
-        return name;
-    }
-
+    string getName();
     string format(int _);
     ExpressionType getExpressionType();
 };
@@ -346,13 +276,8 @@ class ReadStatement : public Statement
         this->id = id;
     }
 
-    shared_ptr<Identifier> getId()
-    {
-        return id;
-    }
-
+    shared_ptr<Identifier> getId();
     string format(int level);
-
     StatementType getStatementType();
 };
 
@@ -367,11 +292,7 @@ class PrintStatement : public Statement
         this->id = id;
     }
 
-    shared_ptr<Identifier> getId()
-    {
-        return id;
-    }
-
+    shared_ptr<Identifier> getId();
     string format(int level);
     StatementType getStatementType();
 };
@@ -387,11 +308,7 @@ class CallStatement : public Statement
         this->procId = procId;
     }
 
-    shared_ptr<Identifier> getProcId()
-    {
-        return procId;
-    }
-
+    shared_ptr<Identifier> getProcId();
     string format(int level);
     StatementType getStatementType();
 };
@@ -411,22 +328,10 @@ class WhileStatement : public Statement
     }
 
     string format(int level);
-
     StatementType getStatementType();
-
-    vector<shared_ptr<Statement>> getStatementList()
-    {
-        return block->getStatements();
-    }
-
-    shared_ptr<StatementList> getBody() {
-        return block;
-    }
-
-    shared_ptr<ConditionalExpression> getConditional()
-    {
-        return cond;
-    }
+    vector<shared_ptr<Statement>> getStatementList();
+    shared_ptr<StatementList> getBody();
+    shared_ptr<ConditionalExpression> getConditional();
 };
 
 class IfStatement : public Statement
@@ -448,33 +353,10 @@ class IfStatement : public Statement
 
     string format(int level);
     StatementType getStatementType();
-
-    // return a list starting with if statements and ending with else statements
-    vector<shared_ptr<Statement>> getStatementList()
-    {
-        vector<shared_ptr<Statement>> consequentStatements = consequent->getStatements();
-        vector<shared_ptr<Statement>> alternativeStatements = alternative->getStatements();
-        consequentStatements.insert(end(consequentStatements), begin(alternativeStatements),
-                                    end(alternativeStatements));
-        return consequentStatements;
-    }
-
-    // return a consequent statement list
-    shared_ptr<StatementList> getConsequent()
-    {
-        return consequent;
-    }
-
-    // return a consequent statement list
-    shared_ptr<StatementList> getAlternative()
-    {
-        return alternative;
-    }
-
-    shared_ptr<ConditionalExpression> getConditional()
-    {
-        return cond;
-    }
+    vector<shared_ptr<Statement>> getStatementList();
+    shared_ptr<StatementList> getConsequent();
+    shared_ptr<StatementList> getAlternative();
+    shared_ptr<ConditionalExpression> getConditional();
 };
 
 class AssignStatement : public Statement
@@ -490,16 +372,8 @@ class AssignStatement : public Statement
         this->expr = expr;
     }
 
-    shared_ptr<Identifier> getId()
-    {
-        return id;
-    }
-
-    shared_ptr<Expression> getExpr()
-    {
-        return expr;
-    }
-
+    shared_ptr<Identifier> getId();
+    shared_ptr<Expression> getExpr();
     string format(int level);
     StatementType getStatementType();
 };
@@ -517,16 +391,8 @@ class Procedure : public Node
         this->stmtList = stmtList;
     }
 
-    shared_ptr<StatementList> getStatementList()
-    {
-        return stmtList;
-    }
-
-    string getName()
-    {
-        return name;
-    }
-
+    shared_ptr<StatementList> getStatementList();
+    string getName();
     string format(int level);
 };
 
@@ -541,12 +407,7 @@ class Program : public Node
         this->procedures = procedures;
     }
 
-    vector<shared_ptr<Procedure>> getProcedures()
-    {
-        return procedures;
-    }
-
+    vector<shared_ptr<Procedure>> getProcedures();
     string format();
-
     string format(int level);
 };

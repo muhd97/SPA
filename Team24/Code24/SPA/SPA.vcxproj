@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\PQL\PQLAST.cpp" />
     <ClCompile Include="..\source\PQL\PQLParser.cpp" />
     <ClCompile Include="..\source\CFG.cpp" />
     <ClCompile Include="..\source\SimpleAST.cpp" />
@@ -47,6 +48,7 @@
   <ItemGroup>
     <ClInclude Include="..\source\CFG.h" />
     <ClInclude Include="..\source\PQL\PQLFollowsParentNextHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLAST.h" />
 	<ClInclude Include="..\source\PQL\PQLNextHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParser.h" />
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
@@ -60,9 +62,9 @@
     <ClInclude Include="..\source\SimpleLexer.h" />
     <ClInclude Include="..\source\SimpleParser.h" />
     <ClInclude Include="..\source\PQL\PQLResultTuple.h" />
-    <ClInclude Include="..\source\PQL\PQLClauseHandler.h" />
     <ClInclude Include="..\source\PQL\PQLPatternHandler.h" />
     <ClInclude Include="..\source\PQL\PQLWithHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLClauseHandler.h" />
     <ClInclude Include="..\source\PQL\PQLSuchThatHandler.h" />
     <ClInclude Include="..\source\PQL\PQLUsesModifiesSHandler.h" />
     <ClInclude Include="..\source\PQL\PQLUsesModifiesPHandler.h" />
