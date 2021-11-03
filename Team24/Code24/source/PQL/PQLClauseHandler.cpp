@@ -24,10 +24,10 @@ void ClauseHandler::validateStmtRef(const shared_ptr<StmtRef>& stmtRef, const st
         int stmtIdx = stmtRef->getIntVal();
         validateStmtInt(stmtRef->getIntVal());
 
-        if (relationshipType == PQL_AFFECTS || relationshipType == PQL_AFFECTS_T
+        /*if (relationshipType == PQL_AFFECTS || relationshipType == PQL_AFFECTS_T
             || relationshipType == PQL_AFFECTS_BIP || relationshipType == PQL_AFFECTS_BIP_T) {
             validateAffectsTypeInt(stmtIdx, relationshipType);
-        }
+        }*/
     }
 }
 
