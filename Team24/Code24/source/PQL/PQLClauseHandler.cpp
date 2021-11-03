@@ -21,7 +21,13 @@ void ClauseHandler::validateStmtRef(const shared_ptr<StmtRef>& stmtRef, const st
         }
     }
     if (stmtRef->getStmtRefType() == StmtRefType::INTEGER) {
+        int stmtIdx = stmtRef->getIntVal();
         validateStmtInt(stmtRef->getIntVal());
+
+        if (relationshipType == PQL_AFFECTS || relationshipType == PQL_AFFECTS_T
+            || relationshipType == PQL_AFFECTS_BIP || relationshipType == PQL_AFFECTS_BIP_T) {
+            validateAffectsTypeInt(stmtIdx, relationshipType);
+        }
     }
 }
 
@@ -61,6 +67,13 @@ void ClauseHandler::validateAffectsTypeSyn(const string& syn, const string& rela
     if (!givenSynonymMatchesMultipleTypes(syn,
         { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
         throw runtime_error("The synonym \"" + syn + "\" is not declared as a stmt/prog_line/assign! Synonyms must be stmt type for " + relationshipType + ".\n");
+    }
+}
+
+void ClauseHandler::validateAffectsTypeInt(int stmtIdx, const string& relationshipType)
+{
+    if (evaluator->getStmtType(stmtIdx) == PKBDesignEntity::Assign) {
+        throw runtime_error("Statement " + to_string(stmtIdx) +" is not an assign statement in the program! " + relationshipType + " must take assignment statements only.\n");
     }
 }
 

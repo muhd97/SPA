@@ -24,6 +24,7 @@ private:
 	void validateProcSyn(const string& syn, const string& relationshipType);
 	void validateProcIdent(const string& ident, const string& relationshipType);
 	void validateAffectsTypeSyn(const string& syn, const string& relationshipType);
+	void validateAffectsTypeInt(int stmtIdx, const string& relationshipType);
 protected:
 	shared_ptr<PKBPQLEvaluator> evaluator;
 	shared_ptr<SelectCl> selectCl;
