@@ -26,6 +26,7 @@
     <ClCompile Include="..\source\PQL\PQLWithHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLSuchThatHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLFollowsParentNextHandler.cpp" />
+	<ClCompile Include="..\source\PQL\PQLNextHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesModifiesSHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesModifiesPHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLUsesSHandler.cpp" />
@@ -46,6 +47,7 @@
   <ItemGroup>
     <ClInclude Include="..\source\CFG.h" />
     <ClInclude Include="..\source\PQL\PQLFollowsParentNextHandler.h" />
+	<ClInclude Include="..\source\PQL\PQLNextHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParser.h" />
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
     <ClInclude Include="..\source\SimpleAST.h" />

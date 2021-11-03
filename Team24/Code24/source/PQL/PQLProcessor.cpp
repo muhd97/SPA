@@ -20,6 +20,7 @@
 #include "PQLModifiesPHandler.h"
 #include "PQLUsesSHandler.h"
 #include "PQLUsesPHandler.h"
+#include "PQLNextHandler.h"
 /* Initialize static variables for PQLProcessor.cpp */
 string Result::dummy = "BaseResult: getResultAsString()";
 string Result::FALSE_STRING = "FALSE";
@@ -253,8 +254,10 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         break;
     }
     case RelRefType::NEXT: {
-        shared_ptr<Next> nextCl = static_pointer_cast<Next>(suchThatCl->relRef);
-        handleNext(selectCl, nextCl, toReturn);
+        /*shared_ptr<Next> nextCl = static_pointer_cast<Next>(suchThatCl->relRef);
+        handleNext(selectCl, nextCl, toReturn);*/
+        shared_ptr<NextHandler> nextHandler = make_shared<NextHandler>(move(evaluator), move(selectCl), static_pointer_cast<Next>(suchThatCl->relRef));
+        nextHandler->evaluate(move(toReturn));
         break;
     }
     case RelRefType::NEXT_T: {
