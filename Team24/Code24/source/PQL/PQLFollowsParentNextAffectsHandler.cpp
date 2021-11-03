@@ -1,28 +1,28 @@
-#include "PQLFollowsParentNextHandler.h"
+#include "PQLFollowsParentNextAffectsHandler.h"
 
-void FollowsParentNextHandler::validateArguments() {
+void FollowsParentNextAffectsHandler::validateArguments() {
 	validateStmtRef(getLeftArg(), this->getRelationshipType());
 	validateStmtRef(getRightArg(), this->getRelationshipType());
 }
 
-shared_ptr<StmtRef>& FollowsParentNextHandler::getLeftArg()
+shared_ptr<StmtRef>& FollowsParentNextAffectsHandler::getLeftArg()
 {
 	return leftArg;
 }
 
-shared_ptr<StmtRef>& FollowsParentNextHandler::getRightArg()
+shared_ptr<StmtRef>& FollowsParentNextAffectsHandler::getRightArg()
 {
 	return rightArg;
 }
 
-FollowsParentNextHandler::FollowsParentNextHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<StmtRef> leftArg, shared_ptr<StmtRef> rightArg)
+FollowsParentNextAffectsHandler::FollowsParentNextAffectsHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<StmtRef> leftArg, shared_ptr<StmtRef> rightArg)
 	: SuchThatHandler(move(evaluator), move(selectCl))
 {
 	this->leftArg = leftArg;
 	this->rightArg = rightArg;
 }
 
-void FollowsParentNextHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
+void FollowsParentNextAffectsHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
 {
 	validateArguments();
 	StmtRefType leftType = leftArg->getStmtRefType();

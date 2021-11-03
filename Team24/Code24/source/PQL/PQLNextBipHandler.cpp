@@ -48,11 +48,6 @@ void NextBipHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
     const string& leftSynonym = getLeftArg()->getStringVal();
     const string& rightSynonym = getRightArg()->getStringVal();
 
-    /* Statement cannot follow itself. Therefore, no results. */
-    if (leftSynonym == rightSynonym) {
-        return;
-    }
-
     PKBDesignEntity pkbDe1 = getPKBDesignEntityOfSynonym(leftSynonym);
     PKBDesignEntity pkbDe2 = getPKBDesignEntityOfSynonym(rightSynonym);
 

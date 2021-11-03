@@ -21,7 +21,7 @@
     <ClCompile Include="..\source\PQL\PQLPatternHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLWithHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLSuchThatHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLFollowsParentNextHandler.cpp" />
+    <ClCompile Include="..\source\PQL\PQLFollowsParentNextAffectsHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLNextHandler.cpp" />
 	<ClCompile Include="..\source\PQL\PQLNextTHandler.cpp" />
 	<ClCompile Include="..\source\PQL\PQLNextBipHandler.cpp" />
@@ -75,7 +75,7 @@
     <ClInclude Include="..\source\PQL\PQLFollowsTHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParentHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParentTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLFollowsParentNextHandler.h" />
+    <ClInclude Include="..\source\PQL\PQLFollowsParentNextAffectsHandler.h" />
     <ClInclude Include="..\source\PQL\PQLNextHandler.h" />
 	<ClInclude Include="..\source\PQL\PQLNextTHandler.h" />
 	<ClInclude Include="..\source\PQL\PQLNextBipHandler.h" />

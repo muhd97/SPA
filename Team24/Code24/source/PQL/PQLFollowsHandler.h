@@ -1,8 +1,8 @@
 #pragma once
 
-#include "PQLFollowsParentNextHandler.h"
+#include "PQLFollowsParentNextAffectsHandler.h"
 
-class FollowsHandler : public FollowsParentNextHandler
+class FollowsHandler : public FollowsParentNextAffectsHandler
 {
 private:
 	//use override method well to ensure OOP sanity

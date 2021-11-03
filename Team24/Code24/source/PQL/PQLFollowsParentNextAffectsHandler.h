@@ -2,7 +2,7 @@
 #include "PQLSuchThatHandler.h"
 #include "PQLResultTuple.h"
 
-class FollowsParentNextHandler : public SuchThatHandler
+class FollowsParentNextAffectsHandler : public SuchThatHandler
 {
 private:
 	shared_ptr<StmtRef> leftArg;
@@ -26,7 +26,7 @@ protected:
 	shared_ptr<StmtRef>& getLeftArg();
 	shared_ptr<StmtRef>& getRightArg();
 
-	FollowsParentNextHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<StmtRef> leftArg, shared_ptr<StmtRef> rightArg);
+	FollowsParentNextAffectsHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<StmtRef> leftArg, shared_ptr<StmtRef> rightArg);
 
 public:
 	void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) override;
