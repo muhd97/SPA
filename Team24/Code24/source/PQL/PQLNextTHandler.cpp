@@ -3,7 +3,7 @@
 //TODO: replace all the tuple creations with getResultTuple method from PQLProcessorUtils.h
 
 NextTHandler::NextTHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<NextT>& nextTCl)
-    : FollowsParentNextHandler(move(evaluator), move(selectCl), nextTCl->stmtRef1, nextTCl->stmtRef2)
+    : FollowsParentNextAffectsHandler(move(evaluator), move(selectCl), nextTCl->stmtRef1, nextTCl->stmtRef2)
 {
 }
 
