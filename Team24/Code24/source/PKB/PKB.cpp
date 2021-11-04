@@ -8,7 +8,7 @@
 #include <memory>
 #include <queue>
 #include <vector>
-
+#include <functional>
 #include "PKBGroup.h"
 #include "PKBProcedure.h"
 #include "PKBStmt.h"
@@ -23,7 +23,7 @@ void PKB::initialise()
     vector<vector<int>> dummy(max(std::thread::hardware_concurrency() - 1, 1U));
     std::for_each(execution::par, dummy.begin(), dummy.end(), [](auto&& v) {
         int i = 0;
-        while (i < 5000)
+        while (i < 10000)
             i++;
     }); 
 #endif
@@ -72,10 +72,19 @@ void PKB::extractDesigns(shared_ptr<Program> program)
 
 void PKB::initializeRelationshipTables()
 {
-    initializeUsesTables();
-    initializeFollowsTTables();
-    initializeParentTTables();
-    initializeNextTables();
+    vector<function<void(void)>> funcs = {
+        [this]() {this->initializeUsesTables(); },
+        [this]() {this->initializeFollowsTTables(); },
+        [this]() {this->initializeParentTTables(); },
+        [this]() {this->initializeNextTables(); }
+    };
+
+    std::for_each(execution::par, funcs.begin(), funcs.end(), [](auto&& item) {
+        item();   
+        }
+    );
+
+    
 }
 
 void PKB::initializeWithTables()
@@ -184,7 +193,7 @@ void PKB::computeGoNextCFG(shared_ptr<CFG> cfg)
         current = frontier.back();
         frontier.pop_back();
 
-        // Check for End of Procedure delimiter
+        // Check for End of Procedure terminating delimiter
         if (current->getStatements().size() == 1 && current->getStatements()[0]->isEOFStatement) {
             continue;
         }

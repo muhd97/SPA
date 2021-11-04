@@ -47,6 +47,7 @@ void PatternHandler::validateArguments() {
 
 void PatternHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
 {
+
     //TODO: @kohyida1997. Do typechecking for different kinds of pattern clauses. If/assign/while have different pattern logic and syntax.
     const auto& synonymType = selectCl->getDesignEntityTypeBySynonym(patternCl->synonym);
     if (!(synonymType == DesignEntity::IF || synonymType == DesignEntity::WHILE)) {

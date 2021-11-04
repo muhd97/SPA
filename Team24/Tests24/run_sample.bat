@@ -3,10 +3,10 @@ title Running sample system acceptance test case!
 
 ..\Code24\Debug\AutoTester.exe sample_source.txt sample_queries.txt sample_out.xml
 
-findstr "/failed" out-first_test.xml
-findstr "/exception" out-first_test.xml
-findstr "/crash" out-first_test.xml
-findstr "timeout" out-first_test.xml
+findstr "/failed" sample_out.xml
+findstr "/exception" sample_out.xml
+findstr "/crash" sample_out.xml
+findstr "timeout" sample_out.xml
 
 echo The End!
 pause
