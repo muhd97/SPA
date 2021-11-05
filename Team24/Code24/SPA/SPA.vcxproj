@@ -20,7 +20,6 @@
     <ClCompile Include="..\source\PKB\PKBGroup.cpp" />
     <ClCompile Include="..\source\PKB\PKB.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLEvaluator.cpp" />
-    <ClCompile Include="..\source\PKB\Statement.cpp" />
     <ClCompile Include="..\source\PKB\PKBVariable.cpp" />
     <ClCompile Include="..\source\PQL\PQLClauseHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLPatternHandler.cpp" />
@@ -73,7 +72,6 @@
     <ClInclude Include="..\source\PKB\PKBGroup.h" />
     <ClInclude Include="..\source\PKB\PKB.h" />
     <ClInclude Include="..\source\PKB\PKBPQLEvaluator.h" />
-    <ClInclude Include="..\source\PKB\PKBStatement.h" />
     <ClInclude Include="..\source\PKB\PKBDesignEntity.h" />
     <ClInclude Include="..\source\PKB\PKBVariable.h" />
     <ClInclude Include="..\source\SimpleLexer.h" />
