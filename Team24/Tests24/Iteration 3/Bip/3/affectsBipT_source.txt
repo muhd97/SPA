@@ -1,0 +1,164 @@
+procedure ma1n {
+    call next;
+    print Variable;
+    while (Variable == variable) {
+        variable = Variable - 2;
+        if (Variable == print) then {
+            call next; 
+            Variable =     variable +     5   ;
+            print read;
+        } else {
+            print Variable;
+            Variable = 2*2/while ;
+            read variable;
+            if (Variable == variable) then {
+                variable = Variable + 2;
+                read Variable;
+            } else {
+                print = read;
+                read print;
+                print = 2 * 8 % while;
+            }
+            print read;
+            print = 4 - print;
+        }
+    }    
+    print Variable;
+    call R8; 
+}
+
+procedure next {
+    while (70000942432244550909090909090909 >= 2) {
+        read Variable;
+        read = 2;
+        print read;
+    }
+    while (read == print) { 
+        Variable = read;
+        read Variable;
+        print Variable;
+        if (read == print) then {  
+            call Print111;
+            Variable = read % (Variable + 2 / 2);
+        } else {
+            read = print;
+            call R8;
+        }
+    }
+}
+
+procedure Next {
+    call Procedure;
+}
+
+procedure R8 {
+    if(reUse == reUse)then {
+        read variable;
+        print reUse;
+    } else{
+        read reUse;
+        while(Use > 0) {
+            print print;
+        }
+        while (11 == 11){
+            read print;
+        }
+        read reUse;
+        print reUse;
+        call Print111;
+    }
+}
+
+procedure Print111 {
+    Use = 0;
+    print Next;
+    print modifies;
+    Use = Use;
+    read modifies;
+    read Next;
+    modifies = Use;
+}
+
+procedure CALL {
+    while (8 - follows == foLLows + 7000090909090909090909) {
+        parent = 5;
+        call reUse;
+        parent = parent;
+        while (follows == foLLows) { 
+            if (follows == foLLows) then {
+                follows = parent / (foLLows + 5);
+            } else {
+                read follows;
+                foLLows = follows + 5;
+                read parent;
+            }
+        }
+        call Next;
+    }
+    call reUse;
+    call reUse;
+    call reUse;
+}
+
+procedure reUse {
+    call Procedure;
+    if (2 == parenT) then {
+        while(parent == parenT) {
+            parent = 2 - parent;
+            read parent;
+            parent = 2 - parent;
+        }
+        parent = (parent - parenT / 5) % (2);
+        if (2 == 2) then { 
+            parent = (parent - (parenT / 5)) % 2;
+        } else {
+            parenT = (parenT / ((2)));
+            while (parent == parenT) { 
+                parenT = parenT / 2 % 2;
+                parent = (parent - parenT / 5) % 2;
+                read parent;
+            }   
+        }
+    } else {
+        parentT = (((4*(2))));
+        print parentT ;
+        parentT = parentT * parenT;
+        read parentT;
+        parentT = parentT * parentT + parenT;
+    }
+}
+
+procedure Procedure {  
+    if = while;
+    while = print;
+    print = read;
+    read = if;
+    if = if / while;
+}
+
+procedure confu510n {
+    if (!((else) <= if)) then {  
+        assign = a;
+        if = ifs;
+    } else {
+        a = assign;
+        ifs = if;
+    }
+    if (while > then) then {  
+        while = w;
+    } else {
+        w = while;
+    }
+    while (print + read == call + 5) {
+        pn = print;
+        r = read;
+        c = call;
+    }
+    if ((procedure != variable) && ((proc) >= var)) then {  
+        proc = p;       
+        p = procedure;
+    } else {
+        var  =  v ;
+        v = variable;
+    }
+}
