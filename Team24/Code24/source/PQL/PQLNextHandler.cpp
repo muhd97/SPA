@@ -5,7 +5,7 @@
 NextHandler::NextHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<Next>& nextCl)
     : FollowsParentNextAffectsHandler(move(evaluator), move(selectCl), nextCl->stmtRef1, nextCl->stmtRef2)
 {
-    cout << "made a next handler to deal with this\n";
+    
 }
 
 const string& NextHandler::getRelationshipType() {

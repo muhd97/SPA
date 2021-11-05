@@ -3,7 +3,7 @@
 #define PRINT_PARSED_PROGRAM 0
 #define DEBUG 0
 #define PRINT_FINISHED_HEADER 0
-#define PRINT_EXCEPTION_STATEMENTS 1
+#define PRINT_EXCEPTION_STATEMENTS 0
 
 #include "TestWrapper.h"
 #include "SimpleAST.h"
@@ -54,7 +54,7 @@ void TestWrapper::parse(std::string filename) {
         printSimpleTokens(tokens);
 #endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
-        cout << root->format();
+        
 #if PRINT_PARSED_PROGRAM
         cout << root->format();
         cout << "\n==== Building PKB ====\n";
@@ -89,7 +89,6 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
 #if DEBUG
     cout << "\n==== Parsing queries ====\n";
 #endif
-
     try {
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();

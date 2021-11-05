@@ -26,10 +26,10 @@ class PKBGroup
         return SharedPtr(new PKBGroup(procedureName));
     }
 
-    int mIndex;
+    int mIndex = -1;
 
     // statements
-    int mOwnerIndex;                            // index of statement that owns this group
+    int mOwnerIndex = -1;                            // index of statement that owns this group
     string mOwnerName;                          // name of procedure, only for procedures that own it
     map<PKBDesignEntity, vector<int>> mMembers; // members, mapped by synonym
 
@@ -46,6 +46,7 @@ class PKBGroup
     // returns index (statement number) of statement which owns this group
     int getOwner()
     {
+        //if (mOwnerIndex == -1) throw "No owner but attempting to getOwner()\n";
         return mOwnerIndex;
     }
 

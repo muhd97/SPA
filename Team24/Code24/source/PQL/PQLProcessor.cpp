@@ -1,5 +1,5 @@
 #pragma optimize( "gty", on )
-//#pragma once
+
 #define DEBUG_SINGLE_EVAL 0
 #define DEBUG_FILTERING 0
 #define DEBUG_GENERAL 0
@@ -46,47 +46,7 @@ string ResultTuple::INTEGER_PLACEHOLDER = "$int";
 string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 /* ======================== HANDLE-ALL CLAUSE METHODS ======================== */
-template <class T>
-void PQLProcessor::handleAllClauseOfSameType(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<T>>& suchThatClauses, vector<shared_ptr<ResultTuple>>& suchThatReturnTuples)
-{
 
-    int N = suchThatClauses.size();
-    for (int i = 0; i < N; i++)
-    {
-        if (i == 0)
-        {
-            handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
-            if (suchThatReturnTuples.size() == 0) {
-                return;
-            }
-        }
-        else
-        {
-            vector<shared_ptr<ResultTuple>> currSuchThatRes;
-            vector<shared_ptr<ResultTuple>> joinedRes;
-            joinedRes.reserve(suchThatReturnTuples.size());
-
-
-            handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
-
-            if (currSuchThatRes.size() == 0) { // Early termination
-                suchThatReturnTuples = move(currSuchThatRes);
-                break;
-            }
-
-
-            unordered_set<string>& setOfSynonymsToJoinOn =
-                getSetOfSynonymsToJoinOn(suchThatReturnTuples, currSuchThatRes);
-
-            if (!setOfSynonymsToJoinOn.empty())
-                hashJoinResultTuples(suchThatReturnTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
-            else
-                cartesianProductResultTuples(suchThatReturnTuples, currSuchThatRes, joinedRes);
-
-            suchThatReturnTuples = move(joinedRes);
-        }
-    }
-}
 
 vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
 {
@@ -160,35 +120,25 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
 void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
-    //special case to handle to separate UsesS and UsesP and ModifiesS and ModifiesP when first arg is synonym
 
-    //TODO Manas: remember to check for synonym type in ModifiesS and UsesS to make sure if they are proc or not.
     switch (suchThatCl->relRef->getType())
     {
     case RelRefType::USES_S: /* Uses(s, v) where s MUST be a
                                 if/while/assign/stmt/read/print. */
     {
         shared_ptr<UsesS> usesSCl = static_pointer_cast<UsesS>(suchThatCl->relRef);
+        shared_ptr<UsesSHandler> usesSHandler = make_shared<UsesSHandler>(move(evaluator), move(selectCl), usesSCl);
 
-        //if else is to handle the case where UsesS stores information for UsesP when synonym
-        if (usesSCl->stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
-            try
-            {
-                shared_ptr<UsesSHandler> usesSHandler = make_shared<UsesSHandler>(move(evaluator), move(selectCl), usesSCl);
-                usesSHandler->evaluate(move(toReturn));
-            }
-            catch (const exception& ex) {
-                //When the synonym is not of type statement, try again with type UsesP
-                shared_ptr<UsesP> newUsesPCl = make_shared<UsesP>(
-                    make_shared<EntRef>(EntRefType::SYNONYM, usesSCl->stmtRef->getStringVal()),
-                    usesSCl->entRef
+        if (usesSHandler->hasProcedureSynonym()) {
+            //When the synonym is not of type statement, try again with type UsesP
+            shared_ptr<UsesP> newUsesPCl = make_shared<UsesP>(
+                make_shared<EntRef>(EntRefType::SYNONYM, usesSCl->stmtRef->getStringVal()),
+                usesSCl->entRef
                 );
-                shared_ptr<UsesPHandler> usesPHandler = make_shared<UsesPHandler>(move(evaluator), move(selectCl), newUsesPCl);
-                usesPHandler->evaluate(move(toReturn));
-            }
+            shared_ptr<UsesPHandler> usesPHandler = make_shared<UsesPHandler>(move(evaluator), move(selectCl), newUsesPCl);
+            usesPHandler->evaluate(move(toReturn));
         }
         else {
-            shared_ptr<UsesSHandler> usesSHandler = make_shared<UsesSHandler>(move(evaluator), move(selectCl), usesSCl);
             usesSHandler->evaluate(move(toReturn));
         }
         break;
@@ -203,26 +153,19 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
     case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
     {
         shared_ptr<ModifiesS> modifiesSCl = static_pointer_cast<ModifiesS>(suchThatCl->relRef);
-        //if else is to handle the case where ModifiesS stores information for ModifiesP when synonym
-        if (modifiesSCl->stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
-            try
-            {
-                shared_ptr<ModifiesSHandler> modifiesSHandler = make_shared<ModifiesSHandler>(move(evaluator), move(selectCl), modifiesSCl);
-                modifiesSHandler->evaluate(move(toReturn));
-            }
-            catch (const exception& ex) {
-                //When the synonym is not of type statement, try again with type ModifiesP
-                
-                shared_ptr<ModifiesP> newModifiesPCl = make_shared<ModifiesP>(
-                    make_shared<EntRef>(EntRefType::SYNONYM, modifiesSCl->stmtRef->getStringVal()),
-                    modifiesSCl->entRef
+        shared_ptr<ModifiesSHandler> modifiesSHandler = make_shared<ModifiesSHandler>(move(evaluator), move(selectCl), modifiesSCl);
+
+        if (modifiesSHandler->hasProcedureSynonym())
+        {
+            shared_ptr<ModifiesP> newModifiesPCl = make_shared<ModifiesP>(
+                make_shared<EntRef>(EntRefType::SYNONYM, modifiesSCl->stmtRef->getStringVal()),
+                modifiesSCl->entRef
                 );
-                shared_ptr<ModifiesPHandler> modifiesPHandler = make_shared<ModifiesPHandler>(move(evaluator), move(selectCl), newModifiesPCl);
-                modifiesPHandler->evaluate(move(toReturn));
-            }
+            shared_ptr<ModifiesPHandler> modifiesPHandler = make_shared<ModifiesPHandler>(move(evaluator), move(selectCl), newModifiesPCl);
+            modifiesPHandler->evaluate(move(toReturn));
         }
-        else {
-            shared_ptr<ModifiesSHandler> modifiesSHandler = make_shared<ModifiesSHandler>(move(evaluator), move(selectCl), modifiesSCl);
+        else
+        {
             modifiesSHandler->evaluate(move(toReturn));
         }
         break;
@@ -634,7 +577,6 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
     {
         for (const string& x : evaluator->getAllConstants()) {
             shared_ptr<ResultTuple> tup = make_shared<ResultTuple>();
-            //tup->insertKeyValuePair(synString, isAttrRef ? resolveAttrRef(x, static_pointer_cast<AttrRef>(elem), de) : x);
             tup->insertKeyValuePair(synString, x);
             toPopulate.emplace_back(move(tup));
         }
@@ -646,7 +588,6 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
         const vector<shared_ptr<PKBVariable>>& vars = evaluator->getAllVariables();
         for (auto& ptr : vars) {
             shared_ptr<ResultTuple> tup = make_shared<ResultTuple>();
-            //tup->insertKeyValuePair(synString, isAttrRef ? resolveAttrRef(ptr->getName(), static_pointer_cast<AttrRef>(elem), de) : ptr->getName());
             tup->insertKeyValuePair(synString, ptr->getName());
             toPopulate.emplace_back(move(tup));
         }
@@ -659,7 +600,6 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
             evaluator->getAllProcedures();
         for (auto& ptr : procedures) {
             shared_ptr<ResultTuple> tup = make_shared<ResultTuple>();
-            //tup->insertKeyValuePair(synString, isAttrRef ? resolveAttrRef(ptr->getName(), static_pointer_cast<AttrRef>(elem), de) : ptr->getName());
             tup->insertKeyValuePair(synString, ptr->getName());
             toPopulate.emplace_back(move(tup));
         }
@@ -678,7 +618,6 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
     for (auto& ptr : stmts)
     {
         shared_ptr<ResultTuple> tup = make_shared<ResultTuple>();
-        //tup->insertKeyValuePair(synString, isAttrRef ? resolveAttrRef(to_string(ptr->getIndex()), static_pointer_cast<AttrRef>(elem), de) : to_string(ptr->getIndex()));
         tup->insertKeyValuePair(synString, to_string(ptr->getIndex()));
         toPopulate.emplace_back(move(tup));
     }
@@ -703,8 +642,8 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
     else if (type == EvalClType::With) {
         WithHandler wh(evaluator, selectCl, static_pointer_cast<WithCl>(evalCl));
         wh.evaluate(toPopulate);
-        
     }
+
 }
 
 void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<ClauseGroup>& clauseGroup)
@@ -744,6 +683,13 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
                 hashJoinResultTuples(toPopulate, currRes, setOfSynonymsToJoinOn, combinedRes);
             else
                 cartesianProductResultTuples(toPopulate, currRes, combinedRes);
+
+
+            if (combinedRes.empty()) { // Early termination
+                toPopulate = move(combinedRes);
+                return;
+            }
+
             toPopulate = move(combinedRes);
         }
     }
@@ -814,7 +760,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
 
             if (i == 0) {
                 handleClauseGroup(selectCl, currTups, currGroup);
-                //if (currTups.empty() && hasSynonymsInResultCl) break;
                 if (currTups.empty()) break;
 
                 /* The synonyms for this group don't appear in the target synonyms */
@@ -834,8 +779,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
                 handleClauseGroup(selectCl, tempRes, currGroup);
 
                 if (currTups.empty()) break;
-                //if (currTups.empty() && hasSynonymsInResultCl) break;
-
+                
                 /* The synonyms for this group don't appear in the target synonyms */
                 if (!hasSynonymsInResultCl) {
                     prevGroupHasSynonymsInResultCl = false;

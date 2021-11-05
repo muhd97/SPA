@@ -258,16 +258,6 @@ set<int> PKBPQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex
 {
 	set<int> res;
 
-	// if rightType is none of the container types, there are no such parents
-
-	// recurse up the parent tree
-	// replace current rightStatement with parent rightStatement
-
-	// if current rightStatement type is the desired type, add it to the
-	// results list 	
-	// we recurse until our 'rightStatement' is actually a Procedure, then we
-	// cant go further up no more
-
 	return res;
 }
 
@@ -275,38 +265,13 @@ set<pair<int, int>> PKBPQLEvaluator::getParentsT(PKBDesignEntity parentType, PKB
 {
 	set<pair<int, int>> res;
 
-	// if rightType is none of the container types, there are no such parents
-
-	// check if res is cached, if so return results
-
-	// if rightType is PKBDesignEntity::AllExceptProcedure call the other
-	// function instead (temporarily doing this because im scared of bugs)
-
-	// if not cached, we find the res manually and insert it into the cache
-
-	// check these 'possible' parent statements
-
-	// recursive check on children
-	// if this rightStatement has already been added in our res set, skip it
-	// check for children in the groups that this rightStatement owns
-
-	// add results from set to vector which we are returning
-	// insert into cache for future use
 	return res;
 }
 
 bool PKBPQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType,
 	PKBDesignEntity childType, unordered_set<int>& setResult)
 {
-	// if we have at least one child that is the desired childType
-
-	// recursive step: on the childGroups of grp
-	// if one of grp's childGrps does have a child of desired type:
-	// add the grp's childGrp if it also qualifies as a parent
-	// and let grp's parents know we found a desired child
-
-	// none of grp's childGroups have a child member with the desired type,
-	// return false
+	
 	return false;
 }
 
@@ -320,13 +285,7 @@ set<pair<int, int>> PKBPQLEvaluator::getParentsT(PKBDesignEntity childType)
 set<int> PKBPQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentIndex)
 {
 	set<int> res;
-	// if childType is procedure or parent is not even a container type, there
-	// are no such children
-	// recurse down our children
-	// pop the last element from toTraverse
-	// first we note that we have to also check current group's childGroups
-	// later 	// then we add current group's children members of the desired type
-
+	
 	return res;
 }
 
@@ -341,14 +300,7 @@ set<pair<int, int>> PKBPQLEvaluator::getChildrenT(PKBDesignEntity parentType, PK
 		return res;
 	}
 
-	// check if res is cached, if so return results
-
-	// if rightType is PKBDesignEntity::AllExceptProcedure call the other function
-	// instead (temporarily doing this because im scared of bugs)
-
-	// if not cached, we find the res manually and insert it into the cache
-	// note: even though we are finding children this time, it is still easier to
-	// traverse the parents instead
+	
 	vector<PKBStmt::SharedPtr > parentStmts;
 	if (parentType == PKBDesignEntity::AllStatements)
 	{
@@ -379,15 +331,7 @@ set<pair<int, int>> PKBPQLEvaluator::getChildrenT(PKBDesignEntity parentType, PK
 		}
 	}
 
-	// 3. go through all the groups one by one, adding relevant children
-	// statements
-	// pop the last group
-
-	// add all desired children of that group to the res set
-
-	// add all childGroups of grp to our toTraverse list (hence, list grows
-	// too) 	// add results from set to vector which we are returning
-	// insert into cache for future use
+	
 
 	return res;
 }
@@ -832,10 +776,6 @@ const unordered_set<int>& PKBPQLEvaluator::getFollowsTSynUnderscore(PKBDesignEnt
 {
 	return mpPKB->followsTSynUnderscoreTable[leftType];
 
-	// get results manually
-	// get all the 'before' users first
-
-	// count from the back, using rbegin and rend
 }
 
 /*Use for Follows*(_, INT) */
@@ -1056,10 +996,6 @@ const vector<int>& PKBPQLEvaluator::getUsesSynIdentNonProc(PKBDesignEntity userT
 	}
 
 	return mpPKB->usesSynIdentTableNonProc[variableName][userType];
-
-	// vector<int> users = v->getUsers();
-
-	//// filter only the desired type
 
 }
 

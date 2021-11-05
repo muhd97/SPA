@@ -1,7 +1,7 @@
 @echo off
 title Running demo system acceptance test case 3!
 
-..\..\Code24\Debug\AutoTester.exe 3_source.txt 3_queries.txt 3_out.xml
+..\..\Code24\Release\AutoTester.exe 3_source.txt 3_queries.txt 3_out.xml
 
 findstr "failed" 3_out.xml
 findstr "exception" 3_out.xml
