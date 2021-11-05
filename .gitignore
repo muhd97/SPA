@@ -533,3 +533,4 @@ FodyWeavers.xsd
 *.xml
 output.xml
 /Team24/Tests24/Outputs/*.xml
+/Team24/Tests24/run_32.bat

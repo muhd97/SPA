@@ -118,12 +118,12 @@ stmt s, s1, s2; assign a, a1; while w, w1; if ifs, ifs1; variable v, v1; procedu
 Select re such that AffectsBip*(3, 24) and AffectsBip*(4, 24)
 
 5000
-18 - 
+25 - 
 stmt s, s1, s2; assign a, a1; while w, w1; if ifs, ifs1; variable v, v1; procedure p, q, p1; constant c, c1; call cl; print pn; read re; prog_line n, n1;
 Select <a1.stmt#, a.stmt#> such that AffectsBip(a1, a)
 3 34,5 6,6 5,14 17,20 17,24 5,30 14,30 24,30 25,30 30,31 10,32 17,32 32,34 17,34 34
 5000
-19 - 
+26 - 
 stmt s, s1, s2; assign a, a1; while w, w1; if ifs, ifs1; variable v, v1; procedure p, q, p1; constant c, c1; call cl; print pn; read re; prog_line n, n1;
 Select <a1.stmt#, a.stmt#> such that AffectsBip*(a1, a)
 3 17,3 34,5 5,5 6,6 5,6 6,14 17,20 17,24 5,24 6,30 5,30 6,30 14,30 17,30 24,30 25,30 30,31 10,32 17,32 32,34 17,34 34
