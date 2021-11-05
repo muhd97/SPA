@@ -50,6 +50,8 @@ string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
 {
+    cout << "handle such that or pattern clause" << endl;
+
     vector<shared_ptr<Result>> toReturn;
     const auto& elems = selectCl->target->getElements();
     int numElements = elems.size();
@@ -120,7 +122,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
 void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
-
+    cout << "handle such that clause" << endl;
     switch (suchThatCl->relRef->getType())
     {
     case RelRefType::USES_S: /* Uses(s, v) where s MUST be a
@@ -248,11 +250,13 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         break;
     }
     case RelRefType::AFFECTS_BIP: {
-        handleAffects(selectCl, suchThatCl, toReturn, false, true);
+        shared_ptr<AffectsBipHandler> affectsBipHandler = make_shared<AffectsBipHandler>(move(evaluator), move(selectCl), static_pointer_cast<AffectsBip>(suchThatCl->relRef));
+        affectsBipHandler->evaluate(move(toReturn));
         break;
     }
     case RelRefType::AFFECTS_BIP_T: {
-        handleAffects(selectCl, suchThatCl, toReturn, true, true);
+        shared_ptr<AffectsBipTHandler> affectsBipTHandler = make_shared<AffectsBipTHandler>(move(evaluator), move(selectCl), static_pointer_cast<AffectsBip>(suchThatCl->relRef));
+        affectsBipTHandler->evaluate(move(toReturn));
         break;
     }        
     default: {
@@ -261,160 +265,6 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
     }
     }
     return;
-}
-
-
-void PQLProcessor::handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn, bool isT, bool isBIP)
-{
-    shared_ptr<StmtRef> stmtRefLeft;
-    shared_ptr<StmtRef> stmtRefRight;
-    if (isT) {
-        if (isBIP) {
-            stmtRefLeft = static_pointer_cast<AffectsBipT>(suchThatCl->relRef)->stmtRef1;
-            stmtRefRight = static_pointer_cast<AffectsBipT>(suchThatCl->relRef)->stmtRef2;
-        }
-        else {
-            stmtRefLeft = static_pointer_cast<AffectsT>(suchThatCl->relRef)->stmtRef1;
-            stmtRefRight = static_pointer_cast<AffectsT>(suchThatCl->relRef)->stmtRef2;
-        }
-    }
-    else {
-        if (isBIP) {
-            stmtRefLeft = static_pointer_cast<AffectsBip>(suchThatCl->relRef)->stmtRef1;
-            stmtRefRight = static_pointer_cast<AffectsBip>(suchThatCl->relRef)->stmtRef2;
-        }
-        else {
-            stmtRefLeft = static_pointer_cast<Affects>(suchThatCl->relRef)->stmtRef1;
-            stmtRefRight = static_pointer_cast<Affects>(suchThatCl->relRef)->stmtRef2;
-        }
-    }
-    StmtRefType leftType = stmtRefLeft->getStmtRefType();
-    StmtRefType rightType = stmtRefRight->getStmtRefType();
-
-    if (leftType == StmtRefType::INTEGER) {
-        int leftArg = stmtRefLeft->getIntVal();
-        if (rightType == StmtRefType::INTEGER) {
-            int rightArg = stmtRefRight->getIntVal();
-            if (evaluator->getAffects(leftArg, rightArg, isT, isBIP)) {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
-                toReturn.emplace_back(tupleToAdd);
-            }
-        }
-        else if (rightType == StmtRefType::SYNONYM) {
-            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP, leftArg);
-            set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
-            if (!givenSynonymMatchesMultipleTypes(selectCl, stmtRefRight->getStringVal(),
-                { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
-                return; // invalid query
-            }
-            const string& rightAssignKey = stmtRefRight->getStringVal();
-            for (const auto& p : relevantRes) {
-                if (p.first == leftArg) {
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    tupleToAdd->insertKeyValuePair(rightAssignKey, to_string(p.second));
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-        }
-
-        else if (rightType == StmtRefType::UNDERSCORE) {
-            if (evaluator->getAffects(leftArg, 0, isT, isBIP)) {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
-                toReturn.emplace_back(move(tupleToAdd));
-                return;
-            }
-        }
-    }
-
-    else if (leftType == StmtRefType::SYNONYM) {
-        if (!givenSynonymMatchesMultipleTypes(selectCl, stmtRefLeft->getStringVal(),
-            { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
-            return; // invalid query
-        }
-
-        const string& leftAssignKey = stmtRefLeft->getStringVal();
-        if (rightType == StmtRefType::INTEGER) {
-            int rightArg = stmtRefRight->getIntVal();
-            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP, rightArg);
-            set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
-            for (const auto& p : relevantRes) {
-                if (p.second == rightArg) { 
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    tupleToAdd->insertKeyValuePair(leftAssignKey, to_string(p.first));
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-        }
-        else if (rightType == StmtRefType::SYNONYM) {
-            if (!givenSynonymMatchesMultipleTypes(selectCl, stmtRefRight->getStringVal(),
-                { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
-                return; // invalid query
-            }
-            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP, 0);
-            set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
-            const string& rightAssignKey = stmtRefRight->getStringVal();
-            for (auto& p : relevantRes) {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                tupleToAdd->insertKeyValuePair(leftAssignKey, to_string(p.first));
-                tupleToAdd->insertKeyValuePair(rightAssignKey, to_string(p.second));
-
-                toReturn.emplace_back(move(tupleToAdd));
-            }
-        }
-        else if (rightType == StmtRefType::UNDERSCORE) {
-            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP, 0);
-            set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
-            set<int> seen;
-            for (const auto& p : relevantRes) {
-                if (!seen.count(p.first)) {
-                    seen.insert(p.first);
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    tupleToAdd->insertKeyValuePair(leftAssignKey, to_string(p.first));
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-        }
-    }
-
-    else { // leftType == StmtRefType::UNDERSCORE 
-        if (rightType == StmtRefType::INTEGER) {
-            const auto& rightArg = stmtRefRight->getIntVal();
-            if (evaluator->getAffects(0, rightArg, isT, isBIP)) {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
-                toReturn.emplace_back(move(tupleToAdd));
-                return;
-            }
-        }
-        else if (rightType == StmtRefType::SYNONYM) {
-            if (!givenSynonymMatchesMultipleTypes(selectCl, stmtRefRight->getStringVal(),
-                { DesignEntity::PROG_LINE, DesignEntity::STMT, DesignEntity::ASSIGN })) {
-                return; // invalid query
-            }
-            pair<set<pair<int, int>>, set<pair<int, int>>>& res = evaluator->getAffects(isT, isBIP, 0);
-            set<pair<int, int>>& relevantRes = isT ? res.second : res.first;
-
-            const string& rightAssignKey = stmtRefRight->getStringVal();
-            set<int> seen;
-            for (const auto& p : relevantRes) {
-                if (!seen.count(p.second)) {
-                    seen.insert(p.second);
-                    shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                    tupleToAdd->insertKeyValuePair(rightAssignKey, to_string(p.second));
-                    toReturn.emplace_back(move(tupleToAdd));
-                }
-            }
-        }
-        else if (rightType == StmtRefType::UNDERSCORE) {
-            if (evaluator->getAffects(0, 0, isT, isBIP)) {
-                shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
-                tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);
-                toReturn.emplace_back(move(tupleToAdd));
-            }
-        }
-    }
 }
 
 /* ======================== HELPER METHODS ======================== */
@@ -736,7 +586,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         return res;
     }
     
-     
+
 
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses() && !selectCl->hasWithClauses())

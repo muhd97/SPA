@@ -539,9 +539,11 @@ class PKBPQLEvaluator
     // Case 9: NextBipT(int, syn)
     unordered_set<int> getNextBipTIntSyn(int fromIndex, PKBDesignEntity to);
 
-    // Affects
-    pair<set<pair<int, int>>, set<pair<int, int>>> getAffects(bool includeAffectsT, bool BIP, int referenceStatement);
-    bool getAffects(int leftInt, int rightInt, bool includeAffectsT, bool BIP);
+    // Affects / AffectsT
+    pair<set<pair<int, int>>, set<pair<int, int>>> getAffects(bool includeAffectsT, int referenceStatement);
+    bool getAffects(int leftInt, int rightInt, bool includeAffectsT);
+    // AffectsBIP / AffectsBIPT
+    pair<set<pair<int, int>>, set<pair<int, int>>> getAffectsBIP(bool includeAffectsT);
 
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
@@ -658,15 +660,26 @@ class PKBPQLEvaluator
     set<pair<int, int>> affectsList;
     set<pair<int, int>> affectsTList;
     map<int, set<pair<int, int>>> affectsTHelperTable;
+    map<int, set<pair<int, int>>> affectsTHelperTable2;
 
-    bool computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT, bool BIP,
+
+    bool computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT,
         map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures, shared_ptr<BasicBlock>& lastBlock,
         bool terminateEarly, int leftInt, int rightInt);
     bool handleAffectsAssign(int index, bool includeAffectsT,
         map<string, set<int>>& lastModifiedTable, bool terminateEarly, int leftInt, int rightInt);
     void handleAffectsRead(int index, bool includeAffectsT,
         map<string, set<int>>& lastModifiedTable);
-    bool handleAffectsCall(int index, bool includeAffectsT, bool BIP,
+    bool handleAffectsCall(int index, bool includeAffectsT,
         map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures, bool terminateEarly, int leftInt, int rightInt);
+
+    bool computeAffectsBIP(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT,
+        map<string, set<int>>& lastModifiedTable, shared_ptr<BasicBlock>& lastBlock);
+    bool handleAffectsAssignBIP(int index, bool includeAffectsT,
+        map<string, set<int>>& lastModifiedTable);
+    void handleAffectsReadBIP(int index, bool includeAffectsT,
+        map<string, set<int>>& lastModifiedTable);
+    bool handleAffectsCallBIP(int index, bool includeAffectsT,
+        map<string, set<int>>& lastModifiedTable);
 
 };
