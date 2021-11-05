@@ -744,6 +744,13 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
                 hashJoinResultTuples(toPopulate, currRes, setOfSynonymsToJoinOn, combinedRes);
             else
                 cartesianProductResultTuples(toPopulate, currRes, combinedRes);
+
+
+            if (combinedRes.empty()) { // Early termination
+                toPopulate = move(combinedRes);
+                return;
+            }
+
             toPopulate = move(combinedRes);
         }
     }

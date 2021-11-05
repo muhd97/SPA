@@ -3,7 +3,7 @@
 #define PRINT_PARSED_PROGRAM 0
 #define DEBUG 0
 #define PRINT_FINISHED_HEADER 0
-#define PRINT_EXCEPTION_STATEMENTS 1
+#define PRINT_EXCEPTION_STATEMENTS 0
 
 #include "TestWrapper.h"
 #include "SimpleAST.h"
