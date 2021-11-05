@@ -487,13 +487,13 @@ shared_ptr<RelRef> PQLParser::parseRelRef()
     else if (curr.type == PQLTokenType::AFFECTS_BIP_T)
     {
         // AffectsBip*
-        eat(PQLTokenType::NEXT_T);
+        eat(PQLTokenType::AFFECTS_BIP_T);
         eat(PQLTokenType::LEFT_PAREN);
         auto ref1 = parseStmtRef();
         eat(PQLTokenType::COMMA);
         auto ref2 = parseStmtRef();
         eat(PQLTokenType::RIGHT_PAREN);
-        return make_shared<AffectsBip>(ref1, ref2);
+        return make_shared<AffectsBipT>(ref1, ref2);
     }
     else if (isKeyword(curr, PQL_USES))
     {
