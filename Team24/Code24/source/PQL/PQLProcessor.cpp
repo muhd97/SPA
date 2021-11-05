@@ -59,7 +59,6 @@ void PQLProcessor::handleAllClauseOfSameType(shared_ptr<SelectCl>& selectCl, con
             if (suchThatReturnTuples.size() == 0) {
                 return;
             }
-
         }
         else
         {
@@ -760,29 +759,39 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
 vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& selectCl)
 {
-    /* Pre-Validate PQLQuery first to catch simple errors like a synonym not
-     * being declared first. */
-    validateSelectCl(selectCl);
+    bool isBooleanReturnType = selectCl->target->isBooleanReturnType();
+    /* Final Results to Return */
+    vector<shared_ptr<Result>> res;
+    vector<shared_ptr<ResultTuple>> currTups;
+
+    /* Treat undeclared synonyms as semantic error. */
+    try {
+        validateSelectCl(selectCl);
+    }
+    catch (...) {
+        if (isBooleanReturnType)
+            res.push_back(make_shared<StringSingleResult>("FALSE"));
+
+        return res;
+    }
+    
      
+
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses() && !selectCl->hasWithClauses())
     {
         return move(handleNoSuchThatOrPatternCase(move(selectCl)));
     }
+    
 
-    /* Get Clause Groups */
-    opt = make_shared<PQLOptimizer>(selectCl);
-    const auto& clauseGroups = opt->getClauseGroups();
 
-    /* Final Results to Return */
-    vector<shared_ptr<Result>> res;
-
-    vector<shared_ptr<ResultTuple>> currTups;
-
-    bool isBooleanReturnType = selectCl->target->isBooleanReturnType();
-    bool prevGroupHasSynonymsInResultCl = true;
 
     try {
+
+        opt = make_shared<PQLOptimizer>(selectCl);
+        const auto& clauseGroups = opt->getClauseGroups();
+
+        bool prevGroupHasSynonymsInResultCl = true;
         int groupSize = clauseGroups.size();
         for (int i = 0; i < groupSize; i++) {
             const auto& currGroup = clauseGroups[i];
@@ -790,7 +799,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
 
             if (i == 0) {
                 handleClauseGroup(selectCl, currTups, currGroup);
-
                 //if (currTups.empty() && hasSynonymsInResultCl) break;
                 if (currTups.empty()) break;
 

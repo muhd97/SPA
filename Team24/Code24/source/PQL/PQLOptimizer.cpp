@@ -71,7 +71,7 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
         adjList[clauseNode] = move(currNeighbours);
     }
 
-    /* DFS */
+    /* BFS */
     unordered_set<OptNode*> visited;
     visited.reserve(allNodes.size());
 
@@ -82,7 +82,9 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
             toReturn.emplace_back(move(cg));
         }
     }
+
     if (!cgForNoSynClauses->clauses.empty()) toReturn.emplace_back(cgForNoSynClauses);
+
     sortClauseGroups(toReturn);
 #if DEBUG_GROUPS
     /* Debugging: */
@@ -99,6 +101,7 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
 }
 
 inline void PQLOptimizer::sortClauseGroups(vector<shared_ptr<ClauseGroup>>& vec) {
+
     sort(vec.begin(), vec.end(), f);
     std::for_each(execution::par_unseq, vec.begin(), vec.end(), [this](auto&& v) {this->sortSingleClauseGroup(v); });
 
@@ -201,12 +204,19 @@ inline void PQLOptimizer::sortSingleClauseGroup(shared_ptr<ClauseGroup>& cg)
     int currGroupSize = currClauses.size();
     int firstClauseIdx = -1;
     int bestPrioritySeen = INT32_MAX;
-    for (int i = 0; i < currGroupSize; i++) {
-        int currPriority = getEvalClPriority(currClauses[i], this->selectCl);
-        if (currPriority < bestPrioritySeen) {
-            bestPrioritySeen = currPriority;
-            firstClauseIdx = i;
+
+    try {
+
+        for (int i = 0; i < currGroupSize; i++) {
+            int currPriority = getEvalClPriority(currClauses[i], this->selectCl);
+            if (currPriority < bestPrioritySeen) {
+                bestPrioritySeen = currPriority;
+                firstClauseIdx = i;
+            }
         }
+    }
+    catch (...) {
+        return;
     }
 #if DEBUG_SORT_WITHIN_GROUP
     cout << "Sorted\n";

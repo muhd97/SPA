@@ -3,6 +3,13 @@
 void CallsCallsTHandler::validateArguments() {
 	validateProcEntRef(getLeftArg(), getRelationshipType());
 	validateProcEntRef(getRightArg(), getRelationshipType());
+
+	if (getLeftArg()->getEntRefType() == EntRefType::SYNONYM && getRightArg()->getEntRefType() == EntRefType::SYNONYM) {
+		if (getLeftArg()->getStringVal() == getRightArg()->getStringVal()) {
+			throw std::runtime_error("Calls Error");
+		}
+	}
+
 }
 
 shared_ptr<EntRef>& CallsCallsTHandler::getLeftArg()

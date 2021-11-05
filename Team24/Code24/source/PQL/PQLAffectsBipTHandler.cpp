@@ -48,8 +48,14 @@ void AffectsBipTHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toRetur
     const string& leftSynonym = getLeftArg()->getStringVal();
     const string& rightSynonym = getRightArg()->getStringVal();
 
-    for (auto& sPair : getEvaluator()->getAffects(true, true, 0).second)
+    for (auto& sPair : getEvaluator()->getAffects(true, true, 0).second) {
+        if ((leftSynonym == rightSynonym) && (sPair.first != sPair.second)) {
+            // special case wher Next...(s1, s1)
+            continue;
+        }
         toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(sPair.first)}, {rightSynonym, to_string(sPair.second)} }));
+    }
+        
 }
 
 void AffectsBipTHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)

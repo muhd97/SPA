@@ -8,6 +8,7 @@
 #include "PQLResultTuple.h"
 #include "PQLLexer.h"
 
+#define DEBUG_VALIDATE 0
 #define DEBUG_HASH_JOIN 0
 #define PARALLELIZE_HASH_JOIN 1
 #define HASH_JOIN_PARALLEL_THRESHOLD 150
@@ -285,30 +286,31 @@ inline bool allSynonymsInPatternClausesAreDeclared(shared_ptr<SelectCl>& selectC
 
 inline void validateSelectCl(shared_ptr<SelectCl> selectCl)
 {
+
     if (!isTargetSynonymDeclared(selectCl))
     {
         throw "Bad PQL Query. The target synonym is NOT declared\n";
     }
-
-    //cout << "Validate0 ================= \n";
-
+#if DEBUG_VALIDATE
+    cout << "Validate0 ================= \n";
+#endif
     if (!allSynonymsInSuchThatClausesAreDeclared(selectCl))
     {
         throw "BAD PQL Query. Some synonyms in the such-that clauses were NOT "
             "declared\n";
     }
-
-    //out << "Validate1 ================= \n";
-
+#if DEBUG_VALIDATE
+    cout << "Validate1 ================= \n";
+#endif
 
     if (!allSynonymsInPatternClausesAreDeclared(selectCl))
     {
         throw "BAD PQL Query. Some synonyms in the pattern clauses were NOT "
             "declared\n";
     }
-
-    //cout << "Validate2 ================= \n";
-
+#if DEBUG_VALIDATE
+    cout << "Validate2 ================= \n";
+#endif
 }
 
 inline bool allTargetSynonymsExistInTuple(const vector<shared_ptr<Element>>& synonyms, shared_ptr<ResultTuple> tuple) {
@@ -369,6 +371,36 @@ inline bool dependentElementsAllExistInTupleKeys(const vector<shared_ptr<ResultT
     return true;
 }
 
+inline bool isValidAttrRef(const shared_ptr<SelectCl>& selectCl, const shared_ptr<AttrRef>& attrRef) {
+
+    const auto& entityType = selectCl->getDesignEntityTypeBySynonym(attrRef->getSynonymString());
+    const string& synString = attrRef->getSynonymString();
+    AttrNameType type = attrRef->getAttrName()->getAttrNameType();
+
+    if (type == AttrNameType::VALUE) {
+        if (entityType != DesignEntity::CONSTANT) return false;
+    }
+
+    else if (type == AttrNameType::STMT_NUMBER) {
+        if (!givenSynonymMatchesMultipleTypes(selectCl, synString, {
+            DesignEntity::STMT, DesignEntity::READ, DesignEntity::PRINT, DesignEntity::CALL,
+            DesignEntity::WHILE, DesignEntity::IF, DesignEntity::ASSIGN })) return false;
+    }
+
+    else if (type == AttrNameType::PROC_NAME) {
+        if (!givenSynonymMatchesMultipleTypes(selectCl, synString, {
+            DesignEntity::PROCEDURE, DesignEntity::CALL})) return false;
+
+    }
+
+    else if (type == AttrNameType::VAR_NAME) {
+        if (!givenSynonymMatchesMultipleTypes(selectCl, synString, {
+            DesignEntity::READ, DesignEntity::PRINT, DesignEntity::VARIABLE})) return false;
+    }
+
+    return true;
+}
+
 inline void validateWithClause(const shared_ptr<SelectCl>& selectCl, const shared_ptr<WithCl>& withCl)
 {
     shared_ptr<Ref> lhs = withCl->lhs;
@@ -402,10 +434,22 @@ inline void validateWithClause(const shared_ptr<SelectCl>& selectCl, const share
     }
     if (!isLhsInt && lhs->getRefType() == RefType::ATTR) {
         AttrNameType attrType = lhs->getAttrRef()->getAttrName()->getType();
+        if (selectCl->getDesignEntityTypeBySynonym(lhs->getAttrRef()->getSynonymString()) == DesignEntity::PROG_LINE)
+            throw "Semantic Error: AttrRef cannot be of syn type PROG_LINE";
+
+        if (!isValidAttrRef(selectCl, lhs->getAttrRef()))
+            throw "Semantic Error: Bad AttrRef";
+
         isLhsInt = attrType == AttrNameType::STMT_NUMBER || attrType == AttrNameType::VALUE;
     }
     if (!isRhsInt && rhs->getRefType() == RefType::ATTR) {
         AttrNameType attrType = rhs->getAttrRef()->getAttrName()->getType();
+        if (selectCl->getDesignEntityTypeBySynonym(rhs->getAttrRef()->getSynonymString()) == DesignEntity::PROG_LINE)
+            throw "Semantic Error: AttrRef cannot be of syn type PROG_LINE";
+
+        if (!isValidAttrRef(selectCl, rhs->getAttrRef()))
+            throw "Semantic Error: Bad AttrRef";
+
         isRhsInt = attrType == AttrNameType::STMT_NUMBER || attrType == AttrNameType::VALUE;
     }
 
@@ -511,9 +555,31 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
                 }
             }
             });
-        for (auto& v : res)
-            for (auto& ptr : v)
-                newResults.emplace_back(move(ptr));
+
+        vector<unsigned int> prefixSum(n);
+        unsigned int totalSize = 0;
+        for (unsigned int i = 0; i < n; i++) {
+            prefixSum[i] = i == 0 ? 0 : res[i - 1].size() + prefixSum[i - 1];
+            totalSize += res[i].size();
+        }
+
+        newResults.clear();
+        newResults.resize(totalSize);
+
+        std::for_each(execution::par_unseq, res.begin(), res.end(), 
+            [baseAddr, &newResults, &prefixSum, &totalSize](auto&& vec) {
+                int idx = &vec - baseAddr;
+                int displacement = prefixSum[idx];
+                int vecSize = vec.size();
+                for (int i = 0; i < vecSize; i++) {
+                    newResults[displacement + i] = move(vec[i]);
+                }
+            }
+        );
+
+        //for (auto& v : res)
+        //    for (auto& ptr : v)
+        //        newResults.emplace_back(move(ptr));
         return;
     }
 #endif

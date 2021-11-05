@@ -50,8 +50,14 @@ void NextTHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
     PKBDesignEntity pkbDe1 = getPKBDesignEntityOfSynonym(leftSynonym);
     PKBDesignEntity pkbDe2 = getPKBDesignEntityOfSynonym(rightSynonym);
 
-    for (auto& sPair : getEvaluator()->getNextTSynSyn(pkbDe1, pkbDe2))
+    for (auto& sPair : getEvaluator()->getNextTSynSyn(pkbDe1, pkbDe2)) {
+        if ((leftSynonym == rightSynonym) && (sPair.first != sPair.second)) {
+            // special case wher Next...(s1, s1)
+            continue;
+        }
         toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(sPair.first)}, {rightSynonym, to_string(sPair.second)} }));
+    }
+        
 }
 
 void NextTHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)

@@ -3,9 +3,9 @@
 #include "PQLParser.h"
 
 inline int getEvalClPriority(const shared_ptr<EvalCl>& evalCl, const shared_ptr<SelectCl>& selectCl) {
+
     const auto& evalClType = evalCl->getEvalClType();
     int numSyns = evalCl->getAllSynonymsAsString().size();
-
 
     /* 0 Syn */
     if (numSyns == 0)
@@ -67,6 +67,7 @@ inline int getEvalClPriority(const shared_ptr<EvalCl>& evalCl, const shared_ptr<
                 priority = 12;
         }
         else if (evalClType == EvalClType::Pattern) {
+
             const auto& pattern = static_pointer_cast<PatternCl>(evalCl);
             const auto& patternType = pattern->getPatternClType(selectCl->synonymToParentDeclarationMap);
             if (patternType == PatternClType::PatternIf) {
@@ -124,9 +125,12 @@ inline int getEvalClPriority(const shared_ptr<EvalCl>& evalCl, const shared_ptr<
             else if (suchThatType == RelRefType::AFFECTS_BIP_T)
                 priority = 24;
         }*/
-        if (priority == -1)
+        if (priority == -1) {
+            cout << "Could not match EvalCl type to match priority, priority is negative\n";
             throw "Could not match EvalCl type to match priority, priority is negative\n";
 
+        }
+            
         return priority + shift;
     }   
 

@@ -49,7 +49,15 @@ void AffectsTHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
     const string& rightSynonym = getRightArg()->getStringVal();
 
     for (auto& sPair : getEvaluator()->getAffects(true, false, 0).second)
+    {
+        if ((leftSynonym == rightSynonym) && (sPair.first != sPair.second)) {
+            // special case wher Next...(s1, s1)
+            continue;
+        }
         toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(sPair.first)}, {rightSynonym, to_string(sPair.second)} }));
+    }
+
+
 }
 
 void AffectsTHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)

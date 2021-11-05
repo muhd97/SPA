@@ -21,7 +21,7 @@ source_query_test_cases = [
     ("31_2_demo_source", "31_2_demo_queries"), ("32_3_source", "32_3_affectsBip_BipT_queries"), ("33_3_source", "33_3_nextBip_BipT_queries")]
 
 
-autotester_dir = ".\\Code24\\Debug\\"
+autotester_dir = ".\\Code24\\Release\\"
 test_cases_dir = ".\\Tests24\\"
 output_dir = ".\\Tests24\\Outputs\\"
 

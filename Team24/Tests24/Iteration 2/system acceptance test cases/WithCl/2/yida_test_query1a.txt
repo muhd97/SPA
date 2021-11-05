@@ -138,8 +138,16 @@ stmt s, s1; variable v, v1;
 Select v with s.stmt# = s1.stmt# and v.varName = v1.varName and 1 = 2
 none
 5000
+29 - undeclared with synonym - semantic error
+variable v;
+Select BOOLEAN with s.stmt# = s1.stmt# and v.varName = v1.varName and 1 = 2
+FALSE
+5000
+30 - undeclared synonym - semantic error
 
-
+Select BOOLEAN such that Uses(5, v)
+FALSE
+5000
 
 
 
