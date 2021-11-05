@@ -54,3 +54,12 @@ void UsesModifiesSHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
 		throw "All 9 cases for UsesS/ModifiesS are being rejected!";
 	}
 }
+
+bool UsesModifiesSHandler::hasProcedureSynonym()
+{
+	if (getLeftArg()->getStmtRefType() == StmtRefType::SYNONYM
+		&& selectCl->getDesignEntityTypeBySynonym(getLeftArg()->getStringVal()) == DesignEntity::PROCEDURE) {
+		return true;
+	}
+	return false;
+}

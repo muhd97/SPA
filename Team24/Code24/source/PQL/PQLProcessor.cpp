@@ -169,26 +169,18 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
                                 if/while/assign/stmt/read/print. */
     {
         shared_ptr<UsesS> usesSCl = static_pointer_cast<UsesS>(suchThatCl->relRef);
+        shared_ptr<UsesSHandler> usesSHandler = make_shared<UsesSHandler>(move(evaluator), move(selectCl), usesSCl);
 
-        //if else is to handle the case where UsesS stores information for UsesP when synonym
-        if (usesSCl->stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
-            try
-            {
-                shared_ptr<UsesSHandler> usesSHandler = make_shared<UsesSHandler>(move(evaluator), move(selectCl), usesSCl);
-                usesSHandler->evaluate(move(toReturn));
-            }
-            catch (const exception& ex) {
-                //When the synonym is not of type statement, try again with type UsesP
-                shared_ptr<UsesP> newUsesPCl = make_shared<UsesP>(
-                    make_shared<EntRef>(EntRefType::SYNONYM, usesSCl->stmtRef->getStringVal()),
-                    usesSCl->entRef
+        if (usesSHandler->hasProcedureSynonym()) {
+            //When the synonym is not of type statement, try again with type UsesP
+            shared_ptr<UsesP> newUsesPCl = make_shared<UsesP>(
+                make_shared<EntRef>(EntRefType::SYNONYM, usesSCl->stmtRef->getStringVal()),
+                usesSCl->entRef
                 );
-                shared_ptr<UsesPHandler> usesPHandler = make_shared<UsesPHandler>(move(evaluator), move(selectCl), newUsesPCl);
-                usesPHandler->evaluate(move(toReturn));
-            }
+            shared_ptr<UsesPHandler> usesPHandler = make_shared<UsesPHandler>(move(evaluator), move(selectCl), newUsesPCl);
+            usesPHandler->evaluate(move(toReturn));
         }
         else {
-            shared_ptr<UsesSHandler> usesSHandler = make_shared<UsesSHandler>(move(evaluator), move(selectCl), usesSCl);
             usesSHandler->evaluate(move(toReturn));
         }
         break;
@@ -203,26 +195,19 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
     case RelRefType::MODIFIES_S: /* Modifies(s, v) where s is a STATEMENT. */
     {
         shared_ptr<ModifiesS> modifiesSCl = static_pointer_cast<ModifiesS>(suchThatCl->relRef);
-        //if else is to handle the case where ModifiesS stores information for ModifiesP when synonym
-        if (modifiesSCl->stmtRef->getStmtRefType() == StmtRefType::SYNONYM) {
-            try
-            {
-                shared_ptr<ModifiesSHandler> modifiesSHandler = make_shared<ModifiesSHandler>(move(evaluator), move(selectCl), modifiesSCl);
-                modifiesSHandler->evaluate(move(toReturn));
-            }
-            catch (const exception& ex) {
-                //When the synonym is not of type statement, try again with type ModifiesP
-                
-                shared_ptr<ModifiesP> newModifiesPCl = make_shared<ModifiesP>(
-                    make_shared<EntRef>(EntRefType::SYNONYM, modifiesSCl->stmtRef->getStringVal()),
-                    modifiesSCl->entRef
+        shared_ptr<ModifiesSHandler> modifiesSHandler = make_shared<ModifiesSHandler>(move(evaluator), move(selectCl), modifiesSCl);
+
+        if (modifiesSHandler->hasProcedureSynonym())
+        {
+            shared_ptr<ModifiesP> newModifiesPCl = make_shared<ModifiesP>(
+                make_shared<EntRef>(EntRefType::SYNONYM, modifiesSCl->stmtRef->getStringVal()),
+                modifiesSCl->entRef
                 );
-                shared_ptr<ModifiesPHandler> modifiesPHandler = make_shared<ModifiesPHandler>(move(evaluator), move(selectCl), newModifiesPCl);
-                modifiesPHandler->evaluate(move(toReturn));
-            }
+            shared_ptr<ModifiesPHandler> modifiesPHandler = make_shared<ModifiesPHandler>(move(evaluator), move(selectCl), newModifiesPCl);
+            modifiesPHandler->evaluate(move(toReturn));
         }
-        else {
-            shared_ptr<ModifiesSHandler> modifiesSHandler = make_shared<ModifiesSHandler>(move(evaluator), move(selectCl), modifiesSCl);
+        else
+        {
             modifiesSHandler->evaluate(move(toReturn));
         }
         break;

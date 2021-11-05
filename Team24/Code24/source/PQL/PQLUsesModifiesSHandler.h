@@ -29,5 +29,6 @@ protected:
 
 public:
 	void evaluate(vector<shared_ptr<ResultTuple>>& toReturn) override;
+	bool hasProcedureSynonym();
 
 };
