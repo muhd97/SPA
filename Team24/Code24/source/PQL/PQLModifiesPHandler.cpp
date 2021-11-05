@@ -35,21 +35,21 @@ void ModifiesPHandler::evaluateIdentUnderscore(vector<shared_ptr<ResultTuple>>& 
 
 void ModifiesPHandler::evaluateSynIdent(vector<shared_ptr<ResultTuple>>& toReturn)
 {        
-    for (auto& p : getEvaluator()->mpPKB->mVariableNameToProceduresThatModifyVarsMap[getRightArg()->getStringVal()])
-        toReturn.emplace_back(getResultTuple({ {getLeftArg()->getStringVal(), p->getName()} }));
+    for (auto& p : getEvaluator()->getProceduresThatModifyVar(getRightArg()->getStringVal()))
+        toReturn.emplace_back(getResultTuple({ {getLeftArg()->getStringVal(), p} }));
 }
 
 void ModifiesPHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)
 {
-    for (auto& p : getEvaluator()->mpPKB->mProceduresThatModifyVars)
-        toReturn.emplace_back(getResultTuple({ {getLeftArg()->getStringVal(), p->getName()} }));
+    for (auto& p : getEvaluator()->getProceduresThatModifyVars())
+        toReturn.emplace_back(getResultTuple({ {getLeftArg()->getStringVal(), p} }));
 }
 
 void ModifiesPHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
 {
-    for (auto p : getEvaluator()->mpPKB->mProceduresThatModifyVars)
+    for (auto p : getEvaluator()->getProceduresThatModifyVars())
     {
-        for (auto v : p->getModifiedVariables())
-            toReturn.emplace_back(getResultTuple({ {getLeftArg()->getStringVal(), p->getName()}, {getRightArg()->getStringVal(), v->getName()} }));
+        for (auto v : getEvaluator()->getModifiedByProcName(p))
+            toReturn.emplace_back(getResultTuple({ {getLeftArg()->getStringVal(), p}, {getRightArg()->getStringVal(), v} }));
     }
 }

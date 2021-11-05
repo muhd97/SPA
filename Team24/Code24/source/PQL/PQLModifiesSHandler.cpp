@@ -54,8 +54,8 @@ void ModifiesSHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& to
     const string& leftSynonym = getLeftArg()->getStringVal();
     PKBDesignEntity pkbDe = getPKBDesignEntityOfSynonym(leftSynonym);
 
-    for (auto& s : getEvaluator()->mpPKB->getAllModifyingStmts(pkbDe))
-        toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(s->getIndex())} }));
+    for (auto& s : getEvaluator()->getModifiers(pkbDe))
+        toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(s)} }));
 }
 
 void ModifiesSHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
@@ -64,9 +64,9 @@ void ModifiesSHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
     const string& rightSynonym = getRightArg()->getStringVal();
     PKBDesignEntity pkbDe = getPKBDesignEntityOfSynonym(leftSynonym);
 
-    for (auto& s : getEvaluator()->mpPKB->getAllModifyingStmts(pkbDe))
+    for (auto& s : getEvaluator()->getModifiers(pkbDe))
     {
-        for (auto& v : s->getModifiedVariables())
-            toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(s->getIndex())}, {rightSynonym, v->getName()} }));
+        for (auto& v : getEvaluator()->getModified(s))
+            toReturn.emplace_back(getResultTuple({ {leftSynonym, to_string(s)}, {rightSynonym, v} }));
     }
 }
