@@ -89,7 +89,6 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
 #if DEBUG
     cout << "\n==== Parsing queries ====\n";
 #endif
-
     try {
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();

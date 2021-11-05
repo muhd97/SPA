@@ -577,9 +577,6 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
             }
         );
 
-        //for (auto& v : res)
-        //    for (auto& ptr : v)
-        //        newResults.emplace_back(move(ptr));
         return;
     }
 #endif

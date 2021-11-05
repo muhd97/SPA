@@ -1,5 +1,5 @@
 #pragma optimize( "gty", on )
-//#pragma once
+
 #define DEBUG_SINGLE_EVAL 0
 #define DEBUG_FILTERING 0
 #define DEBUG_GENERAL 0
@@ -46,47 +46,7 @@ string ResultTuple::INTEGER_PLACEHOLDER = "$int";
 string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 /* ======================== HANDLE-ALL CLAUSE METHODS ======================== */
-template <class T>
-void PQLProcessor::handleAllClauseOfSameType(shared_ptr<SelectCl>& selectCl, const vector<shared_ptr<T>>& suchThatClauses, vector<shared_ptr<ResultTuple>>& suchThatReturnTuples)
-{
 
-    int N = suchThatClauses.size();
-    for (int i = 0; i < N; i++)
-    {
-        if (i == 0)
-        {
-            handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], suchThatReturnTuples);
-            if (suchThatReturnTuples.size() == 0) {
-                return;
-            }
-        }
-        else
-        {
-            vector<shared_ptr<ResultTuple>> currSuchThatRes;
-            vector<shared_ptr<ResultTuple>> joinedRes;
-            joinedRes.reserve(suchThatReturnTuples.size());
-
-
-            handleSuchThatClause(selectCl, selectCl->suchThatClauses[i], currSuchThatRes);
-
-            if (currSuchThatRes.size() == 0) { // Early termination
-                suchThatReturnTuples = move(currSuchThatRes);
-                break;
-            }
-
-
-            unordered_set<string>& setOfSynonymsToJoinOn =
-                getSetOfSynonymsToJoinOn(suchThatReturnTuples, currSuchThatRes);
-
-            if (!setOfSynonymsToJoinOn.empty())
-                hashJoinResultTuples(suchThatReturnTuples, currSuchThatRes, setOfSynonymsToJoinOn, joinedRes);
-            else
-                cartesianProductResultTuples(suchThatReturnTuples, currSuchThatRes, joinedRes);
-
-            suchThatReturnTuples = move(joinedRes);
-        }
-    }
-}
 
 vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
 {
@@ -160,9 +120,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
 void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
-    //special case to handle to separate UsesS and UsesP and ModifiesS and ModifiesP when first arg is synonym
 
-    //TODO Manas: remember to check for synonym type in ModifiesS and UsesS to make sure if they are proc or not.
     switch (suchThatCl->relRef->getType())
     {
     case RelRefType::USES_S: /* Uses(s, v) where s MUST be a
@@ -619,7 +577,6 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
     {
         for (const string& x : evaluator->getAllConstants()) {
             shared_ptr<ResultTuple> tup = make_shared<ResultTuple>();
-            //tup->insertKeyValuePair(synString, isAttrRef ? resolveAttrRef(x, static_pointer_cast<AttrRef>(elem), de) : x);
             tup->insertKeyValuePair(synString, x);
             toPopulate.emplace_back(move(tup));
         }
@@ -631,7 +588,6 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
         const vector<shared_ptr<PKBVariable>>& vars = evaluator->getAllVariables();
         for (auto& ptr : vars) {
             shared_ptr<ResultTuple> tup = make_shared<ResultTuple>();
-            //tup->insertKeyValuePair(synString, isAttrRef ? resolveAttrRef(ptr->getName(), static_pointer_cast<AttrRef>(elem), de) : ptr->getName());
             tup->insertKeyValuePair(synString, ptr->getName());
             toPopulate.emplace_back(move(tup));
         }
@@ -644,7 +600,6 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
             evaluator->getAllProcedures();
         for (auto& ptr : procedures) {
             shared_ptr<ResultTuple> tup = make_shared<ResultTuple>();
-            //tup->insertKeyValuePair(synString, isAttrRef ? resolveAttrRef(ptr->getName(), static_pointer_cast<AttrRef>(elem), de) : ptr->getName());
             tup->insertKeyValuePair(synString, ptr->getName());
             toPopulate.emplace_back(move(tup));
         }
@@ -663,7 +618,6 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
     for (auto& ptr : stmts)
     {
         shared_ptr<ResultTuple> tup = make_shared<ResultTuple>();
-        //tup->insertKeyValuePair(synString, isAttrRef ? resolveAttrRef(to_string(ptr->getIndex()), static_pointer_cast<AttrRef>(elem), de) : to_string(ptr->getIndex()));
         tup->insertKeyValuePair(synString, to_string(ptr->getIndex()));
         toPopulate.emplace_back(move(tup));
     }
@@ -688,8 +642,8 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
     else if (type == EvalClType::With) {
         WithHandler wh(evaluator, selectCl, static_pointer_cast<WithCl>(evalCl));
         wh.evaluate(toPopulate);
-        
     }
+
 }
 
 void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<ClauseGroup>& clauseGroup)
@@ -806,7 +760,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
 
             if (i == 0) {
                 handleClauseGroup(selectCl, currTups, currGroup);
-                //if (currTups.empty() && hasSynonymsInResultCl) break;
                 if (currTups.empty()) break;
 
                 /* The synonyms for this group don't appear in the target synonyms */
@@ -826,8 +779,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
                 handleClauseGroup(selectCl, tempRes, currGroup);
 
                 if (currTups.empty()) break;
-                //if (currTups.empty() && hasSynonymsInResultCl) break;
-
+                
                 /* The synonyms for this group don't appear in the target synonyms */
                 if (!hasSynonymsInResultCl) {
                     prevGroupHasSynonymsInResultCl = false;

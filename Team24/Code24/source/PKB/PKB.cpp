@@ -1,7 +1,6 @@
 #pragma optimize("gty", on)
 
 #define WARMUP_THREADS 1
-
 #include "PKB.h"
 
 #include <iostream>
@@ -60,18 +59,21 @@ void PKB::extractDesigns(shared_ptr<Program> program)
         }
     }
 
+
     // sort all the vectors of statements in ascending order
     for (auto &vec : mStatements)
     {
-        std::sort(execution::par_unseq, vec.second.begin(), vec.second.end(),
+        std::sort(vec.second.begin(), vec.second.end(),
                   [](const PKBStmt::SharedPtr &a, const PKBStmt::SharedPtr &b) -> bool {
                       return a->getIndex() < b->getIndex();
                   });
     }
+
 }
 
 void PKB::initializeRelationshipTables()
 {
+
     vector<function<void(void)>> funcs = {
         [this]() {this->initializeUsesTables(); },
         [this]() {this->initializeFollowsTTables(); },
@@ -79,11 +81,8 @@ void PKB::initializeRelationshipTables()
         [this]() {this->initializeNextTables(); }
     };
 
-    std::for_each(execution::par, funcs.begin(), funcs.end(), [](auto&& item) {
-        item();   
-        }
-    );
-
+    std::for_each(execution::par, funcs.begin(), funcs.end(), [](auto&& f) {f(); });
+    
     
 }
 
@@ -135,8 +134,7 @@ void PKB::initializeWithTables()
         const auto &keyToNameMap = entityToKeyNameMap[de];
         for (auto &otherDe : entitiesWithName)
         {
-            // if (otherDe == de) continue;
-
+            
             attrRefMatchingNameTable[de][otherDe] = set<pair<string, string>>();
             const auto &otherKeyToNameMap = entityToKeyNameMap[otherDe];
 
@@ -285,10 +283,11 @@ PKBProcedure::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSi
     // function)
     PKBGroup::SharedPtr group = createPKBGroup(procedureSimple->getName(), res);
 
+    
     vector<shared_ptr<Statement>> simpleStatements = procedureSimple->getStatementList()->getStatements();
 
     for (shared_ptr<Statement> ss : simpleStatements)
-    {
+    {        
         PKBStmt::SharedPtr child = extractStatement(ss, group, procedureSimple->getName());
 
         // add the statementIndex to our group member list
