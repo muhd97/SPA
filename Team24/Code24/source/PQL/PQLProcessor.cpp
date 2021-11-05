@@ -774,9 +774,22 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
 vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& selectCl)
 {
-    /* Pre-Validate PQLQuery first to catch simple errors like a synonym not
-     * being declared first. */
-    validateSelectCl(selectCl);
+    bool isBooleanReturnType = selectCl->target->isBooleanReturnType();
+    /* Final Results to Return */
+    vector<shared_ptr<Result>> res;
+    vector<shared_ptr<ResultTuple>> currTups;
+
+    /* Treat undeclared synonyms as semantic error. */
+    try {
+        validateSelectCl(selectCl);
+    }
+    catch (...) {
+        if (isBooleanReturnType)
+            res.push_back(make_shared<StringSingleResult>("FALSE"));
+
+        return res;
+    }
+    
      
 
     /* Special case 0: There are no RelRef or Pattern clauses*/
@@ -785,10 +798,8 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         return move(handleNoSuchThatOrPatternCase(move(selectCl)));
     }
     
-    bool isBooleanReturnType = selectCl->target->isBooleanReturnType();
-    /* Final Results to Return */
-    vector<shared_ptr<Result>> res;
-    vector<shared_ptr<ResultTuple>> currTups;
+
+
 
     try {
 
