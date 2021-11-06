@@ -123,7 +123,7 @@ void FollowsHandler::evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>>& toRe
 
 void FollowsHandler::evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)
 {
-    if (getEvaluator()->getFollowsUnderscoreUnderscore())
+    if (getEvaluator()->getFollows())
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER,

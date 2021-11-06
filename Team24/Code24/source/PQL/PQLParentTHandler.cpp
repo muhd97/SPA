@@ -132,7 +132,7 @@ void ParentTHandler::evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>>& toRe
 
 void ParentTHandler::evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)
 {
-    if (getEvaluator()->getParentTUnderscoreUnderscore())
+    if (getEvaluator()->getParentT())
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER, ResultTuple::UNDERSCORE_PLACEHOLDER);

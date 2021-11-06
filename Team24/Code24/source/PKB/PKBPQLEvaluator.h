@@ -37,70 +37,21 @@ class PKBPQLEvaluator
     // In following documentation: PKBDE is short for PKBDesignEntity
 
     // Parent
-
-    // Get parent statement if it is of type {parentType} of child statement
-    // indexed {child} eg. stmt s; Select s such that Parent( s, 14 );
-    // => getParents( PKBDE::AllExceptProcedure, 14 ) // find parent stmt of stmt
-    // 14 eg. if ifs; Select ifs such that Parent( ifs, 14 );
-    // => getParents( PKBDE::If, 14 ) // find parent stmt of stmt 14 if parent is
-    // an 'if' stmt
     set<int> getParents(PKBDesignEntity parentType, int child);
-
-    // Get parent statements of type {parentType} of child statements of type
-    // {childType} eg. if ifs; while w; Select ifs such that Parent( ifs, w );
-    // => getParents( PKBDE::If, PKBDE::While ) // find 'if' stmts who are parents
-    // of 'while' stmts
     set<pair<int, int>> getParents(PKBDesignEntity parentType, PKBDesignEntity childType);
-
-    // Get all parent statements of child statements of type {childType}
-    // eg. stmt s; assign a; Select s such that Parent( s, a );
-    // => getParents( PKBDE::Assign ) // find all parent stmts of all 'assign'
-    // stmts
-    set<pair<int, int>> getParents(PKBDesignEntity childType);
 
     set<int> getParentsSynUnderscore(PKBDesignEntity parentType);
 
-    // Get all children statements of type {childType} of parent statement indexed
-    // {parent} eg. stmt s; Select s such that Parent( 14, s );
-    // => getChildren( PKBDE::AllExceptProcedure, 14 ) // find children stmts of
-    // stmt 14 eg. if ifs; Select ifs such that Parent( 14, ifs );
-    // => getChildren( PKBDE::If, 14 ) // find 'if' children stmts of stmt 14
-
     set<int> getChildren(PKBDesignEntity childType, int parent);
 
-    // Get children statements of type {childType} with parent statements of type
-    // {parentType} eg. if ifs; while w; Select ifs such that Parent( w, ifs );
-    // => getChildren( PKBDE::While, PKBDE::If ) // find 'if' stmts who are
-    // children of 'while' stmts
     set<pair<int, int>> getChildren(PKBDesignEntity parentType, PKBDesignEntity childType);
 
-    // Get all children statements with parent statements of type {parentType}
-    // eg. stmt s; while w; Select s such that Parent( w, s );
-    // => getChildren( PKBDE::While ) // find all children stmts of all while
-    // stmts
-    set<pair<int, int>> getChildren(PKBDesignEntity parentType);
-
     set<int> getChildrenUnderscoreSyn(PKBDesignEntity rightArg);
-
-    bool getParentsUnderscoreUnderscore();
+    // Parents(_, _)
+    bool getParents();
 
     // Handles the specific case of Follows(_, _)
-    bool getFollowsUnderscoreUnderscore();
-
-    bool hasChildren(PKBDesignEntity childType, int parentIndex);
-
-    // Get all direct/indirect children statements of type {childType} with parent
-    // statements of type {parentType} eg. if ifs; while w; Select ifs such that
-    // ParentT( w, ifs );
-    // => getChildrenT( PKBDE::While, PKBDE::If ) // find all direct/indirect 'if'
-    // children stmts of all 'while' stmts
-    set<pair<int, int>> getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType);
-
-    // Get all direct/indirect children statements with parent statements of type
-    // {parentType} eg. stmt s; while w; Select s such that Parent( w, s );
-    // => getChildrenT( PKBDE::While ) // find all children stmts of all while
-    // stmts
-    set<pair<int, int>> getChildrenT(PKBDesignEntity parentType);
+    bool getFollows();
 
     unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStmt::SharedPtr targetParent,
                                                             PKBDesignEntity targetChildrenType);
@@ -130,60 +81,20 @@ class PKBPQLEvaluator
     unordered_set<int> getParentTUnderscoreSyn(PKBDesignEntity targetChildType);
 
     /* Use for Parent*(_, _) */
-    bool getParentTUnderscoreUnderscore();
+    bool getParentT();
 
     // Follow
-
-    // Get statement if it is of type {beforeType} and followed by statement
-    // indexed {after} eg. stmt s; Select s such that Follows( s, 14 );
-    // => getBefore( PKBDE::AllExceptProcedure, 14 )
-    // eg. if ifs; Select ifs such that Follows( ifs, 14 );
-    // => getBefore( PKBDE::If, 14 )
     vector<int> getBefore(PKBDesignEntity beforeType, int after);
 
-    // Get all statements of type {beforeType} that are followed by statements of
-    // type {afterType} eg. assign a; while w; Select a such that Follows( a, w );
-    // => getBefore( PKBDE::Assign, PKBDE::While )
     vector<int> getBefore(PKBDesignEntity beforeType, PKBDesignEntity afterType);
 
-    // Get all pairs of statements (b, a) such that a of type {afterType} follow
-    // statements b of type {beforeType} eg. assign a; while w; Select w such that
-    // Follows( a, w );
-    // => getBeforePairs( PKBDE::Assign, PKBDE::While )
-    set<pair<int, int>> getBeforePairs(PKBDesignEntity beforeType, PKBDesignEntity afterType);
+    //set<pair<int, int>> getBeforePairs(PKBDesignEntity beforeType, PKBDesignEntity afterType);
 
-    // Get all statements that are followed by statements of type {afterType}
-    // eg. assign a; stmt s; Select s such that Follows( s, a );
-    // => getBefore( PKBDE::Assign )
-    //vector<int> getBefore(PKBDesignEntity afterType);
-
-    // Get all pairs of statements (b, a) such that a of type {AfterType} follows
-    // statements b eg. assign a; while w; Select w such that Follows( a, w );
-    // => getAfterPairs( PKBDE::Assign, PKBDE::While )
-    //set<pair<int, int>> getBeforePairs(PKBDesignEntity afterType);
-
-    // Get statement if it is of type {afterType} and follows child statement
-    // indexed {child} eg. stmt s; Select s such that Follows( 14, s );
-    // => getAfter( PKBDE::AllExceptProcedure, 14 )
-    // eg. if ifs; Select ifs such that Follows( 14, ifs );
-    // => getAfter( PKBDE::If, 14 )
     vector<int> getAfter(PKBDesignEntity afterType, int before);
 
-    // Get all statements of type {afterType} that follow statements of type
-    // {beforeType} eg. assign a; while w; Select w such that Follows( a, w );
-    // => getAfter( PKBDE::Assign, PKBDE::While )
     vector<int> getAfter(PKBDesignEntity beforeType, PKBDesignEntity afterType);
 
-    // Get all pairs of statements (a, b) such that a of type {afterType} follow
-    // statements b of type {beforeType} eg. assign a; while w; Select w such that
-    // Follows( a, w );
-    // => getAfterPairs( PKBDE::Assign, PKBDE::While )
     set<pair<int, int>> getAfterPairs(PKBDesignEntity beforeType, PKBDesignEntity afterType);
-
-    // Get all pairs of statements (a, b) such that a follow statements b of type
-    // {beforeType} eg. assign a; while w; Select w such that Follows( a, w );
-    // => getAfterPairs( PKBDE::Assign, PKBDE::While )
-    //set<pair<int, int>> getAfterPairs(PKBDesignEntity beforeType);
 
     // Follow*
     /* Use for Follows*(INT, INT) */
@@ -209,9 +120,6 @@ class PKBPQLEvaluator
 
     /* Use for Follows*(_, s1) */
     unordered_set<int> getFollowsTUnderscoreSyn(PKBDesignEntity rightType);
-
-    /* Use for Follows*(_, _) */
-    bool getFollowsT();
 
     /* Uses */
     //int syn
@@ -266,7 +174,7 @@ class PKBPQLEvaluator
     bool checkModified(PKBDesignEntity entityType);
     /* Check if the given {entityType} modifies a given variable specified by
      * {ident} */
-    bool checkModified(PKBDesignEntity entityType, string ident);
+    //bool checkModified(PKBDesignEntity entityType, string ident);
     // Get the names of all variables modified by all statements of type
     // {entityType}
     vector<string> getModified(PKBDesignEntity entityType);
@@ -274,7 +182,7 @@ class PKBPQLEvaluator
     // Get the names of all variables modified by at least one statement
     vector<string> getModified();
     /* Check if at least one statement modifies a variable. */
-    bool checkModified();
+    //bool checkModified();
 
     // Get the names of all variables modified by procedure with name {procname}
     vector<string> getModifiedByProcName(string procname);
@@ -283,11 +191,6 @@ class PKBPQLEvaluator
     /* Check if given procedure {procname} modifies the variable specified by
      * {ident}. */
     bool checkModifiedByProcName(string procname, string ident);
-    /* Check if there are procedures that modify variables */
-    bool checkAnyProceduresModifyVars();
-    /* Check if there are procedures that modify the variable given by
-     * {variableName} */
-    bool checkAnyProceduresModifyVar(string variableName);
 
     /* Get all procedures that modify at least one variable */
     vector<string> getProceduresThatModifyVars();

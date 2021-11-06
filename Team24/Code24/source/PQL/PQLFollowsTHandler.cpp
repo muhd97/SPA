@@ -118,7 +118,7 @@ void FollowsTHandler::evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>>& toR
 void FollowsTHandler::evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)
 {
     //same method since if a statement follows another statements, Follows* is also satisfied!
-    if (getEvaluator()->getFollowsUnderscoreUnderscore())
+    if (getEvaluator()->getFollows())
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(ResultTuple::UNDERSCORE_PLACEHOLDER,
