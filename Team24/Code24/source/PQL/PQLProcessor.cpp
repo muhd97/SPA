@@ -47,7 +47,7 @@ string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 /* ======================== HANDLE-ALL CLAUSE METHODS ======================== */
 
-vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
+vector<shared_ptr<Result>> PQLProcessor::extractResultsNoClauses(shared_ptr<SelectCl> selectCl)
 {
     vector<shared_ptr<Result>> toReturn;
     const auto& elems = selectCl->target->getElements();
@@ -116,7 +116,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
 
 /* ======================== SUCH THAT CLAUSE ======================== */
 
-void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
+void PQLProcessor::routeSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
     
@@ -474,7 +474,7 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
         ph.evaluate(toPopulate);
     }
     else if (type == EvalClType::SuchThat) {
-        handleSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
+        routeSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::With) {
         WithHandler wh(evaluator, selectCl, static_pointer_cast<WithCl>(evalCl));
@@ -557,7 +557,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses() && !selectCl->hasWithClauses())
     {
-        return move(handleNoSuchThatOrPatternCase(move(selectCl)));
+        return move(extractResultsNoClauses(move(selectCl)));
     }
     try {
         opt = make_shared<PQLOptimizer>(selectCl);
@@ -628,7 +628,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     vector<shared_ptr<ResultTuple>>& finalTuples = currTups;
     if (!selectCl->target->isBooleanReturnType() && !atLeastOneTargetSynonymIsInClauses(selectCl))
     {
-        return finalTuples.empty() ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
+        return finalTuples.empty() ? move(res) : extractResultsNoClauses(move(selectCl));
     }
     extractTargetSynonyms(res, selectCl->target, finalTuples, selectCl);
     return move(res);
