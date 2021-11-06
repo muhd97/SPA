@@ -176,9 +176,7 @@ inline void PQLOptimizer::sortSingleClauseGroup(shared_ptr<ClauseGroup>& cg)
     int currGroupSize = currClauses.size();
     int firstClauseIdx = -1;
     int bestPrioritySeen = INT32_MAX;
-
     try {
-
         for (int i = 0; i < currGroupSize; i++) {
             int currPriority = getEvalClPriority(currClauses[i], this->selectCl);
             if (currPriority < bestPrioritySeen) {
