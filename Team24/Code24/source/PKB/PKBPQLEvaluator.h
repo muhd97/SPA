@@ -17,7 +17,8 @@
 #include "PKBPQLAffectsBipHandler.h"
 #include "PKBPQLCallsHandler.h"
 #include "PKBPQLPatternHandler.h"
-
+#include "PKBPQLNextHandler.h"
+#include "PKBPQLNextBipHandler.h"
 // for pattern
 #include "../SimpleLexer.h"
 #include "../SimpleParser.h"
@@ -411,7 +412,8 @@ class PKBPQLEvaluator
         affectsBipHandler = PKBPQLAffectsBipHandler::create(pPKB);
         callsHandler = PKBPQLCallsHandler::create(pPKB);
         patternHandler = PKBPQLPatternHandler::create(pPKB);
-
+        nextHandler = PKBPQLNextHandler::create(pPKB);
+        nextBipHandler = PKBPQLNextBipHandler::create(pPKB);
     }
 
     // we want to return only vector<int>, not vector<PKBStmt::SharedPtr>
@@ -492,4 +494,7 @@ class PKBPQLEvaluator
     PKBPQLAffectsBipHandler::SharedPtr affectsBipHandler;
     PKBPQLCallsHandler::SharedPtr callsHandler;
     PKBPQLPatternHandler::SharedPtr patternHandler;
+    PKBPQLNextHandler::SharedPtr nextHandler;
+    PKBPQLNextBipHandler::SharedPtr nextBipHandler;
+
 };
