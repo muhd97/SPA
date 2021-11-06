@@ -67,6 +67,8 @@ class PKB
 
     set<PKBProcedure::SharedPtr> mAllProcedures; // vector of all the procedures in the program
 
+    bool statementExists(int statementNo);
+
     // statement number, starting from index 1
     // puts result in stmt and returns true if query is valid
     // else, returns false
