@@ -4,157 +4,591 @@
 #include <algorithm>
 #include <queue>
 
+bool PKBPQLEvaluator::statementExists(int statementNo)
+{
+	PKBStmt::SharedPtr stmt;
+	if (!mpPKB->getStatement(statementNo, stmt))
+	{
+		return false;
+	}
+	return true;
+}
+
 set<int> PKBPQLEvaluator::getParents(PKBDesignEntity parentType, int childIndex)
 {
-	return parentHandler->getParents(parentType, childIndex);
+	set<int> res;
+	PKBStmt::SharedPtr stmt;
+	if (!mpPKB->getStatement(childIndex, stmt))
+	{
+		return res;
+	}
+	PKBGroup::SharedPtr grp = stmt->getGroup();
+	PKBStmt::SharedPtr parent;
+	if (!mpPKB->getStatement(grp->getOwner(), parent))
+	{
+		return res;
+	}
+	if (parentType == PKBDesignEntity::AllStatements || parentType == parent->getType())
+	{
+		res.insert(parent->getIndex());
+	}
+	return res;
+}
+
+set<pair<int, int>> PKBPQLEvaluator::getParents(PKBDesignEntity parentType, PKBDesignEntity childType)
+{
+	set<pair<int, int>> res;
+	// if rightType is none of the container types, there are no such children
+	if (!isContainerType(parentType))
+	{
+		return res;
+	}
+	// if not cached, we find the res manually and insert it into the cache
+	vector<PKBStmt::SharedPtr > parentStmts;
+	if (parentType == PKBDesignEntity::AllStatements)
+	{
+		addParentStmts(parentStmts);
+	}
+	else
+	{
+		parentStmts = mpPKB->getStatements(parentType);
+	}
+	for (auto& stmt : parentStmts)
+	{
+		vector<PKBGroup::SharedPtr > grps = stmt->getContainerGroups();
+		// if this rightStatement's container group contains at least one child of
+		// required type, add rightStatement to our results
+		for (auto& grp : grps)
+		{
+			if (!grp->getMembers(childType).empty())
+			{
+				res.insert(make_pair(stmt->getIndex(), stmt->getIndex()));
+				break;	// this should break out of the inner loop over child groups
+			}
+		}
+	}
+	return res;
 }
 
 set<int> PKBPQLEvaluator::getParentsSynUnderscore(PKBDesignEntity parentType)
 {
-	return parentHandler->getParentsSynUnderscore(parentType);
+	set<int> toReturn;
+	vector<PKBStmt::SharedPtr > parentStmts;
+	if (parentType == PKBDesignEntity::AllStatements)
+	{
+		addParentStmts(parentStmts);
+	}
+	else
+	{
+		parentStmts = mpPKB->getStatements(parentType);
+	}
+	for (auto& stmt : parentStmts)
+	{
+		vector<PKBGroup::SharedPtr > grps = stmt->getContainerGroups();
+		// if this rightStatement's container group contains at least one child of
+		// required type, add rightStatement to our results
+		for (auto& grp : grps)
+		{
+			if (!grp->getMembers(PKBDesignEntity::AllStatements).empty())
+			{
+				toReturn.insert(stmt->getIndex());
+				break;
+			}
+		}
+	}
+	return toReturn;
 }
 
 set<int> PKBPQLEvaluator::getChildren(PKBDesignEntity childType, int parentIndex)
 {
-	return parentHandler->getChildren(childType, parentIndex);
+	set<int> res;
+	PKBStmt::SharedPtr stmt;
+	if (!mpPKB->getStatement(parentIndex, stmt))
+	{
+		return res;
+	}
+	if (!isContainerType(stmt->getType()))
+	{
+		return res;
+	}
+	else
+	{
+		vector<PKBGroup::SharedPtr > grps = stmt->getContainerGroups();
+		for (auto& grp : grps)
+		{
+			vector<int> grpStatements = grp->getMembers(childType);
+			res.insert(grpStatements.begin(), grpStatements.end());
+		}
+	}
+	return res;
 }
 
 set<pair<int, int>> PKBPQLEvaluator::getChildren(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	return parentHandler->getChildren(parentType, childType);
+	set<pair<int, int>> res;
+	vector<int> temp;
+	// if rightType is none of the container types, there are no such children
+	if (!isContainerType(parentType))
+	{
+		return res;
+	}
+	vector<PKBStmt::SharedPtr > parentStmts;
+	if (parentType == PKBDesignEntity::AllStatements)
+	{
+		addParentStmts(parentStmts);
+	}
+	else
+	{
+		parentStmts = mpPKB->getStatements(parentType);
+	}
+	for (auto& stmt : parentStmts)
+	{
+		vector<PKBGroup::SharedPtr > grps = stmt->getContainerGroups();
+		for (auto& grp : grps)
+		{
+			vector<int> members = grp->getMembers(childType);
+			for (int& x : members)
+			{
+				pair<int, int> toAdd;
+				toAdd.first = stmt->getIndex();
+				toAdd.second = x;
+				res.insert(toAdd);
+			}
+		}
+	}
+	return move(res);
 }
 
 set<int> PKBPQLEvaluator::getChildrenUnderscoreSyn(PKBDesignEntity childType)
 {
-	return parentHandler->getChildrenUnderscoreSyn(childType);
+	set<int> toReturn;
+	vector<PKBStmt::SharedPtr > parentStmts;
+	addParentStmts(parentStmts);
+	for (auto& stmt : parentStmts)
+	{
+		vector<PKBGroup::SharedPtr > grps = stmt->getContainerGroups();
+		for (auto& grp : grps)
+		{
+			vector<int> members = grp->getMembers(childType);
+			for (int& x : members)
+			{
+				toReturn.insert(x);
+			}
+		}
+	}
+	return move(toReturn);
 }
 
 bool PKBPQLEvaluator::getParents()
 {
-	return parentHandler->getParents();
+	vector<PKBStmt::SharedPtr > parentStmts;
+	addParentStmts(parentStmts);
+	for (auto& stmt : parentStmts)
+	{
+		vector<PKBGroup::SharedPtr > grps = stmt->getContainerGroups();
+		for (auto& grp : grps)
+		{
+			vector<int> members = grp->getMembers(PKBDesignEntity::AllStatements);
+			if (!members.empty())
+				return true;
+		}
+	}
+	return false;
+}
+
+unordered_set<int> PKBPQLEvaluator::getAllChildAndSubChildrenOfGivenType(PKBStmt::SharedPtr targetParent,
+	PKBDesignEntity targetChildrenType)
+{
+	unordered_set<int> toReturn;
+	queue<PKBGroup::SharedPtr > qOfGroups;
+
+	for (auto& grp : targetParent->getContainerGroups())
+		qOfGroups.push(grp);
+
+	while (!qOfGroups.empty())
+	{
+		auto& currGroup = qOfGroups.front();
+		qOfGroups.pop();
+		for (int& i : currGroup->getMembers(targetChildrenType))
+			toReturn.insert(i);
+		for (auto& subGrps : currGroup->getChildGroups())
+			qOfGroups.push(subGrps);
+	}
+	return toReturn;
 }
 
 /*PRE-CONDITION: StatementNo exists in this program */
 const vector<int>& PKBPQLEvaluator::getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType)
 {
-	return parentHandler->getParentTIntSyn(statementNo, targetChildrenType);
+	return mpPKB->parentTIntSynTable[statementNo][targetChildrenType];
 }
 
 bool PKBPQLEvaluator::getParentTIntUnderscore(int parentStatementNo)
 {
-	return parentHandler->getParentTIntUnderscore(parentStatementNo);
+	const auto& innerMap = mpPKB->parentTIntSynTable[parentStatementNo];
+	for (auto& pair : innerMap)
+	{
+		if (!pair.second.empty())
+			return true;
+	}
+	return false;
 }
 
 bool PKBPQLEvaluator::getParentTIntInt(int parentStatementNo, int childStatementNo)
 {
-	return parentHandler->getParentTIntInt(parentStatementNo, childStatementNo);
+	if (mpPKB->parentTIntIntTable.find(make_pair(parentStatementNo, childStatementNo)) ==
+		mpPKB->parentTIntIntTable.end())
+	{
+		return false;
+	}
+	return true;
 }
 
 /*PRE-CONDITION: TargetParentType IS a container type. */
 const unordered_set<int>& PKBPQLEvaluator::getParentTSynUnderscore(PKBDesignEntity targetParentType)
 {
-	return parentHandler->getParentTSynUnderscore(targetParentType);
+	return mpPKB->parentTSynUnderscoreTable[targetParentType];
 }
 
 /*PRE-CONDITION: TargetParentType IS a container and statement type type. */
 const unordered_set<int>& PKBPQLEvaluator::getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo)
 {
-	return parentHandler->getParentTSynInt(targetParentType, childStatementNo);
+	if (!statementExists(childStatementNo)) throw "Statement doesn't exist: " + to_string(childStatementNo);
+	return mpPKB->parentTSynIntTable[childStatementNo][targetParentType];
 }
 
 /*PRE-CONDITION: Both parent and child types are STATEMENT types (not procedure or variable or others) */
 const set<pair<int, int>>& PKBPQLEvaluator::getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
-	return parentHandler->getParentTSynSyn(parentType, childType);
+	return mpPKB->parentTSynSynTable[make_pair(parentType, childType)];
 }
 
 bool PKBPQLEvaluator::getParentTUnderscoreInt(int childStatementNo)
 {
-	return parentHandler->getParentTUnderscoreInt(childStatementNo);
+	vector<PKBStmt::SharedPtr > parentStmts;
+	addParentStmts(parentStmts);
+	for (auto& stmt : parentStmts)
+	{
+		if (getParentTIntInt(stmt->getIndex(), childStatementNo))
+			return true;
+	}
+	return false;
 }
 
 unordered_set<int> PKBPQLEvaluator::getParentTUnderscoreSyn(PKBDesignEntity targetChildType)
 {
-	return parentHandler->getParentTUnderscoreSyn(targetChildType);
+	unordered_set<int> toReturn;
+	vector<PKBStmt::SharedPtr > parentStmts;
+	addParentStmts(parentStmts);
+	for (const auto& stmt : parentStmts)
+	{
+		for (const int& i : getAllChildAndSubChildrenOfGivenType(stmt, targetChildType))
+		{
+			toReturn.insert(i);
+		}
+	}
+	return move(toReturn);
 }
 
 bool PKBPQLEvaluator::getParentT()
 {
-	return parentHandler->getParentT();
+	return getParents();
 }
 
 vector<int> PKBPQLEvaluator::getBefore(PKBDesignEntity beforeType, int afterIndex)
 {
-	return followsHandler->getBefore(beforeType, afterIndex);
+	vector<int> res;
+	PKBStmt::SharedPtr stmt;
+	if (!mpPKB->getStatement(afterIndex, stmt))
+	{
+		return res;
+	}
+
+	PKBStmt::SharedPtr stmtBefore;
+	if (!getStatementBefore(stmt, stmtBefore))
+	{
+		return res;
+	}
+
+	// if pass the type check
+	if (beforeType == PKBDesignEntity::AllStatements || stmtBefore->getType() == beforeType)
+	{
+		// and pass the same nesting level check
+		if (stmt->getGroup() == stmtBefore->getGroup())
+		{
+			res.emplace_back(stmtBefore->getIndex());
+		}
+	}
+
+	return res;
+}
+
+bool PKBPQLEvaluator::getStatementBefore(PKBStmt::SharedPtr& statementAfter, PKBStmt::SharedPtr& result)
+{
+	// find the rightStatement before in the stmt's group
+	PKBGroup::SharedPtr grp = statementAfter->getGroup();
+	vector<int>& members = grp->getMembers(PKBDesignEntity::AllStatements);
+	for (size_t i = 0; i < members.size(); i++)
+	{
+		if (statementAfter->getIndex() == members[i])
+		{
+			if (i == 0)
+			{
+				return false;
+			}
+
+			int idxToCheck = members[--i];
+			if (!mpPKB->getStatement(idxToCheck, result))
+			{
+				return false;
+			}
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool PKBPQLEvaluator::getStatementAfter(PKBStmt::SharedPtr& statementBefore, PKBStmt::SharedPtr& result)
+{
+	// find the rightStatement before in the stmt's group
+	PKBGroup::SharedPtr grp = statementBefore->getGroup();
+	vector<int>& members = grp->getMembers(PKBDesignEntity::AllStatements);
+	for (size_t i = 0; i < members.size(); i++)
+	{
+		if (statementBefore->getIndex() == members[i] && i != members.size() - 1)
+		{
+			int idxToCheck = members[++i];
+			if (!mpPKB->getStatement(idxToCheck, result))
+			{
+				return false;
+			}
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 vector<int> PKBPQLEvaluator::getBefore(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
-	return followsHandler->getBefore(beforeType, afterType);
+	vector<int> res;
+
+	// get results manually
+	vector<PKBStmt::SharedPtr > stmts = mpPKB->getStatements(afterType);
+	PKBStmt::SharedPtr stmtBefore;
+	for (auto& stmt : stmts)
+	{
+		// if there is no rightStatement before, go next
+		if (!getStatementBefore(stmt, stmtBefore))
+		{
+			continue;
+		}
+
+		// if pass the type check
+		if (beforeType == PKBDesignEntity::AllStatements || stmtBefore->getType() == beforeType)
+		{
+			// and pass the same nesting level check
+			if (stmt->getGroup() == stmtBefore->getGroup())
+			{
+				res.emplace_back(stmtBefore->getIndex());
+			}
+		}
+	}
+
+	return res;
 }
 
 vector<int> PKBPQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
 {
-	return followsHandler->getAfter(afterType, beforeIndex);
+	vector<int> res;
+
+	PKBStmt::SharedPtr stmt;
+	if (!mpPKB->getStatement(beforeIndex, stmt))
+	{
+		return res;
+	}
+
+	PKBStmt::SharedPtr stmtAfter;
+
+	if (!getStatementAfter(stmt, stmtAfter))
+	{
+		return res;
+	}
+
+	// if pass the type check
+	if (afterType == PKBDesignEntity::AllStatements || stmtAfter->getType() == afterType)
+	{
+		// and pass the same nesting level check
+		if (stmt->getGroup() == stmtAfter->getGroup())
+		{
+			res.emplace_back(stmtAfter->getIndex());
+		}
+	}
+
+	return res;
 }
 
 vector<int> PKBPQLEvaluator::getAfter(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
-	return followsHandler->getAfter(beforeType, afterType);
+	vector<int> res;
+
+	// get results manually
+	vector<PKBStmt::SharedPtr > stmts = mpPKB->getStatements(beforeType);
+	PKBStmt::SharedPtr stmtAfter;
+	for (auto& stmt : stmts)
+	{
+		// if there is no rightStatement after, go next
+		if (!getStatementAfter(stmt, stmtAfter))
+		{
+			continue;
+		}
+
+		// if pass the type check
+		if (afterType == PKBDesignEntity::AllStatements || stmtAfter->getType() == afterType)
+		{
+			// and pass the same nesting level check
+			if (stmt->getGroup() == stmtAfter->getGroup())
+			{
+				res.emplace_back(stmtAfter->getIndex());
+			}
+		}
+	}
+
+	return res;
 }
 
 set<pair<int, int>> PKBPQLEvaluator::getAfterPairs(PKBDesignEntity beforeType, PKBDesignEntity afterType)
 {
-	return followsHandler->getAfterPairs(beforeType, afterType);
+	set<pair<int, int>> res;
+	vector<PKBStmt::SharedPtr > stmts = mpPKB->getStatements(beforeType);
+	PKBStmt::SharedPtr stmtAfter;
+	for (auto& stmt : stmts)
+	{
+		// if there is no rightStatement after, go next
+		if (!getStatementAfter(stmt, stmtAfter))
+		{
+			continue;
+		}
+		// if pass the type check
+		if (afterType == PKBDesignEntity::AllStatements || stmtAfter->getType() == afterType)
+		{
+			// and pass the same nesting level check
+			if (stmt->getGroup() == stmtAfter->getGroup())
+			{
+				pair<int, int> toAdd;
+				toAdd.first = stmt->getIndex();
+				toAdd.second = stmtAfter->getIndex();
+				res.insert(toAdd);
+			}
+		}
+	}
+	return res;
 }
 
 bool PKBPQLEvaluator::getFollows()
 {
-	return followsHandler->getFollows();
+	vector<PKBStmt::SharedPtr > stmts = mpPKB->getStatements(PKBDesignEntity::AllStatements);
+	PKBStmt::SharedPtr stmtAfter;
+	for (auto& stmt : stmts)
+	{
+		// if there is no rightStatement after, go next
+		if (!getStatementAfter(stmt, stmtAfter))
+		{
+			continue;
+		}
+		// same group check
+		if (stmt->getGroup() == stmtAfter->getGroup())
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool PKBPQLEvaluator::getFollowsT(int leftStmtNo, int rightStmtNo)
 {
-	return followsHandler->getFollowsT(leftStmtNo, rightStmtNo);
+	if (mpPKB->followsTIntIntTable.find(make_pair(leftStmtNo, rightStmtNo)) == mpPKB->followsTIntIntTable.end())
+	{
+		return false;
+	}
+	return true;
 }
 
+// getAfterT
 const vector<int> PKBPQLEvaluator::getFollowsT(int leftStmtNo, PKBDesignEntity rightType)
 {
-	return followsHandler->getFollowsT(leftStmtNo, rightType);
+	return mpPKB->followsTIntSynTable[leftStmtNo][rightType];
 }
 
-bool PKBPQLEvaluator::getFollowsTIntegerUnderscore(int leftStmtNo) {
-	return followsHandler->getFollowsTIntegerUnderscore(leftStmtNo);
+bool PKBPQLEvaluator::getFollowsTIntegerUnderscore(int leftStmtNo)
+{
+	const auto& innerMap = mpPKB->followsTIntSynTable[leftStmtNo];
+	for (auto& pair : innerMap)
+	{
+		if (!pair.second.empty())
+			return true;
+	}
+	return false;
 }
 
 /*PRE-CONDITION: TargetFollowType IS a container and statement type type. */
 const unordered_set<int>& PKBPQLEvaluator::getFollowsT(PKBDesignEntity leftType, int rightStmtNo)
 {
-	return followsHandler->getFollowsT(leftType, rightStmtNo);
+	if (!statementExists(rightStmtNo)) throw "Statement doesn't exist: " + to_string(rightStmtNo);
+	return mpPKB->followsTSynIntTable[rightStmtNo][leftType];
 }
 
 /*PRE-CONDITION: Both leftType and rightTypes are STATEMENT types (not procedure or variable or others) */
 const set<pair<int, int>>& PKBPQLEvaluator::getFollowsT(PKBDesignEntity leftType, PKBDesignEntity rightType)
 {
-	return followsHandler->getFollowsT(leftType, rightType);
+	return mpPKB->followsTSynSynTable[make_pair(leftType, rightType)];
 }
 
 /*PRE-CONDITION: TargetFolllowsType IS a container type. */
 const unordered_set<int>& PKBPQLEvaluator::getFollowsTSynUnderscore(PKBDesignEntity leftType)
 {
-	return followsHandler->getFollowsTSynUnderscore(leftType);
+	return mpPKB->followsTSynUnderscoreTable[leftType];
 }
 
 /*Use for Follows*(_, INT) */
 bool PKBPQLEvaluator::getFollowsTUnderscoreInteger(int rightStmtNo)
 {
-	return followsHandler->getFollowsTUnderscoreInteger(rightStmtNo);
+	PKBStmt::SharedPtr rightStatement;
+	if (!mpPKB->getStatement(rightStmtNo, rightStatement))
+	{
+		return false;
+	}
+
+	vector<int> members = rightStatement->getGroup()->getMembers(PKBDesignEntity::AllStatements);
+	return rightStmtNo > members.front();
 }
 
 /*Use for Follows*(_, s1) */
 unordered_set<int> PKBPQLEvaluator::getFollowsTUnderscoreSyn(PKBDesignEntity rightType)
 {
-	return followsHandler->getFollowsTUnderscoreSyn(rightType);
+	unordered_set<int> toReturn;
+
+	// get results manually
+	// get all the 'after' users first
+	vector<PKBStmt::SharedPtr > rightStatements = mpPKB->getStatements(rightType);
+
+	// count from the back, using rbegin and rend
+	for (int i = rightStatements.size() - 1; i >= 0; i--)
+	{
+		auto& currStmt = rightStatements[i];
+		PKBGroup::SharedPtr grp = currStmt->getGroup();
+		vector<int> leftStatements = grp->getMembers(PKBDesignEntity::AllStatements);
+		if (currStmt->getIndex() > leftStatements[0])
+		{
+			toReturn.insert(currStmt->getIndex());
+		}
+	}
+
+	return move(toReturn);
 }
 
 const unordered_set<string>& PKBPQLEvaluator::getUsesIntSyn(int statementNo)
@@ -272,6 +706,61 @@ vector<int> PKBPQLEvaluator::getModifiers()
 vector<int> PKBPQLEvaluator::getModifiers(PKBDesignEntity entityType)
 {
 	return modifyHandler->getModifiers(entityType);
+}
+
+const vector<PKBStmt::SharedPtr >& PKBPQLEvaluator::getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const
+{
+	return mpPKB->getStatements(pkbDe);
+}
+
+vector<PKBStmt::SharedPtr > PKBPQLEvaluator::getAllStatements()
+{
+	return mpPKB->getStatements(PKBDesignEntity::AllStatements);
+}
+
+set<PKBProcedure::SharedPtr > PKBPQLEvaluator::getAllProcedures()
+{
+	set<PKBProcedure::SharedPtr > procs = mpPKB->mAllProcedures;
+	return procs;
+}
+
+vector<PKBVariable::SharedPtr > PKBPQLEvaluator::getAllVariables()
+{
+	const unordered_map<string, PKBVariable::SharedPtr >& map = mpPKB->getAllVariablesMap();
+	vector<shared_ptr < PKBVariable>> vars;
+	vars.reserve(map.size());
+	for (auto& kv : map)
+	{
+		vars.emplace_back(kv.second);
+	}
+
+	return move(vars);
+}
+
+const unordered_set<string>& PKBPQLEvaluator::getAllConstants()
+{
+	return mpPKB->getConstants();
+}
+
+PKBDesignEntity PKBPQLEvaluator::getStmtType(int stmtIdx)
+{
+	PKBStmt::SharedPtr stmt;
+	if (mpPKB->getStatement(stmtIdx, stmt)) {
+		return stmt->getType();
+	}
+}
+
+bool PKBPQLEvaluator::variableExists(string name)
+{
+	PKBVariable::SharedPtr& v = mpPKB->getVarByName(name);
+	return v != nullptr;
+}
+
+bool PKBPQLEvaluator::procExists(string procname)
+{
+	if (mpPKB->getProcedureByName(procname) == nullptr)
+		return false;
+	return true;
 }
 
 vector<pair<int, string>> PKBPQLEvaluator::matchAnyPattern(string& LHS)
@@ -493,6 +982,7 @@ unordered_set<int> PKBPQLEvaluator::getNextTIntSyn(int fromIndex, PKBDesignEntit
 
 // ===============================================
 // NextBip
+// NextBip(p, q)
 
 // Use for NextBip(_, _)
 bool PKBPQLEvaluator::getNextBipUnderscoreUnderscore()
@@ -560,48 +1050,56 @@ bool PKBPQLEvaluator::getNextBipTUnderscoreUnderscore()
 unordered_set<int> PKBPQLEvaluator::getNextBipTUnderscoreSyn(PKBDesignEntity to)
 {
 	return nextBipHandler->getNextBipTUnderscoreSyn(to);
+
 }
 
 // Case 3: NextBipT(_, int)
 bool PKBPQLEvaluator::getNextBipTUnderscoreInt(int toIndex)
 {
 	return nextBipHandler->getNextBipTUnderscoreInt(toIndex);
+
 }
 
 // Case 4: NextBipT(syn, syn)
 set<pair<int, int>> PKBPQLEvaluator::getNextBipTSynSyn(PKBDesignEntity from, PKBDesignEntity to)
 {
 	return nextBipHandler->getNextBipTSynSyn(from, to);
+
 }
 
 // Case 5: NextBipT(syn, _)
 unordered_set<int> PKBPQLEvaluator::getNextBipTSynUnderscore(PKBDesignEntity from)
 {
 	return nextBipHandler->getNextBipTSynUnderscore(from);
+
 }
 
 // Case 6: NextBipT(syn, int)
 unordered_set<int> PKBPQLEvaluator::getNextBipTSynInt(PKBDesignEntity from, int toIndex)
 {
 	return nextBipHandler->getNextBipTSynInt(from, toIndex);
+
 }
 
 // Case 7: NextBipT(int, int)
 bool PKBPQLEvaluator::getNextBipTIntInt(int fromIndex, int toIndex)
 {
 	return nextBipHandler->getNextBipTIntInt(fromIndex, toIndex);
+
 }
 
 // Case 8: NextBipT(int, _)
 bool PKBPQLEvaluator::getNextBipTIntUnderscore(int fromIndex)
 {
 	return nextBipHandler->getNextBipTIntUnderscore(fromIndex);
+
 }
 
 // Case 9: NextBipT(int, syn)
 unordered_set<int> PKBPQLEvaluator::getNextBipTIntSyn(int fromIndex, PKBDesignEntity to)
 {
 	return nextBipHandler->getNextBipTIntSyn(fromIndex, to);
+
 }
 
 // ======================================================================================================
@@ -630,65 +1128,6 @@ pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLEvaluator::getAffectsBIP(bo
 	return affectsBipHandler->getAffectsBip(includeAffectsT);
 }
 
-const vector<PKBStmt::SharedPtr >& PKBPQLEvaluator::getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const
-{
-	return mpPKB->getStatements(pkbDe);
-}
-
-vector<PKBStmt::SharedPtr > PKBPQLEvaluator::getAllStatements()
-{
-	return mpPKB->getStatements(PKBDesignEntity::AllStatements);
-}
-
-set<PKBProcedure::SharedPtr > PKBPQLEvaluator::getAllProcedures()
-{
-	set<PKBProcedure::SharedPtr > procs = mpPKB->mAllProcedures;
-	return procs;
-}
-
-vector<PKBVariable::SharedPtr > PKBPQLEvaluator::getAllVariables()
-{
-	const unordered_map<string, PKBVariable::SharedPtr >& map = mpPKB->getAllVariablesMap();
-	vector<shared_ptr < PKBVariable>> vars;
-	vars.reserve(map.size());
-	for (auto& kv : map)
-	{
-		vars.emplace_back(kv.second);
-	}
-	return move(vars);
-}
-
-const unordered_set<string>& PKBPQLEvaluator::getAllConstants()
-{
-	return mpPKB->getConstants();
-}
-
-PKBDesignEntity PKBPQLEvaluator::getStmtType(int stmtIdx)
-{
-	PKBStmt::SharedPtr stmt;
-	if (mpPKB->getStatement(stmtIdx, stmt)) {
-		return stmt->getType();
-	}
-}
-
-bool PKBPQLEvaluator::statementExists(int statementNo)
-{
-	return mpPKB->statementExists(statementNo);
-}
-
-bool PKBPQLEvaluator::variableExists(string name)
-{
-	PKBVariable::SharedPtr& v = mpPKB->getVarByName(name);
-	return v != nullptr;
-}
-
-bool PKBPQLEvaluator::procExists(string procname)
-{
-	if (mpPKB->getProcedureByName(procname) == nullptr)
-		return false;
-	return true;
-}
-
 PKBPQLEvaluator::PKBPQLEvaluator(PKB::SharedPtr pPKB)
 {
 	mpPKB = pPKB;
@@ -700,6 +1139,4 @@ PKBPQLEvaluator::PKBPQLEvaluator(PKB::SharedPtr pPKB)
 	nextBipHandler = PKBPQLNextBipHandler::create(pPKB);
 	modifyHandler = PKBPQLModifyHandler::create(pPKB);
 	useHandler = PKBPQLUseHandler::create(pPKB);
-	parentHandler = PKBPQLParentHandler::create(pPKB);
-	followsHandler = PKBPQLFollowsHandler::create(pPKB);
 }

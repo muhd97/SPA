@@ -21,8 +21,6 @@
 #include "PKBPQLNextBipHandler.h"
 #include "PKBPQLModifyHandler.h"
 #include "PKBPQLUseHandler.h"
-#include "PKBPQLParentHandler.h"
-#include "PKBPQLFollowsHandler.h"
 // for pattern
 #include "../SimpleLexer.h"
 #include "../SimpleParser.h"
@@ -41,61 +39,90 @@ class PKBPQLEvaluator
         return SharedPtr(new PKBPQLEvaluator(pPKB));
     }
 
-    /* ======================== Parent ======================== */
+    // In following documentation: PKBDE is short for PKBDesignEntity
 
     // Parent
     set<int> getParents(PKBDesignEntity parentType, int child);
+    set<pair<int, int>> getParents(PKBDesignEntity parentType, PKBDesignEntity childType);
+
     set<int> getParentsSynUnderscore(PKBDesignEntity parentType);
+
     set<int> getChildren(PKBDesignEntity childType, int parent);
+
     set<pair<int, int>> getChildren(PKBDesignEntity parentType, PKBDesignEntity childType);
+
     set<int> getChildrenUnderscoreSyn(PKBDesignEntity rightArg);
     // Parents(_, _)
     bool getParents();
+
+    // Handles the specific case of Follows(_, _)
+    bool getFollows();
+
+    unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStmt::SharedPtr targetParent,
+                                                            PKBDesignEntity targetChildrenType);
+
     /* Use for Parent*(INT, synonym) */
     const vector<int> &getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
+
     /* Use for Parent*(INT, _) */
     bool getParentTIntUnderscore(int statementNo);
+
     /* Use for Parent*(INT, INT) */
     bool getParentTIntInt(int parentStatementNo, int childStatementNo);
+
     /* Use for Parent*(synonym, _) */
     const unordered_set<int> &getParentTSynUnderscore(PKBDesignEntity targetParentType);
+
     /* Use for Parent*(synonym, INT) */
     const unordered_set<int> &getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
+
     /* Use for Parent*(synonym1, synonym2) */
     const set<pair<int, int>> &getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType);
+
     /* Use for Parent*(_, INT) */
     bool getParentTUnderscoreInt(int childStatementNo);
+
     /* Use for Parent*(_, synonym) */
     unordered_set<int> getParentTUnderscoreSyn(PKBDesignEntity targetChildType);
+
     /* Use for Parent*(_, _) */
     bool getParentT();
 
-    /* ======================== Follows ======================== */
-
     // Follow
     vector<int> getBefore(PKBDesignEntity beforeType, int after);
+
     vector<int> getBefore(PKBDesignEntity beforeType, PKBDesignEntity afterType);
+
+    //set<pair<int, int>> getBeforePairs(PKBDesignEntity beforeType, PKBDesignEntity afterType);
+
     vector<int> getAfter(PKBDesignEntity afterType, int before);
+
     vector<int> getAfter(PKBDesignEntity beforeType, PKBDesignEntity afterType);
+
     set<pair<int, int>> getAfterPairs(PKBDesignEntity beforeType, PKBDesignEntity afterType);
-    // Handles the specific case of Follows(_, _)
-    bool getFollows();
 
     // Follow*
     /* Use for Follows*(INT, INT) */
     bool getFollowsT(int leftStmtNo, int rightStmtNo);
+
     /* Use for Follows*(INT, s1) */
     const vector<int> getFollowsT(int parentStmtNo, PKBDesignEntity childType);
+
     /* Use for Follows*(INT, _) */
     bool getFollowsTIntegerUnderscore(int leftStmtNo);
+
     /* Use for Follows*(s1, INT) */
     const unordered_set<int> &getFollowsT(PKBDesignEntity parentType, int childStmtNo);
+
     /* Use for Follows*(s1, s2) */
     const set<pair<int, int>> &getFollowsT(PKBDesignEntity leftType, PKBDesignEntity rightType);
+
     /* Use for Follows*(s1, _) */
     const unordered_set<int> &getFollowsTSynUnderscore(PKBDesignEntity leftType);
+
     /* Use for Follows*(_, INT) */
     bool getFollowsTUnderscoreInteger(int rightStmtNo);
+
     /* Use for Follows*(_, s1) */
     unordered_set<int> getFollowsTUnderscoreSyn(PKBDesignEntity rightType);
 
@@ -298,8 +325,6 @@ class PKBPQLEvaluator
     // AffectsBIP / AffectsBIPT
     pair<set<pair<int, int>>, set<pair<int, int>>> getAffectsBIP(bool includeAffectsT);
 
-    /* ======================== Utility ======================== */
-
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
     const vector<PKBStmt::SharedPtr> &getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;
@@ -327,6 +352,25 @@ class PKBPQLEvaluator
   protected:
       PKBPQLEvaluator(PKB::SharedPtr pPKB);
 
+    bool isContainerType(PKBDesignEntity s)
+    {
+        return s == PKBDesignEntity::If || s == PKBDesignEntity::While || s == PKBDesignEntity::Procedure ||
+               s == PKBDesignEntity::AllStatements;
+    }
+
+    bool getStatementBefore(PKBStmt::SharedPtr &statementAfter, PKBStmt::SharedPtr &result);
+    bool getStatementAfter(PKBStmt::SharedPtr &statementBefore, PKBStmt::SharedPtr &result);
+
+    void addParentStmts(vector<PKBStmt::SharedPtr> &stmts)
+    {
+        // If, While, Procedure(the container types)
+        vector<PKBStmt::SharedPtr> ifStmts = mpPKB->getStatements(PKBDesignEntity::If);
+        vector<PKBStmt::SharedPtr> whileStmts = mpPKB->getStatements(PKBDesignEntity::While);
+
+        stmts.insert(stmts.end(), ifStmts.begin(), ifStmts.end());
+        stmts.insert(stmts.end(), whileStmts.begin(), whileStmts.end());
+    }
+
     /* ======================== Handlers ======================== */
 
     PKBPQLAffectsHandler::SharedPtr affectsHandler;
@@ -337,6 +381,5 @@ class PKBPQLEvaluator
     PKBPQLNextBipHandler::SharedPtr nextBipHandler;
     PKBPQLModifyHandler::SharedPtr modifyHandler;
     PKBPQLUseHandler::SharedPtr useHandler;
-    PKBPQLParentHandler::SharedPtr parentHandler;
-    PKBPQLFollowsHandler::SharedPtr followsHandler;
+
 };

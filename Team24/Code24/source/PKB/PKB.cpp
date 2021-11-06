@@ -238,16 +238,6 @@ void PKB::computeGoNextCFG(shared_ptr<CFG> cfg)
     }
 }
 
-bool PKB::statementExists(int statementNo)
-{
-    PKBStmt::SharedPtr stmt;
-    if (!getStatement(statementNo, stmt))
-    {
-        return false;
-    }
-    return true;
-}
-
 PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group, string& procName)
 {
     // determine statement type
