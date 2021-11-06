@@ -782,10 +782,6 @@ void PKB::initializeFollowsTTables()
         {
             unordered_set<int> toReturn;
             vector<int> toAdd;
-            // if (!isContainerType(stmt->getType())) {
-            /*followsTIntSynTable[stmt->getIndex()][de] = move(toAdd);*/
-
-            //}
 
             for (int i : stmt->getGroup()->getMembers(de))
             {
@@ -828,21 +824,9 @@ void PKB::initializeFollowsTTables()
             followsTSynSynTable[make_pair(deFollows, PKBDesignEntity::AllStatements)] = set<pair<int, int>>();
 
             vector<PKBStmt::SharedPtr> followsStmts;
-            // if (deFollows == PKBDesignEntity::AllStatements)
-            //{
-            //    const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-            //    const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
-            //    followsStmts.insert(followsStmts.end(), ifStmts.begin(), ifStmts.end());
-            //    followsStmts.insert(followsStmts.end(), whileStmts.begin(), whileStmts.end());
-
-            //    //addFollowsStmts(followsStmts);
-            //}
-            // else
-            //{
             // check these 'possible' follows statements
             followsStmts = getStatements(deFollows);
-            //}
 
             for (auto &stmt : followsStmts)
             {
@@ -876,21 +860,9 @@ void PKB::initializeFollowsTTables()
         followsTSynUnderscoreTable[PKBDesignEntity::AllStatements] = unordered_set<int>();
 
         vector<PKBStmt::SharedPtr> followsStmts;
-        /*if (deFollows == PKBDesignEntity::AllStatements)
-        {
-            const vector<PKBStmt::SharedPtr>& ifStmts = getStatements(PKBDesignEntity::If);
-            const vector<PKBStmt::SharedPtr>& whileStmts = getStatements(PKBDesignEntity::While);
 
-            followsStmts.insert(followsStmts.end(), ifStmts.begin(), ifStmts.end());
-            followsStmts.insert(followsStmts.end(), whileStmts.begin(), whileStmts.end());*/
-
-        // addFollowsStmts(followsStmts);
-        /*}
-        else
-        {*/
         // check these 'possible' follows statements
         followsStmts = getStatements(deFollows);
-        //}
 
         for (auto &stmt : followsStmts)
         {
@@ -1087,7 +1059,6 @@ void PKB::initializeParentTTables()
             parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
             parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
 
-            // addParentStmts(parentStmts);
         }
         else
         {
