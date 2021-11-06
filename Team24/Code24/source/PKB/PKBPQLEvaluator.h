@@ -13,6 +13,9 @@
 #include "PKBProcedure.h"
 #include "PKBStmt.h"
 
+#include "PKBPQLAffectsHandler.h"
+#include "PKBPQLAffectsBipHandler.h"
+
 // for pattern
 #include "../SimpleLexer.h"
 #include "../SimpleParser.h"
@@ -572,6 +575,8 @@ class PKBPQLEvaluator
     PKBPQLEvaluator(PKB::SharedPtr pPKB)
     {
         mpPKB = pPKB;
+        affectsHandler = PKBPQLAffectsHandler::create(pPKB);
+        affectsBipHandler = PKBPQLAffectsBipHandler::create(pPKB);
     }
 
     // we want to return only vector<int>, not vector<PKBStmt::SharedPtr>
@@ -656,29 +661,9 @@ class PKBPQLEvaluator
     bool checkForExactTree(vector<string> &queryInOrder, vector<string> &assignInOrder);
 
 
-    // helpers for affects
+    // handlers for affects
     /* ======================== Affects ======================== */
-    bool affectsCached = false;
-    set<string> seenAffectsProcedures;
-    set<pair<int, int>> affectsList;
-    set<pair<int, int>> affectsTList;
-    map<int, set<pair<int, int>>> affectsTHelperTable;
-    map<int, set<pair<int, int>>> affectsTHelperTable2;
 
-
-    bool computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT,
-        map<string, set<int>>& lastModifiedTable, shared_ptr<BasicBlock>& lastBlock,
-        bool terminateEarly, int leftInt, int rightInt);
-    bool handleAffectsAssign(int index, bool includeAffectsT,
-        map<string, set<int>>& lastModifiedTable, bool terminateEarly, int leftInt, int rightInt);
-    void handleAffectsReadCall(int index, map<string, set<int>>& lastModifiedTable);
-
-    bool computeAffectsBIP(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT,
-        map<string, set<int>>& lastModifiedTable, shared_ptr<BasicBlock>& lastBlock);
-    bool handleAffectsAssignBIP(int index, bool includeAffectsT,
-        map<string, set<int>>& lastModifiedTable);
-    void handleAffectsReadBIP(int index, bool includeAffectsT,
-        map<string, set<int>>& lastModifiedTable);
-    bool handleAffectsCallBIP(int index, bool includeAffectsT,
-        map<string, set<int>>& lastModifiedTable);
+    PKBPQLAffectsHandler::SharedPtr affectsHandler;
+    PKBPQLAffectsBipHandler::SharedPtr affectsBipHandler;
 };

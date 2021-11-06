@@ -43,6 +43,8 @@
     <ClCompile Include="..\source\PQL\PQLCallsHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLCallsTHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLAST.cpp" />
+    <ClCompile Include="..\source\PKB\PKBPQLAffectsHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBPQLAffectsBipHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
@@ -90,5 +92,7 @@
     <ClInclude Include="..\source\PQL\PQLCallsHandler.h" />
     <ClInclude Include="..\source\PQL\PQLCallsTHandler.h" />
     <ClInclude Include="..\source\PQL\PQLAST.h" />
+    <ClInclude Include="..\source\PKB\PKBPQLAffectsHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBPQLAffectsBipHandler.h" />
   </ItemGroup>
 </Project>
