@@ -18,7 +18,12 @@ source_query_test_cases = [
     ("28_2_system_test_2_source", "28_2_system_test_2_queries"),
     ("29_2_demo_1_source", "29_2_demo_1_queries"),
     ("30_2_demo_2_source", "30_2_demo_2_queries"),
-    ("31_2_demo_3_source", "31_2_demo_3_queries"), ("32_3_source", "32_3_affectsBip_BipT_queries"), ("33_3_source", "33_3_nextBip_BipT_queries")]
+    ("31_2_demo_3_source", "31_2_demo_3_queries"), ("32_3_source", "32_3_affectsBip_BipT_queries"), ("33_3_source",
+                                                                                                     "33_3_nextBip_BipT_queries"), ("34_3_system_test_1_source", "34_3_system_test_1_affectsbip_queries"),
+    ("35_3_system_test_1_source", "35_3_system_test_1_affectsbipstar_queries"),
+    ("36_3_system_test_1_source", "36_3_system_test_1_nextbip_queries"),
+    ("37_3_system_test_1_source", "37_3_system_test_1_nextbipstar_queries")
+]
 
 
 autotester_dir = ".\\Code24\\Release\\"

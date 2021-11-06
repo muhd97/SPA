@@ -1099,8 +1099,8 @@ Select p.procName such that Calls("A", "Call")
 Main, A, B, C, D, E, F, Call, Assign, AssignY, Print, PrintX, Read, ReadY, IfElse, IfWhile, WhileLoop
 5000
 219 - Select p1, p2 such that Calls(#, #) = True (Direct Call) (first line)
-procedure p;
-Select <p p> such that Calls("F", "Read")
+procedure p1, p2;
+Select <p1, p2> such that Calls("F", "Read")
 A IfElse,A IfWhile,A WhileLoop,Assign IfElse,Assign IfWhile,Assign WhileLoop,AssignY IfElse,AssignY IfWhile,AssignY WhileLoop,B IfElse,B IfWhile,B WhileLoop,C IfElse,C IfWhile,C WhileLoop,Call IfElse,Call IfWhile,Call WhileLoop,D IfElse,D IfWhile,D WhileLoop,E IfElse,E IfWhile,E WhileLoop,F IfElse,F IfWhile,F WhileLoop,IfElse A,IfElse Assign,IfElse AssignY,IfElse B,IfElse C,IfElse Call,IfElse D,IfElse E,IfElse F,IfElse IfElse,IfElse IfWhile,IfElse Main,IfElse Print,IfElse PrintX,IfElse Read,IfElse ReadY,IfElse WhileLoop,IfWhile A,IfWhile Assign,IfWhile AssignY,IfWhile B,IfWhile C,IfWhile Call,IfWhile D,IfWhile E,IfWhile F,IfWhile IfElse,IfWhile IfWhile,IfWhile Main,IfWhile Print,IfWhile PrintX,IfWhile Read,IfWhile ReadY,IfWhile WhileLoop,Main IfElse,Main IfWhile,Main WhileLoop,Print IfElse,Print IfWhile,Print WhileLoop,PrintX IfElse,PrintX IfWhile,PrintX WhileLoop,Read IfElse,Read IfWhile,Read WhileLoop,ReadY IfElse,ReadY IfWhile,ReadY WhileLoop,WhileLoop A,WhileLoop Assign,WhileLoop AssignY,WhileLoop B,WhileLoop C,WhileLoop Call,WhileLoop D,WhileLoop E,WhileLoop F,WhileLoop IfElse,WhileLoop IfWhile,WhileLoop Main,WhileLoop Print,WhileLoop PrintX,WhileLoop Read,WhileLoop ReadY,WhileLoop WhileLoop,A A,A Assign,A AssignY,A B,A C,A Call,A D,A E,A F,A Main,A Print,A PrintX,A Read,A ReadY,Assign A,Assign Assign,Assign AssignY,Assign B,Assign C,Assign Call,Assign D,Assign E,Assign F,Assign Main,Assign Print,Assign PrintX,Assign Read,Assign ReadY,AssignY A,AssignY Assign,AssignY AssignY,AssignY B,AssignY C,AssignY Call,AssignY D,AssignY E,AssignY F,AssignY Main,AssignY Print,AssignY PrintX,AssignY Read,AssignY ReadY,B A,B Assign,B AssignY,B B,B C,B Call,B D,B E,B F,B Main,B Print,B PrintX,B Read,B ReadY,C A,C Assign,C AssignY,C B,C C,C Call,C D,C E,C F,C Main,C Print,C PrintX,C Read,C ReadY,Call A,Call Assign,Call AssignY,Call B,Call C,Call Call,Call D,Call E,Call F,Call Main,Call Print,Call PrintX,Call Read,Call ReadY,D A,D Assign,D AssignY,D B,D C,D Call,D D,D E,D F,D Main,D Print,D PrintX,D Read,D ReadY,E A,E Assign,E AssignY,E B,E C,E Call,E D,E E,E F,E Main,E Print,E PrintX,E Read,E ReadY,F A,F Assign,F AssignY,F B,F C,F Call,F D,F E,F F,F Main,F Print,F PrintX,F Read,F ReadY,Main A,Main Assign,Main AssignY,Main B,Main C,Main Call,Main D,Main E,Main F,Main Main,Main Print,Main PrintX,Main Read,Main ReadY,Print A,Print Assign,Print AssignY,Print B,Print C,Print Call,Print D,Print E,Print F,Print Main,Print Print,Print PrintX,Print Read,Print ReadY,PrintX A,PrintX Assign,PrintX AssignY,PrintX B,PrintX C,PrintX Call,PrintX D,PrintX E,PrintX F,PrintX Main,PrintX Print,PrintX PrintX,PrintX Read,PrintX ReadY,Read A,Read Assign,Read AssignY,Read B,Read C,Read Call,Read D,Read E,Read F,Read Main,Read Print,Read PrintX,Read Read,Read ReadY,ReadY A,ReadY Assign,ReadY AssignY,ReadY B,ReadY C,ReadY Call,ReadY D,ReadY E,ReadY F,ReadY Main,ReadY Print,ReadY PrintX,ReadY Read,ReadY ReadY
 5000
 220 - Select BOOLEAN such that Calls(#, #) = False (Indirect Call - 2nd)
@@ -1732,252 +1732,252 @@ Select n1 such that Next*(n1, x)
 
 Select BOOLEAN such that Affects(75, 76)
 TRUE
-50000
+5000
 346 - Select p such that Affects(#, #) = True (with call in between that does not modifies)
 procedure p;
 Select p such that Affects(63, 65)
 Main, A, B, C, D, E, F, Call, Assign, AssignY, Print, PrintX, Read, ReadY, IfElse, IfWhile, WhileLoop
-50000
+5000
 347 - Select c such that Affects(#, #) = True (with print in between that does not modifies)
 call c;
 Select c.stmt# such that Affects(19, 21)
 10,109,117,120,121,122,123,124,13,15,20,229,36,38,44,57,61,64,7,82,83,85
-50000
+5000
 348 - Select BOOLEAN such that Affects(#, #) = False (with call in between that modifies)
 
 Select BOOLEAN such that Affects(60, 62)
 FALSE
-50000
+5000
 349 - Select BOOLEAN such that Affects(#, #) = False (with read in between that modifies)
 
 Select BOOLEAN such that Affects(105, 107)
 FALSE
-50000
+5000
 350 - Select BOOLEAN such that Affects(#, #) = False (with assign in between that modifies)
 
 Select BOOLEAN such that Affects(75, 77)
 FALSE
-50000
+5000
 351 - Select w such that Affects(#, #) = False (Wrong order)
 while w;
 Select w such that Affects(76, 75)
 
-50000
+5000
 352 - Select pn such that Affects(#, #) = False (next line do not modify)
 print pn;
 Select pn such that Affects(77, 78)
 
-50000
+5000
 353 - Select r.stmt# such that Affects(#, #) = False (Invalid stmt number - 0)
 read r;
 Select r.stmt# such that Affects(0, 1)
 
-50000
+5000
 354 - Select w, r such that Affects(#, #) = False (Out of range stmt number)
 while w; read r;
 Select <w, r> such that Affects(264, 265)
 
-50000
+5000
 355 - Select BOOLEAN such that Affects(s, #) where # is the start of new if/while block
 stmt s;
 Select BOOLEAN such that Affects(s, 40)
 FALSE
-50000
+5000
 356 - Select BOOLEAN such that Affects(#, s) where # is the start of new if/while block
 stmt s;
 Select s such that Affects(42, s)
 47
-50000
+5000
 357 - Select s such that Affects(s, #) where # is a if/while condition
 stmt s;
 Select s such that Affects(s, 39)
 
-50000
+5000
 358 - Select a.stmt# such that Affects(a, #) where # is a read stmt
 assign a;
 Select a.stmt# such that Affects(a, 106)
 
-50000
+5000
 359 - Select s.stmt# such that Affects(s, #) where # is a print stmt
 stmt s;
 Select s.stmt# such that Affects(s, 112)
 
-50000
+5000
 360 - Select a.stmt# such that Affects(#, a) where # is a assign stmt
 assign a;
 Select a.stmt# such that Affects(75, a)
 76
-50000
+5000
 361 - Select a1, a2 such that Affects(a1, a2)
 assign a1, a2;
 Select BOOLEAN such that Affects(a1, a2)
 TRUE
-50000
+5000
 362 - Select BOOLEAN such that Affects(c, a) (FALSE)
 call c; assign a;
 Select BOOLEAN such that Affects(c, a)
 FALSE
-50000
+5000
 363 - Select BOOLEAN such that Affects(_, _) (TRUE; Meaningless query)
 
 Select BOOLEAN such that Affects(_, _)
 TRUE
-50000
+5000
 364 - Select a such that Affects(a, _)
 assign a;
 Select a such that Affects(a, _)
 101,104,107,115,118,128,134,142,143,144,145,156,157,158,161,17,172,19,203,21,227,228,23,233,234,24,25,27,29,3,42,47,52,63,66,69,75,76
-50000
+5000
 365 - Select a such that Affects(_, a)
 assign a;
 Select a such that Affects(_, a)
 101,104,105,107,108,113,116,118,119,142,143,144,145,156,157,158,161,173,203,21,227,23,234,24,25,26,31,47,5,56,65,68,71,76,77
-50000
+5000
 366 - Select cs such that Affects(1, _) = True
 constant cs;
 Select cs such that Affects(1, _)
 
-50000
+5000
 367 - Select pn such that Affects(#, _) = False (# is out of range)
 print pn;
 Select pn such that Affects(265, _)
 
-50000
+5000
 368 - Error
 stmt s; assignment a1, a2;
 Select x such that Affects(a1, a2)
 
-50000
+5000
 369 - Error
 stmt s; assignment a1, a2;
 Select n1 such that Affects(a1, x)
 
-50000
+5000
 370 - Select BOOLEAN such that Affects*(#, #) = True (consecutive)
 
 Select BOOLEAN such that Affects*(75, 76)
 TRUE
-50000
+5000
 371 - Select p such that Affects*(#, #) = True (with call in between that does not modifies)
 procedure p;
 Select p such that Affects*(63, 65)
 A,Assign,AssignY,B,C,Call,D,E,F,IfElse,IfWhile,Main,Print,PrintX,Read,ReadY,WhileLoop
-50000
+5000
 372 - Select pn such that Affects*(#, #) = True (with print in between that does not modifies)
 print pn;
 Select pn such that Affects*(19, 21)
 112,12,159,160,165,168,171,176,179,180,182,183,185,187,189,199,202,205,206,207,224,230,236,238,30,48,53,67,70,78,81,86,89,9,90,91,92,97
-50000
+5000
 373 - Select BOOLEAN such that Affects*(#, #) = False (with call in between that modifies)
 
 Select BOOLEAN such that Affects*(60, 62)
 FALSE
-50000
+5000
 374 - Select BOOLEAN such that Affects*(#, #) = False (with read in between that modifies)
 
 Select BOOLEAN such that Affects*(104, 106)
 FALSE
-50000
+5000
 375 - Select BOOLEAN such that Affects*(#, #) = True (with assign in between that modifies)
 
 Select BOOLEAN such that Affects*(75, 77)
 TRUE
-50000
+5000
 376 - Select w such that Affects*(#, #) = False (Wrong order)
 while w;
 Select w such that Affects*(76, 75)
 
-50000
+5000
 377 - Select pn such that Affects*(#, #) = False (next line do not modify)
 print pn;
 Select pn such that Affects*(77, 78)
 
-50000
+5000
 378 - Select r.stmt# such that Affects*(#, #) = False (Invalid stmt number - 0)
 read r;
 Select r.stmt# such that Affects*(0, 1)
 
-50000
+5000
 379 - Select w, r such that Affects*(#, #) = False (Out of range stmt number)
 while w; read r;
 Select <w, r> such that Affects*(264, 265)
 
-50000
+5000
 380 - Select BOOLEAN such that Affects*(s, #) where # is the start of new if/while block
 stmt s;
 Select BOOLEAN such that Affects*(s, 40)
 FALSE
-50000
+5000
 381 - Select BOOLEAN such that Affects*(#, s) where # is the start of new if/while block
 stmt s;
 Select s such that Affects*(42, s)
 47
-50000
+5000
 382 - Select s such that Affects*(s, #) where # is a if/while condition
 stmt s;
 Select s such that Affects*(s, 39)
 
-50000
+5000
 383 - Select a.stmt# such that Affects*(a, #) where # is a read stmt
 assign a;
 Select a.stmt# such that Affects*(a, 106)
 
-50000
+5000
 384 - Select s.stmt# such that Affects*(s, #) where # is a print stmt
 stmt s;
 Select s.stmt# such that Affects*(s, 112)
 
-50000
+5000
 385 - Select a.stmt# such that Affects*(#, a) where # is a assign stmt
 assign a;
 Select a.stmt# such that Affects*(75, a)
 76, 77
-50000
+5000
 386 - Select a1, a2 such that Affects*(a1, a2)
 assign a1, a2;
 Select BOOLEAN such that Affects*(a1, a2)
 TRUE
-50000
+5000
 387 - Select BOOLEAN such that Affects*(c, a) (FALSE)
 call c; assign a;
 Select BOOLEAN such that Affects*(c, a)
 FALSE
-50000
+5000
 388 - Select BOOLEAN such that Affects*(_, _) (TRUE; Meaningless query)
 
 Select BOOLEAN such that Affects*(_, _)
 TRUE
-50000
+5000
 389 - Select a such that Affects*(a, _)
 assign a;
 Select a such that Affects*(a, _)
 101,104,107,115,118,128,134,142,143,144,145,156,157,158,161,17,172,19,203,21,227,228,23,233,234,24,25,27,29,3,42,47,52,63,66,69,75,76
-50000
+5000
 390 - Select a such that Affects*(_, a)
 assign a;
 Select a such that Affects*(_, a)
 101,104,105,107,108,113,116,118,119,142,143,144,145,156,157,158,161,173,203,21,227,23,234,24,25,26,31,47,5,56,65,68,71,76,77
-50000
+5000
 391 - Select cs such that Affects*(1, _) = True
 constant cs;
 Select cs such that Affects*(1, _)
 
-50000
+5000
 392 - Select pn such that Affects*(#, _) = False (# is out of range)
 print pn;
 Select pn such that Affects*(265, _)
 
-50000
+5000
 393 - Error
 stmt s; assignment a1, a2;
 Select x such that Affects*(a1, a2)
 
-50000
+5000
 394 - Error
 stmt s; assignment a1, a2;
 Select n1 such that Affects*(a1, x)
 
-50000
+5000
 395 - (WITH) Select if such that Parent(if, s)
 if ifs; stmt s;
 Select ifs such that Parent(ifs, s) with s.stmt# = 18
@@ -2032,12 +2032,12 @@ Select s such that Next*(w, s) with w.stmt# = 73
 procedure p; assign a1, a2;
 Select p such that Affects(a1, a2) with a1.stmt# = 63 and a2 = 65
 
-50000
+5000
 406 - (WITH) Select a.stmt# such that Affects*(#, a)
 assign a; stmt s;
 Select BOOLEAN such that Affects*(s, a) with s.stmt# = 75
 TRUE
-50000
+5000
 407 - Select a1 pattern a(_, a) (Exact match)
 assign a1, a;
 Select a1 pattern a(_, "0")
@@ -2342,29 +2342,29 @@ Select cs pattern ifs("d", _, _) such that Follows*(n, _) with n = 6 such that U
 assign a1, a2;
 Select a1 such that Affects(a1, a2)
 3,17,19,21,23,24,25,27,29,42,47,52,63,66,69,75,76,101,104,107,115,118,128,134,142,143,144,145,156,157,158,161,172,203,227,228,233,234
-50000
+5000
 468 - Select a1, a2 such that Affects(a1, a2)
 assign a1, a2;
 Select a2 such that Affects(a1, a2)
 5,23,31,21,26,24,25,47,56,65,68,71,76,77,101,113,105,104,107,116,108,118,119,158,161,143,144,145,156,142,157,173,203,227,234
-50000
+5000
 469 - Select a1, a2 such that Affects(a1, a2)
 assign a1, a2;
 Select <a1, a2> such that Affects(a1, a2)
 3 5,17 23,17 31,19 21,19 26,21 23,21 26,23 24,24 23,24 25,24 26,25 23,27 31,29 31,42 47,47 47,52 56,63 65,66 68,69 71,75 76,76 77,101 101,101 113,104 101,104 105,107 104,107 107,107 113,115 116,118 104,118 105,118 107,118 108,118 118,118 119,128 158,134 161,142 143,143 144,143 145,143 156,144 142,144 158,145 157,145 158,156 156,157 157,157 158,158 161,161 158,172 173,203 203,227 227,228 227,233 234,234 234
-50000
+5000
 470 - Select a1, a2 such that Affects*(a1, a2)
 assign a1, a2;
 Select a1 such that Affects*(a1, a2)
 3,17,19,21,23,24,25,27,29,42,47,52,63,66,69,75,76,101,104,107,115,118,128,134,142,143,144,145,156,157,158,161,172,203,227,228,233,234
-50000
+5000
 471 - Select a1, a2 such that Affects*(a1, a2)
 assign a1, a2;
 Select a2 such that Affects*(a1, a2)
 5,23,31,21,26,24,25,47,56,65,68,71,76,77,101,113,105,104,107,116,108,118,119,158,161,143,144,145,156,142,157,173,203,227,234
-50000
+5000
 472 - Select a1, a2 such that Affects*(a1, a2)
 assign a1, a2;
 Select <a1, a2> such that Affects*(a1, a2)
 3 5,17 23,17 24,17 25,17 26,17 31,19 21,19 23,19 24,19 25,19 26,21 23,21 24,21 25,21 26,23 23,23 24,23 25,23 26,24 23,24 24,24 25,24 26,25 23,25 24,25 25,25 26,27 31,29 31,42 47,47 47,52 56,63 65,66 68,69 71,75 76,75 77,76 77,101 101,101 113,104 101,104 105,104 113,107 101,107 104,107 105,107 107,107 113,115 116,118 101,118 104,118 105,118 107,118 108,118 113,118 118,118 119,128 158,128 161,134 158,134 161,142 142,142 143,142 144,142 145,142 156,142 157,142 158,142 161,143 142,143 143,143 144,143 145,143 156,143 157,143 158,143 161,144 142,144 143,144 144,144 145,144 156,144 157,144 158,144 161,145 157,145 158,145 161,156 156,157 157,157 158,157 161,158 158,158 161,161 158,161 161,172 173,203 203,227 227,228 227,233 234,234 234
-50000
+5000

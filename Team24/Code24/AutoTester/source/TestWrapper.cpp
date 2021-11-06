@@ -54,7 +54,7 @@ void TestWrapper::parse(std::string filename) {
         printSimpleTokens(tokens);
 #endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
-        
+        cout << root->format();
 #if PRINT_PARSED_PROGRAM
         cout << root->format();
         cout << "\n==== Building PKB ====\n";
@@ -90,8 +90,15 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
     cout << "\n==== Parsing queries ====\n";
 #endif
     try {
-        PQLParser p(pqlLex(query));
+        cout << "B4 PARSE SELECT CL?!";
+
+
+        PQLParser p(pqlLex(query));        cout << "B4 LEX?!";
+
+
         auto sel = p.parseSelectCl();
+        cout << "AFTER PARSE SELECT CL?!";
+
 #if DEBUG
         cout << "\n==== Printing Parsed Query ====\n";
         cout << sel->format() << endl;
@@ -99,6 +106,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
         cout << "\n==== Created PQLEvaluator using PKB ====\n";
 #endif
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
+        cout << "CANT EVEN PROCESS PQL QUERY?!";
 
 #if DEBUG
         cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";

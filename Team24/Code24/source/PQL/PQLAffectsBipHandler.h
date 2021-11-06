@@ -16,6 +16,8 @@ private:
 	void evaluateUnderscoreInt(vector<shared_ptr<ResultTuple>>& toReturn) override;
 	void evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>>& toReturn) override;
 
+	virtual set<pair<int, int>> evaluateAffectsBip();
+
 	const string& getRelationshipType() override;
 
 public:
