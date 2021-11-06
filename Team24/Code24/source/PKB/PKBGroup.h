@@ -26,11 +26,11 @@ class PKBGroup
         return SharedPtr(new PKBGroup(procedureName));
     }
 
-    int mIndex = -1;
+    int mIndex = 0;
 
     // statements
-    int mOwnerIndex = -1;                            // index of statement that owns this group
-    string mOwnerName;                          // name of procedure, only for procedures that own it
+    int mOwnerIndex = 0;                            // index of statement that owns this group
+    string mOwnerName = "$";                          // name of procedure, only for procedures that own it
     map<PKBDesignEntity, vector<int>> mMembers; // members, mapped by synonym
 
     // variables
@@ -115,7 +115,8 @@ class PKBGroup
     {
         mIndex = totalGroupCount;
         totalGroupCount++;
-        mOwnerIndex = ownerStatementIndex;
+        mOwnerIndex = ownerStatementIndex;        
+        mOwnerName = "$";
     }
 
     PKBGroup(string procedureName)
@@ -123,6 +124,7 @@ class PKBGroup
         mIndex = totalGroupCount;
         totalGroupCount++;
         mOwnerName = procedureName;
+        mOwnerIndex = 0;
     }
 
     // keeps track of total number of groups, also lets us assign group index
@@ -132,7 +134,7 @@ class PKBGroup
 class PKBGroupEntity
 {
   private:
-    PKBGroup::SharedPtr mBelongsTo;
+    PKBGroup::SharedPtr mBelongsTo = nullptr;
     vector<PKBGroup::SharedPtr> mContainerGroups;
     set<PKBVariable::SharedPtr> mUses;
     set<PKBVariable::SharedPtr> mModifies;

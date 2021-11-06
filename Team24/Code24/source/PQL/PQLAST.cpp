@@ -1041,6 +1041,16 @@ bool SelectCl::hasWithClauses()
     return withClauses.size() > 0;
 }
 
+bool SelectCl::hasEvalClauses()
+{
+    return hasSuchThatClauses() || hasPatternClauses() || hasWithClauses();
+}
+
+const vector<shared_ptr<EvalCl>>& SelectCl::getEvalClauses()
+{
+    return evalClauses;
+}
+
 bool SelectCl::suchThatContainsSynonym(shared_ptr<Element> s)
 {
     bool flag = false;

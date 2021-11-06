@@ -59,8 +59,7 @@ void PKB::extractDesigns(shared_ptr<Program> program)
         }
     }
 
-
-    // sort all the vectors of statements in ascending order
+    //sort all the vectors of statements in ascending order
     for (auto &vec : mStatements)
     {
         std::sort(vec.second.begin(), vec.second.end(),
@@ -283,6 +282,7 @@ PKBProcedure::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSi
     // function)
     PKBGroup::SharedPtr group = createPKBGroup(procedureSimple->getName(), res);
 
+
     
     vector<shared_ptr<Statement>> simpleStatements = procedureSimple->getStatementList()->getStatements();
 
@@ -476,6 +476,7 @@ PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKB
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
+    
     shared_ptr<IfStatement> ifStatement = static_pointer_cast<IfStatement>(statement);
 
     // 2. USE - process the variables mentioned by conditional statement
@@ -1475,6 +1476,7 @@ PKBStmt::SharedPtr PKB::createPKBStatement(shared_ptr<Statement> &statement, PKB
     addStatement(res, de);
 
     // 3. set the group of the child statement to be our group
+
     res->setGroup(parentGroup);
     return res;
 }
@@ -1497,6 +1499,7 @@ PKBGroup::SharedPtr PKB::createPKBGroup(PKBStmt::SharedPtr &ownerStatement, PKBG
 // version for Procedure PKBGroup, it doesnt have a parentGroup
 PKBGroup::SharedPtr PKB::createPKBGroup(string &name, PKBProcedure::SharedPtr &ownerProcedure)
 {
+
     // create group
     PKBGroup::SharedPtr group = PKBGroup::create(name);
     // handle group-statement relationships
