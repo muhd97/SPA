@@ -61,11 +61,7 @@ void WithHandler::validateArguments()
                     throw "Read/Print attribute must be varName\n";
                 }
             }
-          //  throw "Could not match any valid with-clause format\n";
         }
-    }
-    if (lhs->getRefType() == RefType::INTEGER) {
-        //throw "Could not match any valid with-clause format\n";
     }
     if (lhs->getRefType() == RefType::ATTR) {
         const auto& leftAttrRef = lhs->getAttrRef();
@@ -182,7 +178,6 @@ void WithHandler::validateArguments()
                 }
             }
         }
-        /* Cannot be with PROG_LINE = "IDENT" as the types are different */
     }
 }
 
