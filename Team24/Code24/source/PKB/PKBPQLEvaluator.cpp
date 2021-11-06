@@ -1444,31 +1444,6 @@ unordered_set<int> PKBPQLEvaluator::getNextIntSyn(int fromIndex, PKBDesignEntity
 // ================================================================================================	//
 // NextT
 
-string formatStatementType(StatementType type)
-{
-	switch (type)
-	{
-	case StatementType::READ:
-		return "Read";
-	case StatementType::PRINT:
-		return "Print";
-	case StatementType::ASSIGN:
-		return "Assign";
-	case StatementType::CALL:
-		return "Call";
-	case StatementType::WHILE:
-		return "While";
-	case StatementType::IF:
-		return "If";
-	case StatementType::STATEMENT:
-		return "Stmt";
-	case StatementType::NONE:
-		return "None";
-	default:
-		throw "Unknown StatementType - Design Ent";
-	}
-}
-
 StatementType getStatementType(PKBDesignEntity de)
 {
 	switch (de)
