@@ -80,53 +80,8 @@ inline int getEvalClPriority(const shared_ptr<EvalCl>& evalCl, const shared_ptr<
                 priority = 13;
             }
         }
-        //else if (evalClType == EvalClType::SuchThat) {
-        //    const auto& suchThatCl = static_pointer_cast<SuchThatCl>(evalCl);
-        //    const auto& suchThatType = suchThatCl->relRef->getType();
-        //    if (suchThatType == RelRefType::USES_P)
-        //        priority = 9;
-        //    else if (suchThatType == RelRefType::USES_S)
-        //        priority = 10;
-        //    else if (suchThatType == RelRefType::MODIFIES_P)
-        //        priority = 11;
-        //    else if (suchThatType == RelRefType::MODIFIES_S)
-        //        priority = 12;
-        //}
-        /*else if (evalClType == EvalClType::Pattern) {
-            const auto& pattern = static_pointer_cast<PatternCl>(evalCl);
-            const auto& patternType = pattern->getPatternClType(selectCl->synonymToParentDeclarationMap);
-            if (patternType == PatternClType::PatternAssign) {
-                priority = 13;
-            }
-        }
-        else if (evalClType == EvalClType::SuchThat) {
-            const auto& suchThatCl = static_pointer_cast<SuchThatCl>(evalCl);
-            const auto& suchThatType = suchThatCl->relRef->getType();
-            if (suchThatType == RelRefType::NEXT_BIP)
-                priority = 14;
-            else if (suchThatType == RelRefType::AFFECTS)
-                priority = 15;
-            else if (suchThatType == RelRefType::AFFECTS_BIP)
-                priority = 16;
-            else if (suchThatType == RelRefType::MODIFIES_S)
-                priority = 17;
-            else if (suchThatType == RelRefType::CALLS_T)
-                priority = 18;
-            else if (suchThatType == RelRefType::FOLLOWS_T)
-                priority = 19;
-            else if (suchThatType == RelRefType::PARENT_T)
-                priority = 20;
-            else if (suchThatType == RelRefType::NEXT_T)
-                priority = 21;
-            else if (suchThatType == RelRefType::AFFECTS_T)
-                priority = 22;
-            else if (suchThatType == RelRefType::NEXT_BIP_T)
-                priority = 23;
-            else if (suchThatType == RelRefType::AFFECTS_BIP_T)
-                priority = 24;
-        }*/
+       
         if (priority == -1) {
-            cout << "Could not match EvalCl type to match priority, priority is negative\n";
             throw "Could not match EvalCl type to match priority, priority is negative\n";
 
         }

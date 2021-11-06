@@ -51,7 +51,6 @@ void runLexerCases() {
         "assign a, b, c, test;\nvariable v;\nSelect v such that Uses(14, v)" // multiple assignments
     };
 
-    cout << "\n==== Lexer Test Cases ====\n";
     for (auto& s : lexerTestCases) {
         vector<PQLToken> curr = pqlLex(s); // lex(s) is r-value
         printLexTokens(move(curr));
@@ -64,12 +63,7 @@ void runParserDeclarationTest() {
     vector<PQLToken> temp = pqlLex(parserDeclarationTest);
     PQLParser parser(move(temp));
     auto d = parser.parseDeclaration();
-    for (auto& x : d->getSynonyms()) {
-        cout << x << " | ";
-    }
-
-    cout << "\nDesignEntityType: " << d->getDesignEntity()->getEntityTypeName() << endl;
-
+    
 }
 
 void runParserUsesTestCases() {
@@ -81,15 +75,14 @@ void runParserUsesTestCases() {
     };
 
     for (auto& s : parseUsesTestCases) {
-        cout << "\n==== ParseUsesTest: " << s << " ====" << endl;
         PQLParser usesParser(pqlLex(s));
         SPtr<RelRef> uses = usesParser.parseUses();
-        cout << uses->format();
+        
     }
 }
 
 void runParserSuchThatCases() {
-    vector<string> suchThatTestCases = { // TODO: include negative test cases for Uses, Modifies. How to handle parsing errors?
+    vector<string> suchThatTestCases = { 
        // Uses
        "such that Uses (1, \"x\")",
        "such that Uses (1, x)",
@@ -161,11 +154,9 @@ void runParserSuchThatCases() {
        "such that Parent*(3, 4)",
     };
 
-    cout << "\n==== SuchThat Tests ====\n";
     for (auto& s : suchThatTestCases) {
         PQLParser suchThatParser(pqlLex(s));
         auto suchThat = suchThatParser.parseSuchThat();
-        cout << "Such That: " << suchThat->relRef->format() << endl;
     }
 }
 
@@ -201,12 +192,10 @@ void runParserSelectCases() {
   
     };
 
-    cout << "\n==== Select Test Cases ====\n";
+    
     for (auto& t : selectTestCases) {
-        cout << "\n";
         PQLParser p(pqlLex(t));
         auto sel = p.parseSelectCl();
-        cout << sel->format() << endl;
     }
 
 }

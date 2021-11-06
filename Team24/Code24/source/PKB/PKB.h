@@ -81,7 +81,6 @@ class PKB
          * to subtract 1. */
         int targetIndexInMStatementsVector = stmtNumber - 1;
         stmt = mStatements[PKBDesignEntity::AllStatements][targetIndexInMStatementsVector];
-        assert(stmt->getIndex() == stmtNumber);
         return true;
     }
 
@@ -114,7 +113,7 @@ class PKB
         return mModifiedVariables[s];
     }
 
-    // todo @nicholas obviously string is not the correct type, change soon
+    
     PKBVariable::SharedPtr getVarByName(string s)
     {
         if (mVariables.find(s) == mVariables.end())
