@@ -13,22 +13,17 @@ using namespace std;
 
 inline string ClauseGroup::format() {
     string str = "";
-
     str += "Group syns: [";
     for (const auto& s : synonyms) str += s + ", ";
     str += "]";
-
     if (synonymsInsideResultCl) str += " (Has Synonyms inside ResultCl)";
     else str += " (No synonyms in ResultCl)";
-
     str += (", Clause Size = " + to_string(clauses.size()));
     str += (", Synonyms Size = " + to_string(synonyms.size()));
-
     for (const auto& evalCl : clauses) {
         str += evalCl->format();
     }
     str += "\n";
-
     return str;
 }
 
@@ -126,15 +121,6 @@ void PQLOptimizer::filterTuples(vector<shared_ptr<ResultTuple>>& resultsFromClau
             }
             filteredResults.emplace_back(move(ptr));
             seenBeforeTuples.insert(move(tempHash));
-
-
-            //shared_ptr<ResultTuple> candidate = make_shared<ResultTuple>();
-            //for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
-            //    if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
-            //    candidate->synonymKeyToValMap.insert(move(*(ptr->synonymKeyToValMap.find(synKey))));
-            //}
-            //filteredResults.emplace_back(move(candidate));
-            //seenBeforeTuples.insert(move(tempHash));
         }
     }
 }

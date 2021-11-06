@@ -254,41 +254,6 @@ bool PKBPQLEvaluator::getParentsUnderscoreUnderscore()
 	return false;
 }
 
-set<int> PKBPQLEvaluator::getParentsT(PKBDesignEntity parentType, int childIndex)
-{
-	set<int> res;
-
-	return res;
-}
-
-set<pair<int, int>> PKBPQLEvaluator::getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType)
-{
-	set<pair<int, int>> res;
-
-	return res;
-}
-
-bool PKBPQLEvaluator::hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType,
-	PKBDesignEntity childType, unordered_set<int>& setResult)
-{
-	
-	return false;
-}
-
-set<pair<int, int>> PKBPQLEvaluator::getParentsT(PKBDesignEntity childType)
-{
-	set<pair<int, int>> res;
-
-	return res;
-}
-
-set<int> PKBPQLEvaluator::getChildrenT(PKBDesignEntity childType, int parentIndex)
-{
-	set<int> res;
-	
-	return res;
-}
-
 set<pair<int, int>> PKBPQLEvaluator::getChildrenT(PKBDesignEntity parentType, PKBDesignEntity childType)
 {
 	set<pair<int, int>> res;
@@ -867,76 +832,6 @@ const vector<string>& PKBPQLEvaluator::getUsesSynUnderscoreProc()
 	return mpPKB->usesSynUnderscoreTableProc;
 }
 
-vector<string> PKBPQLEvaluator::getUsed(int statementIndex)
-{
-	set<PKBVariable::SharedPtr > res;
-	PKBStmt::SharedPtr stmt;
-	if (!mpPKB->getStatement(statementIndex, stmt))
-	{
-		return varToString(move(res));
-	}
-
-	res = stmt->getUsedVariables();
-	return varToString(move(res));
-}
-
-bool PKBPQLEvaluator::checkUsed(int statementIndex)
-{
-	PKBStmt::SharedPtr stmt;
-	if (!mpPKB->getStatement(statementIndex, stmt))
-	{
-		return false;
-	}
-
-	return (stmt->getUsedVariablesSize() > 0);
-}
-
-bool PKBPQLEvaluator::checkUsed(int statementIndex, string ident)
-{
-	PKBVariable::SharedPtr targetVar;
-	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr)
-		return false;
-	PKBStmt::SharedPtr stmt;
-	if (!mpPKB->getStatement(statementIndex, stmt))
-	{
-		return false;
-	}
-
-	set<PKBVariable::SharedPtr >& allVars = stmt->getUsedVariables();
-	return allVars.find(targetVar) != allVars.end();
-}
-
-vector<string> PKBPQLEvaluator::getUsed(PKBDesignEntity userType)
-{
-	set<PKBVariable::SharedPtr > vars = mpPKB->getUsedVariables(userType);
-	return varToString(move(vars));
-}
-
-bool PKBPQLEvaluator::checkUsed(PKBDesignEntity entityType)
-{
-	return mpPKB->getUsedVariables(entityType).size() > 0;
-}
-
-bool PKBPQLEvaluator::checkUsed(PKBDesignEntity entityType, string ident)
-{
-	PKBVariable::SharedPtr targetVar;
-	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr)
-		return false;
-	set<PKBVariable::SharedPtr >& allVars = mpPKB->getUsedVariables(entityType);
-	return allVars.find(targetVar) != allVars.end();
-}
-
-vector<string> PKBPQLEvaluator::getUsed()
-{
-	set<PKBVariable::SharedPtr > vars = mpPKB->getUsedVariables(PKBDesignEntity::AllStatements);
-	return varToString(move(vars));
-}
-
-bool PKBPQLEvaluator::checkUsed()
-{
-	set<PKBVariable::SharedPtr >& vars = mpPKB->getUsedVariables(PKBDesignEntity::AllStatements);
-	return vars.size() > 0;
-}
 
 vector<string> PKBPQLEvaluator::getUsedByProcName(string procname)
 {
@@ -1016,67 +911,6 @@ bool PKBPQLEvaluator::procExists(string procname)
 	if (mpPKB->getProcedureByName(procname) == nullptr)
 		return false;
 	return true;
-}
-
-vector<int> PKBPQLEvaluator::getUsers()
-{
-	set<PKBStmt::SharedPtr > stmts = mpPKB->getAllUseStmts();
-	return stmtToInt(move(stmts));
-}
-
-vector<int> PKBPQLEvaluator::getUsers(PKBDesignEntity entityType)
-{
-	vector<PKBStmt::SharedPtr > stmts;
-
-	set<PKBStmt::SharedPtr >& useStmtsToCopyOver =
-		entityType != PKBDesignEntity::AllStatements ? mpPKB->getAllUseStmts(entityType) : mpPKB->getAllUseStmts();
-
-	for (auto& ptr : useStmtsToCopyOver)
-	{
-		stmts.emplace_back(ptr);
-	}
-
-	return stmtToInt(move(stmts));
-}
-
-vector<string> PKBPQLEvaluator::getProceduresThatUseVars()
-{
-	return procedureToString(mpPKB->setOfProceduresThatUseVars);
-}
-
-bool PKBPQLEvaluator::checkAnyProceduresUseVars()
-{
-	return mpPKB->setOfProceduresThatUseVars.size() > 0;
-}
-
-vector<string> PKBPQLEvaluator::getProceduresThatUseVar(string variableName)
-{
-	vector<string> toReturn;
-
-	if (mpPKB->variableNameToProceduresThatUseVarMap.find(variableName) ==
-		mpPKB->variableNameToProceduresThatUseVarMap.end())
-	{
-		return move(toReturn);
-	}
-
-	set<PKBProcedure::SharedPtr >& procedures = mpPKB->variableNameToProceduresThatUseVarMap[variableName];
-	toReturn.reserve(procedures.size());
-
-	for (auto& ptr : procedures)
-	{
-		toReturn.emplace_back(ptr->getName());
-	}
-
-	return move(toReturn);
-}
-
-bool PKBPQLEvaluator::checkAnyProceduresUseVars(string variableName)
-{
-	if (mpPKB->variableNameToProceduresThatUseVarMap.find(variableName) ==
-		mpPKB->variableNameToProceduresThatUseVarMap.end())
-		return false;
-
-	return mpPKB->variableNameToProceduresThatUseVarMap[variableName].size() > 0;
 }
 
 bool PKBPQLEvaluator::checkModified(int statementIndex)
