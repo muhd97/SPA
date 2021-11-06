@@ -13,22 +13,17 @@ using namespace std;
 
 inline string ClauseGroup::format() {
     string str = "";
-
     str += "Group syns: [";
     for (const auto& s : synonyms) str += s + ", ";
     str += "]";
-
     if (synonymsInsideResultCl) str += " (Has Synonyms inside ResultCl)";
     else str += " (No synonyms in ResultCl)";
-
     str += (", Clause Size = " + to_string(clauses.size()));
     str += (", Synonyms Size = " + to_string(synonyms.size()));
-
     for (const auto& evalCl : clauses) {
         str += evalCl->format();
     }
     str += "\n";
-
     return str;
 }
 
@@ -40,10 +35,6 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
     vector<OptNode*> allNodes;
 
     shared_ptr<ClauseGroup> cgForNoSynClauses = make_shared<ClauseGroup>();
-
-#if DEBUG_GROUPS
-    cout << "Number of clauses: " << evalClauses.size() << endl;
-#endif
 
     for (const auto& ptr : evalClauses) {
         const auto& allSyn = ptr->getAllSynonymsAsString();
@@ -86,13 +77,6 @@ vector<shared_ptr<ClauseGroup>> PQLOptimizer::getClauseGroups() {
     if (!cgForNoSynClauses->clauses.empty()) toReturn.emplace_back(cgForNoSynClauses);
 
     sortClauseGroups(toReturn);
-#if DEBUG_GROUPS
-    /* Debugging: */
-    for (const auto& cg : toReturn) {
-    cout << cg->format();
-    cout << "\n";
-    }
-#endif
     /* DO CLEANUP OF NODES */
     for (OptNode* n : allNodes) 
         delete n;
@@ -126,15 +110,6 @@ void PQLOptimizer::filterTuples(vector<shared_ptr<ResultTuple>>& resultsFromClau
             }
             filteredResults.emplace_back(move(ptr));
             seenBeforeTuples.insert(move(tempHash));
-
-
-            //shared_ptr<ResultTuple> candidate = make_shared<ResultTuple>();
-            //for (const auto& synKey : synonymsUsedInResultClauseOrdered) {
-            //    if (!ptr->synonymKeyAlreadyExists(synKey)) continue;
-            //    candidate->synonymKeyToValMap.insert(move(*(ptr->synonymKeyToValMap.find(synKey))));
-            //}
-            //filteredResults.emplace_back(move(candidate));
-            //seenBeforeTuples.insert(move(tempHash));
         }
     }
 }
@@ -197,9 +172,6 @@ void PQLOptimizer::BFS(OptNode* start, unordered_map<OptNode*, vector<OptNode*>>
 
 inline void PQLOptimizer::sortSingleClauseGroup(shared_ptr<ClauseGroup>& cg)
 {
-#if DEBUG_SORT_WITHIN_GROUP
-    cout << "Sort Within ClauseGroup\n";
-#endif
     auto& currClauses = cg->clauses;
     int currGroupSize = currClauses.size();
     int firstClauseIdx = -1;
@@ -218,9 +190,6 @@ inline void PQLOptimizer::sortSingleClauseGroup(shared_ptr<ClauseGroup>& cg)
     catch (...) {
         return;
     }
-#if DEBUG_SORT_WITHIN_GROUP
-    cout << "Sorted\n";
-#endif
     unordered_set<EvalCl*> seenClauses;
     vector<shared_ptr<EvalCl>> finalSortedOrder;
     unordered_set<string> seenSynonyms;
@@ -228,9 +197,7 @@ inline void PQLOptimizer::sortSingleClauseGroup(shared_ptr<ClauseGroup>& cg)
     finalSortedOrder.emplace_back(firstClause);
     seenClauses.insert(firstClause.get());
     for (const auto& syn : firstClause->getAllSynonymsAsString()) seenSynonyms.insert(syn);
-#if DEBUG_SORT_WITHIN_GROUP
-    cout << "Before While\n";
-#endif
+
     while (finalSortedOrder.size() != currGroupSize) {
         int bestIdx = -1;
         int bestOverlap = -1;

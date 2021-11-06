@@ -264,11 +264,7 @@ shared_ptr<RelRef> PQLParser::parseUses()
     { /* If first arg of Uses() is a
        string, it must be a UsesP */
         auto eRef = parseEntRef();
-        if (eRef->getEntRefType() == EntRefType::UNDERSCORE)
-        {
-            // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
-        }
-
+        
         eat(PQLTokenType::COMMA);
         auto rRef = parseEntRef();
         eat(PQLTokenType::RIGHT_PAREN);
@@ -277,11 +273,7 @@ shared_ptr<RelRef> PQLParser::parseUses()
     else
     {
         auto sRef = parseStmtRef();
-        if (sRef->getStmtRefType() == StmtRefType::UNDERSCORE)
-        {
-            // TODO: Handle Error. INVALID to have underscore first Uses (_, x)
-        }
-
+        
         eat(PQLTokenType::COMMA);
         auto rRef = parseEntRef();
         eat(PQLTokenType::RIGHT_PAREN);
@@ -297,12 +289,7 @@ shared_ptr<RelRef> PQLParser::parseModifies()
     { /* If first arg of Modifies() is a string, it must
 be a ModifiesP */
         auto sRef11 = parseStmtRef();
-        if (sRef11->getStmtRefType() == StmtRefType::UNDERSCORE)
-        {
-            // TODO: Handle Error. INVALID to have underscore first Modifies (_,
-            // x)
-        }
-
+        
         eat(PQLTokenType::COMMA);
         auto eRef12 = parseEntRef();
         eat(PQLTokenType::RIGHT_PAREN);
@@ -312,12 +299,7 @@ be a ModifiesP */
     { /* If first arg of Modifies() is a string, it must be a ModifiesP */
 
         auto eRef11 = parseEntRef();
-        if (eRef11->getEntRefType() == EntRefType::UNDERSCORE)
-        {
-            // TODO: Handle Error. INVALID to have underscore first Modifies (_,
-            // x)
-        }
-
+        
         eat(PQLTokenType::COMMA);
         auto eRef12 = parseEntRef();
         eat(PQLTokenType::RIGHT_PAREN);

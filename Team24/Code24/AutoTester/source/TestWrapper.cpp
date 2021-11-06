@@ -42,7 +42,6 @@ void TestWrapper::parse(std::string filename) {
     string program;
     string currentLine;
     ifstream program_file(filename);
-
     try {
         while (getline(program_file, currentLine))
         {
@@ -54,7 +53,6 @@ void TestWrapper::parse(std::string filename) {
         printSimpleTokens(tokens);
 #endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
-        cout << root->format();
 #if PRINT_PARSED_PROGRAM
         cout << root->format();
         cout << "\n==== Building PKB ====\n";
@@ -92,7 +90,6 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
     try {
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
-
 #if DEBUG
         cout << "\n==== Printing Parsed Query ====\n";
         cout << sel->format() << endl;
@@ -100,15 +97,12 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
         cout << "\n==== Created PQLEvaluator using PKB ====\n";
 #endif
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
-
 #if DEBUG
         cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
 #endif
         const vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
-
-        for (auto& r : res) {
+        for (auto& r : res)
             results.emplace_back(move(r->getResultAsString()));
-        }
     }
 
 #if PRINT_EXCEPTION_STATEMENTS

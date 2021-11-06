@@ -38,39 +38,15 @@ void TestPKBEvaluator::runTest1() {
 
     shared_ptr<Program> root = parseSimpleProgram(tokens);
 
-    // for debugging
-    cout << root->format();
-
-    // BUILD PKB HERE
-    cout << "\n==== Building PKB ====\n";
     this->pkb->initialise();
     this->pkb->extractDesigns(root);
-    cout << "\n==== PKB has been populated. ====\n";
     evaluator = PQLEvaluator::create(pkb);
-    cout << "\n==== Created PQLEvaluator using PKB ====\n";
-
-    cout << "\n==== Running PQL Tests ====\n";
     runFollowsTests1();
     runParentTests1();
 
     // constants test
-    cout << "constants test 1" << endl;
     unordered_set<int> constants = evaluator->getAllConstants();
     unordered_set<int> expected = { 0, 1 };
-    if (constants != expected) {
-        cout << "FAILED: Actual: ";
-        for (auto& i : constants) {
-            cout << i;
-        }
-        cout << endl;
-        cout << "Expected: ";
-        for (auto& i : expected) {
-            cout << i;
-        }
-        cout << endl;
-    }
-
-    cout << "\n==== End PQL Tests ====\n";
 }
 
 void TestPKBEvaluator::runTest2() {
@@ -121,58 +97,24 @@ void TestPKBEvaluator::runTest2() {
     printSimpleTokens(tokens);
     shared_ptr<Program> root = parseSimpleProgram(tokens);
 
-    // for debugging
-    cout << root->format();
-
+    
     // BUILD PKB HERE
-    cout << "\n==== Building PKB ====\n";
     this->pkb->initialise();
     this->pkb->extractDesigns(root);
-    cout << "\n==== PKB has been populated. ====\n";
     evaluator = PQLEvaluator::create(pkb);
-    cout << "\n==== Created PQLEvaluator using PKB ====\n";
-
-    cout << "\n==== Running PQL Tests ====\n";
     runFollowsTests2();
     runParentTests2();
 
     // constants test
-    cout << "constants test 2" << endl;
     unordered_set<int> constants = evaluator->getAllConstants();
     unordered_set<int> expected = { 0, 1, 2, 3, 5 };
-    if (constants != expected) {
-        cout << "FAILED: Actual: ";
-        for (auto& i : constants) {
-            cout << i;
-        }
-        cout << endl;
-        cout << "Expected: ";
-        for (auto& i : expected) {
-            cout << i;
-        }
-        cout << endl;
-    }
+    
 
-    cout << "\n==== End PQL Tests ====\n";
 }
 
 void TestPKBEvaluator::checkResult(int testIndex, vector<int> res, vector<int> expected) {
     std::sort(res.begin(), res.end());
-    if (res == expected) {
-        cout << "RESULT " << testIndex << ": OK \n";
-    }
-    else {
-        cout << "RESULT " << testIndex << ": FAIL \n";
-        cout << "Expected: ";
-        for (int i = 0; i < expected.size(); i++)
-            std::cout << expected.at(i) << ' ';
-        cout << "\n";
 
-        cout << "Actual: ";
-        for (int i = 0; i < res.size(); i++)
-            std::cout << res.at(i) << ' ';
-        cout << "\n";
-    }
 }
 
 void TestPKBEvaluator::printResult(int testIndex, vector<string> res) {
@@ -278,14 +220,6 @@ void TestPKBEvaluator::runFollowsTests1() {
 
 }
 
-void TestPKBEvaluator::runParentTests1() {
-
-}
-
-void TestPKBEvaluator::runParentTests2()
-{
-}
-
 void TestPKBEvaluator::runFollowsTests2() {
     int testCounter = 0;
     vector<int> res;
@@ -316,7 +250,7 @@ void TestPKBEvaluator::runFollowsTests2() {
         { },
         { },
     };
-    cout << pkb->mStatements.size() << endl;
+    
     for (auto i = 0; i < pkb->mStatements[PKBDesignEntity::AllStatements].size(); i++) {
         res = evaluator->getBefore(PKBDesignEntity::AllStatements, i+1);
         expected = expectedArray[i];
@@ -339,22 +273,12 @@ void TestPKBEvaluator::runPatternTests1()
 
     vector<SimpleToken> tokens = simpleLex(program);
 
-    // for debugging
     printSimpleTokens(tokens);
     shared_ptr<Program> root = parseSimpleProgram(tokens);
-    // for debugging
-    cout << root->format();
-
-    // BUILD PKB HERE
-    cout << "\n==== Building PKB ====\n";
     this->pkb->initialise();
     this->pkb->extractDesigns(root);
-    cout << "\n==== PKB has been populated. ====\n";
     evaluator = PQLEvaluator::create(pkb);
-    cout << "\n==== Created PQLEvaluator using PKB ====\n";
-
-    cout << "\n==== Running PQL Tests ====\n";
-
+    
     //0
     vector<int> res = evaluator->matchExactPattern("x", "v + x * y + z * t");
     vector<int> expected = { 6 };
@@ -392,22 +316,9 @@ void TestPKBEvaluator::runPatternTests1()
     expected = { 6 };
     checkResult(8, res, expected);
 
-    // constants test
-    cout << "constants test pattern" << endl;
     unordered_set<int> constants = evaluator->getAllConstants();
     unordered_set<int> expectedd = { 1, 2, 3, 4, 5 };
-    if (constants != expectedd) {
-        cout << "FAILED: Actual: ";
-        for (auto& i : constants) {
-            cout << i;
-        }
-        cout << endl;
-        cout << "Expected: ";
-        for (auto& i : expectedd) {
-            cout << i;
-        }
-        cout << endl;
-    }
+    
 }
 
 void TestPKBEvaluator::runPatternTests2()

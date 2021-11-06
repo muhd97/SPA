@@ -33,8 +33,6 @@ SimpleToken makeStringToken(string value, int location)
 }
 
 // Basic lookahead lexer / tokenizer based on chapter 3 of the dragon book
-// TODO: (@jiachen247) optimize for perf
-// TODO: (@jiachen247) check for empty programs and catch syntax errors
 vector<SimpleToken> simpleLex(string program)
 {
     vector<SimpleToken> tokens;
@@ -260,13 +258,3 @@ string getSimpleTokenLabel(SimpleToken token)
     return "";
 }
 
-// use this for debugging the lexer output
-void printSimpleTokens(vector<SimpleToken> tokens)
-{
-    cout << "=== Printing Tokens ===" << endl;
-    for (SimpleToken token : tokens)
-    {
-        cout << getSimpleTokenLabel(token) << " ";
-    }
-    cout << endl << "=== END ===" << endl << endl;
-}

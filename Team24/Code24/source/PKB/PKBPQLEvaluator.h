@@ -89,39 +89,6 @@ class PKBPQLEvaluator
 
     bool hasChildren(PKBDesignEntity childType, int parentIndex);
 
-    // Parent*
-
-    // Get all direct/indirect parent statements of type {parentType} of child
-    // statement indexed {child} eg. stmt s; Select s such that ParentT( s, 14 );
-    // => getParentsT( PKBDE::AllExceptProcedure, 14 ) // find all direct/indirect
-    // parent stmts of stmt 14 eg. if ifs; Select ifs such that ParentT( ifs, 14
-    // );
-    // => getParentsT( PKBDE::If, 14 ) // find all direct/indirect 'if' parent
-    // stmts of stmt 14
-    set<int> getParentsT(PKBDesignEntity parentType, int child);
-
-    // Get all direct/indirect parent statements of type {parentType} of child
-    // statements of type {childType} eg. if ifs; while w; Select ifs such that
-    // ParentT( ifs, w );
-    // => getParentsT( PKBDE::If, PKBDE::While ) // find all direct/indirect 'if'
-    // parent stmts of all 'while' stmts
-    set<pair<int, int>> getParentsT(PKBDesignEntity parentType, PKBDesignEntity childType);
-
-    // Get all direct/indirect parent statements of child statements of type
-    // {childType} eg. stmt s; assign a; Select s such that ParentT( s, a );
-    // => getParentsT( PKBDE::Assign ) // find all direct/indirect parent stmts of
-    // all 'assign' stmts
-    set<pair<int, int>> getParentsT(PKBDesignEntity childType);
-
-    // Get all direct/indirect children statements of type {childType} with parent
-    // statement indexed {parent} eg. stmt s; Select s such that ParentT( 14, s );
-    // => getChildrenT( PKBDE::AllExceptProcedure, 14 ) // find all
-    // direct/indirect children stmts of stmt 14 eg. if ifs; Select ifs such that
-    // ParentT( 14, ifs );
-    // => getChildrenT( PKBDE::If, 14 ) // find all direct/indirect 'if' children
-    // stmts of stmt 14
-    set<int> getChildrenT(PKBDesignEntity child, int parent);
-
     // Get all direct/indirect children statements of type {childType} with parent
     // statements of type {parentType} eg. if ifs; while w; Select ifs such that
     // ParentT( w, ifs );
@@ -262,27 +229,6 @@ class PKBPQLEvaluator
     bool procExists(string procname);
     bool statementExists(int statementNo);
 
-    // Get the names of all variables used by statement indexed {statementIndex}
-    vector<string> getUsed(int statementIndex);
-    /* Check if the given stmt Index USES any variables. */
-    bool checkUsed(int statementIndex);
-    /* Check if the given stmt Index USES a specific variable specified by {ident}
-     */
-    bool checkUsed(int statementIndex, string ident);
-
-    // Get the names of all variables used by all statements of type {entityType}
-    vector<string> getUsed(PKBDesignEntity entityType);
-    /* Check if the given {entityType} uses any variables */
-    bool checkUsed(PKBDesignEntity entityType);
-    /* Check if the given {entityType} uses a given variable specified by {ident}
-     */
-    bool checkUsed(PKBDesignEntity entityType, string ident);
-
-    // Get the names of all variables used by at least one statement
-    vector<string> getUsed();
-    /* Check if at least one statement uses a variable. */
-    bool checkUsed();
-
     // Get the names of all variables used by procedure with name {procname}
     vector<string> getUsedByProcName(string procname);
     /* Check if given procedure {procname} uses at least one variable. */
@@ -296,19 +242,6 @@ class PKBPQLEvaluator
     // Get all statements of type {entityType} that use the variable of name
     // {variableName}
 
-    // Get all statements that use at least one variable
-    vector<int> getUsers();
-    // Get all statements of type {entityType} that use at least one variable
-    vector<int> getUsers(PKBDesignEntity entityType);
-
-    // Get all procedures that use at least one variable
-    vector<string> getProceduresThatUseVars();
-    /* Check if there are procedures that use variables */
-    bool checkAnyProceduresUseVars();
-    // Get all procedures that use the given variable of {variableName}
-    vector<string> getProceduresThatUseVar(string variableName);
-    /* Check if there are procedures that use the given variable {variableName} */
-    bool checkAnyProceduresUseVars(string variableName);
 
     // Modifies
 
@@ -649,10 +582,6 @@ class PKBPQLEvaluator
         stmts.insert(stmts.end(), ifStmts.begin(), ifStmts.end());
         stmts.insert(stmts.end(), whileStmts.begin(), whileStmts.end());
     }
-
-    // helper function for ParentT (getParentsT)
-    bool hasEligibleChildRecursive(PKBGroup::SharedPtr grp, PKBDesignEntity parentType, PKBDesignEntity childType,
-                                   unordered_set<int> &setResult);
 
     // helpers for pattern
     vector<string> inOrderTraversalHelper(shared_ptr<Expression> expr);

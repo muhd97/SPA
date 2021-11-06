@@ -84,7 +84,7 @@ namespace UnitTesting
             cout.rdbuf(oldCoutStreamBuf);
 
             // Will output our string from above.
-            //cout << strCout.str();
+            cout << strCout.str();
 
             std::string actualResultString = strCout.str();
            
