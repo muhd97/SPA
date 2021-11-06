@@ -50,6 +50,8 @@
     <ClCompile Include="..\source\PKB\PKBPQLNextBipHandler.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLModifyHandler.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLUseHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBPQLFollowsHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBPQLParentHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
@@ -105,5 +107,7 @@
     <ClInclude Include="..\source\PKB\PKBPQLNextBipHandler.h" />
     <ClInclude Include="..\source\PKB\PKBPQLModifyHandler.h" />
     <ClInclude Include="..\source\PKB\PKBPQLUseHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBPQLFollowsHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBPQLParentHandler.h" />
   </ItemGroup>
 </Project>
