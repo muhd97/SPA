@@ -40,7 +40,7 @@ class PKBGroup
     set<PKBVariable::SharedPtr> mModifies;
 
     // groups
-    PKBGroup::WeakPtr mParentGroup;           // Weak pointer to parentGroup
+    PKBGroup::SharedPtr mParentGroup;           // Weak pointer to parentGroup
     vector<PKBGroup::SharedPtr> mChildGroups; // vector of shared pointer to all of it's child groups.
 
     // returns index (statement number) of statement which owns this group
@@ -50,7 +50,7 @@ class PKBGroup
         return mOwnerIndex;
     }
 
-    const weak_ptr<PKBGroup> &getParentGroupWeakPtr() const
+    const shared_ptr<PKBGroup> &getParentGroupWeakPtr() const
     {
         return mParentGroup;
     }
@@ -80,12 +80,12 @@ class PKBGroup
     // add a statement of type specified by designEntity
     void addMember(int statementIndex, PKBDesignEntity designEntity)
     {
-        mMembers[designEntity].emplace_back(statementIndex);
+        mMembers[designEntity].push_back(statementIndex);
 
         // also add it to the combined list of all members
         if (designEntity != PKBDesignEntity::AllStatements)
         {
-            mMembers[PKBDesignEntity::AllStatements].emplace_back(statementIndex);
+            mMembers[PKBDesignEntity::AllStatements].push_back(statementIndex);
         }
     }
 
@@ -99,12 +99,12 @@ class PKBGroup
         mModifies.insert(variables.begin(), variables.end());
     }
 
-    void addChildGroup(PKBGroup::SharedPtr &childGroup)
+    void addChildGroup(PKBGroup::SharedPtr childGroup)
     {
-        mChildGroups.emplace_back(childGroup);
+        mChildGroups.push_back(childGroup);
     }
 
-    void setParentGroup(PKBGroup::SharedPtr &parentGroup)
+    void setParentGroup(PKBGroup::SharedPtr parentGroup)
     {
      
         mParentGroup = parentGroup;
@@ -162,13 +162,13 @@ class PKBGroupEntity
 
     void setGroup(PKBGroup::SharedPtr belongsTo);
 
-    void addContainerGroup(PKBGroup::SharedPtr &containerGroup);
+    void addContainerGroup(PKBGroup::SharedPtr containerGroup);
 
-    void addUsedVariable(PKBVariable::SharedPtr &variable);
+    void addUsedVariable(PKBVariable::SharedPtr variable);
 
     void addModifiedVariable(PKBVariable::SharedPtr variable);
 
-    void addUsedVariables(set<PKBVariable::SharedPtr> &variables);
+    void addUsedVariables(set<PKBVariable::SharedPtr>& variables);
 
     void addModifiedVariables(set<PKBVariable::SharedPtr> variables);
 

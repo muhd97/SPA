@@ -80,7 +80,7 @@ void PKB::initializeRelationshipTables()
         [this]() {this->initializeNextTables(); }
     };
 
-    std::for_each(execution::par, funcs.begin(), funcs.end(), [](auto&& f) {f(); });
+    std::for_each(execution::seq, funcs.begin(), funcs.end(), [](auto&& f) {f(); });
     
     
 }
@@ -248,7 +248,7 @@ bool PKB::statementExists(int statementNo)
     return true;
 }
 
-PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &group, string& procName)
+PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr group, string procName)
 {
     // determine statement type
     PKBDesignEntity designEntity = simpleToPKBType(statement->getStatementType());
@@ -275,7 +275,7 @@ PKBStmt::SharedPtr PKB::extractStatement(shared_ptr<Statement> &statement, PKBGr
 }
 
 // return PKBProcedure of the procedureSimple extracted
-PKBProcedure::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSimple)
+PKBProcedure::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> procedureSimple)
 {
     // create procedureSimple statement
     PKBProcedure::SharedPtr res = PKBProcedure::create(procedureSimple->getName());
@@ -353,7 +353,7 @@ PKBProcedure::SharedPtr PKB::extractProcedure(shared_ptr<Procedure> &procedureSi
     return res;
 }
 
-PKBStmt::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup)
 {
     // 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles
     // PARENTS and FOLLOWS
@@ -405,7 +405,7 @@ PKBStmt::SharedPtr PKB::extractAssignStatement(shared_ptr<Statement> &statement,
     return res;
 }
 
-PKBStmt::SharedPtr PKB::extractReadStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractReadStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup)
 {
     // 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles
     // PARENTS and FOLLOWS
@@ -445,7 +445,7 @@ PKBStmt::SharedPtr PKB::extractReadStatement(shared_ptr<Statement> &statement, P
     return res;
 }
 
-PKBStmt::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup)
 {
     // create the PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -482,7 +482,7 @@ PKBStmt::SharedPtr PKB::extractPrintStatement(shared_ptr<Statement> &statement, 
     return res;
 }
 
-PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName)
+PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup, string procName)
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -589,7 +589,7 @@ PKBStmt::SharedPtr PKB::extractIfStatement(shared_ptr<Statement> &statement, PKB
     return res;
 }
 
-PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup, string& procName)
+PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup, string procName)
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -677,7 +677,7 @@ PKBStmt::SharedPtr PKB::extractWhileStatement(shared_ptr<Statement> &statement, 
     return res;
 }
 
-PKBStmt::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::extractCallStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup)
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -976,7 +976,7 @@ void PKB::initializeParentTTables()
             vector<int> toAdd;
             if (!isContainerType(stmt->getType()))
             {
-                parentTIntSynTable[stmt->getIndex()][de] = move(toAdd);
+                parentTIntSynTable[stmt->getIndex()][de] = toAdd;
                 continue;
             }
 
@@ -1134,9 +1134,7 @@ void PKB::initializeParentTTables()
                 }
 
                 if (isValidParentStmt)
-                {
                     parentTSynIntTable[childStmtNo][de].insert(parStmt->getIndex());
-                }
             }
         }
     }
@@ -1416,7 +1414,7 @@ void PKB::buildTerminalStatements(string procedure, unordered_set<string> visite
 }
 
 
-void PKB::addStatement(PKBStmt::SharedPtr &statement, PKBDesignEntity designEntity)
+void PKB::addStatement(PKBStmt::SharedPtr statement, PKBDesignEntity designEntity)
 {
     mStatements[designEntity].emplace_back(statement);
 
@@ -1427,13 +1425,13 @@ void PKB::addStatement(PKBStmt::SharedPtr &statement, PKBDesignEntity designEnti
     }
 }
 
-void PKB::addProcedure(PKBProcedure::SharedPtr &procedure)
+void PKB::addProcedure(PKBProcedure::SharedPtr procedure)
 {
     procedureNameToProcedureMap[procedure->getName()] = procedure;
     mAllProcedures.insert(procedure);
 }
 
-inline void PKB::addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr &variable)
+inline void PKB::addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr variable)
 {
     mUsedVariables[designEntity].insert(variable);
 
@@ -1444,7 +1442,7 @@ inline void PKB::addUsedVariable(PKBDesignEntity designEntity, PKBVariable::Shar
     }
 }
 
-void PKB::addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr> &variables)
+void PKB::addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr>& variables)
 {
     for (auto v : variables)
     {
@@ -1452,7 +1450,7 @@ void PKB::addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedP
     }
 }
 
-void PKB::addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr &variable)
+void PKB::addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr variable)
 {
     mModifiedVariables[designEntity].insert(variable);
 
@@ -1463,7 +1461,7 @@ void PKB::addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedP
     }
 }
 
-void PKB::addModifiedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr> &variables)
+void PKB::addModifiedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr>& variables)
 {
     for (auto v : variables)
     {
@@ -1474,7 +1472,7 @@ void PKB::addModifiedVariable(PKBDesignEntity designEntity, set<PKBVariable::Sha
 // this is a wrapper around PKBStatement::create()
 // we need a wrapper because there are administrative tasks after creating the
 // PKBStatement we need to perform
-PKBStmt::SharedPtr PKB::createPKBStatement(shared_ptr<Statement> &statement, PKBGroup::SharedPtr &parentGroup)
+PKBStmt::SharedPtr PKB::createPKBStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup)
 {
     PKBDesignEntity de = simpleToPKBType(statement->getStatementType());
 
@@ -1494,7 +1492,7 @@ PKBStmt::SharedPtr PKB::createPKBStatement(shared_ptr<Statement> &statement, PKB
 // this is a wrapper around PKBGroup::create()
 // we need a wrapper because there are administrative tasks after creating the
 // PKBGroup to handle child/parent group relationships
-PKBGroup::SharedPtr PKB::createPKBGroup(PKBStmt::SharedPtr &ownerStatement, PKBGroup::SharedPtr &parentGroup)
+PKBGroup::SharedPtr PKB::createPKBGroup(PKBStmt::SharedPtr ownerStatement, PKBGroup::SharedPtr parentGroup)
 {
     // create group
     PKBGroup::SharedPtr group = PKBGroup::create(ownerStatement->getIndex());
@@ -1507,7 +1505,7 @@ PKBGroup::SharedPtr PKB::createPKBGroup(PKBStmt::SharedPtr &ownerStatement, PKBG
 }
 
 // version for Procedure PKBGroup, it doesnt have a parentGroup
-PKBGroup::SharedPtr PKB::createPKBGroup(string &name, PKBProcedure::SharedPtr &ownerProcedure)
+PKBGroup::SharedPtr PKB::createPKBGroup(string name, PKBProcedure::SharedPtr ownerProcedure)
 {
 
     // create group
