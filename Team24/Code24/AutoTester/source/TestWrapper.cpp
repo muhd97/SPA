@@ -59,44 +59,11 @@ void TestWrapper::parse(std::string filename) {
 #endif
         this->pkb->initialise();
         this->pkb->extractDesigns(root);
-        cout << "01 ====\n";
-        for (const auto& stmt : this->pkb->getStatements(PKBDesignEntity::If)) {
-            cout << "stmt no = " << stmt->getIndex() << endl;
-            for (const auto& g : stmt->getContainerGroups()) {
-
-                cout << "Group Addr: " << g.get() << ", size = " << g->getMembers(PKBDesignEntity::AllStatements).size() << endl;
-            }
-        }
         this->pkb->initializeCFG(root);
         this->pkb->computeGoNextCFG(pkb->cfg);
-        cout << "02 ====\n";
-        for (const auto& stmt : this->pkb->getStatements(PKBDesignEntity::If)) {
-            cout << "stmt no = " << stmt->getIndex() << endl;
-            for (const auto& g : stmt->getContainerGroups()) {
-
-                cout << "Group Addr: " << g.get() << ", size = " << g->getMembers(PKBDesignEntity::AllStatements).size() << endl;
-            }
-        }
         this->pkb->initializeRelationshipTables();
-        cout << "03 ====\n";
-        for (const auto& stmt : this->pkb->getStatements(PKBDesignEntity::If)) {
-            cout << "stmt no = " << stmt->getIndex() << endl;
-            for (const auto& g : stmt->getContainerGroups()) {
-
-                cout << "Group Addr: " << g.get() << ", size = " << g->getMembers(PKBDesignEntity::AllStatements).size() << endl;
-            }
-        }
         this->pkb->initializeWithTables();
         this->evaluator = PKBPQLEvaluator::create(this->pkb);
-        cout << "04 ====\n";
-        for (const auto& stmt : this->pkb->getStatements(PKBDesignEntity::If)) {
-            cout << "stmt no = " << stmt->getIndex() << endl;
-            for (const auto& g : stmt->getContainerGroups()) {
-
-                cout << "Group Addr: " << g.get() << ", size = " << g->getMembers(PKBDesignEntity::AllStatements).size() << endl;
-            }
-        }
-
 #if DEBUG
         cout << "\n==== PKB has been populated. ====\n";
 #endif
