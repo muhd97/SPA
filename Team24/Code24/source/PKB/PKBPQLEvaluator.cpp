@@ -701,188 +701,63 @@ bool PKBPQLEvaluator::procExists(string procname)
 
 bool PKBPQLEvaluator::checkModified(int statementIndex)
 {
-	PKBStmt::SharedPtr stmt;
-	if (!mpPKB->getStatement(statementIndex, stmt))
-	{
-		return false;
-	}
-
-	return stmt->getModifiedVariables().size() > 0;
+	return modifyHandler->checkModified(statementIndex);
 }
 
 bool PKBPQLEvaluator::checkModified(int statementIndex, string ident)
 {
-	PKBVariable::SharedPtr targetVar;
-	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr)
-		return false;
-	PKBStmt::SharedPtr stmt;
-	if (!mpPKB->getStatement(statementIndex, stmt))
-	{
-		return false;
-	}
-
-	set<PKBVariable::SharedPtr >& allVars = stmt->getModifiedVariables();
-	return allVars.find(targetVar) != allVars.end();
-}
-
-bool PKBPQLEvaluator::checkModified(PKBDesignEntity entityType)
-{
-	return mpPKB->getModifiedVariables(entityType).size() > 0;
+	return modifyHandler->checkModified(statementIndex, ident);
 }
 
 bool PKBPQLEvaluator::checkModifiedByProcName(string procname)
 {
-	PKBProcedure::SharedPtr procedure;
-	if ((procedure = mpPKB->getProcedureByName(procname)) == nullptr)
-	{
-		return false;
-	}
-
-	return procedure->getModifiedVariables().size() > 0;
+	return modifyHandler->checkModifiedByProcName(procname);
 }
 
 bool PKBPQLEvaluator::checkModifiedByProcName(string procname, string ident)
 {
-	PKBProcedure::SharedPtr procedure;
-	if ((procedure = mpPKB->getProcedureByName(procname)) == nullptr)
-		return false;
-
-	PKBVariable::SharedPtr targetVar;
-	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr)
-		return false;
-
-	const set<PKBVariable::SharedPtr >& varsUsed = procedure->getModifiedVariables();
-
-	return varsUsed.find(targetVar) != varsUsed.end();
+	return modifyHandler->checkModifiedByProcName(procname, ident);
 }
 
 /*Get all variable names modified by the particular rightStatement */
 vector<string> PKBPQLEvaluator::getModified(int statementIndex)
 {
-	PKBStmt::SharedPtr stmt;
-	if (!mpPKB->getStatement(statementIndex, stmt))
-	{
-		return vector<string>();
-	}
-
-	set<PKBVariable::SharedPtr > vars = stmt->getModifiedVariables();
-	return varToString(vars);
+	return modifyHandler->getModified(statementIndex);
 }
 
 vector<string> PKBPQLEvaluator::getModifiedByProcName(string procname)
 {
-	if (mpPKB->getProcedureByName(procname) == nullptr)
-	{
-		return vector<string>();
-	}
-
-	PKBProcedure::SharedPtr& procedure = mpPKB->getProcedureByName(procname);
-
-	vector<PKBVariable::SharedPtr > vars;
-	const set<PKBVariable::SharedPtr >& varsModified = procedure->getModifiedVariables();
-	vars.reserve(varsModified.size());
-
-	for (auto& v : varsModified)
-	{
-		vars.emplace_back(v);
-	}
-
-	return varToString(move(vars));
+	return modifyHandler->getModifiedByProcName(procname);
 }
 
 vector<string> PKBPQLEvaluator::getProceduresThatModifyVars()
 {
-	return procedureToString(mpPKB->mProceduresThatModifyVars);
+	return modifyHandler->getProceduresThatModifyVars();
 }
 
 vector<string> PKBPQLEvaluator::getProceduresThatModifyVar(string variableName)
 {
-	vector<string> toReturn;
-
-	if (mpPKB->mVariableNameToProceduresThatModifyVarsMap.find(variableName) ==
-		mpPKB->mVariableNameToProceduresThatModifyVarsMap.end())
-	{
-		return move(toReturn);
-	}
-
-	set<PKBProcedure::SharedPtr >& procedures = mpPKB->mVariableNameToProceduresThatModifyVarsMap[variableName];
-	toReturn.reserve(procedures.size());
-
-	for (auto& ptr : procedures)
-	{
-		toReturn.emplace_back(ptr->getName());
-	}
-
-	return move(toReturn);
+	return modifyHandler->getProceduresThatModifyVar(variableName);
 }
 
 vector<int> PKBPQLEvaluator::getModifiers(string variableName)
 {
-	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
-
-	if (v == nullptr)
-	{
-		return vector<int>();
-	}
-
-	return v->getModifiers();
+	return modifyHandler->getModifiers(variableName);
 }
 
 vector<int> PKBPQLEvaluator::getModifiers(PKBDesignEntity modifierType, string variableName)
 {
-	// if we are looking for ALL users using the variable, call the other function
-
-	if (modifierType == PKBDesignEntity::AllStatements)
-	{
-		return getModifiers(variableName);
-	}
-
-	vector<int> res;
-	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
-	if (v == nullptr)
-		return res;
-
-	vector<int> modifiers = v->getModifiers();
-
-	// filter only the desired type
-	for (int modifierIndex : modifiers)
-	{
-		PKBStmt::SharedPtr modifierStatement;
-		if (!mpPKB->getStatement(modifierIndex, modifierStatement))
-		{
-			return res;
-		}
-
-		if (modifierStatement->getType() == modifierType)
-		{
-			res.emplace_back(modifierIndex);
-		}
-	}
-
-	return res;
+	return modifyHandler->getModifiers(modifierType, variableName);
 }
 
 vector<int> PKBPQLEvaluator::getModifiers()
 {
-	set<PKBStmt::SharedPtr > stmts = mpPKB->getAllModifyingStmts();
-	return stmtToInt(stmts);
+	return modifyHandler->getModifiers();
 }
 
 vector<int> PKBPQLEvaluator::getModifiers(PKBDesignEntity entityType)
 {
-	vector<PKBStmt::SharedPtr > stmts;
-
-	if (entityType == PKBDesignEntity::AllStatements)
-	{
-		return getModifiers();
-	}
-
-	for (auto& ptr : mpPKB->getAllModifyingStmts(entityType))
-	{
-		stmts.emplace_back(ptr);
-	}
-
-	return stmtToInt(stmts);
+	return modifyHandler->getModifiers(entityType);
 }
 
 const vector<PKBStmt::SharedPtr >& PKBPQLEvaluator::getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const
@@ -1045,71 +920,55 @@ bool PKBPQLEvaluator::getCallsTUnderscoreUnderscore()
 // Use for Next(_, _)
 bool PKBPQLEvaluator::getNextUnderscoreUnderscore()
 {
-	return mpPKB->nextIntIntTable.begin() != mpPKB->nextIntIntTable.end();
+	return nextHandler->getNextUnderscoreUnderscore();
 }
 
 // Case 2: Next(_, syn)
 unordered_set<int> PKBPQLEvaluator::getNextUnderscoreSyn(PKBDesignEntity to)
 {
-	auto typePair = make_pair(PKBDesignEntity::AllStatements, to);
-	unordered_set<int> result;
-	for (auto p : mpPKB->nextSynSynTable[typePair])
-	{
-		result.insert(p.second);
-	}
-
-	return result;
+	return nextHandler->getNextUnderscoreSyn(to);
 }
 
 // Case 3: Next(_, int)
 bool PKBPQLEvaluator::getNextUnderscoreInt(int toIndex)
 {
-	return mpPKB->nextSynIntTable.find(toIndex) != mpPKB->nextSynIntTable.end();
+	return nextHandler->getNextUnderscoreInt(toIndex);
 }
 
 // Case 4: Next(syn, syn)
 set<pair<int, int>> PKBPQLEvaluator::getNextSynSyn(PKBDesignEntity from, PKBDesignEntity to)
 {
-	auto typePair = make_pair(from, to);
-	return mpPKB->nextSynSynTable[typePair];
+	return nextHandler->getNextSynSyn(from, to);
 }
 
 // Case 5: Next(syn, _)
 unordered_set<int> PKBPQLEvaluator::getNextSynUnderscore(PKBDesignEntity from)
 {
-	auto typePair = make_pair(from, PKBDesignEntity::AllStatements);
-	unordered_set<int> result;
-	for (auto p : mpPKB->nextSynSynTable[typePair])
-	{
-		result.insert(p.first);
-	}
-
-	return result;
+	return nextHandler->getNextSynUnderscore(from);
 }
 
 // Case 6: Next(syn, int)
 unordered_set<int> PKBPQLEvaluator::getNextSynInt(PKBDesignEntity from, int toIndex)
 {
-	return mpPKB->nextSynIntTable[toIndex][from];
+	return nextHandler->getNextSynInt(from, toIndex);
 }
 
 // Case 7: Next(int, int)
 bool PKBPQLEvaluator::getNextIntInt(int fromIndex, int toIndex)
 {
-	auto typePair = make_pair(fromIndex, toIndex);
-	return mpPKB->nextIntIntTable.find(typePair) != mpPKB->nextIntIntTable.end();
+	return nextHandler->getNextIntInt(fromIndex, toIndex);
 }
 
 // Case 8: Next(int, _)
 bool PKBPQLEvaluator::getNextIntUnderscore(int fromIndex)
 {
-	return mpPKB->nextIntSynTable.find(fromIndex) != mpPKB->nextIntSynTable.end();
+	return nextHandler->getNextIntUnderscore(fromIndex);
 }
 
 // Case 9: Next(int, syn)
 unordered_set<int> PKBPQLEvaluator::getNextIntSyn(int fromIndex, PKBDesignEntity to)
 {
-	return mpPKB->nextIntSynTable[fromIndex][to];
+	return nextHandler->getNextIntSyn(fromIndex, to);
 }
 
 // ================================================================================================	//

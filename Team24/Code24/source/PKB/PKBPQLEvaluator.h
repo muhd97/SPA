@@ -19,6 +19,8 @@
 #include "PKBPQLPatternHandler.h"
 #include "PKBPQLNextHandler.h"
 #include "PKBPQLNextBipHandler.h"
+#include "PKBPQLModifyHandler.h"
+
 // for pattern
 #include "../SimpleLexer.h"
 #include "../SimpleParser.h"
@@ -414,58 +416,8 @@ class PKBPQLEvaluator
         patternHandler = PKBPQLPatternHandler::create(pPKB);
         nextHandler = PKBPQLNextHandler::create(pPKB);
         nextBipHandler = PKBPQLNextBipHandler::create(pPKB);
-    }
+        modifyHandler = PKBPQLModifyHandler::create(pPKB);
 
-    // we want to return only vector<int>, not vector<PKBStmt::SharedPtr>
-    vector<int> stmtToInt(vector<PKBStmt::SharedPtr> &stmts)
-    {
-        vector<int> res;
-        for (auto &stmt : stmts)
-        {
-            res.emplace_back(stmt->getIndex());
-        }
-        return move(res);
-    }
-
-    vector<int> stmtToInt(set<PKBStmt::SharedPtr> &stmts)
-    {
-        vector<int> res;
-        for (auto &stmt : stmts)
-        {
-            res.emplace_back(stmt->getIndex());
-        }
-        return move(res);
-    }
-
-    // we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
-    vector<string> varToString(set<PKBVariable::SharedPtr> &vars)
-    {
-        vector<string> res;
-        for (auto &var : vars)
-        {
-            res.emplace_back(var->getName());
-        }
-        return move(res);
-    }
-
-    // we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
-    vector<string> varToString(vector<PKBVariable::SharedPtr> &vars)
-    {
-        vector<string> res;
-        for (auto &var : vars)
-        {
-            res.emplace_back(var->getName());
-        }
-        return move(res);
-    }
-
-    vector<string> procedureToString(set<PKBProcedure::SharedPtr> &procs)
-    {
-        vector<string> res;
-        res.reserve(procs.size());
-        for (auto &p : procs)
-            res.emplace_back(p->getName());
-        return move(res);
     }
 
     bool isContainerType(PKBDesignEntity s)
@@ -487,7 +439,6 @@ class PKBPQLEvaluator
         stmts.insert(stmts.end(), whileStmts.begin(), whileStmts.end());
     }
 
-    // handlers for affects
     /* ======================== Handlers ======================== */
 
     PKBPQLAffectsHandler::SharedPtr affectsHandler;
@@ -496,5 +447,6 @@ class PKBPQLEvaluator
     PKBPQLPatternHandler::SharedPtr patternHandler;
     PKBPQLNextHandler::SharedPtr nextHandler;
     PKBPQLNextBipHandler::SharedPtr nextBipHandler;
+    PKBPQLModifyHandler::SharedPtr modifyHandler;
 
 };
