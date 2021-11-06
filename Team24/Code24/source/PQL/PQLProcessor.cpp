@@ -116,7 +116,7 @@ vector<shared_ptr<Result>> PQLProcessor::extractResultsNoClauses(shared_ptr<Sele
 
 /* ======================== SUCH THAT CLAUSE ======================== */
 
-void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
+void PQLProcessor::routeSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
     
@@ -474,7 +474,7 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
         ph.evaluate(toPopulate);
     }
     else if (type == EvalClType::SuchThat) {
-        handleSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
+        routeSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::With) {
         WithHandler wh(evaluator, selectCl, static_pointer_cast<WithCl>(evalCl));
