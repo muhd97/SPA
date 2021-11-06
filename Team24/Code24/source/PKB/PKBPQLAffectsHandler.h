@@ -1,4 +1,5 @@
 #include "PKB.h"
+#pragma once
 
 class PKBPQLAffectsHandler {
 public:

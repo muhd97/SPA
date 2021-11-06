@@ -14,6 +14,8 @@
     <ClCompile Include="..\source\PKB\PKBPQLAffectsBipHandler.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLAffectsHandler.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLCallsHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBPQLNextBipHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBPQLNextHandler.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLPatternHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLAST.cpp" />
     <ClCompile Include="..\source\PQL\PQLParser.cpp" />
@@ -63,6 +65,8 @@
     <ClInclude Include="..\source\PKB\PKBPQLAffectsBipHandler.h" />
     <ClInclude Include="..\source\PKB\PKBPQLAffectsHandler.h" />
     <ClInclude Include="..\source\PKB\PKBPQLCallsHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBPQLNextBipHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBPQLNextHandler.h" />
     <ClInclude Include="..\source\PKB\PKBPQLPatternHandler.h" />
     <ClInclude Include="..\source\PQL\PQLFollowsParentNextAffectsHandler.h" />
     <ClInclude Include="..\source\PQL\PQLAST.h" />
