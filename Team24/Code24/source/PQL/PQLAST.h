@@ -112,9 +112,12 @@ public:
 
 class Declaration
 {
-public:
+private:
     vector<shared_ptr<Synonym>> synonyms;
     shared_ptr<DesignEntity> de;
+
+public:
+
 
     Declaration(shared_ptr<DesignEntity> ent, vector<shared_ptr<Synonym>> vec) : synonyms(move(vec)), de(move(ent))
     {
@@ -720,7 +723,7 @@ public:
     {
         for (auto& d : declarations)
         {
-            for (auto syn : d->synonyms)
+            for (auto syn : d->getSynonyms())
             {
                 /* Duplicate declaration is detected. This synonym was previously
                  * already encountered in a declaration, but is now encountered
