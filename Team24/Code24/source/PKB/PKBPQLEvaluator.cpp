@@ -769,19 +769,6 @@ vector<string> PKBPQLEvaluator::getModified(int statementIndex)
 	return varToString(vars);
 }
 
-/*Get all variable names modified by the particular rightStatement */
-vector<string> PKBPQLEvaluator::getModified(PKBDesignEntity modifierType)
-{
-	set<PKBVariable::SharedPtr > vars = mpPKB->getModifiedVariables(modifierType);
-	return varToString(vars);
-}
-
-vector<string> PKBPQLEvaluator::getModified()
-{
-	set<PKBVariable::SharedPtr > vars = mpPKB->getModifiedVariables(PKBDesignEntity::AllStatements);
-	return varToString(vars);
-}
-
 vector<string> PKBPQLEvaluator::getModifiedByProcName(string procname)
 {
 	if (mpPKB->getProcedureByName(procname) == nullptr)
@@ -901,11 +888,6 @@ vector<int> PKBPQLEvaluator::getModifiers(PKBDesignEntity entityType)
 const vector<PKBStmt::SharedPtr >& PKBPQLEvaluator::getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const
 {
 	return mpPKB->getStatements(pkbDe);
-}
-
-const PKBProcedure::SharedPtr& PKBPQLEvaluator::getProcedureByName(string& procName) const
-{
-	return mpPKB->procedureNameToProcedureMap[procName];
 }
 
 vector<PKBStmt::SharedPtr > PKBPQLEvaluator::getAllStatements()

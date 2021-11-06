@@ -172,17 +172,6 @@ class PKBPQLEvaluator
 
     /* Check if the given {entityType} modifies any variables */
     bool checkModified(PKBDesignEntity entityType);
-    /* Check if the given {entityType} modifies a given variable specified by
-     * {ident} */
-    //bool checkModified(PKBDesignEntity entityType, string ident);
-    // Get the names of all variables modified by all statements of type
-    // {entityType}
-    vector<string> getModified(PKBDesignEntity entityType);
-
-    // Get the names of all variables modified by at least one statement
-    vector<string> getModified();
-    /* Check if at least one statement modifies a variable. */
-    //bool checkModified();
 
     // Get the names of all variables modified by procedure with name {procname}
     vector<string> getModifiedByProcName(string procname);
@@ -396,9 +385,6 @@ class PKBPQLEvaluator
     // General: Access PKB's map<PKBDesignEntity, vector<PKBStmt::SharedPtr>>
     // mStatements;
     const vector<PKBStmt::SharedPtr> &getStatementsByPKBDesignEntity(PKBDesignEntity pkbDe) const;
-
-    // General: Access any procedure's pointer with its name
-    const PKBProcedure::SharedPtr &getProcedureByName(string &procName) const;
 
     // General: Get all statements in the PKB
     vector<PKBStmt::SharedPtr> getAllStatements();
