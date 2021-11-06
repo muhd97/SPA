@@ -98,9 +98,6 @@ class SimpleParser
 
     bool doesCallGraphContainCycles(map<string, vector<string>> callGraph)
     {
-        // TODO: (@jiachen247) Build call graph
-        // and run tarjans to find SCC / detect cycles
-        // or run toposort and detect back edges
         return false;
     }
 
@@ -156,7 +153,6 @@ class SimpleParser
 
     void error(vector<SimpleTokenType> expectedTypes, SimpleToken actual)
     {
-        // Can consider adding error productions to carry on parsing to catch more
         // errors
         cout << "Line " << actual.location << ":";
         cout << "Failed to match expected grammer" << endl;

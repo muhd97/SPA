@@ -12,7 +12,6 @@ const string& AffectsTHandler::getRelationshipType() {
 
 void AffectsTHandler::evaluateIntInt(vector<shared_ptr<ResultTuple>>& toReturn)
 {
-    cout << "asdfghj";
     if (getEvaluator()->getAffects(getLeftArg()->getIntVal(), getRightArg()->getIntVal(), true))
         toReturn.emplace_back(getResultTuple({ {ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER} }));
 }

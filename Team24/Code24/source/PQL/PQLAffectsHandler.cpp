@@ -1,6 +1,5 @@
 #include "PQLAffectsHandler.h"
 #include "PQLProcessorUtils.h"
-//TODO: replace all the tuple creations with getResultTuple method from PQLProcessorUtils.h
 
 AffectsHandler::AffectsHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<Affects>& affectsCl)
     : FollowsParentNextAffectsHandler(move(evaluator), move(selectCl), affectsCl->stmtRef1, affectsCl->stmtRef2)

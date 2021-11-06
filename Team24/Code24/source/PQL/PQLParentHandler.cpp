@@ -1,5 +1,4 @@
 #include "PQLParentHandler.h"
-//TODO: replace all the tuple creations with getResultTuple method from PQLProcessorUtils.h
 
 ParentHandler::ParentHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<Parent>& parentCl)
     : FollowsParentNextAffectsHandler(evaluator, selectCl, parentCl->stmtRef1, parentCl->stmtRef2)
