@@ -271,100 +271,101 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
 /* PRE-CONDITION: At least ONE targetSynonym appears in the suchThat/pattern/with clauses*/
 void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl) {
     if (resultCl->isBooleanReturnType()) {
-        if (!tuples.empty()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
-        else toReturn.emplace_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
-        return;
+        extractTargetSynonymsBoolean(toReturn, resultCl, tuples, selectCl);
     }
 
-    if (resultCl->isSingleValReturnType()) {
-
-
-        if (tuples.empty()) return;
-        
-        shared_ptr<Element> firstElem = resultCl->getElements()[0];
-        shared_ptr<AttrRef> attrRef = nullptr;
-
-        const string& targetSynonymVal = firstElem->getSynonymString();
-
-        bool isAttrRef = firstElem->getElementType() == ElementType::AttrRef;
-
-        if (isAttrRef) attrRef = static_pointer_cast<AttrRef>(firstElem);
-
-        if (!tuples[0]->synonymKeyAlreadyExists(targetSynonymVal)) return;
-
-        unordered_set<string> existingResults;
-        for (auto& tuple : tuples)
-        {
-                const string& val = isAttrRef
-                    ? resolveAttrRef(targetSynonymVal, attrRef, selectCl, tuple)
-                    : tuple->get(targetSynonymVal);
-                if (!stringIsInsideSet(existingResults, val))
-                {
-                    toReturn.emplace_back(make_shared<StringSingleResult>(val));
-                    existingResults.insert(val);
-                }
-            
-        }
-        return;
+    else if (resultCl->isSingleValReturnType()) {
+        extractTargetSynonymsSingle(toReturn, resultCl, tuples, selectCl);
     }
 
     else if (resultCl->isMultiTupleReturnType()) {
-
-        if (tuples.empty()) return;
-
-        int numTargetElements = resultCl->getElements().size();
-        const vector<shared_ptr<Element>>& targetElems = resultCl->getElements();
-        unordered_set<string> existingResults;
-        const auto& independentElements = getSetOfIndependentSynonymsInTargetSynonyms(selectCl);
-        if (!dependentElementsAllExistInTupleKeys(tuples, independentElements, targetElems)) return;
-
-        /* If there are some elements that are not used in the suchThat/pattern/with clauses, we need to resolve them separately. */
-        if (!independentElements.empty()) {
-            vector<shared_ptr<ResultTuple>> res;
-            bool isFirst = true;
-            for (const auto& x : independentElements) {
-                if (isFirst) {
-                    isFirst = false;
-                    extractAllTuplesForSingleElement(selectCl, res, x);
-                    if (res.empty()) return;
-                }
-                else {
-                    vector<shared_ptr<ResultTuple>> curr;
-                    vector<shared_ptr<ResultTuple>> productRes;
-                    extractAllTuplesForSingleElement(selectCl, curr, x);
-                    if (curr.empty()) return;
-                    cartesianProductResultTuples(res, curr, productRes);
-                    res = move(productRes);
-
-                }
-            }
-            vector<shared_ptr<ResultTuple>> independentAndDependantProductRes;
-            cartesianProductResultTuples(res, tuples, independentAndDependantProductRes);
-            tuples = move(independentAndDependantProductRes);
-        }
-
-
-        for (auto& tuple : tuples)
-        {
-            string temp;
-            for (unsigned int i = 0; i < targetElems.size(); i++) {
-                const auto& curr = targetElems[i];
-                const string& targetSynonymVal = curr->getSynonymString();
-                const string& val = (curr->getElementType() == ElementType::AttrRef) 
-                    ? resolveAttrRef(targetSynonymVal, static_pointer_cast<AttrRef>(curr), selectCl, tuple)
-                    : tuple->get(targetSynonymVal);
-                
-                temp.append(val);
-                if (i != targetElems.size() - 1) temp.push_back(' ');
-            }
-            if (!existingResults.count(temp)) {
-                toReturn.emplace_back(make_shared<StringSingleResult>(temp));
-                existingResults.insert(move(temp));
-            }
-        }
-        return;
+        extractTargetSynonymsMultiple(toReturn, resultCl, tuples, selectCl);
     }
+}
 
+void PQLProcessor::extractTargetSynonymsBoolean(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl)
+{
+    if (!tuples.empty()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
+    else toReturn.emplace_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
+}
+
+void PQLProcessor::extractTargetSynonymsSingle(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl)
+{
+    if (tuples.empty()) return;
+    shared_ptr<Element> firstElem = resultCl->getElements()[0];
+    shared_ptr<AttrRef> attrRef = nullptr;
+    const string& targetSynonymVal = firstElem->getSynonymString();
+    bool isAttrRef = firstElem->getElementType() == ElementType::AttrRef;
+    if (isAttrRef) attrRef = static_pointer_cast<AttrRef>(firstElem);
+    if (!tuples[0]->synonymKeyAlreadyExists(targetSynonymVal)) return;
+    unordered_set<string> existingResults;
+    for (auto& tuple : tuples)
+    {
+        const string& val = isAttrRef
+            ? resolveAttrRef(targetSynonymVal, attrRef, selectCl, tuple)
+            : tuple->get(targetSynonymVal);
+        if (!stringIsInsideSet(existingResults, val))
+        {
+            toReturn.emplace_back(make_shared<StringSingleResult>(val));
+            existingResults.insert(val);
+        }
+
+    }
+}
+
+void PQLProcessor::extractTargetSynonymsMultiple(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl)
+{
+    if (tuples.empty()) return;
+
+    int numTargetElements = resultCl->getElements().size();
+    const vector<shared_ptr<Element>>& targetElems = resultCl->getElements();
+    unordered_set<string> existingResults;
+    const auto& independentElements = getSetOfIndependentSynonymsInTargetSynonyms(selectCl);
+    if (!dependentElementsAllExistInTupleKeys(tuples, independentElements, targetElems)) return;
+
+    /* If there are some elements that are not used in the suchThat/pattern/with clauses, we need to resolve them separately. */
+    if (!independentElements.empty()) {
+        vector<shared_ptr<ResultTuple>> res;
+        bool isFirst = true;
+        for (const auto& x : independentElements) {
+            if (isFirst) {
+                isFirst = false;
+                extractAllTuplesForSingleElement(selectCl, res, x);
+                if (res.empty()) return;
+            }
+            else {
+                vector<shared_ptr<ResultTuple>> curr;
+                vector<shared_ptr<ResultTuple>> productRes;
+                extractAllTuplesForSingleElement(selectCl, curr, x);
+                if (curr.empty()) return;
+                cartesianProductResultTuples(res, curr, productRes);
+                res = move(productRes);
+
+            }
+        }
+        vector<shared_ptr<ResultTuple>> independentAndDependantProductRes;
+        cartesianProductResultTuples(res, tuples, independentAndDependantProductRes);
+        tuples = move(independentAndDependantProductRes);
+    }
+    for (auto& tuple : tuples)
+    {
+        string temp;
+        for (unsigned int i = 0; i < targetElems.size(); i++) {
+            const auto& curr = targetElems[i];
+            const string& targetSynonymVal = curr->getSynonymString();
+            const string& val = (curr->getElementType() == ElementType::AttrRef)
+                ? resolveAttrRef(targetSynonymVal, static_pointer_cast<AttrRef>(curr), selectCl, tuple)
+                : tuple->get(targetSynonymVal);
+
+            temp.append(val);
+            if (i != targetElems.size() - 1) temp.push_back(' ');
+        }
+        if (!existingResults.count(temp)) {
+            toReturn.emplace_back(make_shared<StringSingleResult>(temp));
+            existingResults.insert(move(temp));
+        }
+    }
+    return;
 }
 
 /* PRE-CONDITION: TargetSynonym exists as one of the keys of the ResultTuple. */
@@ -456,13 +457,7 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
     }
 
     PKBDesignEntity pkbde = resolvePQLDesignEntityToPKBDesignEntity(de);
-    vector<shared_ptr<PKBStmt>> stmts;
-
-    if (pkbde == PKBDesignEntity::AllStatements)
-        stmts = evaluator->getAllStatements();
-    else {
-        stmts = evaluator->getStatementsByPKBDesignEntity(pkbde);
-    }
+    vector<shared_ptr<PKBStmt>> stmts = pkbde == PKBDesignEntity::AllStatements ? evaluator->getAllStatements() : evaluator->getStatementsByPKBDesignEntity(pkbde);
 
     for (auto& ptr : stmts)
     {
@@ -475,11 +470,9 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
 
 void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<EvalCl> evalCl)
 {
-
 #if DEBUG_SINGLE_EVAL
     cout << "Evaluating: " << evalCl->format() << endl;
 #endif
-
     const auto type = evalCl->getEvalClType();
     if (type == EvalClType::Pattern) {
         PatternHandler ph(evaluator, selectCl, static_pointer_cast<PatternCl>(evalCl));
@@ -492,8 +485,8 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
         WithHandler wh(evaluator, selectCl, static_pointer_cast<WithCl>(evalCl));
         wh.evaluate(toPopulate);
     }
-
 }
+
 
 void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<ClauseGroup>& clauseGroup)
 {
@@ -502,7 +495,6 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
     int i = 0;
 
     for (const auto& clPtr : clauseGroup->clauses) {
-
         if (isFirst) {
             handleSingleEvalClause(selectCl, toPopulate, clPtr);
 #if DEBUG_GENERAL
@@ -580,37 +572,26 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     }
     catch (...) {
         if (isBooleanReturnType)
-            res.push_back(make_shared<StringSingleResult>("FALSE"));
+            res.push_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
 
         return res;
     }
-    
-
-
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses() && !selectCl->hasWithClauses())
     {
         return move(handleNoSuchThatOrPatternCase(move(selectCl)));
     }
-    
-
-
-
     try {
-
         opt = make_shared<PQLOptimizer>(selectCl);
         const auto& clauseGroups = opt->getClauseGroups();
-
         bool prevGroupHasSynonymsInResultCl = true;
         int groupSize = clauseGroups.size();
         for (int i = 0; i < groupSize; i++) {
             const auto& currGroup = clauseGroups[i];
             bool hasSynonymsInResultCl = currGroup->synonymsInsideResultCl;
-
             if (i == 0) {
                 handleClauseGroup(selectCl, currTups, currGroup);
                 if (currTups.empty()) break;
-
                 /* The synonyms for this group don't appear in the target synonyms */
                 if (!hasSynonymsInResultCl) {
                     prevGroupHasSynonymsInResultCl = false;
@@ -626,9 +607,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
             else {
                 vector<shared_ptr<ResultTuple>> tempRes;
                 handleClauseGroup(selectCl, tempRes, currGroup);
-
-                if (currTups.empty()) break;
-                
+                if (currTups.empty()) break;                
                 /* The synonyms for this group don't appear in the target synonyms */
                 if (!hasSynonymsInResultCl) {
                     prevGroupHasSynonymsInResultCl = false;
@@ -655,7 +634,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     }
     catch (const exception& e) {
         if (isBooleanReturnType) {
-            res.push_back(make_shared<StringSingleResult>("FALSE"));
+            res.push_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
         }
         else {
             throw e;
@@ -664,20 +643,16 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     }
     catch (...) {
         if (isBooleanReturnType) {
-            res.push_back(make_shared<StringSingleResult>("FALSE"));
+            res.push_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
         }
         return move(res);
     }
-
     vector<shared_ptr<ResultTuple>>& finalTuples = currTups;
-
     if (!selectCl->target->isBooleanReturnType() && !atLeastOneTargetSynonymIsInClauses(selectCl))
     {
         return finalTuples.empty() ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
     }
-
     extractTargetSynonyms(res, selectCl->target, finalTuples, selectCl);
-
     return move(res);
 }
 
