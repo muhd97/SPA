@@ -47,7 +47,6 @@ string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 /* ======================== HANDLE-ALL CLAUSE METHODS ======================== */
 
-
 vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
 {
     vector<shared_ptr<Result>> toReturn;
