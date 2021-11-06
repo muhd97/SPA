@@ -86,9 +86,6 @@ vector<PQLToken> pqlLex(string &program)
         else if (isalpha(curr))
         {
             string value;
-            // TODO (@jiachen) fix this, # should not be allowed other than stmt#
-            // prog_line is currently a hack...
-            // the grammar is IDIOTIC i swear, `_` is an illegal variable name character but used in prog_line while `such that` uses a space as its delimiter
             while (isalpha(curr) || isdigit(curr) || (value == "prog" && curr == '_'))
             {
                 value.push_back(curr);

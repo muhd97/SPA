@@ -1,6 +1,5 @@
 #include "PQLNextTHandler.h"
 #include "PQLProcessorUtils.h"
-//TODO: replace all the tuple creations with getResultTuple method from PQLProcessorUtils.h
 
 NextTHandler::NextTHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<NextT>& nextTCl)
     : FollowsParentNextAffectsHandler(move(evaluator), move(selectCl), nextTCl->stmtRef1, nextTCl->stmtRef2)

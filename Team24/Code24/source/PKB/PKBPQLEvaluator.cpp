@@ -1915,7 +1915,6 @@ unordered_set<int> PKBPQLEvaluator::getNextTSynInt(PKBDesignEntity from, int toI
 // Case 7: NextT(int, int)
 bool PKBPQLEvaluator::getNextTIntInt(int fromIndex, int toIndex)
 {
-	// Todo optimize (@jiachen247) Can exit early after first is found match
 	set<pair<int, int>> result =
 		getNextT(mpPKB->program, StatementType::NONE, StatementType::NONE, fromIndex, toIndex, true);
 	return result.begin() != result.end();
@@ -1924,7 +1923,6 @@ bool PKBPQLEvaluator::getNextTIntInt(int fromIndex, int toIndex)
 // Case 8: NextT(int, _)
 bool PKBPQLEvaluator::getNextTIntUnderscore(int fromIndex)
 {
-	// Todo optimize (@jiachen247) Can exit early after first is found match
 	set<pair<int, int>> result =
 		getNextT(mpPKB->program, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0, true);
 	return result.begin() != result.end();
@@ -2318,7 +2316,6 @@ unordered_set<int> PKBPQLEvaluator::getNextBipTSynInt(PKBDesignEntity from, int 
 // Case 7: NextBipT(int, int)
 bool PKBPQLEvaluator::getNextBipTIntInt(int fromIndex, int toIndex)
 {
-	// Todo optimize (@jiachen247) Can exit early after first is found match
 	set<pair<int, int>> result =
 		getNextBipT(mpPKB->program, StatementType::NONE, StatementType::NONE, fromIndex, toIndex, true);
 	return result.begin() != result.end();
@@ -2327,7 +2324,6 @@ bool PKBPQLEvaluator::getNextBipTIntInt(int fromIndex, int toIndex)
 // Case 8: NextBipT(int, _)
 bool PKBPQLEvaluator::getNextBipTIntUnderscore(int fromIndex)
 {
-	// Todo optimize (@jiachen247) Can exit early after first is found match
 	set<pair<int, int>> result =
 		getNextBipT(mpPKB->program, StatementType::NONE, StatementType::STATEMENT, fromIndex, 0, true);
 	return result.begin() != result.end();
@@ -2364,9 +2360,6 @@ bool PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 				for (int s : affectingStatements) {
 					pair<int, int>& affectClause = make_pair(s, index);
 					bool insertAffectsSucceed = affectsList.insert(affectClause).second;
-					if (insertAffectsSucceed) {
-						//cout << "insert  " << affectClause.first << ", " << affectClause.second << endl;
-					}
 					if (insertAffectsSucceed && terminateEarly &&
 						((leftInt == 0 && (rightInt == 0 || rightInt == index)) || 
 							(leftInt == s && (rightInt == 0 || rightInt == index)))) {
@@ -2375,17 +2368,12 @@ bool PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 					// handle affects*
 					if (includeAffectsT && (insertAffectsSucceed)) {
 						affectsTList.insert(affectClause);
-						//cout << "insert * " << affectClause.first << ", " << affectClause.second << endl;
 						affectsTHelperTable[index].insert(affectClause);
 						affectsTHelperTable2[s].insert(affectClause);
 
 						for (const auto& p : affectsTHelperTable[s]) {
-							//cout << "helper : " << p.first << ", " << p.second << endl;
 							pair<int, int> affectsTClause = make_pair(p.first, index);
 							bool insertAffectsTSucceed = affectsTList.insert(affectsTClause).second;
-							if (insertAffectsTSucceed) {
-								//cout << "insert * " << affectsTClause.first << ", " << affectsTClause.second << endl;
-							}
 							if (insertAffectsTSucceed && terminateEarly &&
 								((leftInt == 0 && (rightInt == 0 || rightInt == index)) ||
 									(leftInt == p.first && (rightInt == 0 || rightInt == index)))) {
@@ -2395,12 +2383,8 @@ bool PKBPQLEvaluator::handleAffectsAssign(int index, bool includeAffectsT,
 						}
 
 						for (const auto& p : affectsTHelperTable2[index]) {
-							//cout << "helper : " << p.first << ", " << p.second << endl;
 							pair<int, int> affectsTClause = make_pair(s, p.second);
 							bool insertAffectsTSucceed = affectsTList.insert(affectsTClause).second;
-							if (insertAffectsTSucceed) {
-								//cout << "insert * " << affectsTClause.first << ", " << affectsTClause.second << endl;
-							}
 							if (insertAffectsTSucceed && terminateEarly &&
 								((leftInt == 0 && (rightInt == 0 || rightInt == p.second)) ||
 									(leftInt == s && (rightInt == 0 || rightInt == p.second)))) {
@@ -2457,7 +2441,6 @@ bool PKBPQLEvaluator::getAffects(int leftInt, int rightInt, bool includeAffectsT
 		for (const auto & p : mpPKB->cfg->getAllCFGs()) {
 			if (!seenProcedures.count(p.first)) {
 				seenProcedures.insert(p.first);
-				//cout <<  "from the root: " << p.first << endl;
 				affectsTHelperTable.clear();
 
 				if (computeAffects(p.second, includeAffectsT, map<string, set<int>>(), set<string>(), shared_ptr<BasicBlock>(), true, leftInt, rightInt)) {
@@ -2503,8 +2486,6 @@ pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLEvaluator::getAffects(bool 
 	else {		// (int, syn) (syn, int)
 		string& targetProcName = mpPKB->stmtToProcNameTable[referenceStatement];
 		if (targetProcName != "") {
-			cout << "from the root: " << targetProcName << endl;
-
 			const shared_ptr<BasicBlock>& firstBlock = mpPKB->cfg->getCFG(targetProcName);
 			computeAffects(firstBlock, includeAffectsT, map<string, set<int>>(), set<string>(), shared_ptr<BasicBlock>(), false, 0, 0);
 		}
@@ -2619,31 +2600,19 @@ bool PKBPQLEvaluator::handleAffectsAssignBIP(int index, bool includeAffectsT,
 				for (int s : affectingStatements) {
 					pair<int, int>& affectClause = make_pair(s, index);
 					bool insertAffectsSucceed = affectsList.insert(affectClause).second;
-					if (insertAffectsSucceed) {
-						//cout << "insert  " << affectClause.first << ", " << affectClause.second << endl;
-					}
 					// handle affects*
 					if (includeAffectsT) {
 						affectsTList.insert(affectClause);
-						//cout << "insert * " << affectClause.first << ", " << affectClause.second << endl;
 						affectsTHelperTable[index].insert(affectClause);
 						for (const auto& p : affectsTHelperTable[s]) {
-							//cout << "helper : " << p.first << ", " << p.second << endl;
 							pair<int, int> affectsTClause = make_pair(p.first, index);
 							bool insertAffectsTSucceed = affectsTList.insert(affectsTClause).second;
-							if (insertAffectsTSucceed) {
-								//cout << "insert * " << affectsTClause.first << ", " << affectsTClause.second << endl;
-							}
 							affectsTHelperTable[index].insert(affectsTClause);
 						}
 
 						for (const auto& p : affectsTHelperTable2[index]) {
-							//cout << "helper : " << p.first << ", " << p.second << endl;
 							pair<int, int> affectsTClause = make_pair(s, p.second);
 							bool insertAffectsTSucceed = affectsTList.insert(affectsTClause).second;
-							if (insertAffectsTSucceed) {
-								//cout << "insert * " << affectsTClause.first << ", " << affectsTClause.second << endl;
-							}
 							affectsTHelperTable2[s].insert(affectsTClause);
 						}
 					}
@@ -2677,7 +2646,6 @@ bool PKBPQLEvaluator::handleAffectsCallBIP(int index, bool includeAffectsT,
 	PKBStmt::SharedPtr stmt;
 	if (mpPKB->getStatement(index, stmt)) {
 		string calledProcName = mpPKB->callStmtToProcNameTable[to_string(index)];
-		//cout << calledProcName << endl;
 		const shared_ptr<BasicBlock>& procBlock = mpPKB->cfg->getCFG(calledProcName);
 		return computeAffectsBIP(procBlock, includeAffectsT, lastModifiedTable, shared_ptr<BasicBlock>());
 	}
@@ -2692,7 +2660,6 @@ pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLEvaluator::getAffectsBIP(bo
 	// (syn, syn) (syn, _) (_, syn) (int, syn) (syn, int)
 	const unordered_map<string, shared_ptr<BasicBlock>>& cfgMap = mpPKB->cfg->getAllCFGs();
 	for (auto const& cfg : cfgMap) {
-			//cout << "from the root: " << cfg.first << endl;
 			affectsTHelperTable.clear();
 			map<string, set<int>> lastModifiedTable;
 			computeAffectsBIP(cfg.second, includeAffectsT, lastModifiedTable, shared_ptr<BasicBlock>());

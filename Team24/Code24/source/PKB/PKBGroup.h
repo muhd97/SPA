@@ -106,7 +106,7 @@ class PKBGroup
 
     void setParentGroup(PKBGroup::SharedPtr &parentGroup)
     {
-        // todo @nicholas weak ptr = shared ptr ?? dunno if have problem
+     
         mParentGroup = parentGroup;
     }
 

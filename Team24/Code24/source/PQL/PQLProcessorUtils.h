@@ -239,26 +239,16 @@ inline void validateSelectCl(shared_ptr<SelectCl> selectCl)
     {
         throw "Bad PQL Query. The target synonym is NOT declared\n";
     }
-#if DEBUG_VALIDATE
-    cout << "Validate0 ================= \n";
-#endif
     if (!allSynonymsInSuchThatClausesAreDeclared(selectCl))
     {
         throw "BAD PQL Query. Some synonyms in the such-that clauses were NOT "
             "declared\n";
     }
-#if DEBUG_VALIDATE
-    cout << "Validate1 ================= \n";
-#endif
-
     if (!allSynonymsInPatternClausesAreDeclared(selectCl))
     {
         throw "BAD PQL Query. Some synonyms in the pattern clauses were NOT "
             "declared\n";
     }
-#if DEBUG_VALIDATE
-    cout << "Validate2 ================= \n";
-#endif
 }
 
 inline bool allTargetSynonymsExistInTuple(const vector<shared_ptr<Element>>& synonyms, shared_ptr<ResultTuple> tuple) {
@@ -429,9 +419,6 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
 {
     int leftSize = leftResults.size();
     int rightSize = rightResults.size();
-#if DEBUG_HASH_JOIN
-    cout << "hash join ========= Num LeftResults = " << leftSize << ", Num RightResults = " << rightSize << ", joinKeysSize = " << joinKeys.size() << endl;
-#endif
     vector<shared_ptr<ResultTuple>>* smallerVec = nullptr;
     vector<shared_ptr<ResultTuple>>* largerVec = nullptr;
     if (leftSize < rightSize) {
@@ -445,9 +432,6 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
     const auto& smallerRes = *smallerVec;
     const auto& largerRes = *largerVec;
 
-#if DEBUG_HASH_JOIN
-    cout << "Hash Join Smaller Res Size = " << smallerRes.size() << endl;
-#endif
     unordered_map<string, unordered_set<ResultTuple*>> leftHashTable;
     vector<string> joinKeysVec(joinKeys.begin(), joinKeys.end());
     /* Build phase */
@@ -468,10 +452,6 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
             leftHashTable[stringToHash].insert(tup.get());
 
     }
-#if DEBUG_HASH_JOIN
-    cout << "Build Phase Done\n";
-#endif
-
 #if PARALLELIZE_HASH_JOIN
     if (largerRes.size() > HASH_JOIN_PARALLEL_THRESHOLD) { // Parallelize
         int rightBound = largerRes.size();
@@ -552,9 +532,6 @@ inline void hashJoinResultTuples(vector<shared_ptr<ResultTuple>>& leftResults, v
             }
         }
     }
-#if DEBUG_HASH_JOIN
-    cout << "Probe Phase Done\n";
-#endif
     return;
 }
 
@@ -562,9 +539,6 @@ inline void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftRe
     vector<shared_ptr<ResultTuple>>& rightResults,
     vector<shared_ptr<ResultTuple>>& newResults)
 {
-#if DEBUG_CARTESIAN
-    cout << "cartesian ==== LeftSize = " << leftResults.size() << ", RightSize = " << rightResults.size() << ", Product = " << leftResults.size() * rightResults.size() << endl;
-#endif
     if (leftResults.size() == 0)
     {
         newResults = rightResults;
@@ -611,7 +585,4 @@ inline void cartesianProductResultTuples(vector<shared_ptr<ResultTuple>>& leftRe
                 newResults[i * X + j] = move(toAdd);
             }
         });
-#if DEBUG_CARTESIAN
-    cout << "Cartesian Product Done!\n";
-#endif
 }

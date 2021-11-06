@@ -49,8 +49,6 @@ string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
 {
-    cout << "handle such that or pattern clause" << endl;
-
     vector<shared_ptr<Result>> toReturn;
     const auto& elems = selectCl->target->getElements();
     int numElements = elems.size();
@@ -470,9 +468,6 @@ void PQLProcessor::extractAllTuplesForSingleElement(const shared_ptr<SelectCl>& 
 
 void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector<shared_ptr<ResultTuple>>& toPopulate, const shared_ptr<EvalCl> evalCl)
 {
-#if DEBUG_SINGLE_EVAL
-    cout << "Evaluating: " << evalCl->format() << endl;
-#endif
     const auto type = evalCl->getEvalClType();
     if (type == EvalClType::Pattern) {
         PatternHandler ph(evaluator, selectCl, static_pointer_cast<PatternCl>(evalCl));
@@ -497,11 +492,6 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
     for (const auto& clPtr : clauseGroup->clauses) {
         if (isFirst) {
             handleSingleEvalClause(selectCl, toPopulate, clPtr);
-#if DEBUG_GENERAL
-            cout << "Handled First Clause:\n";
-            cout << clPtr->format();
-            cout << "SIZE ============= " << toPopulate.size() << endl;      
-#endif
             if (toPopulate.empty()) return;
             isFirst = false;
         }
@@ -535,26 +525,11 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
         }
     }
 
-#if DEBUG_FILTERING
-    cout << "Begin Filtering ====================================================\n";
-
-    cout << "BEFORE FILTERING ==========\n";
-    for (auto& x : toPopulate) cout << x->toString() << endl;
-    cout << endl;
-#endif
-
     if (clauseGroup->synonymsInsideResultCl) {
         vector<shared_ptr<ResultTuple>> toReturn;
         opt->filterTuples(toPopulate, toReturn);
         toPopulate = move(toReturn);
     }
-
-#if DEBUG_FILTERING
-    cout << "AFTER FILTERING ==========\n";
-    for (auto& x : toPopulate) cout << x->toString() << endl;
-    cout << endl;
-    cout << "Finish ClauseGroup====================================================\n";
-#endif
 }
 
 /* ======================== EXPOSED PUBLIC METHODS ======================== */
