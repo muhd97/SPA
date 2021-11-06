@@ -593,110 +593,59 @@ unordered_set<int> PKBPQLEvaluator::getFollowsTUnderscoreSyn(PKBDesignEntity rig
 
 const unordered_set<string>& PKBPQLEvaluator::getUsesIntSyn(int statementNo)
 {
-	return mpPKB->usesIntSynTable[statementNo];
+	return useHandler->getUsesIntSyn(statementNo);
 }
 
 bool PKBPQLEvaluator::getUsesIntIdent(int statementNo, string ident)
 {
-	unordered_set<string>& temp = mpPKB->usesIntSynTable[statementNo];
-	return temp.find(ident) != temp.end();
+	return useHandler->getUsesIntIdent(statementNo, ident);
 }
 
 bool PKBPQLEvaluator::getUsesIntUnderscore(int statementNo)
 {
-	return !mpPKB->usesIntSynTable[statementNo].empty();
+	return useHandler->getUsesIntUnderscore(statementNo);
 }
 
 const vector<pair<int, string>>& PKBPQLEvaluator::getUsesSynSynNonProc(PKBDesignEntity de)
 {
-	return mpPKB->usesSynSynTableNonProc[de];
+	return useHandler->getUsesSynSynNonProc(de);
 }
 
 const vector<pair<string, string>>& PKBPQLEvaluator::getUsesSynSynProc()
 {
-	return mpPKB->usesSynSynTableProc;
+	return useHandler->getUsesSynSynProc();
 }
 
 const vector<int>& PKBPQLEvaluator::getUsesSynUnderscoreNonProc(PKBDesignEntity de)
 {
-	return mpPKB->usesSynUnderscoreTableNonProc[de];
+	return useHandler->getUsesSynUnderscoreNonProc(de);
 }
 
 const vector<string>& PKBPQLEvaluator::getUsesSynUnderscoreProc()
 {
-	return mpPKB->usesSynUnderscoreTableProc;
+	return useHandler->getUsesSynUnderscoreProc();
 }
 
-vector<string> PKBPQLEvaluator::getUsedByProcName(string procname)
-{
-	if (mpPKB->getProcedureByName(procname) == nullptr)
-	{
-		return vector<string>();
-	}
-	PKBProcedure::SharedPtr& procedure = mpPKB->getProcedureByName(procname);
-	vector<PKBVariable::SharedPtr > vars;
-	return procedure->getUsedVariablesAsString();
-}
-
-bool PKBPQLEvaluator::checkUsedByProcName(string procname)
-{
-	PKBProcedure::SharedPtr procedure;
-	if ((procedure = mpPKB->getProcedureByName(procname)) == nullptr)
-	{
-		return false;
-	}
-	return procedure->getUsedVariablesSize() > 0;
-}
-
-bool PKBPQLEvaluator::checkUsedByProcName(string procname, string ident)
-{
-	PKBProcedure::SharedPtr procedure;
-	if ((procedure = mpPKB->getProcedureByName(procname)) == nullptr)
-		return false;
-	PKBVariable::SharedPtr targetVar;
-	if ((targetVar = mpPKB->getVarByName(ident)) == nullptr)
-		return false;
-
-	const set<PKBVariable::SharedPtr >& varsUsed = procedure->getUsedVariables();
-
-	return varsUsed.find(targetVar) != varsUsed.end();
-}
-
-/*PRE-CONDITION: Variable Name exists in this program */
-const vector<int>& PKBPQLEvaluator::getUsers(string variableName)
-{
-	PKBVariable::SharedPtr v = mpPKB->getVarByName(variableName);
-	return v->getUsersByConstRef();
-}
-
-/*PRE-CONDITION: Variable Name exists in this program */
 const vector<int>& PKBPQLEvaluator::getUsesSynIdentNonProc(PKBDesignEntity userType, string variableName)
 {
-	// if we are looking for ALL users using the variable, call the other function
-	if (userType == PKBDesignEntity::AllStatements)
-	{
-		return getUsers(variableName);
-	}
-	return mpPKB->usesSynIdentTableNonProc[variableName][userType];
+	return useHandler->getUsesSynIdentNonProc(userType, variableName);
 }
 
-/*PRE-CONDITION: Variable Name exists in this program */
 const vector<string>& PKBPQLEvaluator::getUsesSynIdentProc(string ident)
 {
-	return mpPKB->usesSynIdentTableProc[ident];
+	return useHandler->getUsesSynIdentProc(ident);
 }
 
-bool PKBPQLEvaluator::variableExists(string name)
-{
-	PKBVariable::SharedPtr& v = mpPKB->getVarByName(name);
-	return v != nullptr;
+vector<string> PKBPQLEvaluator::getUsedByProcName(string procname) {
+	return useHandler->getUsedByProcName(procname);
 }
 
-bool PKBPQLEvaluator::procExists(string procname)
-{
-	if (mpPKB->getProcedureByName(procname) == nullptr)
-		return false;
-	return true;
+bool PKBPQLEvaluator::checkUsedByProcName(string procname) {
+	return useHandler->checkUsedByProcName(procname);
+}
+
+bool PKBPQLEvaluator::checkUsedByProcName(string procname, string ident) {
+	return useHandler->checkUsedByProcName(procname, ident);
 }
 
 bool PKBPQLEvaluator::checkModified(int statementIndex)
@@ -719,7 +668,6 @@ bool PKBPQLEvaluator::checkModifiedByProcName(string procname, string ident)
 	return modifyHandler->checkModifiedByProcName(procname, ident);
 }
 
-/*Get all variable names modified by the particular rightStatement */
 vector<string> PKBPQLEvaluator::getModified(int statementIndex)
 {
 	return modifyHandler->getModified(statementIndex);
@@ -802,25 +750,29 @@ PKBDesignEntity PKBPQLEvaluator::getStmtType(int stmtIdx)
 	}
 }
 
-// For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
-// if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern
-// instead
+bool PKBPQLEvaluator::variableExists(string name)
+{
+	PKBVariable::SharedPtr& v = mpPKB->getVarByName(name);
+	return v != nullptr;
+}
+
+bool PKBPQLEvaluator::procExists(string procname)
+{
+	if (mpPKB->getProcedureByName(procname) == nullptr)
+		return false;
+	return true;
+}
+
 vector<pair<int, string>> PKBPQLEvaluator::matchAnyPattern(string& LHS)
 {
 	return patternHandler->matchAnyPattern(LHS);
 }
 
-// For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
-// if you want to use a(IDENT, EXPR) or a("_", EXPR), use matchExactPattern
-// instead
 vector<pair<int, string>> PKBPQLEvaluator::matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS)
 {
 	return patternHandler->matchPartialPattern(LHS, RHS);
 }
 
-// For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
-// if you want to use a("_", _EXPR_) or a(IDENT, _EXPR_), use matchPattern
-// instead
 vector<pair<int, string>> PKBPQLEvaluator::matchExactPattern(string& LHS, shared_ptr<Expression>& RHS)
 {
 	return patternHandler->matchExactPattern(LHS, RHS);
@@ -1174,4 +1126,17 @@ void PKBPQLEvaluator::resetAffectsCache() {
 // 5 cases: (int, syn) (syn, int) (syn, syn) (syn, _) (_, syn)
 pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLEvaluator::getAffectsBIP(bool includeAffectsT) {
 	return affectsBipHandler->getAffectsBip(includeAffectsT);
+}
+
+PKBPQLEvaluator::PKBPQLEvaluator(PKB::SharedPtr pPKB)
+{
+	mpPKB = pPKB;
+	affectsHandler = PKBPQLAffectsHandler::create(pPKB);
+	affectsBipHandler = PKBPQLAffectsBipHandler::create(pPKB);
+	callsHandler = PKBPQLCallsHandler::create(pPKB);
+	patternHandler = PKBPQLPatternHandler::create(pPKB);
+	nextHandler = PKBPQLNextHandler::create(pPKB);
+	nextBipHandler = PKBPQLNextBipHandler::create(pPKB);
+	modifyHandler = PKBPQLModifyHandler::create(pPKB);
+	useHandler = PKBPQLUseHandler::create(pPKB);
 }
