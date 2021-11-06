@@ -18,7 +18,7 @@ class PQLProcessor
       shared_ptr<PQLOptimizer> opt = nullptr;
       shared_ptr<PKBPQLEvaluator> evaluator = nullptr;
 
-      vector<shared_ptr<Result>> handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl);
+      vector<shared_ptr<Result>> extractResultsNoClauses(shared_ptr<SelectCl> selectCl);
       void handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
           vector<shared_ptr<ResultTuple>> &toReturn);
       void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);

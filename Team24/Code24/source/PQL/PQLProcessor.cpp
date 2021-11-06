@@ -47,7 +47,7 @@ string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 /* ======================== HANDLE-ALL CLAUSE METHODS ======================== */
 
-vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
+vector<shared_ptr<Result>> PQLProcessor::extractResultsNoClauses(shared_ptr<SelectCl> selectCl)
 {
     vector<shared_ptr<Result>> toReturn;
     const auto& elems = selectCl->target->getElements();
@@ -557,7 +557,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     /* Special case 0: There are no RelRef or Pattern clauses*/
     if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses() && !selectCl->hasWithClauses())
     {
-        return move(handleNoSuchThatOrPatternCase(move(selectCl)));
+        return move(extractResultsNoClauses(move(selectCl)));
     }
     try {
         opt = make_shared<PQLOptimizer>(selectCl);
@@ -628,7 +628,7 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     vector<shared_ptr<ResultTuple>>& finalTuples = currTups;
     if (!selectCl->target->isBooleanReturnType() && !atLeastOneTargetSynonymIsInClauses(selectCl))
     {
-        return finalTuples.empty() ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
+        return finalTuples.empty() ? move(res) : extractResultsNoClauses(move(selectCl));
     }
     extractTargetSynonyms(res, selectCl->target, finalTuples, selectCl);
     return move(res);
