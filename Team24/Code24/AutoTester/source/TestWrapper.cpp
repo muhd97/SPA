@@ -90,14 +90,8 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
     cout << "\n==== Parsing queries ====\n";
 #endif
     try {
-        cout << "B4 PARSE SELECT CL?!";
-
-
-        PQLParser p(pqlLex(query));        cout << "B4 LEX?!";
-
-
+        PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
-        cout << "AFTER PARSE SELECT CL?!";
 
 #if DEBUG
         cout << "\n==== Printing Parsed Query ====\n";
@@ -106,7 +100,6 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
         cout << "\n==== Created PQLEvaluator using PKB ====\n";
 #endif
         shared_ptr<PQLProcessor> pqlProcessor = make_shared<PQLProcessor>(evaluator);
-        cout << "CANT EVEN PROCESS PQL QUERY?!";
 
 #if DEBUG
         cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";

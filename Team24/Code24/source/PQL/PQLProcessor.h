@@ -69,8 +69,6 @@ class PQLProcessor
 
     /* ======================== Affects ======================== */
 
-    void handleAffects(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl, vector<shared_ptr<ResultTuple>>& toReturn, bool isT, bool isBIP);
-
     void extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl);
 
     const string& resolveAttrRef(const string& syn, shared_ptr<AttrRef>& attrRef, const shared_ptr<SelectCl>& selectCl, shared_ptr<ResultTuple>& tup);

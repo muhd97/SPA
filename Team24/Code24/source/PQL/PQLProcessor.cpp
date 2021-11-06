@@ -50,8 +50,6 @@ string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
 {
-    cout << "handle such that or pattern clause" << endl;
-
     vector<shared_ptr<Result>> toReturn;
     const auto& elems = selectCl->target->getElements();
     int numElements = elems.size();
@@ -122,7 +120,6 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
 void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
-    cout << "handle such that clause" << endl;
     switch (suchThatCl->relRef->getType())
     {
     case RelRefType::USES_S: /* Uses(s, v) where s MUST be a
@@ -570,6 +567,9 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
 vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& selectCl)
 {
+    // reset affects cache according to no inter-query caching rules
+    evaluator->resetAffectsCache();
+
     bool isBooleanReturnType = selectCl->target->isBooleanReturnType();
     /* Final Results to Return */
     vector<shared_ptr<Result>> res;
@@ -593,9 +593,6 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
     {
         return move(handleNoSuchThatOrPatternCase(move(selectCl)));
     }
-    
-
-
 
     try {
 
