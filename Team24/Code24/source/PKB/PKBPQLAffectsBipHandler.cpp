@@ -76,6 +76,7 @@ pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLAffectsBipHandler::getAffec
 	affectsList.clear();
 	affectsTList.clear();
 	affectsTHelperTable.clear();
+	affectsTHelperTable2.clear();
 	// (syn, syn) (syn, _) (_, syn) (int, syn) (syn, int)
 	const unordered_map<string, shared_ptr<BasicBlock>>& cfgMap = mpPKB->cfg->getAllCFGs();
 	for (auto const& cfg : cfgMap) {
@@ -85,12 +86,6 @@ pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLAffectsBipHandler::getAffec
 	}
 	return make_pair(affectsList, affectsTList);
 }
-
-void PKBPQLAffectsBipHandler::resetCache() {
-	affectsCached = false;
-	seenAffectsProcedures.clear();
-}
-
 
 bool PKBPQLAffectsBipHandler::computeAffectsBIP(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT,
 	map<string, set<int>>& lastModifiedTable, shared_ptr<BasicBlock>& lastBlock) {

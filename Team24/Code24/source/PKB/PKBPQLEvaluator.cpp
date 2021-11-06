@@ -617,11 +617,6 @@ pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLEvaluator::getAffects(bool 
 	return affectsHandler->getAffects(includeAffectsT, referenceStatement);
 }
 
-void PKBPQLEvaluator::resetAffectsCache() {
-	affectsHandler->resetCache();
-	affectsBipHandler->resetCache();
-}
-
 // ======================================================================================================
 // AffectsBIP
 

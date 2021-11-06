@@ -294,7 +294,6 @@ class PKBPQLEvaluator
     // Affects / AffectsT
     pair<set<pair<int, int>>, set<pair<int, int>>> getAffects(bool includeAffectsT, int referenceStatement);
     bool getAffects(int leftInt, int rightInt, bool includeAffectsT);
-    void resetAffectsCache();
     // AffectsBIP / AffectsBIPT
     pair<set<pair<int, int>>, set<pair<int, int>>> getAffectsBIP(bool includeAffectsT);
 

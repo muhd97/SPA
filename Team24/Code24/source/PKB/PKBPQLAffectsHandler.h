@@ -7,7 +7,6 @@ public:
 
     pair<set<pair<int, int>>, set<pair<int, int>>> getAffects(bool includeAffectsT, int referenceStatement);
     bool getAffects(int leftInt, int rightInt, bool includeAffectsT);
-    void resetCache();
 
     static SharedPtr create(PKB::SharedPtr pkb)
     {
@@ -17,8 +16,6 @@ public:
 private:
     PKB::SharedPtr mpPKB;
 
-    bool affectsCached = false;
-    set<string> seenAffectsProcedures;
     set<pair<int, int>> affectsList;
     set<pair<int, int>> affectsTList;
     map<int, set<pair<int, int>>> affectsTHelperTable;

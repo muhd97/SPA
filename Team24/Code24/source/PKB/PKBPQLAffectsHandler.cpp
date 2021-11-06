@@ -95,15 +95,9 @@ bool PKBPQLAffectsHandler::getAffects(int leftInt, int rightInt, bool includeAff
 
 	string targetProcName;
 	if (leftInt == 0 && rightInt == 0) {
-		set<string> seenProcedures;
 		for (const auto& p : mpPKB->cfg->getAllCFGs()) {
-			if (!seenProcedures.count(p.first)) {
-				seenProcedures.insert(p.first);
-				affectsTHelperTable.clear();
-
-				if (computeAffects(p.second, includeAffectsT, map<string, set<int>>(), shared_ptr<BasicBlock>(), true, leftInt, rightInt)) {
-					return true;
-				}
+			if (computeAffects(p.second, includeAffectsT, map<string, set<int>>(), shared_ptr<BasicBlock>(), true, leftInt, rightInt)) {
+				return true;
 			}
 		}
 		return false;
@@ -135,33 +129,21 @@ pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLAffectsHandler::getAffects(
 	affectsTHelperTable.clear();
 	affectsTHelperTable2.clear();
 	if (referenceStatement == 0) { // (syn, syn) (syn, _) (_, syn)
-		if (!affectsCached) {
-			affectsCached = true;
-			const unordered_map<string, shared_ptr<BasicBlock>>& cfgMap = mpPKB->cfg->getAllCFGs();
-			for (auto const& cfg : cfgMap) {
-				if (seenAffectsProcedures.count(cfg.first) == 0) {
-					seenAffectsProcedures.insert(cfg.first);
-					map<string, set<int>> lastModifiedTable;
-					computeAffects(cfg.second, includeAffectsT, lastModifiedTable, shared_ptr<BasicBlock>(), false, 0, 0);
-				}
-			}
+		const unordered_map<string, shared_ptr<BasicBlock>>& cfgMap = mpPKB->cfg->getAllCFGs();
+		for (auto const& cfg : cfgMap) {
+			map<string, set<int>> lastModifiedTable;
+			computeAffects(cfg.second, includeAffectsT, lastModifiedTable, shared_ptr<BasicBlock>(), false, 0, 0);
 		}
 		return make_pair(affectsList, affectsTList);
 	}
 	else {		// (int, syn) (syn, int)
 		string& targetProcName = mpPKB->stmtToProcNameTable[referenceStatement];
-		if (seenAffectsProcedures.count(targetProcName) == 0 && targetProcName != "") {
-			seenAffectsProcedures.insert(targetProcName);
+		if (targetProcName != "") {
 			const shared_ptr<BasicBlock>& firstBlock = mpPKB->cfg->getCFG(targetProcName);
 			computeAffects(firstBlock, includeAffectsT, map<string, set<int>>(), shared_ptr<BasicBlock>(), false, 0, 0);
 		}
 		return make_pair(affectsList, affectsTList);
 	}
-}
-
-void PKBPQLAffectsHandler::resetCache() {
-	affectsCached = false;
-	seenAffectsProcedures.clear();
 }
 
 bool PKBPQLAffectsHandler::computeAffects(const shared_ptr<BasicBlock>& basicBlock, bool includeAffectsT,

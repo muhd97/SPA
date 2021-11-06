@@ -6,7 +6,6 @@ public:
     using SharedPtr = std::shared_ptr<PKBPQLAffectsBipHandler>;
 
     pair<set<pair<int, int>>, set<pair<int, int>>> getAffectsBip(bool includeAffectsT);
-    void resetCache();
 
     static SharedPtr create(PKB::SharedPtr pkb)
     {
@@ -16,8 +15,6 @@ public:
 private:
     PKB::SharedPtr mpPKB;
 
-    bool affectsCached = false;
-    set<string> seenAffectsProcedures;
     set<pair<int, int>> affectsList;
     set<pair<int, int>> affectsTList;
     map<int, set<pair<int, int>>> affectsTHelperTable;

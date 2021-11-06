@@ -536,9 +536,6 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
 vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& selectCl)
 {
-    // reset affects cache according to no inter-query caching rules
-    evaluator->resetAffectsCache();
-
     bool isBooleanReturnType = selectCl->getTarget()->isBooleanReturnType();
     /* Final Results to Return */
     vector<shared_ptr<Result>> res;
