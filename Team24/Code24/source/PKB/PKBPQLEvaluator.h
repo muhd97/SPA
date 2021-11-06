@@ -12,9 +12,11 @@
 #include "PKBDesignEntity.h"
 #include "PKBProcedure.h"
 #include "PKBStmt.h"
-
+// handlers
 #include "PKBPQLAffectsHandler.h"
 #include "PKBPQLAffectsBipHandler.h"
+#include "PKBPQLCallsHandler.h"
+#include "PKBPQLPatternHandler.h"
 
 // for pattern
 #include "../SimpleLexer.h"
@@ -407,6 +409,9 @@ class PKBPQLEvaluator
         mpPKB = pPKB;
         affectsHandler = PKBPQLAffectsHandler::create(pPKB);
         affectsBipHandler = PKBPQLAffectsBipHandler::create(pPKB);
+        callsHandler = PKBPQLCallsHandler::create(pPKB);
+        patternHandler = PKBPQLPatternHandler::create(pPKB);
+
     }
 
     // we want to return only vector<int>, not vector<PKBStmt::SharedPtr>
@@ -480,16 +485,11 @@ class PKBPQLEvaluator
         stmts.insert(stmts.end(), whileStmts.begin(), whileStmts.end());
     }
 
-    // helpers for pattern
-    vector<string> inOrderTraversalHelper(shared_ptr<Expression> expr);
-    vector<string> preOrderTraversalHelper(shared_ptr<Expression> expr);
-    bool checkForSubTree(vector<string> &queryInOrder, vector<string> &assignInOrder);
-    bool checkForExactTree(vector<string> &queryInOrder, vector<string> &assignInOrder);
-
-
     // handlers for affects
-    /* ======================== Affects ======================== */
+    /* ======================== Handlers ======================== */
 
     PKBPQLAffectsHandler::SharedPtr affectsHandler;
     PKBPQLAffectsBipHandler::SharedPtr affectsBipHandler;
+    PKBPQLCallsHandler::SharedPtr callsHandler;
+    PKBPQLPatternHandler::SharedPtr patternHandler;
 };

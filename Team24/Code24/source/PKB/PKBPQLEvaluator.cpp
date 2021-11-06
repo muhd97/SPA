@@ -932,20 +932,7 @@ PKBDesignEntity PKBPQLEvaluator::getStmtType(int stmtIdx)
 // instead
 vector<pair<int, string>> PKBPQLEvaluator::matchAnyPattern(string& LHS)
 {
-	vector<PKBStmt::SharedPtr > assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
-	vector<pair<int, string>> res;
-	for (auto& assignStmt : assignStmts)
-	{
-		// check LHS
-		if (LHS == assignStmt->simpleAssignStatement->getId()->getName() || LHS == "_")
-		{
-			int statementIndex = assignStmt->getIndex();
-			string variableModified = assignStmt->simpleAssignStatement->getId()->getName();
-			res.emplace_back(make_pair(statementIndex, variableModified));
-		}
-	}
-
-	return res;
+	return patternHandler->matchAnyPattern(LHS);
 }
 
 // For pattern a("_", _EXPR_) or pattern a(IDENT, _EXPR_)
@@ -953,33 +940,7 @@ vector<pair<int, string>> PKBPQLEvaluator::matchAnyPattern(string& LHS)
 // instead
 vector<pair<int, string>> PKBPQLEvaluator::matchPartialPattern(string& LHS, shared_ptr<Expression>& RHS)
 {
-	vector<PKBStmt::SharedPtr > assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
-	vector<pair<int, string>> res;
-
-	// inorder and preorder traversals of RHS
-	vector<string> queryInOrder = inOrderTraversalHelper(RHS);
-	vector<string> queryPreOrder = preOrderTraversalHelper(RHS);
-
-	for (auto& assignStmt : assignStmts)
-	{
-		// check LHS
-		if (LHS != assignStmt->simpleAssignStatement->getId()->getName() && LHS != "_")
-		{
-			continue;
-		}
-
-		// check RHS
-		vector<string> assignInOrder = inOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
-		vector<string> assignPreOrder = preOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
-		if (checkForSubTree(queryInOrder, assignInOrder) && checkForSubTree(queryPreOrder, assignPreOrder))
-		{
-			int statementIndex = assignStmt->getIndex();
-			string variableModified = assignStmt->simpleAssignStatement->getId()->getName();
-			res.emplace_back(make_pair(statementIndex, variableModified));
-		}
-	}
-
-	return res;
+	return patternHandler->matchPartialPattern(LHS, RHS);
 }
 
 // For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
@@ -987,387 +948,97 @@ vector<pair<int, string>> PKBPQLEvaluator::matchPartialPattern(string& LHS, shar
 // instead
 vector<pair<int, string>> PKBPQLEvaluator::matchExactPattern(string& LHS, shared_ptr<Expression>& RHS)
 {
-	vector<PKBStmt::SharedPtr > assignStmts = mpPKB->getStatements(PKBDesignEntity::Assign);
-	vector<pair<int, string>> res;
-
-	// inorder and preorder traversals of RHS
-	vector<string> queryInOrder = inOrderTraversalHelper(RHS);
-	vector<string> queryPreOrder = preOrderTraversalHelper(RHS);
-
-	for (auto& assignStmt : assignStmts)
-	{
-		// check LHS
-		if (LHS != assignStmt->simpleAssignStatement->getId()->getName() && LHS != "_")
-		{
-			continue;
-		}
-
-		// check RHS
-		vector<string> assignInOrder = inOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
-		vector<string> assignPreOrder = preOrderTraversalHelper(assignStmt->simpleAssignStatement->getExpr());
-		if (checkForExactTree(queryInOrder, assignInOrder) && checkForExactTree(queryPreOrder, assignPreOrder))
-		{
-			int statementIndex = assignStmt->getIndex();
-			string variableModified = assignStmt->simpleAssignStatement->getId()->getName();
-			res.emplace_back(make_pair(statementIndex, variableModified));
-		}
-	}
-
-	return res;
+	return patternHandler->matchExactPattern(LHS, RHS);
 }
 
 bool PKBPQLEvaluator::getCallsStringString(const string& caller, const string& called)
 {
-	for (auto& p : mpPKB->callsTable[caller])
-	{
-		if (p.second == called)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return callsHandler->getCallsStringString(caller, called);
 }
 
 const set<pair<string, string>>& PKBPQLEvaluator::getCallsStringSyn(const string& caller)
 {
-	return mpPKB->callsTable[caller];
-}
+	return callsHandler->getCallsStringSyn(caller);
+;}
 
 bool PKBPQLEvaluator::getCallsStringUnderscore(const string& caller)
 {
-	return mpPKB->callsTable[caller].size() > 0;
+	return callsHandler->getCallsStringUnderscore(caller);
 }
 
 unordered_set<string> PKBPQLEvaluator::getCallsSynString(const string& called)
 {
-	unordered_set<string> toReturn;
-	for (auto& p : mpPKB->calledTable[called])
-	{
-		toReturn.insert(p.first);
-	}
-
-	return toReturn;
+	return callsHandler->getCallsSynString(called);
 }
 
 set<pair<string, string>> PKBPQLEvaluator::getCallsSynSyn()
 {
-	set<pair<string, string>> toReturn;
-	for (auto
-		const& [procName, pairs] : mpPKB->callsTable)
-	{
-		toReturn.insert(pairs.begin(), pairs.end());
-	}
-
-	return toReturn;
+	return callsHandler->getCallsSynSyn();
 }
 
 unordered_set<string> PKBPQLEvaluator::getCallsSynUnderscore()
 {
-	unordered_set<string> toReturn;
-	for (auto
-		const& [procName, pairs] : mpPKB->callsTable)
-	{
-		if (pairs.size() > 0)
-		{
-			toReturn.insert(procName);
-		}
-	}
-
-	return toReturn;
+	return callsHandler->getCallsSynUnderscore();
 }
 
 bool PKBPQLEvaluator::getCallsUnderscoreString(const string& called)
 {
-	return mpPKB->calledTable[called].size() > 0;
+	return callsHandler->getCallsUnderscoreString(called);
 }
 
 unordered_set<string> PKBPQLEvaluator::getCallsUnderscoreSyn()
 {
-	unordered_set<string> toReturn;
-	for (auto
-		const& [procName, pairs] : mpPKB->calledTable)
-	{
-		if (pairs.size() > 0)
-		{
-			toReturn.insert(procName);
-		}
-	}
-
-	return toReturn;
+	return callsHandler->getCallsUnderscoreSyn();
 }
 
 bool PKBPQLEvaluator::getCallsUnderscoreUnderscore()
 {
-	return mpPKB->callsTable.size() > 0;
+	return callsHandler->getCallsUnderscoreUnderscore();
 }
 
 bool PKBPQLEvaluator::getCallsTStringString(const string& caller, const string& called)
 {
-	for (auto& p : mpPKB->callsTTable[caller])
-	{
-		if (p.second == called)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return callsHandler->getCallsTStringString(caller, called);
 }
 
 unordered_set<string> PKBPQLEvaluator::getCallsTStringSyn(const string& caller)
 {
-	unordered_set<string> toReturn;
-	for (auto& p : mpPKB->callsTTable[caller])
-	{
-		toReturn.insert(p.second);
-	}
-
-	return toReturn;
+	return callsHandler->getCallsTStringSyn(caller);
 }
 
 bool PKBPQLEvaluator::getCallsTStringUnderscore(const string& caller)
 {
-	return mpPKB->callsTTable[caller].size() > 0;
+	return callsHandler->getCallsTStringUnderscore(caller);
 }
 
 unordered_set<string> PKBPQLEvaluator::getCallsTSynString(const string& called)
 {
-	unordered_set<string> toReturn;
-	for (auto& p : mpPKB->calledTTable[called])
-	{
-		toReturn.insert(p.first);
-	}
-
-	return toReturn;
+	return callsHandler->getCallsTSynString(called);
 }
 
 set<pair<string, string>> PKBPQLEvaluator::getCallsTSynSyn()
 {
-	set<pair<string, string>> toReturn;
-	for (auto
-		const& [procName, pairs] : mpPKB->callsTTable)
-	{
-		toReturn.insert(pairs.begin(), pairs.end());
-	}
-
-	return toReturn;
+	return callsHandler->getCallsTSynSyn();
 }
 
 unordered_set<string> PKBPQLEvaluator::getCallsTSynUnderscore()
 {
-	unordered_set<string> toReturn;
-	for (auto
-		const& [procName, pairs] : mpPKB->callsTTable)
-	{
-		if (pairs.size() > 0)
-		{
-			toReturn.insert(procName);
-		}
-	}
-
-	return toReturn;
+	return callsHandler->getCallsTSynUnderscore();
 }
 
 bool PKBPQLEvaluator::getCallsTUnderscoreString(const string& called)
 {
-	return mpPKB->calledTTable[called].size() > 0;
+	return callsHandler->getCallsTUnderscoreString(called);
 }
 
 unordered_set<string> PKBPQLEvaluator::getCallsTUnderscoreSyn()
 {
-	unordered_set<string> toReturn;
-	for (auto
-		const& [procName, pairs] : mpPKB->calledTTable)
-	{
-		if (pairs.size() > 0)
-		{
-			toReturn.insert(procName);
-		}
-	}
-
-	return toReturn;
+	return callsHandler->getCallsTUnderscoreSyn();
 }
 
 bool PKBPQLEvaluator::getCallsTUnderscoreUnderscore()
 {
-	return mpPKB->callsTTable.size() > 0;
-}
-
-vector<string> PKBPQLEvaluator::inOrderTraversalHelper(shared_ptr<Expression> expr)
-{
-	vector<string> res;	// using a set to prevent duplicates
-	vector<shared_ptr < Expression>> queue = { expr
-	};
-
-	// comb through the expression and pick out all identifiers' names
-	while (!queue.empty())
-	{
-		// pop the last element
-		shared_ptr<Expression> e = queue.back();
-		queue.pop_back();
-
-		switch (e->getExpressionType())
-		{
-		case ExpressionType::CONSTANT:
-		{
-			shared_ptr<Constant> constant = static_pointer_cast<Constant> (e);
-			res.emplace_back(constant->getValue());
-			break;
-		}
-
-		case ExpressionType::IDENTIFIER:
-		{
-			shared_ptr<Identifier> id = static_pointer_cast<Identifier> (e);
-			res.emplace_back(id->getName());
-			break;
-		}
-
-		case ExpressionType::COMBINATION:
-		{
-			shared_ptr<CombinationExpression> cmb = static_pointer_cast<CombinationExpression> (e);
-			shared_ptr<Identifier> id;
-			switch (cmb->getOp())
-			{
-			case Bop::PLUS:
-				id = make_shared<Identifier>("+");
-				break;
-			case Bop::MINUS:
-				id = make_shared<Identifier>("-");
-				break;
-			case Bop::MULTIPLY:
-				id = make_shared<Identifier>("*");
-				break;
-			case Bop::DIVIDE:
-				id = make_shared<Identifier>("/");
-				break;
-			case Bop::MOD:
-				id = make_shared<Identifier>("%");
-				break;
-			}
-
-			queue.emplace_back(cmb->getLHS());
-			queue.emplace_back(id);
-			queue.emplace_back(cmb->getRHS());
-			break;
-		}
-
-		default:
-			throw ("I dont recognise this Expression Type, sergeant");
-		}
-	}
-
-	return res;
-}
-
-vector<string> PKBPQLEvaluator::preOrderTraversalHelper(shared_ptr<Expression> expr)
-{
-	vector<string> res;	// using a set to prevent duplicates
-	vector<shared_ptr < Expression>> queue = { expr
-	};
-
-	// comb through the expression and pick out all identifiers' names
-	while (!queue.empty())
-	{
-		// pop the last element
-		shared_ptr<Expression> e = queue.back();
-		queue.pop_back();
-
-		switch (e->getExpressionType())
-		{
-		case ExpressionType::CONSTANT:
-		{
-			shared_ptr<Constant> constant = static_pointer_cast<Constant> (e);
-			res.emplace_back(constant->getValue());
-			break;
-		}
-
-		case ExpressionType::IDENTIFIER:
-		{
-			shared_ptr<Identifier> id = static_pointer_cast<Identifier> (e);
-			res.emplace_back(id->getName());
-			break;
-		}
-
-		case ExpressionType::COMBINATION:
-		{
-			shared_ptr<CombinationExpression> cmb = static_pointer_cast<CombinationExpression> (e);
-			switch (cmb->getOp())
-			{
-			case Bop::PLUS:
-				res.emplace_back("+");
-				break;
-			case Bop::MINUS:
-				res.emplace_back("-");
-				break;
-			case Bop::MULTIPLY:
-				res.emplace_back("*");
-				break;
-			case Bop::DIVIDE:
-				res.emplace_back("/");
-				break;
-			case Bop::MOD:
-				res.emplace_back("%");
-				break;
-			}
-
-			queue.emplace_back(cmb->getLHS());
-			queue.emplace_back(cmb->getRHS());
-			break;
-		}
-
-		default:
-			throw ("I dont recognise this Expression Type, sergeant");
-		}
-	}
-
-	return res;
-}
-
-bool PKBPQLEvaluator::checkForSubTree(vector<string>& queryInOrder, vector<string>& assignInOrder)
-{
-	for (size_t assignPointer = 0; assignPointer < assignInOrder.size(); assignPointer++)
-	{
-		// early termination, assignInOrder too small already
-		if (assignInOrder.size() - assignPointer < queryInOrder.size())
-		{
-			return false;
-		}
-
-		for (size_t queryPointer = 0; queryPointer < queryInOrder.size(); queryPointer++)
-		{
-			if (queryInOrder[queryPointer] != assignInOrder[assignPointer + queryPointer])
-			{
-				break;
-			}
-
-			// valid matching subtree, this is correct, add to result
-			else if (queryPointer == queryInOrder.size() - 1)
-			{
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-bool PKBPQLEvaluator::checkForExactTree(vector<string>& queryInOrder, vector<string>& assignInOrder)
-{
-	if (queryInOrder.size() != assignInOrder.size())
-	{
-		return false;
-	}
-
-	for (size_t pointer = 0; pointer < queryInOrder.size(); pointer++)
-	{
-		if (queryInOrder[pointer] != assignInOrder[pointer])
-		{
-			return false;
-		}
-	}
-
-	return true;
+	return callsHandler->getCallsTUnderscoreUnderscore();
 }
 
 // Next
