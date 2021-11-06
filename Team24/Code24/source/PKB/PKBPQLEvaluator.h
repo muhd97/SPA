@@ -19,6 +19,8 @@
 #include "PKBPQLPatternHandler.h"
 #include "PKBPQLNextHandler.h"
 #include "PKBPQLNextBipHandler.h"
+#include "PKBPQLModifyHandler.h"
+#include "PKBPQLUseHandler.h"
 // for pattern
 #include "../SimpleLexer.h"
 #include "../SimpleParser.h"
@@ -124,7 +126,8 @@ class PKBPQLEvaluator
     /* Use for Follows*(_, s1) */
     unordered_set<int> getFollowsTUnderscoreSyn(PKBDesignEntity rightType);
 
-    /* Uses */
+    /* ======================== Uses ======================== */
+    
     //int syn
     const unordered_set<string> &getUsesIntSyn(int statementNo);
     //int ident
@@ -143,64 +146,43 @@ class PKBPQLEvaluator
     const vector<int> &getUsesSynIdentNonProc(PKBDesignEntity entityType, string variableName);
     // syn ident proc
     const vector<string> &getUsesSynIdentProc(string ident);
-
-    bool variableExists(string name);
-    bool procExists(string procname);
-    bool statementExists(int statementNo);
-
     // Get the names of all variables used by procedure with name {procname}
     vector<string> getUsedByProcName(string procname);
-    /* Check if given procedure {procname} uses at least one variable. */
+    // Check if given procedure {procname} uses at least one variable. 
     bool checkUsedByProcName(string procname);
-    /* Check if given procedure {procname} uses the variable specified by {ident}.
-     */
+    // Check if given procedure {procname} uses the variable specified by {ident}.
     bool checkUsedByProcName(string procname, string ident);
 
-    // Get all statements that use the variable of name {variableName}
-    const vector<int> &getUsers(string variableName);
-    // Get all statements of type {entityType} that use the variable of name
-    // {variableName}
+    /* ======================== Modifies ======================== */
 
-
-    // Modifies
-
-    /* Check if the given stmt Index MODIFIES any variables. */
+    // Check if the given stmt Index MODIFIES any variables.
     bool checkModified(int statementIndex);
-    /* Check if the given stmt Index MODIFIES a specific variable specified by
-     * {ident} */
+    // Check if the given stmt Index MODIFIES a specific variable specified by {ident}
     bool checkModified(int statementIndex, string ident);
-    // Get the names of all variables modified by statement indexed
-    // {statementIndex}
+    // Get the names of all variables modified by statement indexed {statementIndex}
     vector<string> getModified(int statementIndex);
-
     /* Check if the given {entityType} modifies any variables */
     bool checkModified(PKBDesignEntity entityType);
-
     // Get the names of all variables modified by procedure with name {procname}
     vector<string> getModifiedByProcName(string procname);
-    /* Check if given procedure {procname} modifies at least one variable. */
+    //Check if given procedure {procname} modifies at least one variable.
     bool checkModifiedByProcName(string procname);
-    /* Check if given procedure {procname} modifies the variable specified by
-     * {ident}. */
+    //Check if given procedure {procname} modifies the variable specified by {ident}.
     bool checkModifiedByProcName(string procname, string ident);
-
-    /* Get all procedures that modify at least one variable */
+    //Get all procedures that modify at least one variable 
     vector<string> getProceduresThatModifyVars();
     // Get all procedures that modify the given variable of {variableName}
     vector<string> getProceduresThatModifyVar(string variableName);
-
     // Get all statements that modify the variable of name {variableName}
     vector<int> getModifiers(string variableName);
-
-    // Get all statements of type {entityType} that modify the variable of name
-    // {variableName}
+    // Get all statements of type {entityType} that modify the variable of name {variableName}
     vector<int> getModifiers(PKBDesignEntity statements, string variableName);
-
     // Get all statements that modify at least one variable
     vector<int> getModifiers();
+    // Get all stmts of a given type that modify variable(s)
+    vector<int> getModifiers(PKBDesignEntity entityType); 
 
-    vector<int> getModifiers(PKBDesignEntity entityType); /* Get all stmts of a given type
-                                                             that modify variable(s) */
+    /* ======================== Pattern ======================== */
 
     // Pattern
     // For pattern a("_", "_") or pattern a(IDENT, "_")
@@ -210,173 +192,131 @@ class PKBPQLEvaluator
     // For pattern a("_", EXPR) or pattern a(IDENT, EXPR)
     vector<pair<int, string>> matchExactPattern(string &LHS, shared_ptr<Expression> &RHS);
 
+    /* ======================== Calls ======================== */
+
     // Calls
     /* Use for Calls(proc, proc) */
     bool getCallsStringString(const string &caller, const string &called);
-
     /* Use for Calls(proc, syn) */
     const  set<pair<string, string>>& getCallsStringSyn(const string &caller);
-
     /* Use for Calls(proc, _) */
     bool getCallsStringUnderscore(const string &caller);
-
     /* Use for Calls(syn, proc) */
     unordered_set<string> getCallsSynString(const string &called);
-
     /* Use for Calls(syn, syn) */
     set<pair<string, string>> getCallsSynSyn();
-
     /* Use for Calls(syn, _) */
     unordered_set<string> getCallsSynUnderscore();
-
     /* Use for Calls(_, proc) */
     bool getCallsUnderscoreString(const string &called);
-
     /* Use for Calls(_, syn) */
     unordered_set<string> getCallsUnderscoreSyn();
-
     /* Use for Calls(_, _) */
     bool getCallsUnderscoreUnderscore();
 
     // CallsT
     /* Use for CallsT(proc, proc) */
     bool getCallsTStringString(const string &caller, const string &called);
-
     /* Use for CallsT(proc, syn) */
     unordered_set<string> getCallsTStringSyn(const string &caller);
-
     /* Use for CallsT(proc, _) */
     bool getCallsTStringUnderscore(const string &caller);
-
     /* Use for CallsT(syn, proc) */
     unordered_set<string> getCallsTSynString(const string &called);
-
     /* Use for CallsT(syn, syn) */
     set<pair<string, string>> getCallsTSynSyn();
-
     /* Use for CallsT(syn, _) */
     unordered_set<string> getCallsTSynUnderscore();
-
     /* Use for CallsT(_, proc) */
     bool getCallsTUnderscoreString(const string &called);
-
     /* Use for CallsT(_, syn) */
     unordered_set<string> getCallsTUnderscoreSyn();
-
     /* Use for CallsT(_, _) */
     bool getCallsTUnderscoreUnderscore();
+
+    /* ======================== Next ======================== */
 
     // Next
     // Case 1: Next(_, _)
     bool getNextUnderscoreUnderscore();
-
     // Case 2: Next(_, syn)
     unordered_set<int> getNextUnderscoreSyn(PKBDesignEntity to);
-
     // Case 3: Next(_, int)
     bool getNextUnderscoreInt(int toIndex);
-
     // Case 4: Next(syn, syn)
     set<pair<int, int>> getNextSynSyn(PKBDesignEntity from, PKBDesignEntity to);
-
     // Case 5: Next(syn, _)
     unordered_set<int> getNextSynUnderscore(PKBDesignEntity from);
-
     // Case 6: Next(syn, int)
     unordered_set<int> getNextSynInt(PKBDesignEntity from, int toIndex);
-
     // Case 7: Next(int, int)
     bool getNextIntInt(int fromIndex, int toIndex);
-
     // Case 8: Next(int, _)
     bool getNextIntUnderscore(int fromIndex);
-
     // Case 9: Next(int, syn)
     unordered_set<int> getNextIntSyn(int fromIndex, PKBDesignEntity to);
 
     // NextT
     // Case 1: NextT(_, _)
     bool getNextTUnderscoreUnderscore();
-
     // Case 2: NextT(_, syn)
     unordered_set<int> getNextTUnderscoreSyn(PKBDesignEntity to);
-
     // Case 3: NextT(_, int)
     bool getNextTUnderscoreInt(int toIndex);
-
     // Case 4: NextT(syn, syn)
     set<pair<int, int>> getNextTSynSyn(PKBDesignEntity from, PKBDesignEntity to);
-
     // Case 5: NextT(syn, _)
     unordered_set<int> getNextTSynUnderscore(PKBDesignEntity from);
-
     // Case 6: NextT(syn, int)
     unordered_set<int> getNextTSynInt(PKBDesignEntity from, int toIndex);
-
     // Case 7: NextT(int, int)
     bool getNextTIntInt(int fromIndex, int toIndex);
-
     // Case 8: NextT(int, _)
     bool getNextTIntUnderscore(int fromIndex);
-
     // Case 9: NextT(int, syn)
     unordered_set<int> getNextTIntSyn(int fromIndex, PKBDesignEntity to);
 
     // NextBip
     // Case 1: NextBip(_, _)
     bool getNextBipUnderscoreUnderscore();
-
     // Case 2: NextBip(_, syn)
     unordered_set<int> getNextBipUnderscoreSyn(PKBDesignEntity to);
-
     // Case 3: NextBip(_, int)
     bool getNextBipUnderscoreInt(int toIndex);
-
     // Case 4: NextBip(syn, syn)
     set<pair<int, int>> getNextBipSynSyn(PKBDesignEntity from, PKBDesignEntity to);
-
     // Case 5: NextBip(syn, _)
     unordered_set<int> getNextBipSynUnderscore(PKBDesignEntity from);
-
     // Case 6: NextBip(syn, int)
     unordered_set<int> getNextBipSynInt(PKBDesignEntity from, int toIndex);
-
     // Case 7: NextBip(int, int)
     bool getNextBipIntInt(int fromIndex, int toIndex);
-
     // Case 8: NextBip(int, _)
     bool getNextBipIntUnderscore(int fromIndex);
-
     // Case 9: NextBip(int, syn)
     unordered_set<int> getNextBipIntSyn(int fromIndex, PKBDesignEntity to);
 
     // NextBipT
     // Case 1: NextBipT(_, _)
     bool getNextBipTUnderscoreUnderscore();
-
     // Case 2: NextBipT(_, syn)
     unordered_set<int> getNextBipTUnderscoreSyn(PKBDesignEntity to);
-
     // Case 3: NextBipT(_, int)
     bool getNextBipTUnderscoreInt(int toIndex);
-
     // Case 4: NextBipT(syn, syn)
     set<pair<int, int>> getNextBipTSynSyn(PKBDesignEntity from, PKBDesignEntity to);
-
     // Case 5: NextBipT(syn, _)
     unordered_set<int> getNextBipTSynUnderscore(PKBDesignEntity from);
-
     // Case 6: NextBipT(syn, int)
     unordered_set<int> getNextBipTSynInt(PKBDesignEntity from, int toIndex);
-
     // Case 7: NextBipT(int, int)
     bool getNextBipTIntInt(int fromIndex, int toIndex);
-
     // Case 8: NextBipT(int, _)
     bool getNextBipTIntUnderscore(int fromIndex);
-
     // Case 9: NextBipT(int, syn)
     unordered_set<int> getNextBipTIntSyn(int fromIndex, PKBDesignEntity to);
+
+    /* ======================== Affects ======================== */
 
     // Affects / AffectsT
     pair<set<pair<int, int>>, set<pair<int, int>>> getAffects(bool includeAffectsT, int referenceStatement);
@@ -404,69 +344,13 @@ class PKBPQLEvaluator
     //Get statement type by index
     PKBDesignEntity getStmtType(int stmtIdx);
 
+    // clause handler
+    bool variableExists(string name);
+    bool procExists(string procname);
+    bool statementExists(int statementNo);
+
   protected:
-    PKBPQLEvaluator(PKB::SharedPtr pPKB)
-    {
-        mpPKB = pPKB;
-        affectsHandler = PKBPQLAffectsHandler::create(pPKB);
-        affectsBipHandler = PKBPQLAffectsBipHandler::create(pPKB);
-        callsHandler = PKBPQLCallsHandler::create(pPKB);
-        patternHandler = PKBPQLPatternHandler::create(pPKB);
-        nextHandler = PKBPQLNextHandler::create(pPKB);
-        nextBipHandler = PKBPQLNextBipHandler::create(pPKB);
-    }
-
-    // we want to return only vector<int>, not vector<PKBStmt::SharedPtr>
-    vector<int> stmtToInt(vector<PKBStmt::SharedPtr> &stmts)
-    {
-        vector<int> res;
-        for (auto &stmt : stmts)
-        {
-            res.emplace_back(stmt->getIndex());
-        }
-        return move(res);
-    }
-
-    vector<int> stmtToInt(set<PKBStmt::SharedPtr> &stmts)
-    {
-        vector<int> res;
-        for (auto &stmt : stmts)
-        {
-            res.emplace_back(stmt->getIndex());
-        }
-        return move(res);
-    }
-
-    // we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
-    vector<string> varToString(set<PKBVariable::SharedPtr> &vars)
-    {
-        vector<string> res;
-        for (auto &var : vars)
-        {
-            res.emplace_back(var->getName());
-        }
-        return move(res);
-    }
-
-    // we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
-    vector<string> varToString(vector<PKBVariable::SharedPtr> &vars)
-    {
-        vector<string> res;
-        for (auto &var : vars)
-        {
-            res.emplace_back(var->getName());
-        }
-        return move(res);
-    }
-
-    vector<string> procedureToString(set<PKBProcedure::SharedPtr> &procs)
-    {
-        vector<string> res;
-        res.reserve(procs.size());
-        for (auto &p : procs)
-            res.emplace_back(p->getName());
-        return move(res);
-    }
+      PKBPQLEvaluator(PKB::SharedPtr pPKB);
 
     bool isContainerType(PKBDesignEntity s)
     {
@@ -487,7 +371,6 @@ class PKBPQLEvaluator
         stmts.insert(stmts.end(), whileStmts.begin(), whileStmts.end());
     }
 
-    // handlers for affects
     /* ======================== Handlers ======================== */
 
     PKBPQLAffectsHandler::SharedPtr affectsHandler;
@@ -496,5 +379,7 @@ class PKBPQLEvaluator
     PKBPQLPatternHandler::SharedPtr patternHandler;
     PKBPQLNextHandler::SharedPtr nextHandler;
     PKBPQLNextBipHandler::SharedPtr nextBipHandler;
+    PKBPQLModifyHandler::SharedPtr modifyHandler;
+    PKBPQLUseHandler::SharedPtr useHandler;
 
 };

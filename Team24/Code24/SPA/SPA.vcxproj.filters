@@ -7,7 +7,6 @@
     <ClCompile Include="..\source\PKB\PKBGroup.cpp" />
     <ClCompile Include="..\source\PKB\PKB.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLEvaluator.cpp" />
-    <ClCompile Include="..\source\PKB\PKBVariable.cpp" />
     <ClCompile Include="..\source\PQL\PQLLexer.cpp" />
     <ClCompile Include="..\source\PQL\PQLParser.cpp" />
     <ClCompile Include="..\source\PQL\PQLProcessor.cpp" />
@@ -49,6 +48,8 @@
     <ClCompile Include="..\source\PKB\PKBPQLPatternHandler.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLNextHandler.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLNextBipHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBPQLModifyHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBPQLUseHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
@@ -102,5 +103,7 @@
     <ClInclude Include="..\source\PKB\PKBPQLPatternHandler.h" />
     <ClInclude Include="..\source\PKB\PKBPQLNextHandler.h" />
     <ClInclude Include="..\source\PKB\PKBPQLNextBipHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBPQLModifyHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBPQLUseHandler.h" />
   </ItemGroup>
 </Project>
