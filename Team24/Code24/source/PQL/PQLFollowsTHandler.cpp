@@ -13,7 +13,7 @@ void FollowsTHandler::evaluateIntInt(vector<shared_ptr<ResultTuple>>& toReturn)
 {
     int s1 = getLeftArg()->getIntVal();
     int s2 = getRightArg()->getIntVal();
-    if (getEvaluator()->getFollowsTIntegerInteger(s1, s2))
+    if (getEvaluator()->getFollowsT(s1, s2))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(ResultTuple::INTEGER_PLACEHOLDER, ResultTuple::INTEGER_PLACEHOLDER);
@@ -26,7 +26,7 @@ void FollowsTHandler::evaluateIntSyn(vector<shared_ptr<ResultTuple>>& toReturn)
     const string& rightSynonym = getRightArg()->getStringVal();
     PKBDesignEntity pkbDe = getPKBDesignEntityOfSynonym(rightSynonym);
 
-    for (auto& s : getEvaluator()->getFollowsTIntegerSyn(pkbDe, getLeftArg()->getIntVal()))
+    for (auto& s : getEvaluator()->getFollowsT(getLeftArg()->getIntVal(), pkbDe))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(rightSynonym, to_string(s));
@@ -49,7 +49,7 @@ void FollowsTHandler::evaluateSynInt(vector<shared_ptr<ResultTuple>>& toReturn)
     const string& leftSynonym = getLeftArg()->getStringVal();
     PKBDesignEntity pkbDe = getPKBDesignEntityOfSynonym(leftSynonym);
 
-    for (auto& s : getEvaluator()->getFollowsTSynInteger(pkbDe, getRightArg()->getIntVal()))
+    for (auto& s : getEvaluator()->getFollowsT(pkbDe, getRightArg()->getIntVal()))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(leftSynonym, to_string(s));
@@ -70,7 +70,7 @@ void FollowsTHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
     PKBDesignEntity pkbDe1 = getPKBDesignEntityOfSynonym(leftSynonym);
     PKBDesignEntity pkbDe2 = getPKBDesignEntityOfSynonym(rightSynonym);
 
-    for (auto& p : getEvaluator()->getFollowsTSynSyn(pkbDe1, pkbDe2))
+    for (auto& p : getEvaluator()->getFollowsT(pkbDe1, pkbDe2))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(leftSynonym, to_string(p.first));

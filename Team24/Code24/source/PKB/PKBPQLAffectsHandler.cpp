@@ -17,9 +17,6 @@ bool PKBPQLAffectsHandler::handleAffectsAssign(int index, bool includeAffectsT,
 				for (int s : affectingStatements) {
 					pair<int, int>& affectClause = make_pair(s, index);
 					bool insertAffectsSucceed = affectsList.insert(affectClause).second;
-					if (insertAffectsSucceed) {
-						cout << "insert  " << affectClause.first << ", " << affectClause.second << endl;
-					}
 					if (insertAffectsSucceed && terminateEarly &&
 						((leftInt == 0 && (rightInt == 0 || rightInt == index)) ||
 							(leftInt == s && (rightInt == 0 || rightInt == index)))) {
@@ -28,17 +25,13 @@ bool PKBPQLAffectsHandler::handleAffectsAssign(int index, bool includeAffectsT,
 					// handle affects*
 					if (includeAffectsT && (insertAffectsSucceed)) {
 						affectsTList.insert(affectClause);
-						cout << "insert * " << affectClause.first << ", " << affectClause.second << endl;
 						affectsTHelperTable[index].insert(affectClause);
 						affectsTHelperTable2[s].insert(affectClause);
 
 						for (const auto& p : affectsTHelperTable[s]) {
-							//cout << "helper : " << p.first << ", " << p.second << endl;
 							pair<int, int> affectsTClause = make_pair(p.first, index);
 							bool insertAffectsTSucceed = affectsTList.insert(affectsTClause).second;
-							if (insertAffectsTSucceed) {
-								cout << "insert * " << affectsTClause.first << ", " << affectsTClause.second << endl;
-							}
+
 							if (insertAffectsTSucceed && terminateEarly &&
 								((leftInt == 0 && (rightInt == 0 || rightInt == index)) ||
 									(leftInt == p.first && (rightInt == 0 || rightInt == index)))) {
@@ -47,12 +40,8 @@ bool PKBPQLAffectsHandler::handleAffectsAssign(int index, bool includeAffectsT,
 							affectsTHelperTable[index].insert(affectsTClause);
 							affectsTHelperTable2[p.first].insert(affectsTClause);
 							for (const auto& p2 : affectsTHelperTable2[index]) {
-								//cout << "helper : " << p.first << ", " << p.second << endl;
 								pair<int, int> affectsTClause = make_pair(p.first, p2.second);
 								bool insertAffectsTSucceed = affectsTList.insert(affectsTClause).second;
-								if (insertAffectsTSucceed) {
-									cout << "insert * " << affectsTClause.first << ", " << affectsTClause.second << endl;
-								}
 								if (insertAffectsTSucceed && terminateEarly &&
 									((leftInt == 0 && (rightInt == 0 || rightInt == p2.second)) ||
 										(leftInt == p.first && (rightInt == 0 || rightInt == p2.second)))) {
@@ -63,12 +52,8 @@ bool PKBPQLAffectsHandler::handleAffectsAssign(int index, bool includeAffectsT,
 							}
 						}
 						for (const auto& p2 : affectsTHelperTable2[index]) {
-							//cout << "helper : " << p.first << ", " << p.second << endl;
 							pair<int, int> affectsTClause = make_pair(s, p2.second);
 							bool insertAffectsTSucceed = affectsTList.insert(affectsTClause).second;
-							if (insertAffectsTSucceed) {
-								cout << "insert * " << affectsTClause.first << ", " << affectsTClause.second << endl;
-							}
 							if (insertAffectsTSucceed && terminateEarly &&
 								((leftInt == 0 && (rightInt == 0 || rightInt == p2.second)) ||
 									(leftInt == s && (rightInt == 0 || rightInt == p2.second)))) {
@@ -114,7 +99,6 @@ bool PKBPQLAffectsHandler::getAffects(int leftInt, int rightInt, bool includeAff
 		for (const auto& p : mpPKB->cfg->getAllCFGs()) {
 			if (!seenProcedures.count(p.first)) {
 				seenProcedures.insert(p.first);
-				//cout <<  "from the root: " << p.first << endl;
 				affectsTHelperTable.clear();
 
 				if (computeAffects(p.second, includeAffectsT, map<string, set<int>>(), shared_ptr<BasicBlock>(), true, leftInt, rightInt)) {
@@ -167,7 +151,6 @@ pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLAffectsHandler::getAffects(
 	else {		// (int, syn) (syn, int)
 		string& targetProcName = mpPKB->stmtToProcNameTable[referenceStatement];
 		if (seenAffectsProcedures.count(targetProcName) == 0 && targetProcName != "") {
-			cout << "from the root: " << targetProcName << endl;
 			seenAffectsProcedures.insert(targetProcName);
 			const shared_ptr<BasicBlock>& firstBlock = mpPKB->cfg->getCFG(targetProcName);
 			computeAffects(firstBlock, includeAffectsT, map<string, set<int>>(), shared_ptr<BasicBlock>(), false, 0, 0);

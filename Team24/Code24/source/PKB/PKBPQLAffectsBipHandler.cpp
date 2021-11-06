@@ -17,30 +17,20 @@ bool PKBPQLAffectsBipHandler::handleAffectsAssignBIP(int index, bool includeAffe
 				for (int s : affectingStatements) {
 					pair<int, int>& affectClause = make_pair(s, index);
 					bool insertAffectsSucceed = affectsList.insert(affectClause).second;
-					if (insertAffectsSucceed) {
-						//cout << "insert  " << affectClause.first << ", " << affectClause.second << endl;
-					}
 					// handle affects*
 					if (includeAffectsT) {
 						affectsTList.insert(affectClause);
-						//cout << "insert * " << affectClause.first << ", " << affectClause.second << endl;
 						affectsTHelperTable[index].insert(affectClause);
 						for (const auto& p : affectsTHelperTable[s]) {
-							//cout << "helper : " << p.first << ", " << p.second << endl;
 							pair<int, int> affectsTClause = make_pair(p.first, index);
 							bool insertAffectsTSucceed = affectsTList.insert(affectsTClause).second;
-							if (insertAffectsTSucceed) {
-								//cout << "insert * " << affectsTClause.first << ", " << affectsTClause.second << endl;
-							}
 							affectsTHelperTable[index].insert(affectsTClause);
 						}
 
 						for (const auto& p : affectsTHelperTable2[index]) {
-							//cout << "helper : " << p.first << ", " << p.second << endl;
 							pair<int, int> affectsTClause = make_pair(s, p.second);
 							bool insertAffectsTSucceed = affectsTList.insert(affectsTClause).second;
 							if (insertAffectsTSucceed) {
-								//cout << "insert * " << affectsTClause.first << ", " << affectsTClause.second << endl;
 							}
 							affectsTHelperTable2[s].insert(affectsTClause);
 						}
@@ -75,7 +65,6 @@ bool PKBPQLAffectsBipHandler::handleAffectsCallBIP(int index, bool includeAffect
 	PKBStmt::SharedPtr stmt;
 	if (mpPKB->getStatement(index, stmt)) {
 		string calledProcName = mpPKB->callStmtToProcNameTable[to_string(index)];
-		//cout << calledProcName << endl;
 		const shared_ptr<BasicBlock>& procBlock = mpPKB->cfg->getCFG(calledProcName);
 		return computeAffectsBIP(procBlock, includeAffectsT, lastModifiedTable, shared_ptr<BasicBlock>());
 	}
@@ -90,7 +79,6 @@ pair<set<pair<int, int>>, set<pair<int, int>>> PKBPQLAffectsBipHandler::getAffec
 	// (syn, syn) (syn, _) (_, syn) (int, syn) (syn, int)
 	const unordered_map<string, shared_ptr<BasicBlock>>& cfgMap = mpPKB->cfg->getAllCFGs();
 	for (auto const& cfg : cfgMap) {
-		//cout << "from the root: " << cfg.first << endl;
 		affectsTHelperTable.clear();
 		map<string, set<int>> lastModifiedTable;
 		computeAffectsBIP(cfg.second, includeAffectsT, lastModifiedTable, shared_ptr<BasicBlock>());

@@ -155,12 +155,12 @@ class PKBPQLEvaluator
     // Get all statements that are followed by statements of type {afterType}
     // eg. assign a; stmt s; Select s such that Follows( s, a );
     // => getBefore( PKBDE::Assign )
-    vector<int> getBefore(PKBDesignEntity afterType);
+    //vector<int> getBefore(PKBDesignEntity afterType);
 
     // Get all pairs of statements (b, a) such that a of type {AfterType} follows
     // statements b eg. assign a; while w; Select w such that Follows( a, w );
     // => getAfterPairs( PKBDE::Assign, PKBDE::While )
-    set<pair<int, int>> getBeforePairs(PKBDesignEntity afterType);
+    //set<pair<int, int>> getBeforePairs(PKBDesignEntity afterType);
 
     // Get statement if it is of type {afterType} and follows child statement
     // indexed {child} eg. stmt s; Select s such that Follows( 14, s );
@@ -183,23 +183,23 @@ class PKBPQLEvaluator
     // Get all pairs of statements (a, b) such that a follow statements b of type
     // {beforeType} eg. assign a; while w; Select w such that Follows( a, w );
     // => getAfterPairs( PKBDE::Assign, PKBDE::While )
-    set<pair<int, int>> getAfterPairs(PKBDesignEntity beforeType);
+    //set<pair<int, int>> getAfterPairs(PKBDesignEntity beforeType);
 
     // Follow*
     /* Use for Follows*(INT, INT) */
-    bool getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo);
+    bool getFollowsT(int leftStmtNo, int rightStmtNo);
 
     /* Use for Follows*(INT, s1) */
-    const vector<int> getFollowsTIntegerSyn(PKBDesignEntity childType, int parentStmtNo);
+    const vector<int> getFollowsT(int parentStmtNo, PKBDesignEntity childType);
 
     /* Use for Follows*(INT, _) */
     bool getFollowsTIntegerUnderscore(int leftStmtNo);
 
     /* Use for Follows*(s1, INT) */
-    const unordered_set<int> &getFollowsTSynInteger(PKBDesignEntity parentType, int childStmtNo);
+    const unordered_set<int> &getFollowsT(PKBDesignEntity parentType, int childStmtNo);
 
     /* Use for Follows*(s1, s2) */
-    const set<pair<int, int>> &getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType);
+    const set<pair<int, int>> &getFollowsT(PKBDesignEntity leftType, PKBDesignEntity rightType);
 
     /* Use for Follows*(s1, _) */
     const unordered_set<int> &getFollowsTSynUnderscore(PKBDesignEntity leftType);
@@ -211,18 +211,26 @@ class PKBPQLEvaluator
     unordered_set<int> getFollowsTUnderscoreSyn(PKBDesignEntity rightType);
 
     /* Use for Follows*(_, _) */
-    bool getFollowsTUnderscoreUnderscore();
+    bool getFollowsT();
 
     /* Uses */
-
+    //int syn
     const unordered_set<string> &getUsesIntSyn(int statementNo);
+    //int ident
     bool getUsesIntIdent(int statementNo, string ident);
+    //int underscore
     bool getUsesIntUnderscore(int statementNo);
+    //syn syn non proc
     const vector<pair<int, string>> &getUsesSynSynNonProc(PKBDesignEntity de);
+    //syn syn proc
     const vector<pair<string, string>> &getUsesSynSynProc();
+    //syn underscore non proc
     const vector<int> &getUsesSynUnderscoreNonProc(PKBDesignEntity de);
+    // syn underscore proc
     const vector<string> &getUsesSynUnderscoreProc();
+    // syn ident non proc
     const vector<int> &getUsesSynIdentNonProc(PKBDesignEntity entityType, string variableName);
+    // syn ident proc
     const vector<string> &getUsesSynIdentProc(string ident);
 
     bool variableExists(string name);

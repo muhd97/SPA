@@ -560,15 +560,15 @@ set<pair<int, int>> PKBPQLEvaluator::getBeforePairs(PKBDesignEntity beforeType, 
 	return res;
 }
 
-set<pair<int, int>> PKBPQLEvaluator::getBeforePairs(PKBDesignEntity afterType)
-{
-	return getBeforePairs(PKBDesignEntity::AllStatements, afterType);
-}
+//set<pair<int, int>> PKBPQLEvaluator::getBeforePairs(PKBDesignEntity afterType)
+//{
+//	return getBeforePairs(PKBDesignEntity::AllStatements, afterType);
+//}
 
-vector<int> PKBPQLEvaluator::getBefore(PKBDesignEntity afterType)
-{
-	return getBefore(PKBDesignEntity::AllStatements, afterType);
-}
+//vector<int> PKBPQLEvaluator::getBefore(PKBDesignEntity afterType)
+//{
+//	return getBefore(PKBDesignEntity::AllStatements, afterType);
+//}
 
 vector<int> PKBPQLEvaluator::getAfter(PKBDesignEntity afterType, int beforeIndex)
 {
@@ -662,10 +662,10 @@ set<pair<int, int>> PKBPQLEvaluator::getAfterPairs(PKBDesignEntity beforeType, P
 	return res;
 }
 
-set<pair<int, int>> PKBPQLEvaluator::getAfterPairs(PKBDesignEntity beforeType)
-{
-	return getAfterPairs(PKBDesignEntity::AllStatements, beforeType);
-}
+//set<pair<int, int>> PKBPQLEvaluator::getAfterPairs(PKBDesignEntity beforeType)
+//{
+//	return getAfterPairs(PKBDesignEntity::AllStatements, beforeType);
+//}
 
 bool PKBPQLEvaluator::getFollowsUnderscoreUnderscore()
 {
@@ -689,7 +689,7 @@ bool PKBPQLEvaluator::getFollowsUnderscoreUnderscore()
 	return false;
 }
 
-bool PKBPQLEvaluator::getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo)
+bool PKBPQLEvaluator::getFollowsT(int leftStmtNo, int rightStmtNo)
 {
 	if (mpPKB->followsTIntIntTable.find(make_pair(leftStmtNo, rightStmtNo)) == mpPKB->followsTIntIntTable.end())
 	{
@@ -701,7 +701,7 @@ bool PKBPQLEvaluator::getFollowsTIntegerInteger(int leftStmtNo, int rightStmtNo)
 }
 
 // getAfterT
-const vector<int> PKBPQLEvaluator::getFollowsTIntegerSyn(PKBDesignEntity rightType, int leftStmtNo)
+const vector<int> PKBPQLEvaluator::getFollowsT(int leftStmtNo, PKBDesignEntity rightType)
 {
 	return mpPKB->followsTIntSynTable[leftStmtNo][rightType];
 
@@ -723,7 +723,7 @@ bool PKBPQLEvaluator::getFollowsTIntegerUnderscore(int leftStmtNo)
 // getBeforeT
 
 /*PRE-CONDITION: TargetFollowType IS a container and statement type type. */
-const unordered_set<int>& PKBPQLEvaluator::getFollowsTSynInteger(PKBDesignEntity leftType, int rightStmtNo)
+const unordered_set<int>& PKBPQLEvaluator::getFollowsT(PKBDesignEntity leftType, int rightStmtNo)
 {
 	if (!statementExists(rightStmtNo)) throw "Statement doesn't exist: " + to_string(rightStmtNo);
 
@@ -731,7 +731,7 @@ const unordered_set<int>& PKBPQLEvaluator::getFollowsTSynInteger(PKBDesignEntity
 }
 
 /*PRE-CONDITION: Both leftType and rightTypes are STATEMENT types (not procedure or variable or others) */
-const set<pair<int, int>>& PKBPQLEvaluator::getFollowsTSynSyn(PKBDesignEntity leftType, PKBDesignEntity rightType)
+const set<pair<int, int>>& PKBPQLEvaluator::getFollowsT(PKBDesignEntity leftType, PKBDesignEntity rightType)
 {
 	return mpPKB->followsTSynSynTable[make_pair(leftType, rightType)];
 }
@@ -781,7 +781,7 @@ unordered_set<int> PKBPQLEvaluator::getFollowsTUnderscoreSyn(PKBDesignEntity rig
 }
 
 /*Use for Follows*(_, _) */
-bool PKBPQLEvaluator::getFollowsTUnderscoreUnderscore()
+bool PKBPQLEvaluator::getFollowsT()
 {
 	vector<PKBStmt::SharedPtr > allStatements = mpPKB->getStatements(PKBDesignEntity::AllStatements);
 	for (auto& stmt : allStatements)
@@ -2345,18 +2345,6 @@ unordered_set<int> PKBPQLEvaluator::getNextBipTIntSyn(int fromIndex, PKBDesignEn
 
 // ======================================================================================================
 // Affects
-
-	map<string, set<int>>& lastModifiedTable, set<string>& seenProcedures, bool terminateEarly, int leftInt, int rightInt)
-{
-	PKBStmt::SharedPtr stmt;
-	if (mpPKB->getStatement(index, stmt)) {
-		set<PKBVariable::SharedPtr> modVars = stmt->getModifiedVariables();
-		for (const auto& modVar : modVars) {
-			lastModifiedTable[modVar->getName()].clear();
-		}
-	}
-	return false;
-}
 
 // 4 cases: (int, int) (int, _) (_, int) (_, _)
 bool PKBPQLEvaluator::getAffects(int leftInt, int rightInt, bool includeAffectsT) {

@@ -45,6 +45,7 @@
     <ClCompile Include="..\source\PQL\PQLAST.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLAffectsHandler.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLAffectsBipHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBPQLFollowsHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
@@ -94,5 +95,6 @@
     <ClInclude Include="..\source\PQL\PQLAST.h" />
     <ClInclude Include="..\source\PKB\PKBPQLAffectsHandler.h" />
     <ClInclude Include="..\source\PKB\PKBPQLAffectsBipHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBPQLFollowsHandler.h" />
   </ItemGroup>
 </Project>
