@@ -22,7 +22,8 @@ source_query_test_cases = [
                                                                                                      "33_3_nextBip_BipT_queries"), ("34_3_system_test_1_source", "34_3_system_test_1_affectsbip_queries"),
     ("35_3_system_test_1_source", "35_3_system_test_1_affectsbipstar_queries"),
     ("36_3_system_test_1_source", "36_3_system_test_1_nextbip_queries"),
-    ("37_3_system_test_1_source", "37_3_system_test_1_nextbipstar_queries")
+    ("37_3_system_test_1_source", "37_3_system_test_1_nextbipstar_queries"),
+    ("38_3_affectsBipT_source", "38_3_affectsbipT_queries")
 ]
 
 

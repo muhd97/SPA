@@ -1,0 +1,845 @@
+1 - Select BOOLEAN such that AffectsBip*(#, #)
+
+Select BOOLEAN such that AffectsBip*(33, 7)
+TRUE
+5000
+2 - Select BOOLEAN such that AffectsBip*(33, _)
+stmt ss;
+Select BOOLEAN such that AffectsBip*(33, _)
+TRUE
+5000
+3 - Select s such that AffectsBip*(55, s) 
+stmt s;
+Select s such that AffectsBip*(55, s)
+57, 60, 71, 74, 76, 80
+5000
+4 - Select pn such that AffectsBip*(55, pn)
+print pn;
+Select pn such that AffectsBip*(55, pn)
+
+5000
+5 - Select r such that AffectsBip*(66, r)
+read r;
+Select r such that AffectsBip*(66, r)
+
+5000
+6 - Select a such that AffectsBip*(87, a)
+assign a;
+Select a such that AffectsBip*(87, a)
+87,88,89,90,91
+5000
+7 - Select w such that AffectsBip*(61, w)
+while w;
+Select w such that AffectsBip*(61, w)
+
+5000
+8 - Select ifs such that AffectsBip*(60, ifs)
+if is;
+Select ifs such that AffectsBip*(60, ifs)
+
+5000
+9 - AffectsBip*(16, cl) 
+call c;
+Select c such that AffectsBip*(16, c)
+
+5000
+10 - Select n such that AffectsBip*(33, n) 
+prog_line n;
+Select n such that AffectsBip*(33, n)
+4,7,15,27,32
+5000
+11 - Select p such that AffectsBip*(30, p)
+procedure p;
+Select p such that AffectsBip*(30, p)
+
+5000
+12 - Select BOOLEAN such that AffectsBip*(30, v)
+variable v;
+Select BOOLEAN such that AffectsBip*(30, v)
+FALSE
+5000
+13 - Select BOOLEAN such that AffectsBip*(26, cs)
+constant cs;
+Select BOOLEAN such that AffectsBip*(26, cs)
+FALSE
+5000
+14 - Select BOOLEAN such that AffectsBip*(_, 60)
+
+Select BOOLEAN such that AffectsBip*(_, 60)
+TRUE
+5000
+15 - Select BOOLEAN such that AffectsBip*(_, _)
+
+Select BOOLEAN such that AffectsBip*(_, _)
+TRUE
+5000
+16 - Select BOOLEAN such that AffectsBip*(_, s)
+stmt s;
+Select BOOLEAN such that AffectsBip*(_, s)
+TRUE
+5000
+17 - Select pn such that AffectsBip*(_, pn)
+print pn;
+Select pn such that AffectsBip*(_, pn)
+
+5000
+18 - Select r such that AffectsBip*(_, r)
+read r;
+Select r such that AffectsBip*(_, r)
+
+5000
+19 - Select BOOLEAN such that AffectsBip*(_, a)
+assign a;
+Select BOOLEAN such that AffectsBip*(_, a)
+TRUE
+5000
+20 - Select ifs such that AffectsBip*(_, ifs)
+if ifs;
+Select ifs such that AffectsBip*(_, ifs)
+
+5000
+21 - Select w such that AffectsBip*(_, w)
+while w;
+Select w such that AffectsBip*(_, w)
+
+5000
+22 - Select c such that AffectsBip*(_, c)
+call c;
+Select c such that AffectsBip*(_, c)
+
+5000
+23 - AffectsBip*(_, n) 
+prog_line n;
+Select BOOLEAN such that AffectsBip*(_, n)
+TRUE
+5000
+24 - Select p, p such that AffectsBip*(_, p)
+procedure p;
+Select <p, p> such that AffectsBip*(_, p)
+
+5000
+25 - Select v such that AffectsBip*(_, v)
+variable v;
+Select v such that AffectsBip*(_, v)
+
+5000
+26 - Select cs1, cs2, s such that AffectsBip*(_, cs1)
+constant cs1, cs2; stmt s; 
+Select <cs1, cs2, s> such that AffectsBip*(_, cs1)
+
+5000
+27 - Select s such that AffectsBip*(s, 84)
+stmt s;
+Select <s, s, s, s> such that AffectsBip*(s, 84)
+77 77 77 77, 79 79 79 79, 82 82 82 82
+5000
+28 - Select s such that AffectsBip*(s, _) with s.stmt# = 4
+stmt s;
+Select s such that AffectsBip*(s, _) with s.stmt# = 4
+4
+5000
+29 - Select s1 such that AffectsBip*(s1, S2) with s1.stmt# = 4
+stmt s1, S2;
+Select s1 such that AffectsBip*(s1, S2) with s1.stmt# = 4
+4
+5000
+30 - Select pn such that AffectsBip*(s, pn)
+print pn; stmt s;
+Select pn such that AffectsBip*(s, pn)
+
+5000
+31 - Select r such that AffectsBip*(r, s)
+read r; stmt s;
+Select r such that AffectsBip*(r, s)
+
+5000
+32 - Select a such that AffectsBip*(s, a) with a.stmt# = 4
+assign a; stmt s;
+Select a such that AffectsBip*(s, a) with a.stmt# = 4
+4
+5000
+33 - Select ifs such that AffectsBip*(s, ifs)
+if ifs; stmt s;
+Select ifs such that AffectsBip*(s, ifs)
+
+5000
+34 - Select w such that AffectsBip*(s, w) 
+while w; stmt s;
+Select w such that AffectsBip*(s, w)
+
+5000
+35 - Select c such that AffectsBip*(s, c)
+call c; stmt s;
+Select c such that AffectsBip*(s, c)
+
+5000
+36 - Select n such that AffectsBip*(s, n) with n = 4
+stmt s; prog_line n;
+Select n such that AffectsBip*(s, n) with n = 4
+4
+5000
+37 - Select p such that AffectsBip*(s, p)
+stmt s; procedure p;
+Select p such that AffectsBip*(s, p)
+
+5000
+38 - Select s, v such that AffectsBip*(s, v)
+stmt s; variable v;
+Select <s, v, s, v> such that AffectsBip*(s, v)
+
+5000
+39 - Select cs such that AffectsBip*(s, cs)
+stmt s; constant cs;
+Select cs such that AffectsBip*(s, cs)
+
+5000
+40 - Select pn such that AffectsBip*(pn, 50)
+print pn;
+Select pn such that AffectsBip*(pn, 50)
+
+5000
+41 - Select pn such that AffectsBip*(pn, _)
+print pn;
+Select pn such that AffectsBip*(pn, _)
+
+5000
+42 - Select n such that AffectsBip*(pn, n)
+print pn; prog_line n;
+Select n such that AffectsBip*(pn, n)
+
+5000
+43 - Select pn1 such that AffectsBip*(pn1, pn2) 
+print pn1, pn2;
+Select pn1 such that AffectsBip*(pn1, pn2)
+
+5000
+44 - Select r such that AffectsBip*(pn, r)  
+print pn; read r; 
+Select r such that AffectsBip*(pn, r)  
+
+5000
+45 - Select a such that AffectsBip*(pn, a)   
+print pn; assign a;
+Select a such that AffectsBip*(pn, a)  
+
+5000
+46 - Select ifs such that AffectsBip*(pn, ifs)     
+print pn; if ifs;  
+Select ifs such that AffectsBip*(pn, ifs)  
+
+5000
+47 - Select w such that AffectsBip*(pn, w)   
+print pn; while w; 
+Select w such that AffectsBip*(pn, w)  
+
+5000
+48 - Select c such that AffectsBip*(pn, c)  
+print pn; call c; 
+Select BOOLEAN such that AffectsBip*(pn, c)  
+FALSE
+5000
+49 - Select n, pn such that AffectsBip*(pn, n)
+prog_line n; print pn;
+Select <n, pn> such that AffectsBip*(pn, n)
+
+5000
+50 - Select pn, p such that AffectsBip*(pn, p)
+print pn; procedure p;
+Select <pn, p> such that AffectsBip*(pn, p)
+
+5000
+51 - Select v such that AffectsBip*(pn, v)
+print pn; variable v;
+Select v such that AffectsBip*(pn, v)
+
+5000
+52 - Select c such that AffectsBip*(pn, c)
+print pn; constant c;
+Select c such that AffectsBip*(pn, c)
+
+5000
+53 - Select r such that AffectsBip*(r, 64)
+read r;
+Select r such that AffectsBip*(r, 64)
+
+5000
+54 - Select r such that AffectsBip*(r, _)
+read r;
+Select r such that AffectsBip*(r, _)
+
+5000
+55 - Select BOOLEAN such that AffectsBip*(r, s)
+read r; stmt s;
+Select BOOLEAN such that AffectsBip*(r, s)
+FALSE
+5000
+56 - Select pn such that AffectsBip*(r, pn)
+read r; print pn; 
+Select pn such that AffectsBip*(r, pn)
+
+5000
+57 - Select r1 such that AffectsBip*(r1, r2)
+read r1, r2;
+Select r1 such that AffectsBip*(r1, r2)
+
+5000
+58 - Select a such that AffectsBip*(r, a)  
+read r; assign a; 
+Select a such that AffectsBip*(r, a)  
+
+5000 
+59 - Select ifs such that AffectsBip*(r, ifs) 
+read r; if ifs; 
+Select ifs such that AffectsBip*(r, ifs)  
+
+5000
+60 - Select w such that AffectsBip*(r, w)  
+read r; while w;  
+Select w such that AffectsBip*(r, w)  
+
+5000
+61 - Select BOOLEAN such that AffectsBip*(r, c)  
+read r; call c;  
+Select BOOLEAN such that AffectsBip*(r, c)  
+FALSE
+5000
+62 - Select n such that AffectsBip*(r, n) 
+read r; prog_line n;
+Select n such that AffectsBip*(r, n)
+
+5000
+63 - Select p such that AffectsBip*(r, p)
+read r; procedure p;
+Select p such that AffectsBip*(r, p)
+
+5000
+64 - Select BOOLEAN such that AffectsBip*(r, v)
+read r; variable v;
+Select BOOLEAN such that AffectsBip*(r, v)
+FALSE
+5000
+65 - Select cs such that AffectsBip*(r, cs)
+read r; constant cs;
+Select cs such that AffectsBip*(r, cs)
+
+5000
+66 - Select a such that AffectsBip*(a, 86)
+assign a;
+Select a such that AffectsBip*(a, 86)
+77,79
+5000
+67 - Select a such that AffectsBip*(a, _) with a.stmt# = 4
+assign a;
+Select a such that AffectsBip*(a, _) with a.stmt# = 4
+4
+5000
+68 - Select a such that AffectsBip*(a, s) with a.stmt# = 4
+stmt s; assign a;
+Select a such that AffectsBip*(a, s) with a.stmt# = 4
+4
+5000
+69 - Select pn such that AffectsBip*(a, pn)
+assign a; print pn; 
+Select pn such that AffectsBip*(a, pn)
+
+5000
+70 - Select r such that AffectsBip*(a, r) 
+assign a; read r; 
+Select r such that AffectsBip*(a, r)  
+
+5000
+71 - Select A1, a2 such that AffectsBip*(A1, a2) with A1.stmt# = 4
+assign A1, a2; 
+Select <A1, a2> such that AffectsBip*(A1, a2) with A1.stmt# = 4
+4 7, 4 4
+5000
+72 - Select ifs such that AffectsBip*(a, ifs) 
+assign a; if ifs;  
+Select ifs such that AffectsBip*(a, ifs)  
+
+5000
+73 - Select w such that AffectsBip*(a, w)    
+assign a; while w; 
+Select w such that AffectsBip*(a, w)  
+
+5000
+74 - Select c such that AffectsBip*(a, c)    
+assign a; call c; 
+Select c such that AffectsBip*(a, c)  
+
+5000
+75 - Select n such that AffectsBip*(a, n) with n = 7
+prog_line n; assign a;
+Select n such that AffectsBip*(a, n) with n = 7
+7
+5000
+76 - Select BOOLEAN such that AffectsBip*(a, p)
+assign a; procedure p;
+Select BOOLEAN such that AffectsBip*(a, p)
+FALSE
+5000
+77 - Select v such that AffectsBip*(a, v)
+assign a; variable v;
+Select v such that AffectsBip*(a, v)
+
+5000
+78 - Select cs such that AffectsBip*(a, cs)
+assign a; constant cs;
+Select cs such that AffectsBip*(a, cs)
+
+5000
+79 - Select ifs such that AffectsBip*(ifs, 76)
+if ifs;
+Select ifs such that AffectsBip*(ifs, 76)
+
+5000
+80 - Select ifs such that AffectsBip*(ifs, _)
+if ifs;
+Select ifs such that AffectsBip*(ifs, _)
+
+5000
+81 - Select ifs such that AffectsBip*(ifs, s)
+if ifs; stmt s; 
+Select ifs such that AffectsBip*(ifs, s)
+
+5000
+82 - Select pn such that AffectsBip*(ifs, pn)
+if ifs; print pn;
+Select pn such that AffectsBip*(ifs, pn)
+
+5000
+83 - Select r such that AffectsBip*(ifs, r)   
+if ifs; read r; 
+Select r such that AffectsBip*(ifs, r)  
+
+5000
+84 - Select ifs, a such that AffectsBip*(ifs, a)   
+if ifs; assign a; 
+Select <ifs, a> such that AffectsBip*(ifs, a)  
+
+5000
+85 - Select ifs, Ifs such that AffectsBip*(ifs, Ifs)    
+if ifs, Ifs; 
+Select <ifs, Ifs> such that AffectsBip*(ifs, Ifs)  
+
+5000
+86 - Select BOOLEAN such that AffectsBip*(ifs, w)     
+if ifs;  while w; 
+Select BOOLEAN such that AffectsBip*(ifs, w)  
+FALSE
+5000
+87 - Select c such that AffectsBip*(ifs, c) 
+if ifs; call c; 
+Select c such that AffectsBip*(ifs, c)  
+
+5000
+88 - Select n, ifs such that AffectsBip*(ifs, n) 
+if ifs; prog_line n;
+Select <n, ifs> such that AffectsBip*(ifs, n)
+
+5000
+89 - Select BOOLEAN such that AffectsBip*(ifs, p)
+if ifs; procedure p;
+Select BOOLEAN such that AffectsBip*(ifs, p)
+FALSE
+5000
+90 - Select BOOLEAN such that AffectsBip*(ifs, v)
+if ifs; variable v;
+Select BOOLEAN such that AffectsBip*(ifs, v)
+FALSE
+5000
+91 - Select BOOLEAN such that AffectsBip*(ifs, cs)
+if ifs; constant cs;
+Select BOOLEAN such that AffectsBip*(ifs, cs)
+FALSE
+5000
+92 - Select w, w such that AffectsBip*(w, 19)
+while w;
+Select <w, w> such that AffectsBip*(w, 19)
+
+5000
+93 - Select w such that AffectsBip*(w, _) 
+while w;
+Select w such that AffectsBip*(w, _)
+
+5000
+94 - Select w such that AffectsBip*(w, s)
+while w; stmt s; 
+Select w such that AffectsBip*(w, s)
+
+5000
+95 - Select pn such that AffectsBip*(w, pn) 
+while w; print pn;
+Select pn such that AffectsBip*(w, pn)
+
+5000
+96 - Select r such that AffectsBip*(w, r)  
+while w; read r; 
+Select r such that AffectsBip*(w, r)  
+
+5000
+97 - Select a such that AffectsBip*(w, a) 
+while w; assign a; 
+Select a such that AffectsBip*(w, a)  
+
+5000
+98 - Select ifs such that AffectsBip*(w, ifs)    
+while w; if ifs; 
+Select ifs such that AffectsBip*(w, ifs)  
+
+5000
+99 - Select w such that AffectsBip*(ww, wW)    
+while ww, wW; 
+Select w such that AffectsBip*(ww, wW)  
+
+5000
+100 - Select c, c such that AffectsBip*(w, c)  
+while w; call c; 
+Select <c, c> such that AffectsBip*(w, c)  
+
+5000
+101 - Select w, n, n such that AffectsBip*(w, n)
+while w; prog_line n; 
+Select <w, n, n> such that AffectsBip*(w, n)
+
+5000
+102 - Select p such that AffectsBip*(w, p)
+while w; procedure p;
+Select p such that AffectsBip*(w, p)
+
+5000
+103 - Select BOOLEAN such that AffectsBip*(w, v)
+while w; variable v;
+Select BOOLEAN such that AffectsBip*(w, v)
+FALSE
+5000
+104 - Select cs such that AffectsBip*(w, cs)
+while w; constant cs;
+Select cs such that AffectsBip*(w, cs)
+
+5000
+105 - Select c such that AffectsBip*(c, 60)
+call c;
+Select c such that AffectsBip*(c, 60)
+
+5000
+106 - Select BOOLEAN such that AffectsBip*(c, _)
+call c;
+Select BOOLEAN such that AffectsBip*(c, _)
+FALSE
+5000
+107 - Select c such that AffectsBip*(c, s)
+call c; stmt s; 
+Select c such that AffectsBip*(c, s)
+
+5000
+108 - Select pn such that AffectsBip*(c, pn)
+call c; print pn; 
+Select pn such that AffectsBip*(c, pn)
+
+5000
+109 - Select r such that AffectsBip*(c, r)   
+call c; read r; 
+Select r such that AffectsBip*(c, r)  
+
+5000
+110 - Select BOOLEAN such that AffectsBip*(c, a)  
+call c; assign a;
+Select BOOLEAN such that AffectsBip*(c, a)  
+FALSE
+5000
+111 - Select c, ifs such that AffectsBip*(c, ifs)   
+call c; if ifs;
+Select <c, ifs> such that AffectsBip*(c, ifs)  
+
+5000
+112 - Select w, w such that AffectsBip*(c, w)    
+call c; while w;
+Select <w, w> such that AffectsBip*(c, w)  
+
+5000
+113 - Select cl such that AffectsBip*(cl, c2)  
+call c1, c2; 
+Select cl such that AffectsBip*(cl, c2)  
+
+5000
+114 - Select c such that AffectsBip*(c, n)
+call c; prog_line n;
+Select c such that AffectsBip*(c, n)
+
+5000
+115 - Select p such that AffectsBip*(c, p)
+call c; procedure p;
+Select p such that AffectsBip*(c, p)
+
+5000
+116 - Select c, v such that AffectsBip*(c, v)
+call c; variable v;
+Select <c, v> such that AffectsBip*(c, v)
+
+5000
+117 - Select BOOLEAN such that AffectsBip*(c, cs)
+call c; constant cs;
+Select BOOLEAN such that AffectsBip*(c, cs)
+FALSE
+5000
+118 - Select n such that AffectsBip*(n, 13)
+prog_line n;
+Select n such that AffectsBip*(n, 13)
+10
+5000
+119 - Select n such that AffectsBip*(n, _) with n = 7
+prog_line n; 
+Select n such that AffectsBip*(n, _) with n = 7
+7
+5000
+120 - Select s such that AffectsBip*(n, s) with s.stmt# = 7
+prog_line n; stmt s; 
+Select <s, s.stmt#> such that AffectsBip*(n, s) with s.stmt# = 7
+7 7
+5000
+121 - Select pn such that AffectsBip*(n, pn)
+prog_line n; print pn;  
+Select pn such that AffectsBip*(n, pn)
+
+5000
+122 - Select r such that AffectsBip*(n, r)
+prog_line n; read r; 
+Select r such that AffectsBip*(n, r)
+
+5000
+123 - Select a such that AffectsBip*(n, a) with a.stmt# = 4
+prog_line n; assign a;
+Select a such that AffectsBip*(n, a) with a.stmt# = 4
+4
+5000
+124 - Select ifs such that AffectsBip*(n, ifs)
+prog_line n; if ifs;
+Select ifs such that AffectsBip*(n, ifs)
+
+5000
+125 - Select w such that AffectsBip*(n, w)
+prog_line n; while w; 
+Select w such that AffectsBip*(n, w)
+
+5000
+126 - Select n, c such that AffectsBip*(n, c)
+prog_line n; call c;
+Select <n, c> such that AffectsBip*(n, c)
+
+5000
+127 - Select n1, n1 such that AffectsBip*(n1, n2) with n2 = 4
+prog_line n1, n2;
+Select <n1, n1> such that AffectsBip*(n1, n2) with n2 = 4
+4 4, 10 10,24 24,32 32,33 33,7 7
+5000
+128 - Select p such that AffectsBip*(n, p)
+prog_line n; procedure p;
+Select BOOLEAN such that AffectsBip*(n, p)
+FALSE
+5000
+129 - Select n such that AffectsBip*(n, v)
+prog_line n; variable v;
+Select n such that AffectsBip*(n, v)
+
+5000
+130 - Select BOOLEAN such that AffectsBip*(n, cs)
+prog_line n; constant cs;
+Select BOOLEAN such that AffectsBip*(n, cs)
+FALSE
+5000
+131 - Select p such that AffectsBip*(p, 12)
+procedure p;
+Select p such that AffectsBip*(p, 12)
+
+5000
+132 - Select BOOLEAN such that AffectsBip*(p, _)
+procedure p; 
+Select BOOLEAN such that AffectsBip*(p, _)
+FALSE
+5000
+133 - Select s such that AffectsBip*(p, s)
+procedure p; stmt s; 
+Select s such that AffectsBip*(p, s)
+
+5000
+134 - Select pn such that AffectsBip*(p, pn)
+procedure p; print pn; 
+Select pn such that AffectsBip*(p, pn)
+
+5000
+135 - Select r such that AffectsBip*(p, r)
+procedure p; read r; 
+Select r such that AffectsBip*(p, r)
+
+5000
+136 - Select a such that AffectsBip*(p, a)
+procedure p; assign a; 
+Select a such that AffectsBip*(p, a)
+
+5000
+137 - Select ifs such that AffectsBip*(p, ifs)
+procedure p; if ifs; 
+Select ifs such that AffectsBip*(p, ifs)
+
+5000
+138 - Select w such that AffectsBip*(p, w)
+procedure p; while w;
+Select w such that AffectsBip*(p, w)
+
+5000
+139 - Select BOOLEAN such that AffectsBip*(p, c)
+procedure p; call c; 
+Select BOOLEAN such that AffectsBip*(p, c)
+FALSE
+5000
+140 - Select p , p such that AffectsBip*(p, n)
+procedure p; prog_line n; 
+Select <p , p> such that AffectsBip*(p, n)
+
+5000
+141 - Select p1 such that AffectsBip*(p1,p2)
+procedure p1, p2;
+Select BOOLEAN such that AffectsBip*(p1,p2)
+FALSE
+5000
+142 - Select p, v such that AffectsBip*(p, v)
+procedure p; variable v;
+Select <p, v> such that AffectsBip*(p, v)
+
+5000
+143 - Select BOOLEAN such that AffectsBip*(p, cs) 
+procedure p; constant cs;
+Select BOOLEAN such that AffectsBip*(p, cs)
+FALSE
+5000
+144 - Select v such that AffectsBip*(v, 27)
+variable v;
+Select v such that AffectsBip*(v, 27)
+
+5000
+145 - Select BOOLEAN such that AffectsBip*(v, _)
+variable v; 
+Select BOOLEAN such that AffectsBip*(v, _)
+FALSE
+5000
+146 - Select BOOLEAN such that AffectsBip*(v, s)
+variable v; stmt s; 
+Select BOOLEAN such that AffectsBip*(v, s)
+FALSE
+5000
+147 - Select pn such that AffectsBip*(v, pn)
+variable v; print pn; 
+Select pn such that AffectsBip*(v, pn)
+
+5000
+148 - Select r such that AffectsBip*(v, r)
+variable v; read r; 
+Select r such that AffectsBip*(v, r)
+
+5000
+149 - Select a such that AffectsBip*(v, a)
+variable v; assign a; 
+Select <a,a> such that AffectsBip*(v, a)
+
+5000
+150 - Select ifs such that AffectsBip*(v, ifs)
+variable v; if ifs; 
+Select BOOLEAN such that AffectsBip*(v, ifs)
+FALSE
+5000
+151 - Select w such that AffectsBip*(v, w)
+variable v; while w; 
+Select w such that AffectsBip*(v, w)
+
+5000
+152 - Select c such that AffectsBip*(v, c)
+variable v; call c; 
+Select c such that AffectsBip*(v, c)
+
+5000
+153 - Select v such that AffectsBip*(v, n)
+variable v; prog_line n; 
+Select v such that AffectsBip*(v, n)
+
+5000
+154 - Select BOOLEAN such that AffectsBip*(v, p)
+variable v; procedure p;
+Select BOOLEAN such that AffectsBip*(v, p)
+FALSE
+5000
+155 - Select v1 such that AffectsBip*(v1, V1)
+variable v1, V1; 
+Select v1 such that AffectsBip*(v1, V1)
+
+5000
+156 - Select BOOLEAN such that AffectsBip*(v, cs)
+variable v; constant cs;
+Select BOOLEAN such that AffectsBip*(v, cs)
+FALSE
+5000
+157 - Select BOOLEAN such that AffectsBip*(cs, 27)
+constant cs;
+Select BOOLEAN such that AffectsBip*(cs, 27)
+FALSE
+5000
+158 - Select c such that AffectsBip*(cs, _)
+constant cs; 
+Select cs such that AffectsBip*(cs, _)
+
+5000
+159 - Select BOOLEAN such that AffectsBip*(cs, s)
+constant cs; stmt s; 
+Select BOOLEAN such that AffectsBip*(sc, s)
+FALSE
+5000
+160 - Select BOOLEAN such that AffectsBip*(cs, pn)
+constant cs; print pn; 
+Select BOOLEAN such that AffectsBip*(cs, pn)
+FALSE
+5000
+161 - Select r such that AffectsBip*(cs, r)
+constant cs; read r;
+Select r such that AffectsBip*(cs, r)
+
+5000
+162 - Select a such that AffectsBip*(cs, a)
+constant cs; assign a; 
+Select a such that AffectsBip*(cs, a)
+
+5000
+163 - Select ifs such that AffectsBip*(cs, ifs)
+constant cs; if ifs;
+Select <cs,ifs> such that AffectsBip*(cs, ifs)
+
+5000
+164 - Select w such that AffectsBip*(cs, w)
+constant cs; while w; 
+Select <w,w> such that AffectsBip*(cs, w)
+
+5000
+165 - Select BOOLEAN such that AffectsBip*(cs, c)
+constant cs; call c; 
+Select BOOLEAN such that AffectsBip*(cs, c)
+FALSE
+5000
+166 - Select BOOLEAN such that AffectsBip*(cs, n)
+constant cs; prog_line n; 
+Select BOOLEAN such that AffectsBip*(cs, n)
+FALSE
+5000
+167 - Select p such that AffectsBip*(cs, p)
+constant cs; procedure p;
+Select p such that AffectsBip*(cs, p)
+
+5000
+168 - Select BOOLEAN such that AffectsBip*(cs, v)
+constant cs; variable v; 
+Select BOOLEAN such that AffectsBip*(cs, v)
+FALSE
+5000
+169 - Select cs1, Cs1 such that AffectsBip*(cs, Cs1)
+constant cs1, Cs1; 
+Select <cs1, Cs1> such that AffectsBip*(cs, Cs1)
+
+5000
