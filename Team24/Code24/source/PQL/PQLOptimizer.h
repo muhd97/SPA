@@ -57,13 +57,7 @@ class PQLOptimizer {
 public:
     PQLOptimizer(const shared_ptr<SelectCl>& _selectCl) : selectCl(_selectCl) {
 
-        for (const auto& cl : selectCl->suchThatClauses) {
-            evalClauses.emplace_back(cl);
-        }
-        for (const auto& cl : selectCl->patternClauses) {
-            evalClauses.emplace_back(cl);
-        }
-        for (const auto& cl : selectCl->withClauses) {
+        for (const auto& cl : selectCl->getEvalClauses()) {
             evalClauses.emplace_back(cl);
         }
         

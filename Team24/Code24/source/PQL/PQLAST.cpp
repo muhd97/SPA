@@ -906,7 +906,7 @@ const vector<string>& PatternCl::getAllSynonymsAsString()
 const string& PatternCl::getSynonymType(unordered_map<string, shared_ptr<Declaration>>& synonymToParentDeclarationMap)
 {
     auto it = synonymToParentDeclarationMap.find(synonym->getValue());
-    if (it == synonymToParentDeclarationMap.end()) throw "Failed to resolve synonym. It was not declared";
+    if (it == synonymToParentDeclarationMap.end()) throw runtime_error("Failed to resolve synonym. It was not declared");
     return (*it).second->getDesignEntity()->getEntityTypeName();
 }
 PatternClType PatternCl::getPatternClType(unordered_map<string, shared_ptr<Declaration>>& synonymToParentDeclarationMap)
@@ -916,7 +916,7 @@ PatternClType PatternCl::getPatternClType(unordered_map<string, shared_ptr<Decla
     else if (synonymType == DesignEntity::WHILE) return PatternClType::PatternWhile;
     else if (synonymType == DesignEntity::IF) return PatternClType::PatternIf;
     else {
-        throw "Unsupported Synonym Type for Pattern Clause";
+        throw runtime_error("Unsupported Synonym Type for Pattern Clause");
     }
 }
 
@@ -949,9 +949,9 @@ shared_ptr<Declaration>& SelectCl::getParentDeclarationForSynonym(const string& 
 {
     if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end())
     {
-        throw "Warning: requested synonym of value [" + s +
+        throw runtime_error("Warning: requested synonym of value [" + s +
             "] is NOT declared in this SelectCl. Null DesignEntityType is "
-            "returned.\n";
+            "returned.\n");
     }
     return synonymToParentDeclarationMap[s];
 }
@@ -960,9 +960,9 @@ shared_ptr<Declaration>& SelectCl::getParentDeclarationForSynonym(shared_ptr<Syn
 {
     if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end())
     {
-        throw "Warning: requested synonym of value [" + s->getValue() +
+        throw runtime_error("Warning: requested synonym of value [" + s->getValue() +
             "] is NOT declared in this SelectCl. Null DesignEntityType is "
-            "returned.\n";
+            "returned.\n");
     }
     return synonymToParentDeclarationMap[s->getValue()];
 }
@@ -989,10 +989,7 @@ const string& SelectCl::getDesignEntityTypeBySynonym(const shared_ptr<Synonym>& 
 {
     if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end())
     {
-        cout << "Warning: requested synonym of value [" << s->getValue()
-            << "] is NOT declared in this SelectCl. Null DesignEntityType is "
-            "returned.\n";
-        throw "Synonym " + s->getValue() + " not declared, cannot resolve it's DesignEntityType";
+        throw runtime_error("Synonym " + s->getValue() + " not declared, cannot resolve it's DesignEntityType");
     }
 
     return synonymToParentDeclarationMap[s->getValue()]->getDesignEntity()->getEntityTypeName();
@@ -1039,6 +1036,16 @@ bool SelectCl::hasPatternClauses()
 bool SelectCl::hasWithClauses()
 {
     return withClauses.size() > 0;
+}
+
+bool SelectCl::hasEvalClauses()
+{
+    return hasSuchThatClauses() || hasPatternClauses() || hasWithClauses();
+}
+
+const vector<shared_ptr<EvalCl>>& SelectCl::getEvalClauses()
+{
+    return evalClauses;
 }
 
 bool SelectCl::suchThatContainsSynonym(shared_ptr<Element> s)

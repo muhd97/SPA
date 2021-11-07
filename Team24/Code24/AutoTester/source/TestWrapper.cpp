@@ -10,12 +10,13 @@
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 
 #include "PKB.h"
-#include "../PQL/PQLParser.h"
-#include "../PQL/PQLAST.h"
-#include "../PQL/PQLLexer.h"
-#include "../PQL/PQLProcessor.h"
+#include "PQLParser.h"
+#include "PQLAST.h"
+#include "PQLLexer.h"
+#include "PQLProcessor.h"
 #include "CFG.h"
 #include <memory>
+#include "DesignExtractor.h"
 
 
 using namespace std;
@@ -49,22 +50,19 @@ void TestWrapper::parse(std::string filename) {
         }
 
         vector<SimpleToken> tokens = simpleLex(program);
-#if DEBUG
-        printSimpleTokens(tokens);
-#endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
 #if PRINT_PARSED_PROGRAM
         cout << root->format();
         cout << "\n==== Building PKB ====\n";
 #endif
+        DesignExtractor::SharedPtr de = DesignExtractor::create(this->pkb);
         this->pkb->initialise();
-        this->pkb->extractDesigns(root);
+        de->extractDesigns(root);
         this->pkb->initializeCFG(root);
         this->pkb->computeGoNextCFG(pkb->cfg);
         this->pkb->initializeRelationshipTables();
         this->pkb->initializeWithTables();
         this->evaluator = PKBPQLEvaluator::create(this->pkb);
-
 #if DEBUG
         cout << "\n==== PKB has been populated. ====\n";
 #endif
@@ -75,11 +73,13 @@ void TestWrapper::parse(std::string filename) {
         cout << "Error message: " << ex.what() << endl;
     }
 #endif
+    // depreceated in favour of std::runtime_error
     catch (...) {
 #if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to parsing simple code.\n";
 #endif
     }
+
 }
 
 // method to evaluating a query
@@ -100,6 +100,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
 #if DEBUG
         cout << "\n==== Created PQLProcessor using PQLEvaluator ====\n";
 #endif
+
         const vector<shared_ptr<Result>>& res = pqlProcessor->processPQLQuery(sel);
         for (auto& r : res)
             results.emplace_back(move(r->getResultAsString()));
@@ -110,13 +111,12 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
         cout << "Error message: " << ex.what() << endl;
     }
-#endif
     catch (const char* s) {
-#if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
         cout << "Error message: " << s << endl;
-#endif
     }
+#endif
+    // depreceated in favour of std::runtime_error
     catch (...) {
 #if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";

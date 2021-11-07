@@ -535,3 +535,8 @@ output.xml
 /Team24/Tests24/Outputs/*.xml
 /Team24/Tests24/run_32.bat
 /Team24/Tests24/Iteration 3/Bip/1
+/Team24/Tests24/Iteration 2/system acceptance test cases/Mixed/1/iter3_test_clause_combinations_suchthat_and_with_source.txt
+/Team24/Tests24/Iteration 2/system acceptance test cases/Mixed/1/iter3_test_clause_combinations_suchthat_and_with_queries.txt
+/Team24/Tests24/Iteration 2/system acceptance test cases/Mixed/1/iter3_test_clause_combinations_suchthat_and_with_queries.bat
+/Team24/Tests24/Iteration 2/system acceptance test cases/Mixed/1
+/Team24/Tests24/Iteration 1/system acceptance test cases/Parents_ParentsT/1

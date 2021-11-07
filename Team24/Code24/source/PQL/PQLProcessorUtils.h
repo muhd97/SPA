@@ -156,7 +156,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(const string& s)
         return PKBDesignEntity::Constant;
     }
     else {
-        throw "Unreconized design entity: " + s;
+        throw runtime_error("Unreconized design entity: " + s);
     }
 }
 
@@ -207,48 +207,26 @@ inline bool isTargetSynonymDeclared(shared_ptr<SelectCl>& selectCl)
     return true;
 }
 
-inline bool allSynonymsInSuchThatClausesAreDeclared(shared_ptr<SelectCl>& selectCl)
+inline bool allSynonymsAreDeclared(shared_ptr<SelectCl>& selectCl) 
 {
-    for (auto& suchThatClause : selectCl->suchThatClauses)
-    {
-        for (const string& s : suchThatClause->getAllSynonymsAsString())
-        {
+
+    for (const auto& ptr : selectCl->getEvalClauses()) {
+        for (const auto& s : ptr->getAllSynonymsAsString())
             if (!selectCl->isSynonymDeclared(s))
                 return false;
-        }
     }
-
     return true;
-}
 
-inline bool allSynonymsInPatternClausesAreDeclared(shared_ptr<SelectCl>& selectCl)
-{
-    for (auto& patternClause : selectCl->patternClauses)
-    {
-        if (!selectCl->isSynonymDeclared(patternClause->synonym->getValue()))
-            return false;
-    }
-
-    return true;
 }
 
 inline void validateSelectCl(shared_ptr<SelectCl> selectCl)
 {
 
     if (!isTargetSynonymDeclared(selectCl))
-    {
-        throw "Bad PQL Query. The target synonym is NOT declared\n";
-    }
-    if (!allSynonymsInSuchThatClausesAreDeclared(selectCl))
-    {
-        throw "BAD PQL Query. Some synonyms in the such-that clauses were NOT "
-            "declared\n";
-    }
-    if (!allSynonymsInPatternClausesAreDeclared(selectCl))
-    {
-        throw "BAD PQL Query. Some synonyms in the pattern clauses were NOT "
-            "declared\n";
-    }
+        throw runtime_error("Bad PQL Query. The target synonym is NOT declared\n");
+    if (!allSynonymsAreDeclared(selectCl))
+        throw runtime_error("Bad PQL Query. Some synonyms used are not declared\n");
+
 }
 
 inline bool allTargetSynonymsExistInTuple(const vector<shared_ptr<Element>>& synonyms, shared_ptr<ResultTuple> tuple) {
@@ -267,27 +245,12 @@ inline unordered_set<shared_ptr<Element>> getSetOfIndependentSynonymsInTargetSyn
     unordered_set<shared_ptr<Element>> independentElements;
     for (const auto& elemPtr : temp) allowedSynonyms.insert(elemPtr->getSynonymString());
 
-    for (const auto& ptr : selectCl->suchThatClauses) {
+    for (const auto& ptr : selectCl->getEvalClauses()) {
         for (const auto& s : ptr->getAllSynonymsAsString()) {
             if (allowedSynonyms.find(s) != allowedSynonyms.end()) allowedSynonyms.erase(s);
             if (allowedSynonyms.empty()) return move(independentElements);
         }
     }
-
-    for (const auto& ptr : selectCl->patternClauses) {
-        for (const auto& s : ptr->getAllSynonymsAsString()) {
-            if (allowedSynonyms.find(s) != allowedSynonyms.end()) allowedSynonyms.erase(s);
-            if (allowedSynonyms.empty()) return move(independentElements);;
-        }
-    }
-
-    for (const auto& ptr : selectCl->withClauses) {
-        for (const auto& s : ptr->getAllSynonymsAsString()) {
-            if (allowedSynonyms.find(s) != allowedSynonyms.end()) allowedSynonyms.erase(s);
-            if (allowedSynonyms.empty()) return move(independentElements);;
-        }
-    }
-
 
     for (const auto& ptr : temp) {
         if (stringIsInsideSet(allowedSynonyms, ptr->getSynonymString())) independentElements.insert(ptr);
@@ -348,13 +311,13 @@ inline void validateWithClause(const shared_ptr<SelectCl>& selectCl, const share
 
     if (lhs->getRefType() == RefType::SYNONYM) {
         if (selectCl->getDesignEntityTypeBySynonym(lhs->getStringVal()) != DesignEntity::PROG_LINE) {
-            throw "Synonym types in with-clauses MUST be of type 'prog_line'\n";
+            throw runtime_error("Synonym types in with-clauses MUST be of type 'prog_line'\n");
         }
     }
 
     if (rhs->getRefType() == RefType::SYNONYM) {
         if (selectCl->getDesignEntityTypeBySynonym(rhs->getStringVal()) != DesignEntity::PROG_LINE) {
-            throw "Synonym types in with-clauses MUST be of type 'prog_line'\n";
+            throw runtime_error("Synonym types in with-clauses MUST be of type 'prog_line'\n");
         }
     }
 
@@ -373,26 +336,26 @@ inline void validateWithClause(const shared_ptr<SelectCl>& selectCl, const share
     if (!isLhsInt && lhs->getRefType() == RefType::ATTR) {
         AttrNameType attrType = lhs->getAttrRef()->getAttrName()->getType();
         if (selectCl->getDesignEntityTypeBySynonym(lhs->getAttrRef()->getSynonymString()) == DesignEntity::PROG_LINE)
-            throw "Semantic Error: AttrRef cannot be of syn type PROG_LINE";
+            throw runtime_error("Semantic Error: AttrRef cannot be of syn type PROG_LINE");
 
         if (!isValidAttrRef(selectCl, lhs->getAttrRef()))
-            throw "Semantic Error: Bad AttrRef";
+            throw runtime_error("Semantic Error: Bad AttrRef");
 
         isLhsInt = attrType == AttrNameType::STMT_NUMBER || attrType == AttrNameType::VALUE;
     }
     if (!isRhsInt && rhs->getRefType() == RefType::ATTR) {
         AttrNameType attrType = rhs->getAttrRef()->getAttrName()->getType();
         if (selectCl->getDesignEntityTypeBySynonym(rhs->getAttrRef()->getSynonymString()) == DesignEntity::PROG_LINE)
-            throw "Semantic Error: AttrRef cannot be of syn type PROG_LINE";
+            throw runtime_error("Semantic Error: AttrRef cannot be of syn type PROG_LINE");
 
         if (!isValidAttrRef(selectCl, rhs->getAttrRef()))
-            throw "Semantic Error: Bad AttrRef";
+            throw runtime_error("Semantic Error: Bad AttrRef");
 
         isRhsInt = attrType == AttrNameType::STMT_NUMBER || attrType == AttrNameType::VALUE;
     }
 
     if (isLhsInt != isRhsInt) {
-        throw "Bad PQL Query: The with-clause is checking equality on different types.\n";
+        throw runtime_error("Bad PQL Query: The with-clause is checking equality on different types.\n");
     }
 }
 

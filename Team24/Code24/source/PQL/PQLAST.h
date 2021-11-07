@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "PQLLexer.h"
-#include "..\SimpleAST.h"
-#include "..\SimpleLexer.h"
-#include "..\SimpleParser.h"
+#include "SimpleAST.h"
+#include "SimpleLexer.h"
+#include "SimpleParser.h"
 
 using namespace std;
 
@@ -112,9 +112,12 @@ public:
 
 class Declaration
 {
-public:
+private:
     vector<shared_ptr<Synonym>> synonyms;
     shared_ptr<DesignEntity> de;
+
+public:
+
 
     Declaration(shared_ptr<DesignEntity> ent, vector<shared_ptr<Synonym>> vec) : synonyms(move(vec)), de(move(ent))
     {
@@ -706,11 +709,13 @@ public:
 
 class SelectCl
 {
-public:
-    vector<shared_ptr<Declaration>> declarations;
+private:
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
     vector<shared_ptr<WithCl>> withClauses;
+public:
+    vector<shared_ptr<Declaration>> declarations;
+    vector<shared_ptr<EvalCl>> evalClauses;
     shared_ptr<ResultCl> target;
     unordered_map<string, shared_ptr<Declaration>> synonymToParentDeclarationMap;
 
@@ -720,7 +725,7 @@ public:
     {
         for (auto& d : declarations)
         {
-            for (auto syn : d->synonyms)
+            for (auto syn : d->getSynonyms())
             {
                 /* Duplicate declaration is detected. This synonym was previously
                  * already encountered in a declaration, but is now encountered
@@ -734,6 +739,10 @@ public:
                 synonymToParentDeclarationMap[syn->getValue()] = d;
             }
         }
+
+        for (const auto& ptr : suchThatClauses) evalClauses.emplace_back(ptr);
+        for (const auto& ptr : patternClauses) evalClauses.emplace_back(ptr);
+        for (const auto& ptr : withClauses) evalClauses.emplace_back(ptr);
     }
 
     shared_ptr<Declaration>& getParentDeclarationForSynonym(const string& s);
@@ -745,6 +754,8 @@ public:
     bool hasSuchThatClauses();
     bool hasPatternClauses();
     bool hasWithClauses();
+    bool hasEvalClauses();
+    const vector<shared_ptr<EvalCl>>& getEvalClauses();
     bool suchThatContainsSynonym(shared_ptr<Element> s);
     bool patternContainsSynonym(shared_ptr<Element> s);
     bool withContainsSynonym(shared_ptr<Element> e);

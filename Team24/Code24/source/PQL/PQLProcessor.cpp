@@ -10,31 +10,26 @@
 #include "PQLLexer.h"
 #include <execution>
 #include <algorithm>
-#include "PQLFollowsHandler.h"
-#include "PQLFollowsTHandler.h"
-#include "PQLParentHandler.h"
-#include "PQLParentTHandler.h"
-#include "PQLFollowsTHandler.h"
-#include "PQLFollowsHandler.h"
-#include "PQLUsesPHandler.h"
-#include "PQLUsesSHandler.h"
-#include "PQLModifiesPHandler.h"
-#include "PQLModifiesSHandler.h"
+#include "Parent/PQLParentHandler.h"
+#include "Parent/PQLParentTHandler.h"
+#include "Follows/PQLFollowsTHandler.h"
+#include "Follows/PQLFollowsHandler.h"
+#include "Uses/PQLUsesPHandler.h"
+#include "Uses/PQLUsesSHandler.h"
+#include "Modifies/PQLModifiesPHandler.h"
+#include "Modifies/PQLModifiesSHandler.h"
 #include "PQLWithHandler.h"
 #include "PQLPatternHandler.h"
-#include "PQLModifiesSHandler.h"
-#include "PQLUsesSHandler.h"
-#include "PQLUsesPHandler.h"
-#include "PQLNextHandler.h"
-#include "PQLNextTHandler.h"
-#include "PQLNextBipHandler.h"
-#include "PQLNextBipTHandler.h"
-#include "PQLCallsHandler.h"
-#include "PQLCallsTHandler.h"
-#include "PQLAffectsHandler.h"
-#include "PQLAffectsTHandler.h"
-#include "PQLAffectsBipHandler.h"
-#include "PQLAffectsBipTHandler.h"
+#include "Next/PQLNextHandler.h"
+#include "Next/PQLNextTHandler.h"
+#include "Next/PQLNextBipHandler.h"
+#include "Next/PQLNextBipTHandler.h"
+#include "Calls/PQLCallsHandler.h"
+#include "Calls/PQLCallsTHandler.h"
+#include "Affects/PQLAffectsHandler.h"
+#include "Affects/PQLAffectsTHandler.h"
+#include "Affects/PQLAffectsBipHandler.h"
+#include "Affects/PQLAffectsBipTHandler.h"
 
 /* Initialize static variables for PQLProcessor.cpp */
 string Result::dummy = "BaseResult: getResultAsString()";
@@ -47,15 +42,15 @@ string ResultTuple::UNDERSCORE_PLACEHOLDER = "$_";
 
 /* ======================== HANDLE-ALL CLAUSE METHODS ======================== */
 
-vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_ptr<SelectCl> selectCl)
+vector<shared_ptr<Result>> PQLProcessor::extractResultsNoClauses(shared_ptr<SelectCl> selectCl)
 {
     vector<shared_ptr<Result>> toReturn;
-    const auto& elems = selectCl->target->getElements();
+    const auto& elems = selectCl->getTarget()->getElements();
     int numElements = elems.size();
 
     if (numElements == 0) {
 
-        if (selectCl->target->isBooleanReturnType()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
+        if (selectCl->getTarget()->isBooleanReturnType()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
 
         return move(toReturn);
     }
@@ -116,7 +111,7 @@ vector<shared_ptr<Result>> PQLProcessor::handleNoSuchThatOrPatternCase(shared_pt
 
 /* ======================== SUCH THAT CLAUSE ======================== */
 
-void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
+void PQLProcessor::routeSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_ptr<SuchThatCl>& suchThatCl,
     vector<shared_ptr<ResultTuple>>& toReturn)
 {
     
@@ -257,7 +252,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
         break;
     }        
     default: {
-        throw "Unknown such that relationship: " + suchThatCl->relRef->format();
+        throw runtime_error("Unknown such that relationship: " + suchThatCl->relRef->format());
         break;
     }
     }
@@ -267,7 +262,7 @@ void PQLProcessor::handleSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_p
 /* ======================== HELPER METHODS ======================== */
 
 /* PRE-CONDITION: At least ONE targetSynonym appears in the suchThat/pattern/with clauses*/
-void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl) {
+void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, const shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl) {
     if (resultCl->isBooleanReturnType()) {
         extractTargetSynonymsBoolean(toReturn, resultCl, tuples, selectCl);
     }
@@ -281,13 +276,13 @@ void PQLProcessor::extractTargetSynonyms(vector<shared_ptr<Result>>& toReturn, s
     }
 }
 
-void PQLProcessor::extractTargetSynonymsBoolean(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl)
+void PQLProcessor::extractTargetSynonymsBoolean(vector<shared_ptr<Result>>& toReturn, const shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl)
 {
     if (!tuples.empty()) toReturn.emplace_back(make_shared<StringSingleResult>(Result::TRUE_STRING));
     else toReturn.emplace_back(make_shared<StringSingleResult>(Result::FALSE_STRING));
 }
 
-void PQLProcessor::extractTargetSynonymsSingle(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl)
+void PQLProcessor::extractTargetSynonymsSingle(vector<shared_ptr<Result>>& toReturn, const shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl)
 {
     if (tuples.empty()) return;
     shared_ptr<Element> firstElem = resultCl->getElements()[0];
@@ -311,7 +306,7 @@ void PQLProcessor::extractTargetSynonymsSingle(vector<shared_ptr<Result>>& toRet
     }
 }
 
-void PQLProcessor::extractTargetSynonymsMultiple(vector<shared_ptr<Result>>& toReturn, shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl)
+void PQLProcessor::extractTargetSynonymsMultiple(vector<shared_ptr<Result>>& toReturn, const shared_ptr<ResultCl>& resultCl, vector<shared_ptr<ResultTuple>>& tuples, shared_ptr<SelectCl>& selectCl)
 {
     if (tuples.empty()) return;
 
@@ -381,7 +376,7 @@ const string& PQLProcessor::resolveAttrRef(const string& rawSynVal, shared_ptr<A
 {
 
     if (attrRef == nullptr) {
-        throw "Critical error: AttrRef to resolve is nullptr!";
+        throw runtime_error("Critical error: AttrRef to resolve is nullptr!");
     }
 
     if (attrRef->getAttrName()->getAttrNameType() == AttrNameType::PROC_NAME) {
@@ -474,7 +469,7 @@ void PQLProcessor::handleSingleEvalClause(shared_ptr<SelectCl>& selectCl, vector
         ph.evaluate(toPopulate);
     }
     else if (type == EvalClType::SuchThat) {
-        handleSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
+        routeSuchThatClause(selectCl, static_pointer_cast<SuchThatCl>(evalCl), toPopulate);
     }
     else if (type == EvalClType::With) {
         WithHandler wh(evaluator, selectCl, static_pointer_cast<WithCl>(evalCl));
@@ -536,7 +531,7 @@ void PQLProcessor::handleClauseGroup(shared_ptr<SelectCl>& selectCl, vector<shar
 
 vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& selectCl)
 {
-    bool isBooleanReturnType = selectCl->target->isBooleanReturnType();
+    bool isBooleanReturnType = selectCl->getTarget()->isBooleanReturnType();
     /* Final Results to Return */
     vector<shared_ptr<Result>> res;
     vector<shared_ptr<ResultTuple>> currTups;
@@ -552,9 +547,9 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         return res;
     }
     /* Special case 0: There are no RelRef or Pattern clauses*/
-    if (!selectCl->hasSuchThatClauses() && !selectCl->hasPatternClauses() && !selectCl->hasWithClauses())
+    if (!selectCl->hasEvalClauses())
     {
-        return move(handleNoSuchThatOrPatternCase(move(selectCl)));
+        return move(extractResultsNoClauses(move(selectCl)));
     }
     try {
         opt = make_shared<PQLOptimizer>(selectCl);
@@ -623,11 +618,11 @@ vector<shared_ptr<Result>> PQLProcessor::processPQLQuery(shared_ptr<SelectCl>& s
         return move(res);
     }
     vector<shared_ptr<ResultTuple>>& finalTuples = currTups;
-    if (!selectCl->target->isBooleanReturnType() && !atLeastOneTargetSynonymIsInClauses(selectCl))
+    if (!selectCl->getTarget()->isBooleanReturnType() && !atLeastOneTargetSynonymIsInClauses(selectCl))
     {
-        return finalTuples.empty() ? move(res) : handleNoSuchThatOrPatternCase(move(selectCl));
+        return finalTuples.empty() ? move(res) : extractResultsNoClauses(move(selectCl));
     }
-    extractTargetSynonyms(res, selectCl->target, finalTuples, selectCl);
+    extractTargetSynonyms(res, selectCl->getTarget(), finalTuples, selectCl);
     return move(res);
 }
 

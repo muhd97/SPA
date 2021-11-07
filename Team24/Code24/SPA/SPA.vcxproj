@@ -11,95 +11,116 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\PKB\DesignExtractor.cpp" />
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBAffectsBipHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBAffectsHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBCallsHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBFollowsHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBModifyHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBNextBipHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBNextHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBParentHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBPatternHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBUseHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKBModel\CFG.cpp" />
+    <ClCompile Include="..\source\PKB\PKBModel\PKBGroup.cpp" />
+    <ClCompile Include="..\source\PKB\PKBModel\PKBProcedure.cpp" />
+    <ClCompile Include="..\source\PKB\PKBModel\PKBStmt.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\PQLClauseHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\PQLPatternHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\PQLSuchThatHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\PQLWithHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsBipHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsBipTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsCallsTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Follows\PQLFollowsHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Follows\PQLFollowsTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Modifies\PQLModifiesPHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Modifies\PQLModifiesSHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextBipHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextBipTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Parent\PQLParentHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Parent\PQLParentTHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLFollowsParentNextAffectsHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLUsesModifiesPHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLUsesModifiesSHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Uses\PQLUsesPHandler.cpp" />
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Uses\PQLUsesSHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLAST.cpp" />
     <ClCompile Include="..\source\PQL\PQLParser.cpp" />
-    <ClCompile Include="..\source\CFG.cpp" />
-    <ClCompile Include="..\source\SimpleAST.cpp" />
-    <ClCompile Include="..\source\SimpleLexer.cpp" />
-    <ClCompile Include="..\source\SimpleParser.cpp" />
-    <ClCompile Include="..\source\PKB\PKBGroup.cpp" />
     <ClCompile Include="..\source\PKB\PKB.cpp" />
     <ClCompile Include="..\source\PKB\PKBPQLEvaluator.cpp" />
-    <ClCompile Include="..\source\PKB\PKBVariable.cpp" />
-    <ClCompile Include="..\source\PQL\PQLClauseHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLPatternHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLWithHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLSuchThatHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLFollowsParentNextAffectsHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLNextHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLNextTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLNextBipHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLNextBipTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLAffectsHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLAffectsTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLAffectsBipHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLAffectsBipTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLUsesModifiesSHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLUsesModifiesPHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLUsesSHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLModifiesSHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLModifiesPHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLUsesPHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLFollowsHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLFollowsTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLParentHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLParentTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLCallsCallsTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLCallsHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLCallsTHandler.cpp" />
     <ClCompile Include="..\source\PQL\PQLLexer.cpp" />
     <ClCompile Include="..\source\PQL\PQLProcessor.cpp" />
     <ClCompile Include="..\source\PQL\PQLOptimizer.cpp" />
-    <ClCompile Include="..\source\PKB\PKBStmt.cpp" />
-    <ClCompile Include="..\source\PKB\PKBProcedure.cpp" />
+    <ClCompile Include="..\source\Simple\SimpleAST.cpp" />
+    <ClCompile Include="..\source\Simple\SimpleLexer.cpp" />
+    <ClCompile Include="..\source\Simple\SimpleParser.cpp" />
     <ClCompile Include="..\source\Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\source\CFG.h" />
-    <ClInclude Include="..\source\PQL\PQLFollowsParentNextAffectsHandler.h" />
+    <ClInclude Include="..\source\PKB\DesignExtractor.h" />
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBAffectsBipHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBAffectsHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBCallsHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBFollowsHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBModifyHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBNextBipHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBNextHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBParentHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBPatternHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBUseHandler.h" />
+    <ClInclude Include="..\source\PKB\PKBModel\CFG.h" />
+    <ClInclude Include="..\source\PKB\PKBModel\PKBDesignEntity.h" />
+    <ClInclude Include="..\source\PKB\PKBModel\PKBGroup.h" />
+    <ClInclude Include="..\source\PKB\PKBModel\PKBProcedure.h" />
+    <ClInclude Include="..\source\PKB\PKBModel\PKBStmt.h" />
+    <ClInclude Include="..\source\PKB\PKBModel\PKBVariable.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\PQLClauseHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\PQLPatternHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\PQLSuchThatHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\PQLWithHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsBipHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsBipTHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsTHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsCallsTHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsTHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Follows\PQLFollowsHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Follows\PQLFollowsTHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Modifies\PQLModifiesPHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Modifies\PQLModifiesSHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextBipHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextBipTHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextTHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Parent\PQLParentHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Parent\PQLParentTHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLFollowsParentNextAffectsHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLUsesModifiesPHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLUsesModifiesSHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Uses\PQLUsesPHandler.h" />
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Uses\PQLUsesSHandler.h" />
     <ClInclude Include="..\source\PQL\PQLAST.h" />
-    <ClInclude Include="..\source\PQL\PQLNextHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLNextTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLNextBipHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLNextBipTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLAffectsHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLAffectsTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLAffectsBipHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLAffectsBipTHandler.h" />
     <ClInclude Include="..\source\PQL\PQLParser.h" />
     <ClInclude Include="..\source\PQL\PQLLexer.h" />
-    <ClInclude Include="..\source\SimpleAST.h" />
-    <ClInclude Include="..\source\PKB\PKBGroup.h" />
     <ClInclude Include="..\source\PKB\PKB.h" />
     <ClInclude Include="..\source\PKB\PKBPQLEvaluator.h" />
-    <ClInclude Include="..\source\PKB\PKBDesignEntity.h" />
-    <ClInclude Include="..\source\PKB\PKBVariable.h" />
-    <ClInclude Include="..\source\SimpleLexer.h" />
-    <ClInclude Include="..\source\SimpleParser.h" />
     <ClInclude Include="..\source\PQL\PQLResultTuple.h" />
-    <ClInclude Include="..\source\PQL\PQLPatternHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLWithHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLClauseHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLSuchThatHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLUsesModifiesSHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLUsesModifiesPHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLUsesSHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLModifiesSHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLModifiesPHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLUsesPHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLFollowsHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLFollowsTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLParentHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLParentTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLCallsCallsTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLCallsHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLCallsTHandler.h" />
     <ClInclude Include="..\source\PQL\PQLProcessor.h" />
     <ClInclude Include="..\source\PQL\PQLOptimizer.h" />
     <ClInclude Include="..\source\PQL\PQLOptimizerUtils.h" />
     <ClInclude Include="..\source\PQL\PQLProcessorUtils.h" />
-    <ClInclude Include="..\source\PKB\PKBStmt.h" />
-    <ClInclude Include="..\source\PKB\PKBProcedure.h" />
+    <ClInclude Include="..\source\Simple\SimpleAST.h" />
+    <ClInclude Include="..\source\Simple\SimpleLexer.h" />
+    <ClInclude Include="..\source\Simple\SimpleParser.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DC21A1EA-D2C6-4D14-A2B4-E025B64BDE81}</ProjectGuid>
@@ -140,6 +161,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <OpenMPSupport>false</OpenMPSupport>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <AdditionalIncludeDirectories>$(SolutionDir)source\Simple;$(SolutionDir)source\PQL;$(SolutionDir)source\PQL\ClauseHandlers;$(SolutionDir)source\PQL\ClauseHandlers\SuchThatHandlers;$(SolutionDir)source\PKB\PKBModel;$(SolutionDir)source\PKB\PKBHandlers;$(SolutionDir)source\PKB;$(SolutionDir)source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -153,6 +175,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)source\Simple;$(SolutionDir)source\PQL;$(SolutionDir)source\PQL\ClauseHandlers;$(SolutionDir)source\PQL\ClauseHandlers\SuchThatHandlers;$(SolutionDir)source\PKB\PKBModel;$(SolutionDir)source\PKB\PKBHandlers;$(SolutionDir)source\PKB;$(SolutionDir)source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

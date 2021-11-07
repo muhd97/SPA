@@ -25,7 +25,7 @@ void PQLParser::advance()
     }
     else
     {
-        throw "PQLParser failed to advance EOF\n";
+        throw runtime_error("PQLParser failed to advance EOF\n");
     }
 }
 
@@ -38,7 +38,7 @@ inline PQLToken PQLParser::eat(PQLTokenType exepctedType)
 {
     if (tokensAreEmpty()) {
         PQLToken temp(exepctedType);
-        throw "Expected " + getPQLTokenLabel(temp) + " but tokens were empty\n";
+        throw runtime_error("Expected " + getPQLTokenLabel(temp) + " but tokens were empty\n");
     }
     PQLToken tok = peek();
     if (tok.type == exepctedType)
@@ -48,8 +48,8 @@ inline PQLToken PQLParser::eat(PQLTokenType exepctedType)
     else
     {
         PQLToken temp(exepctedType);
-        cout << "Expected: " << getPQLTokenLabel(temp) << " but got: " << getPQLTokenLabel(tok) << " instead\n";
-        throw std::invalid_argument("Error parsing PQL Query!!");
+        throw std::invalid_argument("Error parsing PQL Query, Expected: " + getPQLTokenLabel(temp) + " but got : " + getPQLTokenLabel(tok) + " instead\n");
+        
     }
     return tok;
 }
@@ -63,8 +63,7 @@ inline PQLToken PQLParser::eatKeyword(string keyword)
     }
     else
     {
-        cout << "Expected: " << keyword << " but got: " << getPQLTokenLabel(tok) << " instead\n";
-        throw std::invalid_argument("Error parsing PQL Query!!");
+        throw std::invalid_argument("Error parsing PQL Query, Expected: " + keyword + " but got: " + getPQLTokenLabel(tok) + " instead\n");
     }
     return tok;
 }
@@ -143,7 +142,7 @@ shared_ptr<DesignEntity> PQLParser::parseDesignEntity()
         }
         else
         {
-            throw "ERROR: Unrecognized Design Entity!\n" + curr.stringValue;
+            throw runtime_error("ERROR: Unrecognized Design Entity!\n" + curr.stringValue);
         }
 
         return make_shared<DesignEntity>(curr.stringValue);
@@ -188,16 +187,16 @@ string parseIdent(string str) {
     string clean = regex_replace(str, regex("^ +| +$"), "");
 
     if (str.length() < 1) {
-        throw "Ident must contain at least one letter";
+        throw runtime_error("Ident must contain at least one letter");
     }
     // check that first char is a letter
     else if (!isalpha(str[0])) {
-        throw "First of character of ident has to be a letter";
+        throw runtime_error("First of character of ident has to be a letter");
     }
     // if whole string is alpha numeric
     for (char x : str) {
         if (!isalnum(x)) {
-            throw "Character in ident has to be alpha numeric";
+            throw runtime_error("Character in ident has to be alpha numeric");
         }
     }
 
@@ -219,7 +218,7 @@ shared_ptr<EntRef> PQLParser::parseEntRef()
         auto str = eat(PQLTokenType::STRING);
         return make_shared<EntRef>(EntRefType::IDENT, parseIdent(str.stringValue));
     }
-    throw "Faild to parse entRef: " + getPQLTokenLabel(peek());
+    throw runtime_error("Faild to parse entRef: " + getPQLTokenLabel(peek()));
 }
 
 shared_ptr<Ref> PQLParser::parseRef()
@@ -250,7 +249,7 @@ shared_ptr<Ref> PQLParser::parseRef()
         return make_shared<Ref>(RefType::IDENT, parseIdent(str.stringValue));
     }
     default: {
-        throw "Failed to parse ref: " + getPQLTokenLabel(peek());
+        throw runtime_error("Failed to parse ref: " + getPQLTokenLabel(peek()));
     }
     }
 }
@@ -521,7 +520,7 @@ shared_ptr<ExpressionSpec> PQLParser::parseExpressionSpec()
     }
     else
     {
-        throw "Error: Invalid expression spec.\n";
+        throw runtime_error("Error: Invalid expression spec.\n");
     }
 
     if (!tokensAreEmpty() && peek().type == PQLTokenType::COMMA) {
@@ -567,7 +566,7 @@ shared_ptr<PatternCl> PQLParser::parsePatternClCond()
         hasThirdArg = true;
         eat(PQLTokenType::COMMA);
         if (!exprSpec->isAnything) {
-            throw "Detected third argument for Pattern clause. It is required for 2nd and 3rd argument for these type of Pattern clauses to be UNDERSCORE";
+            throw runtime_error("Detected third argument for Pattern clause. It is required for 2nd and 3rd argument for these type of Pattern clauses to be UNDERSCORE");
         }
         /* Expect third argument to be UNDERSCORE */
         eat(PQLTokenType::UNDERSCORE);
@@ -627,7 +626,7 @@ shared_ptr<AttrName> PQLParser::parseAttrName() {
     else if (name.stringValue == PQL_VALUE) {
         return make_shared<AttrName>(AttrNameType::VALUE);
     } else {
-        throw "Unreconized attribute name: " + name.stringValue;
+        throw runtime_error("Unreconized attribute name: " + name.stringValue);
     }
 }
 
@@ -749,7 +748,7 @@ shared_ptr<SelectCl> PQLParser::parseSelectCl()
         }
         else
         {
-            throw "ParseSelectCl Unknown token: " + getPQLTokenLabel(peek()) + "\n";
+            throw runtime_error("ParseSelectCl Unknown token: " + getPQLTokenLabel(peek()) + "\n");
             break;
         }
     }
