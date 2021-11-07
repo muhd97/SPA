@@ -50,9 +50,6 @@ void TestWrapper::parse(std::string filename) {
         }
 
         vector<SimpleToken> tokens = simpleLex(program);
-#if DEBUG
-        printSimpleTokens(tokens);
-#endif
         shared_ptr<Program> root = parseSimpleProgram(tokens);
 #if PRINT_PARSED_PROGRAM
         cout << root->format();

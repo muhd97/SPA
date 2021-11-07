@@ -38,6 +38,8 @@ class Environment
     // a mapping of procedures to calls made in the procedure
     map<string, vector<string>> callGraph;
 
+    string currentProcedure;
+
   public:
     bool isProcAlreadyDeclared(string procName)
     {
@@ -46,15 +48,18 @@ class Environment
 
     void addProc(string procName)
     {
+        currentProcedure = procName;
         procedures.insert(procName);
     }
 
     void addInvokeProcedure(string procName)
     {
+
         if (proceduresInvoked.find(procName) == proceduresInvoked.end())
         {
             proceduresInvoked.insert(procName);
         }
+        addToCallGraph(currentProcedure, procName);
     }
 
     bool isProcedureCallsValid()
@@ -76,7 +81,7 @@ class Environment
         return this->callGraph;
     }
 
-    bool addToCallGraph(string procedure, string targetProcedure)
+    void addToCallGraph(string procedure, string targetProcedure)
     {
         if (callGraph.find(procedure) == callGraph.end())
         {
@@ -96,9 +101,34 @@ class SimpleParser
     size_t index;
     size_t size;
 
-    bool doesCallGraphContainCycles(map<string, vector<string>> callGraph)
+    static void visitProc(string callee, unordered_set<string> current, unordered_set<string> visited, map<string, vector<string>> callGraph) {
+        if (current.find(callee) != current.end()) {
+            throw "Found a cycle with procedure  " + callee + "\n";
+        }
+        else if (visited.find(callee) != visited.end()) {
+            return;
+        }
+
+        visited.insert(callee);
+        current.insert(callee);
+        for (string proc: callGraph[callee]) {
+            visitProc(proc, current, visited, callGraph);
+        }
+        current.erase(callee);
+    }
+
+    void assertNoCyclesInCallGraph(vector<shared_ptr<Procedure>> procedures, map<string, vector<string>> callGraph)
     {
-        return false;
+        unordered_set<string> visited = {};
+        unordered_set<string> current = {};
+
+        for (auto procedure : procedures) {
+            if (visited.find(procedure->getName()) != visited.end()) {
+                continue;
+            }
+            unordered_set<string> current = {};
+            visitProc(procedure->getName(), current, visited, callGraph);
+        }
     }
 
   public:
@@ -234,12 +264,9 @@ class SimpleParser
         {
             throw "Procedure call invalid.";
         }
-        else if (doesCallGraphContainCycles(env->getCallGraph()))
-        {
-            throw "Call graph contains cycles.";
-        }
         else
         {
+            assertNoCyclesInCallGraph(procedures, env->getCallGraph());
             return make_shared<Program>(procedures);
         }
     }
