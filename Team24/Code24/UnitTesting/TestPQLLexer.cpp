@@ -35,8 +35,8 @@ namespace UnitTesting
 
         }
 
-        //TEST_METHOD(TestpqlLex_Pattern)
-        //{
+        TEST_METHOD(TestpqlLex_Pattern)
+        {
         //    string query = "Select a pattern a (\"p\", _\"p + q\"_)";
         //    const auto actualTokens = pqlLex(query);
         //    const std::vector<PQLToken> expectedTokens = {
@@ -63,10 +63,10 @@ namespace UnitTesting
         //    string tenth_2 = getPQLTokenLabel(tenth_1);
         //    Assert::IsTrue(tenth_2 == ")");
 
-        //}
+        }
 
-        //TEST_METHOD(TestpqlLex_PatternExprLHSFullMatchRHS)
-        //{
+        TEST_METHOD(TestpqlLex_PatternExprLHSFullMatchRHS)
+        {
         //    string query = "Select a pattern a(\"p\", \"p + q\")";
         //    const auto actualTokens = pqlLex(query);
         //    const std::vector<PQLToken> expectedTokens = {
@@ -86,10 +86,10 @@ namespace UnitTesting
         //    auto seven_1 = actualTokens[7]; 
         //    string seven_2 = getPQLTokenLabel(seven_1);
         //    Assert::IsTrue(seven_2 == "($p + $q)");
-        //}
+        }
 
-        //TEST_METHOD(TestpqlLex_PatternAnyLHSAnyRHS)
-        //{
+        TEST_METHOD(TestpqlLex_PatternAnyLHSAnyRHS)
+        {
         //    string query = "Select a pattern a (_, _)";
         //    const auto actualTokens = pqlLex(query);
         //    const std::vector<PQLToken> expectedTokens = {
@@ -109,10 +109,10 @@ namespace UnitTesting
         //    Assert::IsTrue(seven_2 == "_");
 
         //    Assert::IsTrue(expectedTokens.size() == actualTokens.size());
-        //}
+        }
 
-        //TEST_METHOD(TestpqlLex_Relationship)
-        //{
+        TEST_METHOD(TestpqlLex_Relationship)
+        {
         //    string query = "Select s1 such that Follows (s1, s2)";
         //    const auto actualTokens = pqlLex(query);
         //    const std::vector<PQLToken> expectedTokens = {
@@ -132,10 +132,10 @@ namespace UnitTesting
         //    auto seven_1 = actualTokens[7];
         //    string seven_2 = getPQLTokenLabel(seven_1);
         //    Assert::IsTrue(seven_2 == "name(s2)");
-        //}
+        }
 
-        //TEST_METHOD(TestpqlLex_ParenthesisWithinString)
-        //{
+        TEST_METHOD(TestpqlLex_ParenthesisWithinString)
+        {
         //    string query = "Select a pattern a(_, \"(p+q)\")";
         //    const auto actualTokens = pqlLex(query);
         //    const std::vector<PQLToken> expectedTokens = {
@@ -156,10 +156,10 @@ namespace UnitTesting
         //    Assert::IsTrue(second_2 == "pattern");
 
         //    Assert::IsTrue(expectedTokens.size() == actualTokens.size());
-        //}
+        }
 
-        //TEST_METHOD(TestpqlLex_Declarations)
-        //{
+        TEST_METHOD(TestpqlLex_Declarations)
+        {
         //    string query = "procedure p; assign a;";
         //    const auto actualTokens = pqlLex(query);
         //    const std::vector<PQLToken> expectedTokens = {
@@ -176,7 +176,7 @@ namespace UnitTesting
         // Assert::IsFalse(first_2 == "procedure2");
 
         //Assert::IsTrue(expectedTokens.size() == actualTokens.size());
-        //}
+        }
 
     };
 

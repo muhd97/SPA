@@ -1,19 +1,19 @@
 #include "stdafx.h"
-//#include "CppUnitTest.h"
-//#include <iostream>
-//#include "PQL\PQLParser.h"
-//
-//using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-//using namespace std;
-//
-//namespace UnitTesting
-//{
-//    TEST_CLASS(TestPQLParser)
-//    {
-//    public:
-//
-//        TEST_METHOD(TestpqlParse_Declaration)
-//        {
+#include "CppUnitTest.h"
+#include <iostream>
+#include "PQL\PQLParser.h"
+
+using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using namespace std;
+
+namespace UnitTesting
+{
+    TEST_CLASS(TestPQLParser)
+    {
+    public:
+
+        TEST_METHOD(TestpqlParse_Declaration)
+        {
 //            const std::vector<PQLToken> input = {
 //                                      PQLToken(PQL_PROCEDURE),
 //                                      PQLToken("p"),
@@ -33,10 +33,10 @@
 //
 //            auto actualResult_2 = PQLParser(input).parseDeclaration()->getDesignEntity()->getEntityTypeName();
 //            Assert::IsTrue(actualResult_2 == PQL_PROCEDURE);
-//        }
+        }
 //
-//        TEST_METHOD(TestpqlParse_Uses)
-//        {
+        TEST_METHOD(TestpqlParse_Uses)
+        {
 //            const std::vector<PQLToken> input = {
 //                PQLToken(PQL_USES),
 //                PQLToken(PQLTokenType::LEFT_PAREN),
@@ -50,11 +50,11 @@
 //
 //            Assert::IsTrue(actualResult->stmtRef->getStmtRefTypeName() == "int(1)");
 //            Assert::IsTrue(actualResult->entRef->getEntRefTypeName() == "synonym(x)"); //how to differentiate between ident or synonym? 
-//        }
+        }
 //
 //
-//        TEST_METHOD(TestpqlParse_SuchThat)
-//        {
+        TEST_METHOD(TestpqlParse_SuchThat)
+        {
 //            const std::vector<PQLToken> input = {
 //                                      PQLToken(PQL_SUCH),
 //                                      PQLToken(PQL_THAT),
@@ -90,11 +90,11 @@
 //           
 //            //Logger::WriteMessage(actualout.c_str());
 //            Assert::IsTrue(actualResultString == "Parent*[synonym(x), _]");
-//        }
+        }
 //        /*
 //
-//        TEST_METHOD(TestpqlParse_Select)
-//        {
+        TEST_METHOD(TestpqlParse_Select)
+        {
 //            const std::vector<PQLToken> input = {
 //                                      PQLToken(PQLTokenType::STMT),
 //                                      PQLToken("s"),
@@ -115,8 +115,8 @@
 //            Assert::IsTrue(actualResult->declarations.size() == 1);
 //            Assert::IsFalse(actualResult->hasPatternClauses());
 //            Assert::IsTrue(actualResult->getParentDeclarationForSynonym("s")->getDesignEntity()->getEntityTypeName() == STMT);
-//        }
+        }
 //        */
-//    };
+    };
 //
-//}
+}
