@@ -1,6 +1,6 @@
 #pragma once
 #include "PKBDesignEntity.h"
-#include "SimpleAST.h"
+#include "Simple\SimpleAST.h"
 #include <iostream>
 #include <unordered_map>
 

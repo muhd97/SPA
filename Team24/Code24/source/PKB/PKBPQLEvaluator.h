@@ -9,23 +9,23 @@
 #include <vector>
 
 #include "PKB.h"
-#include "PKBDesignEntity.h"
-#include "PKBProcedure.h"
-#include "PKBStmt.h"
+#include "PKBModel\PKBDesignEntity.h"
+#include "PKBModel\PKBProcedure.h"
+#include "PKBModel\PKBStmt.h"
 // handlers
-#include "PKBAffectsBipHandler.h"
-#include "PKBAffectsHandler.h"
-#include "PKBCallsHandler.h"
-#include "PKBFollowsHandler.h"
-#include "PKBModifyHandler.h"
-#include "PKBNextBipHandler.h"
-#include "PKBNextHandler.h"
-#include "PKBParentHandler.h"
-#include "PKBPatternHandler.h"
-#include "PKBUseHandler.h"
+#include "PKBHandlers\PKBAffectsBipHandler.h"
+#include "PKBHandlers\PKBAffectsHandler.h"
+#include "PKBHandlers\PKBCallsHandler.h"
+#include "PKBHandlers\PKBFollowsHandler.h"
+#include "PKBHandlers\PKBModifyHandler.h"
+#include "PKBHandlers\PKBNextBipHandler.h"
+#include "PKBHandlers\PKBNextHandler.h"
+#include "PKBHandlers\PKBParentHandler.h"
+#include "PKBHandlers\PKBPatternHandler.h"
+#include "PKBHandlers\PKBUseHandler.h"
 // for pattern
-#include "SimpleLexer.h"
-#include "SimpleParser.h"
+#include "Simple\SimpleLexer.h"
+#include "Simple\SimpleParser.h"
 
 using namespace std;
 

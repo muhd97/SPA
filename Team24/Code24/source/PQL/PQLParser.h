@@ -7,9 +7,9 @@
 
 #include "PQLAST.h"
 #include "PQLLexer.h"
-#include "SimpleAST.h"
-#include "SimpleLexer.h"
-#include "SimpleParser.h"
+#include "Simple\SimpleAST.h"
+#include "Simple\SimpleLexer.h"
+#include "Simple\SimpleParser.h"
 
 using namespace std;
 

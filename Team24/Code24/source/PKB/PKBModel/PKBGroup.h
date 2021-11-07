@@ -5,7 +5,7 @@
 
 #include "PKBDesignEntity.h"
 #include "PKBVariable.h"
-#include "SimpleAST.h"
+#include "Simple\SimpleAST.h"
 
 using namespace std;
 
