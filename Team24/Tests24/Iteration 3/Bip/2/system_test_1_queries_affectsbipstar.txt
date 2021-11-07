@@ -28,10 +28,10 @@ Main, A, B, C, D, E, F, Call, Assign, AssignY, Print, PrintX, Read, ReadY
 Select BOOLEAN such that AffectsBip*(51, 53)
 FALSE
 5000
-7 - Select pn.stmt# such that AffectsBip*(#, #) = False (within procedure with assignment in between)
+7 - Select pn.stmt# such that AffectsBip*(#, #)
 print pn;
 Select pn.stmt# such that AffectsBip*(1, 23)
-9, 12, 41, 44, 58, 61, 69, 72, 77, 80, 81, 82, 83, 88, 102, 112, 113
+
 5000
 8 - Select BOOLEAN such that AffectsBip*(#, #) = False (with read in between that modifies)
 
@@ -43,10 +43,10 @@ FALSE
 Select BOOLEAN such that AffectsBip*(66, 68)
 TRUE
 5000
-10 - Select w such that AffectsBip*(#, #) = True (while loop)
+10 - Select w such that AffectsBip*(#, #) 
 while w;
 Select pn such that AffectsBip*(67, 66)
-9, 12, 41, 44, 58, 61, 69, 72, 77, 80, 81, 82, 83, 88, 102, 112, 113
+
 5000
 11 - Select pn such that AffectsBip*(#, #) = False (next line do not modify)
 print pn;
@@ -96,11 +96,11 @@ Select a.stmt# such that AffectsBip*(66, a)
 20 - Select a.stmt# such that AffectsBip*(#, a)
 assign a;
 Select a such that AffectsBip*(43, a)
-11,47,78,79
+11,47,53,78,79
 5000
 21 - Select a1, a2 such that AffectsBip*(a1, a2)
 assign a1, a2;
-Select <a1, a2> such that AffectsBip*(a1, a2) with a1.stmt# = 91 and a1.stmt# = s2.stmt#
+Select <a1, a2> such that AffectsBip*(a1, a2) with a1.stmt# = 91 and a1.stmt# = a2.stmt#
 91 91
 5000
 22 - Select BOOLEAN such that AffectsBip*(c, a) (FALSE)
