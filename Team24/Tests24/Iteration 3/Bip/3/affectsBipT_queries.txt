@@ -26,7 +26,7 @@ Select r such that AffectsBip*(66, r)
 6 - Select a such that AffectsBip*(87, a)
 assign a;
 Select a such that AffectsBip*(87, a)
-88,89,90,91
+87,88,89,90,91
 5000
 7 - Select w such that AffectsBip*(61, w)
 while w;
@@ -138,9 +138,9 @@ stmt s;
 Select s such that AffectsBip*(s, _) with s.stmt# = 4
 4
 5000
-29 - Select s1 such that AffectsBip*(s1, S2) with s1 = 4
+29 - Select s1 such that AffectsBip*(s1, S2) with s1.stmt# = 4
 stmt s1, S2;
-Select s1 such that AffectsBip*(s1, S2) with s1 = 4
+Select s1 such that AffectsBip*(s1, S2) with s1.stmt# = 4
 4
 5000
 30 - Select pn such that AffectsBip*(s, pn)
@@ -326,7 +326,7 @@ Select cs such that AffectsBip*(r, cs)
 66 - Select a such that AffectsBip*(a, 86)
 assign a;
 Select a such that AffectsBip*(a, 86)
-56,79,80,83,85
+77,79
 5000
 67 - Select a such that AffectsBip*(a, _) with a.stmt# = 4
 assign a;
@@ -416,7 +416,7 @@ Select r such that AffectsBip*(ifs, r)
 84 - Select ifs, a such that AffectsBip*(ifs, a)   
 if ifs; assign a; 
 Select <ifs, a> such that AffectsBip*(ifs, a)  
-FALSE
+
 5000
 85 - Select ifs, Ifs such that AffectsBip*(ifs, Ifs)    
 if ifs, Ifs; 
@@ -426,7 +426,7 @@ Select <ifs, Ifs> such that AffectsBip*(ifs, Ifs)
 86 - Select BOOLEAN such that AffectsBip*(ifs, w)     
 if ifs;  while w; 
 Select BOOLEAN such that AffectsBip*(ifs, w)  
-
+FALSE
 5000
 87 - Select c such that AffectsBip*(ifs, c) 
 if ifs; call c; 
@@ -631,7 +631,7 @@ Select <n, c> such that AffectsBip*(n, c)
 127 - Select n1, n1 such that AffectsBip*(n1, n2) with n2 = 4
 prog_line n1, n2;
 Select <n1, n1> such that AffectsBip*(n1, n2) with n2 = 4
-4 4
+4 4, 10 10,24 24,32 32,33 33,7 7
 5000
 128 - Select p such that AffectsBip*(n, p)
 prog_line n; procedure p;
@@ -761,7 +761,7 @@ Select c such that AffectsBip*(v, c)
 153 - Select v such that AffectsBip*(v, n)
 variable v; prog_line n; 
 Select v such that AffectsBip*(v, n)
-FALSE
+
 5000
 154 - Select BOOLEAN such that AffectsBip*(v, p)
 variable v; procedure p;
