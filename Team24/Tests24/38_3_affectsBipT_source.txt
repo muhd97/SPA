@@ -1,184 +1,164 @@
-procedure Main {
-    a = 0;
-    read a; 
-    b = a;
-    read c;
-    d = (a * (b + 2)) * (c - 3);
-    if (d > 0) then {
-        call A;
-        read p;
-        print p;
-    } else {
-        call B;
-        a = (b + 2) * (c - 3);
-        print p;
-    }
-    call Print;
-}
-
-procedure A {
-    x = (a * b) + (2 * c);
-    call Read;
-    if ((a > b) && (a == 0)) then {
-        a = a + 4;
-        if (a < 20) then {
-            y = 6;
-            call Print;
-            z = (y / 3) * (b + 2) * (c - 3);
-            while ((z != 0) || (z < a)) {
-                z = z - a;
-            }
+procedure ma1n {
+    call next;
+    print Variable;
+    while (Variable == variable) {
+        variable = Variable - 2;
+        if (Variable == print) then {
+            call next; 
+            Variable =     variable +     5   ;
+            print read;
         } else {
-            b = b + 1;
-        }
-    } else {
-        c = 4;
-        read c;
-        while (a + b > c) {
-            d = c;
-        }
-    }
-    call Call;
-}
-
-procedure B {
-    x = a * (b + 2) * (c + 8);
-    call ReadY;
-    if (((a <= 10) && (a != 0)) && (3 >= x)) then {
-        a = 4 + x;
-        if (a < 20 - x) then {
-            y = y / 6;
-            read z;
-            call PrintX;
-            z = 3 * (b + 2) * c;
-            while (y != a) {
-                y = y / 6;
-                print y;
-            }
-        } else {
-            b = 1;
-        }
-    } else {
-        c = 4;
-        print c;
-        while (a + b > c) {
-            read d;
-            d = c;
-        }
-    }
-    call C;
-}
-
-procedure C {
-    while (1 > 0) {
-        if (a > b) then {
-            x = 0;
-            call Assign;
-            z = x;
-        } else {
-            x = 0;
-            call AssignY;
-            z = x;
-        }
-        i = 0;
-        print i;
-        j = i;
-    }
-    p = 0;
-    print a;
-    a = p + 3;
-}
-
-procedure D {
-    while ((p + q > x - y) || ((a > x) && (p > x))) {
-        while (a > x) {
-            if (p > x) then {
-                p = 4 + 5;
-                q = p / (a / 3);
-                p = q;
-                print p;
+            print Variable;
+            Variable = 2*2/while ;
+            read variable;
+            if (Variable == variable) then {
+                variable = Variable + 2;
+                read Variable;
             } else {
-                if (a < x + 20) then {
-                    read b;
-                    print b;
-                } else {
-                    call Read;
-                    call E;
-                }
+                print = read;
+                read print;
+                print = 2 * 8 % while;
             }
+            print read;
+            print = 4 - print;
         }
+    }    
+    print Variable;
+    call R8; 
+}
+
+procedure next {
+    while (70000942432244550909090909090909 >= 2) {
+        read Variable;
+        read = 2;
+        print read;
     }
-}
-
-procedure Call {
-    read d;
-    call D;
-    print d;
-}
-
-procedure Assign {
-    x = (a * b) + (2 * (c - 2));
-}
-
-procedure AssignY {
-    y = (a * b) + ((2 * c) - 2);
-}
-
-procedure Print {
-    print a;
-    print b;
-    print y;
-}
-
-procedure PrintX {
-    print x;
-}
-
-procedure Read {
-    read a;
-    read b;
-    read x;
-}
-
-procedure ReadY {
-    read y;
-}
-
-procedure E {
-    print i;
-    read j;
-    while (((i > 0) && (j == 3 + i)) || (i < j)) {
-        i = i + 5;
-        if (i > 0) then {
-            if (i <= j) then {
-                i = j / (2 * c);
-                d = i * (j / 2);
-                read d;
-                c = (d + 4) * ((j / 2) - (2 * c));
-            } else {
-                x = j / 2;
-                call PrintX;
-                read x;
-                y = x + 2;
-                print y;
-            }
+    while (read == print) { 
+        Variable = read;
+        read Variable;
+        print Variable;
+        if (read == print) then {  
+            call Print111;
+            Variable = read % (Variable + 2 / 2);
         } else {
-            p = ((c * 2) - 2) / i;
-            while (p >= i) {
-                x = 2;
-                x = x + 5;
-            }
-            call F;
+            read = print;
+            call R8;
         }
-        j = j / 2;
     }
 }
 
-procedure F {
-    call Read;
-    call Print;
-    while (i > 0) {
-        print i;
+procedure Next {
+    call Procedure;
+}
+
+procedure R8 {
+    if(reUse == reUse)then {
+        read variable;
+        print reUse;
+    } else{
+        read reUse;
+        while(Use > 0) {
+            print print;
+        }
+        while (11 == 11){
+            read print;
+        }
+        read reUse;
+        print reUse;
+        call Print111;
     }
-    print x;
+}
+
+procedure Print111 {
+    Use = 0;
+    print Next;
+    print modifies;
+    Use = Use;
+    read modifies;
+    read Next;
+    modifies = Use;
+}
+
+procedure CALL {
+    while (8 - follows == foLLows + 7000090909090909090909) {
+        parent = 5;
+        call reUse;
+        parent = parent;
+        while (follows == foLLows) { 
+            if (follows == foLLows) then {
+                follows = parent / (foLLows + 5);
+            } else {
+                read follows;
+                foLLows = follows + 5;
+                read parent;
+            }
+        }
+        call Next;
+    }
+    call reUse;
+    call reUse;
+    call reUse;
+}
+
+procedure reUse {
+    call Procedure;
+    if (2 == parenT) then {
+        while(parent == parenT) {
+            parent = 2 - parent;
+            read parent;
+            parent = 2 - parent;
+        }
+        parent = (parent - parenT / 5) % (2);
+        if (2 == 2) then { 
+            parent = (parent - (parenT / 5)) % 2;
+        } else {
+            parenT = (parenT / ((2)));
+            while (parent == parenT) { 
+                parenT = parenT / 2 % 2;
+                parent = (parent - parenT / 5) % 2;
+                read parent;
+            }   
+        }
+    } else {
+        parentT = (((4*(2))));
+        print parentT ;
+        parentT = parentT * parenT;
+        read parentT;
+        parentT = parentT * parentT + parenT;
+    }
+}
+
+procedure Procedure {  
+    if = while;
+    while = print;
+    print = read;
+    read = if;
+    if = if / while;
+}
+
+procedure confu510n {
+    if (!((else) <= if)) then {  
+        assign = a;
+        if = ifs;
+    } else {
+        a = assign;
+        ifs = if;
+    }
+    if (while > then) then {  
+        while = w;
+    } else {
+        w = while;
+    }
+    while (print + read == call + 5) {
+        pn = print;
+        r = read;
+        c = call;
+    }
+    if ((procedure != variable) && ((proc) >= var)) then {  
+        proc = p;       
+        p = procedure;
+    } else {
+        var  =  v ;
+        v = variable;
+    }
 }
