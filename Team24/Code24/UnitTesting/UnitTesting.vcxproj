@@ -173,6 +173,7 @@
     <ClCompile Include="TestPQLLexer.cpp" />
     <ClCompile Include="TestPQLProcessor.cpp" />
     <ClCompile Include="TestPQLParser.cpp" />
+    <ClCompile Include="TestSimpleParser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
