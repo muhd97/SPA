@@ -992,6 +992,11 @@ shared_ptr<Declaration> &SelectCl::getParentDeclarationForSynonym(shared_ptr<Syn
     return synonymToParentDeclarationMap[s->getValue()];
 }
 
+const vector<shared_ptr<Declaration>>& SelectCl::getAllDeclarations()
+{
+    return declarations;
+}
+
 bool SelectCl::isSynonymDeclared(string toTest)
 {
     return synonymToParentDeclarationMap.find(toTest) != synonymToParentDeclarationMap.end();

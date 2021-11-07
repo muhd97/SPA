@@ -152,6 +152,10 @@ vector<PQLToken> pqlLex(string &program)
                 lookahead = program[++i + 1];
             }
             value.push_back(curr);
+            if (value.size() > 1 && value[0] == '0')
+            {
+                throw runtime_error("Integer token cannot start with 0");
+            }
             tokens.emplace_back(stoi(value));
         }
         else

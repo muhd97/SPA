@@ -437,6 +437,7 @@ const string &PQLProcessor::resolveAttrRef(const string &rawSynVal, shared_ptr<A
         {
             return evaluator->mpPKB->callStmtToProcNameTable[rawSynVal];
         }
+
     }
 
     if (attrRef->getAttrName()->getAttrNameType() == AttrNameType::VAR_NAME)

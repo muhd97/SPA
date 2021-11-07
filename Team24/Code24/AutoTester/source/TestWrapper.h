@@ -26,9 +26,10 @@ class TestWrapper : public AbstractWrapper {
   virtual void evaluate(std::string query, std::list<std::string>& results);
 
 private:
-    // Yida: add PKB object and evaluator object
+
     shared_ptr<PKB> pkb = nullptr;
     shared_ptr<PKBPQLEvaluator> evaluator = nullptr;
+    bool parsingFailed = false;
 };
 
 #endif

@@ -3,7 +3,7 @@
 #define PRINT_PARSED_PROGRAM 0
 #define DEBUG 0
 #define PRINT_FINISHED_HEADER 0
-#define PRINT_EXCEPTION_STATEMENTS 0
+#define PRINT_EXCEPTION_STATEMENTS 1
 
 #include "TestWrapper.h"
 #include "SimpleAST.h"
@@ -36,6 +36,10 @@ TestWrapper::TestWrapper() {
   // as well as any initialization required for your spa program
     pkb = make_shared<PKB>();
 
+}
+
+TestWrapper::~TestWrapper()
+{
 }
 
 // method for parsing the SIMPLE source
@@ -71,6 +75,7 @@ void TestWrapper::parse(std::string filename) {
     catch (const std::exception& ex) {
         cout << "Exception was thrown while trying to parsing simple code.\n";
         cout << "Error message: " << ex.what() << endl;
+        parsingFailed = true;
     }
 #endif
     // depreceated in favour of std::runtime_error
@@ -78,6 +83,7 @@ void TestWrapper::parse(std::string filename) {
 #if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to parsing simple code.\n";
 #endif
+        parsingFailed = true;
     }
 
 }
@@ -88,6 +94,9 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
     cout << "\n==== Parsing queries ====\n";
 #endif
     try {
+        if (parsingFailed) {
+            throw std::runtime_error("SIMPLE Program failed to parse, no queries will be evaluated");
+        }
         PQLParser p(pqlLex(query));
         auto sel = p.parseSelectCl();
 #if DEBUG

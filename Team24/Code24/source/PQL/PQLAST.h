@@ -739,15 +739,6 @@ class SelectCl
         {
             for (auto syn : d->getSynonyms())
             {
-                /* Duplicate declaration is detected. This synonym was previously
-                 * already encountered in a declaration, but is now encountered
-                 * again!
-                 */
-                if (synonymToParentDeclarationMap.find(syn->getValue()) != synonymToParentDeclarationMap.end())
-                {
-                    throw std::exception("Error: Duplicate synonym detected in query!");
-                }
-
                 synonymToParentDeclarationMap[syn->getValue()] = d;
             }
         }
@@ -762,6 +753,7 @@ class SelectCl
 
     shared_ptr<Declaration> &getParentDeclarationForSynonym(const string &s);
     shared_ptr<Declaration> &getParentDeclarationForSynonym(shared_ptr<Synonym> s);
+    const vector<shared_ptr<Declaration>>& getAllDeclarations();
     bool isSynonymDeclared(string toTest);
     const string &getDesignEntityTypeBySynonym(const string &s);
     const string &getDesignEntityTypeBySynonym(const shared_ptr<Synonym> &s);

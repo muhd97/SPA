@@ -17,6 +17,8 @@
 
 static const unsigned int HARDWARE_CONCURRENCY = thread::hardware_concurrency();
 
+inline bool isValidAttrRef(const shared_ptr<SelectCl>& selectCl, const shared_ptr<AttrRef>& attrRef);
+
 inline shared_ptr<ResultTuple> getResultTuple(const initializer_list<pair<string, string>> &args)
 {
 
@@ -232,7 +234,32 @@ inline bool allSynonymsAreDeclared(shared_ptr<SelectCl> &selectCl)
 
 inline void validateSelectCl(shared_ptr<SelectCl> selectCl)
 {
+    unordered_set<string> declaredSynonymsSoFar;
+    for (auto& d : selectCl->getAllDeclarations())
+    {
+        for (auto syn : d->getSynonyms())
+        {
+            /* Duplicate declaration is detected. This synonym was previously
+             * already encountered in a declaration, but is now encountered
+             * again!
+             */
+            if (declaredSynonymsSoFar.find(syn->getValue()) != declaredSynonymsSoFar.end())
+            {
+                throw std::runtime_error("Error: Duplicate synonym detected in query!");
+            }
 
+            declaredSynonymsSoFar.insert(syn->getValue());
+        }
+    }
+
+    const auto& resultCl = selectCl->getTarget();
+    for (const auto& ptr : resultCl->getElements()) {
+        if (ptr->getElementType() == ElementType::AttrRef) {
+            auto temp = static_pointer_cast<AttrRef>(ptr);
+            if (!isValidAttrRef(selectCl, temp))
+                throw runtime_error("Bad AttrRef\n");
+        }
+    }
     if (!isTargetSynonymDeclared(selectCl))
         throw runtime_error("Bad PQL Query. The target synonym is NOT declared\n");
     if (!allSynonymsAreDeclared(selectCl))
