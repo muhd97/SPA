@@ -86,7 +86,7 @@ void ClauseHandler::validateStmtInt(int i)
 
 void ClauseHandler::validateVarIdent(const string& ident, const string& relationshipType)
 {
-    if (!getEvaluator()->variableExists(move(ident))) {
+    if (!getEvaluator()->variableExists(ident)) {
         throw runtime_error("The provided identifier \"" + ident + "\" is not a variable in the SIMPLE program!\n");
     }
 }

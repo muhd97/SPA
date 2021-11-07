@@ -16,7 +16,7 @@ shared_ptr<EntRef>& UsesModifiesSHandler::getRightArg()
 }
 
 UsesModifiesSHandler::UsesModifiesSHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<StmtRef> leftArg, shared_ptr<EntRef> rightArg)
-	: SuchThatHandler(move(evaluator), move(selectCl))
+	: SuchThatHandler(evaluator, selectCl)
 {
 	this->leftArg = leftArg;
 	this->rightArg = rightArg;
@@ -30,22 +30,22 @@ void UsesModifiesSHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
 	EntRefType rightType = rightArg->getEntRefType();
 
 	if (leftType == StmtRefType::INTEGER && rightType == EntRefType::IDENT) {
-		evaluateIntIdent(move(toReturn));
+		evaluateIntIdent(toReturn);
 	}
 	else if (leftType == StmtRefType::INTEGER && rightType == EntRefType::SYNONYM) {
-		evaluateIntSyn(move(toReturn));
+		evaluateIntSyn(toReturn);
 	}
 	else if (leftType == StmtRefType::INTEGER && rightType == EntRefType::UNDERSCORE) {
-		evaluateIntUnderscore(move(toReturn));
+		evaluateIntUnderscore(toReturn);
 	}
 	else if (leftType == StmtRefType::SYNONYM && rightType == EntRefType::IDENT) {
-		evaluateSynIdent(move(toReturn));
+		evaluateSynIdent(toReturn);
 	}
 	else if (leftType == StmtRefType::SYNONYM && rightType == EntRefType::SYNONYM) {
-		evaluateSynSyn(move(toReturn));
+		evaluateSynSyn(toReturn);
 	}
 	else if (leftType == StmtRefType::SYNONYM && rightType == EntRefType::UNDERSCORE) {
-		evaluateSynUnderscore(move(toReturn));
+		evaluateSynUnderscore(toReturn);
 	}
 	else if (leftType == StmtRefType::UNDERSCORE) {
 		throw getRelationshipType() + " must NOT have '_' as the first argument!";

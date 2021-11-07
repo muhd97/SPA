@@ -2,7 +2,7 @@
 #include "PQLProcessorUtils.h"
 
 NextBipTHandler::NextBipTHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<NextBipT>& nextBipTCl)
-    : FollowsParentNextAffectsHandler(move(evaluator), move(selectCl), nextBipTCl->stmtRef1, nextBipTCl->stmtRef2)
+    : FollowsParentNextAffectsHandler(evaluator, selectCl, nextBipTCl->stmtRef1, nextBipTCl->stmtRef2)
 {
 }
 

@@ -1,7 +1,7 @@
 #include "PQLFollowsHandler.h"
 
 FollowsHandler::FollowsHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<Follows>& followsCl) 
-	: FollowsParentNextAffectsHandler(move(evaluator), move(selectCl), followsCl->stmtRef1, followsCl->stmtRef2)
+	: FollowsParentNextAffectsHandler(evaluator, selectCl, followsCl->stmtRef1, followsCl->stmtRef2)
 {
 }
 

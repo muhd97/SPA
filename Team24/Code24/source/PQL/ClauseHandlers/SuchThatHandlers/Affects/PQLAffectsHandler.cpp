@@ -2,7 +2,7 @@
 #include "PQLProcessorUtils.h"
 
 AffectsHandler::AffectsHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<Affects>& affectsCl)
-    : FollowsParentNextAffectsHandler(move(evaluator), move(selectCl), affectsCl->stmtRef1, affectsCl->stmtRef2)
+    : FollowsParentNextAffectsHandler(evaluator, selectCl, affectsCl->stmtRef1, affectsCl->stmtRef2)
 {
 }
 

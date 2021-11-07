@@ -2,7 +2,7 @@
 #include "PQLParentTHandler.h"
 
 ParentTHandler::ParentTHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<ParentT>& parentTCl)
-    : FollowsParentNextAffectsHandler(move(evaluator), move(selectCl), parentTCl->stmtRef1, parentTCl->stmtRef2)
+    : FollowsParentNextAffectsHandler(evaluator, selectCl, parentTCl->stmtRef1, parentTCl->stmtRef2)
 {
 }
 

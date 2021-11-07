@@ -8,7 +8,7 @@ const string& CallsHandler::getRelationshipType()
 }
 
 CallsHandler::CallsHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<Calls>& callsCl)
-    : CallsCallsTHandler(move(evaluator), move(selectCl), callsCl->entRef1, callsCl->entRef2)
+    : CallsCallsTHandler(evaluator, selectCl, callsCl->entRef1, callsCl->entRef2)
 {
 }
 

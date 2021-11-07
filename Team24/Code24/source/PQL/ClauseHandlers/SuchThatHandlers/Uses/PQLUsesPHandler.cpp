@@ -8,7 +8,7 @@ const string& UsesPHandler::getRelationshipType()
 }
 
 UsesPHandler::UsesPHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<UsesP>& usesPCl)
-    : UsesModifiesPHandler(move(evaluator), move(selectCl), usesPCl->entRef1, usesPCl->entRef2)
+    : UsesModifiesPHandler(evaluator, selectCl, usesPCl->entRef1, usesPCl->entRef2)
 {
 }
 
