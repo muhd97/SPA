@@ -147,7 +147,7 @@ vector<PQLToken> pqlLex(string &program)
         }
         else
         {
-            throw "PQLLexer: Unknown token '" + to_string(curr) + "'." + "\n";
+            throw runtime_error("PQLLexer: Unknown token '" + to_string(curr) + "'." + "\n");
         }
         i++;
     }

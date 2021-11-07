@@ -43,20 +43,20 @@ void WithHandler::validateArguments()
 
             if (synType == DesignEntity::PROCEDURE) {
                 if (attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
-                    throw "Procedure attribute must be procName\n";
+                    throw runtime_error("Procedure attribute must be procName\n");
                 }
             }
             if (synType == DesignEntity::VARIABLE) {
                 if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
-                    throw "Variable attribute must be varName\n";
+                    throw runtime_error("Variable attribute must be varName\n");
                 }
             }
             if (synType == DesignEntity::CALL || synType == DesignEntity::READ || synType == DesignEntity::PRINT) {
                 if (synType == DesignEntity::CALL && attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
-                    throw "Call attribute must be procName\n";
+                    throw runtime_error("Call attribute must be procName\n");
                 }
                 if ((synType == DesignEntity::READ || synType == DesignEntity::PRINT) && attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
-                    throw "Read/Print attribute must be varName\n";
+                    throw runtime_error("Read/Print attribute must be varName\n");
                 }
             }
         }
@@ -75,28 +75,28 @@ void WithHandler::validateArguments()
 
             if (synType == DesignEntity::PROCEDURE) {
                 if (attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
-                    throw "Procedure attribute must be procName\n";
+                    throw runtime_error("Procedure attribute must be procName\n");
                 }
             }
             if (synType == DesignEntity::VARIABLE) {
                 if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
-                    throw "Variable attribute must be varName\n";
+                    throw runtime_error("Variable attribute must be varName\n");
                 }
             }
 
             if (synType == DesignEntity::CALL) {
                 if (attrName->getAttrNameType() != AttrNameType::PROC_NAME) {
-                    throw "Call attribute must be procName\n";
+                    throw runtime_error("Call attribute must be procName\n");
                 }
             }
             if (synType == DesignEntity::READ) {
                 if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
-                    throw "Read attribute must be varName\n";
+                    throw runtime_error("Read attribute must be varName\n");
                 }
             }
             if (synType == DesignEntity::PRINT) {
                 if (attrName->getAttrNameType() != AttrNameType::VAR_NAME) {
-                    throw "Print attribute must be varName\n";
+                    throw runtime_error("Print attribute must be varName\n");
                 }
             }
         }
@@ -112,7 +112,7 @@ void WithHandler::validateArguments()
                 auto leftDesignEntity = resolvePQLDesignEntityToPKBDesignEntity(temp1);
 
                 if (leftDesignEntity == PKBDesignEntity::Constant || leftDesignEntity == PKBDesignEntity::Variable || leftDesignEntity == PKBDesignEntity::Procedure) {
-                    throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
+                    throw runtime_error("Stmt# attribute is only applicable to synonyms which are of a statement type\n");
                 }
                 
             }
@@ -130,13 +130,13 @@ void WithHandler::validateArguments()
 
             if (leftAttrNameType == AttrNameType::STMT_NUMBER) {
                 if (leftDesignEntity == PKBDesignEntity::Constant || leftDesignEntity == PKBDesignEntity::Variable || leftDesignEntity == PKBDesignEntity::Procedure) {
-                    throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
+                    throw runtime_error("Stmt# attribute is only applicable to synonyms which are of a statement type\n");
                 }
 
             }
             else if (leftAttrNameType == AttrNameType::VALUE) {
                 if (leftDesignEntity != PKBDesignEntity::Constant) {
-                    throw "Value attribute is only applicable to synonyms which are of Constant type\n";
+                    throw runtime_error("Value attribute is only applicable to synonyms which are of Constant type\n");
                 }
             }
         }
@@ -146,14 +146,14 @@ void WithHandler::validateArguments()
         const auto& leftEntityType = selectCl->getDesignEntityTypeBySynonym(leftSynonymString);
 
         if (leftEntityType != DesignEntity::PROG_LINE) {
-            throw "Synonyms must be PROG_LINE type for with clauses\n";
+            throw runtime_error("Synonyms must be PROG_LINE type for with clauses\n");
         }
         else if (rightType == RefType::SYNONYM) {
             const auto& rightSynonymString = rhs->getStringVal();
             const auto& rightEntityType = selectCl->getDesignEntityTypeBySynonym(rightSynonymString);
 
             if (rightEntityType != DesignEntity::PROG_LINE) {
-                throw "Synonyms must be PROG_LINE type for with clauses\n";
+                throw runtime_error("Synonyms must be PROG_LINE type for with clauses\n");
             }
         }
 
@@ -166,13 +166,13 @@ void WithHandler::validateArguments()
 
             if (rightAttrNameType == AttrNameType::VALUE) { /* with prog_line = const.value */
                 if (rightDesignEntity != PKBDesignEntity::Constant) {
-                    throw "Value attribute is only applicable to synonyms which are of type Constant\n";
+                    throw runtime_error("Value attribute is only applicable to synonyms which are of type Constant\n");
                 }
             }
 
             else if (rightAttrNameType == AttrNameType::STMT_NUMBER) { /* with prog_line == stmt.stmt# */
                 if (rightDesignEntity == PKBDesignEntity::Constant || rightDesignEntity == PKBDesignEntity::Variable || rightDesignEntity == PKBDesignEntity::Procedure) {
-                    throw "Stmt# attribute is only applicable to synonyms which are of a statement type\n";
+                    throw runtime_error("Stmt# attribute is only applicable to synonyms which are of a statement type\n");
                 }
             }
         }
@@ -235,7 +235,7 @@ void WithHandler::evaluateWithFirstArgIdentSecondArgAttr(const std::string& left
         }
         return;
     }
-    throw "Could not match any valid with-clause format\n";
+    throw runtime_error("Could not match any valid with-clause format\n");
 }
 
 void WithHandler::evaluateWithFirstArgIdentSecondArgIdent(std::vector<std::shared_ptr<ResultTuple>>& toReturn)
@@ -269,7 +269,7 @@ void WithHandler::evaluateWithFirstArgInt(vector<shared_ptr<ResultTuple>>& toRet
     if (rightType == RefType::ATTR) {
         return evaluateWithFirstArgIntSecondArgAttr(leftVal, toReturn);
     }
-    throw "Could not match any valid with-clause format\n";
+    throw runtime_error("Could not match any valid with-clause format\n");
 }
 
 void WithHandler::evaluateWithFirstArgIntSecondArgAttr(int leftVal, std::vector<std::shared_ptr<ResultTuple>>& toReturn)

@@ -252,7 +252,7 @@ void PQLProcessor::routeSuchThatClause(shared_ptr<SelectCl>& selectCl, shared_pt
         break;
     }        
     default: {
-        throw "Unknown such that relationship: " + suchThatCl->relRef->format();
+        throw runtime_error("Unknown such that relationship: " + suchThatCl->relRef->format());
         break;
     }
     }
@@ -376,7 +376,7 @@ const string& PQLProcessor::resolveAttrRef(const string& rawSynVal, shared_ptr<A
 {
 
     if (attrRef == nullptr) {
-        throw "Critical error: AttrRef to resolve is nullptr!";
+        throw runtime_error("Critical error: AttrRef to resolve is nullptr!");
     }
 
     if (attrRef->getAttrName()->getAttrNameType() == AttrNameType::PROC_NAME) {

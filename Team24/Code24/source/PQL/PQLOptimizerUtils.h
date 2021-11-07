@@ -82,13 +82,13 @@ inline int getEvalClPriority(const shared_ptr<EvalCl>& evalCl, const shared_ptr<
         }
        
         if (priority == -1) {
-            throw "Could not match EvalCl type to match priority, priority is negative\n";
+            throw runtime_error("Could not match EvalCl type to match priority, priority is negative\n");
 
         }
             
         return priority + shift;
     }   
 
-    throw "Could not match EvalCl type to match priority";
+    throw runtime_error("Could not match EvalCl type to match priority");
 
 }

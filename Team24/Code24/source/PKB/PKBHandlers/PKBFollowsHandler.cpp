@@ -194,7 +194,7 @@ bool PKBFollowsHandler::getFollowsTIntegerUnderscore(int leftStmtNo)
 /*PRE-CONDITION: TargetFollowType IS a container and statement type type. */
 const unordered_set<int>& PKBFollowsHandler::getFollowsT(PKBDesignEntity leftType, int rightStmtNo)
 {
-	if (!mpPKB->statementExists(rightStmtNo)) throw "Statement doesn't exist: " + to_string(rightStmtNo);
+	if (!mpPKB->statementExists(rightStmtNo)) throw runtime_error("Statement doesn't exist: " + to_string(rightStmtNo));
 	return mpPKB->followsTSynIntTable[rightStmtNo][leftType];
 }
 

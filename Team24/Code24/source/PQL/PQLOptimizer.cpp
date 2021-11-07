@@ -221,7 +221,7 @@ inline void PQLOptimizer::sortSingleClauseGroup(shared_ptr<ClauseGroup>& cg)
                 bestPriority = getEvalClPriority(curr, this->selectCl);
             }
         }
-        if (bestIdx == -1) throw "Critical Error, failed to elect next best clause in group";
+        if (bestIdx == -1) throw runtime_error("Critical Error, failed to elect next best clause in group");
         const auto& bestNextClause = currClauses[bestIdx];
         for (const auto& syn : bestNextClause->getAllSynonymsAsString())
             seenSynonyms.insert(syn);

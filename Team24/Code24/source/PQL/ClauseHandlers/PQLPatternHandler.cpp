@@ -13,31 +13,31 @@ void PatternHandler::validateArguments() {
     //validate assign
     if (assignment == 1) {
         if (synonymType != DesignEntity::ASSIGN) {
-            throw "Invalid synonym type of (" + synonymType + ") for pattern clauses\n";
+            throw runtime_error("Invalid synonym type of (" + synonymType + ") for pattern clauses\n");
         }
 
         /* pattern a(?, ?) */
 
         if (patternCl->hasThirdArg) {
-            throw "Invalid pattern clause. Pattern for assign can only have 2 arguments\n";
+            throw runtime_error("Invalid pattern clause. Pattern for assign can only have 2 arguments\n");
         }
     }
     //validate whileAndIf
     else {
             if (!patternCl->exprSpec->isAnything) {
-                throw "Invalid pattern clause. 2nd and 3rd arguments of pattern with WHILE and IFS must be UNDERSCORE\n";
+                throw runtime_error("Invalid pattern clause. 2nd and 3rd arguments of pattern with WHILE and IFS must be UNDERSCORE\n");
             }
             if (synonymType == DesignEntity::WHILE && patternCl->hasThirdArg) {
-                throw "Invalid pattern clause. Pattern with WHILE only has 2 arguments.\n";
+                throw runtime_error("Invalid pattern clause. Pattern with WHILE only has 2 arguments.\n");
             }
             if (synonymType == DesignEntity::IF && !patternCl->hasThirdArg) {
                 /* Third argument having to be UNDERSCORE is caught in parsing stage. */
-                throw "Invalid pattern clause. Pattern with IF needs to have 3 arguments.\n";
+                throw runtime_error("Invalid pattern clause. Pattern with IF needs to have 3 arguments.\n");
             }
             const auto& entRefType = patternCl->entRef->getEntRefType();
             if (!(entRefType == EntRefType::UNDERSCORE || entRefType == EntRefType::IDENT)) {
                 if (selectCl->getDesignEntityTypeBySynonym(patternCl->entRef->getStringVal()) != DesignEntity::VARIABLE) {
-                    throw "Invalid pattern clause. EntRef must be declared variable\n";
+                    throw runtime_error("Invalid pattern clause. EntRef must be declared variable\n");
                 }
             }
     }

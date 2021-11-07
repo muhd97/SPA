@@ -116,7 +116,7 @@ PKBDesignEntity toPKBType(StatementType simpleStatementType)
 	case StatementType::ASSIGN:
 		return PKBDesignEntity::Assign;
 	default:
-		throw "hey this Simple StatementType aint supported mate!";
+		throw runtime_error("Simple StatementType aint supported mate!");
 	}
 }
 

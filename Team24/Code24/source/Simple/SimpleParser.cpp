@@ -62,18 +62,16 @@ class Environment
         addToCallGraph(currentProcedure, procName);
     }
 
-    bool isProcedureCallsValid()
+    void assertProcedureCallsValid()
     {
         unordered_set<string> ps = this->procedures;
         for (string proc : proceduresInvoked)
         {
             if (!this->isProcAlreadyDeclared(proc))
             {
-                cout << "Error: Call to undeclared procedure '" + proc + "' is not allowed." << endl;
-                return false;
+                throw runtime_error("Call to undeclared procedure '" + proc + "' is not allowed.");
             }
         }
-        return true;
     }
 
     map<string, vector<string>> getCallGraph()
@@ -103,7 +101,7 @@ class SimpleParser
 
     static void visitProc(string callee, unordered_set<string> current, unordered_set<string> visited, map<string, vector<string>> callGraph) {
         if (current.find(callee) != current.end()) {
-            throw "Found a cycle with procedure  " + callee + "\n";
+            throw runtime_error("Cycles in SIMPLE code is not allowed. Found cycle in procedure  " + callee + "\n");
         }
         else if (visited.find(callee) != visited.end()) {
             return;
@@ -197,7 +195,7 @@ class SimpleParser
 
         cout << "] but got '" << getSimpleTokenLabel(actual) << "' instead." << endl;
 
-        throw "Simple parser failed to parse source code.";
+        throw runtime_error("Simple parser failed to parse source code.");
     }
 
     void errorKeyword(string expectedKeyword, SimpleToken actual)
@@ -207,7 +205,7 @@ class SimpleParser
         cout << "Expected \"" << expectedKeyword << "\" but got " << getSimpleTokenLabel(actual) << "' instead."
              << endl;
 
-        throw "Simple parser failed to parse source code.";
+        throw runtime_error("Simple parser failed to parse source code.");
     }
 
     bool isEmpty()
@@ -258,14 +256,11 @@ class SimpleParser
         // Validate program and procs
         if (procedures.size() == 0)
         {
-            throw "Simple program must have at least one procedure.";
-        }
-        else if (!env->isProcedureCallsValid())
-        {
-            throw "Procedure call invalid.";
+            throw runtime_error("Simple program must have at least one procedure.");
         }
         else
         {
+            env->assertProcedureCallsValid();
             assertNoCyclesInCallGraph(procedures, env->getCallGraph());
             return make_shared<Program>(procedures);
         }
@@ -280,7 +275,7 @@ class SimpleParser
         if (env->isProcAlreadyDeclared(procName))
         {
             cout << "Error: Procedure '" + procName + "' is already declared.\n";
-            throw "Redeclation of proc in simple code";
+            throw runtime_error("Redeclation of proc in simple code");
         }
         else
         {

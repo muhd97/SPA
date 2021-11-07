@@ -737,7 +737,7 @@ void PKB::initializeNextTables()
 
         if (root == NULL)
         {
-            throw "Cannot find CFG for " + proc->getName();
+            runtime_error("Cannot find CFG for " + proc->getName());
         }
 
 

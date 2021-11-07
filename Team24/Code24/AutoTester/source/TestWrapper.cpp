@@ -73,6 +73,7 @@ void TestWrapper::parse(std::string filename) {
         cout << "Error message: " << ex.what() << endl;
     }
 #endif
+    // depreceated in favour of std::runtime_error
     catch (...) {
 #if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to parsing simple code.\n";
@@ -110,13 +111,12 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
         cout << "Error message: " << ex.what() << endl;
     }
-#endif
     catch (const char* s) {
-#if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";
         cout << "Error message: " << s << endl;
-#endif
     }
+#endif
+    // depreceated in favour of std::runtime_error
     catch (...) {
 #if PRINT_EXCEPTION_STATEMENTS
         cout << "Exception was thrown while trying to evaluate query. Empty result is returned\n";

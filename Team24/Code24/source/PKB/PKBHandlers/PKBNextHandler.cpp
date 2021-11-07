@@ -19,7 +19,7 @@ StatementType PKBPQLNextHandler::getStatementType(PKBDesignEntity de)
 	case PKBDesignEntity::AllStatements:
 		return StatementType::STATEMENT;	// Use this as a hack to represent AllStatements
 	default:
-		throw "Unknown StatementType - Design Ent";
+		throw runtime_error("Unknown StatementType - Design Ent");
 	}
 }
 

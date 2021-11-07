@@ -156,7 +156,7 @@ inline PKBDesignEntity resolvePQLDesignEntityToPKBDesignEntity(const string& s)
         return PKBDesignEntity::Constant;
     }
     else {
-        throw "Unreconized design entity: " + s;
+        throw runtime_error("Unreconized design entity: " + s);
     }
 }
 
@@ -223,9 +223,9 @@ inline void validateSelectCl(shared_ptr<SelectCl> selectCl)
 {
 
     if (!isTargetSynonymDeclared(selectCl))
-        throw "Bad PQL Query. The target synonym is NOT declared\n";
+        throw runtime_error("Bad PQL Query. The target synonym is NOT declared\n");
     if (!allSynonymsAreDeclared(selectCl))
-        throw "Bad PQL Query. Some synonyms used are not declared\n";
+        throw runtime_error("Bad PQL Query. Some synonyms used are not declared\n");
 
 }
 
@@ -311,13 +311,13 @@ inline void validateWithClause(const shared_ptr<SelectCl>& selectCl, const share
 
     if (lhs->getRefType() == RefType::SYNONYM) {
         if (selectCl->getDesignEntityTypeBySynonym(lhs->getStringVal()) != DesignEntity::PROG_LINE) {
-            throw "Synonym types in with-clauses MUST be of type 'prog_line'\n";
+            throw runtime_error("Synonym types in with-clauses MUST be of type 'prog_line'\n");
         }
     }
 
     if (rhs->getRefType() == RefType::SYNONYM) {
         if (selectCl->getDesignEntityTypeBySynonym(rhs->getStringVal()) != DesignEntity::PROG_LINE) {
-            throw "Synonym types in with-clauses MUST be of type 'prog_line'\n";
+            throw runtime_error("Synonym types in with-clauses MUST be of type 'prog_line'\n");
         }
     }
 
@@ -336,26 +336,26 @@ inline void validateWithClause(const shared_ptr<SelectCl>& selectCl, const share
     if (!isLhsInt && lhs->getRefType() == RefType::ATTR) {
         AttrNameType attrType = lhs->getAttrRef()->getAttrName()->getType();
         if (selectCl->getDesignEntityTypeBySynonym(lhs->getAttrRef()->getSynonymString()) == DesignEntity::PROG_LINE)
-            throw "Semantic Error: AttrRef cannot be of syn type PROG_LINE";
+            throw runtime_error("Semantic Error: AttrRef cannot be of syn type PROG_LINE");
 
         if (!isValidAttrRef(selectCl, lhs->getAttrRef()))
-            throw "Semantic Error: Bad AttrRef";
+            throw runtime_error("Semantic Error: Bad AttrRef");
 
         isLhsInt = attrType == AttrNameType::STMT_NUMBER || attrType == AttrNameType::VALUE;
     }
     if (!isRhsInt && rhs->getRefType() == RefType::ATTR) {
         AttrNameType attrType = rhs->getAttrRef()->getAttrName()->getType();
         if (selectCl->getDesignEntityTypeBySynonym(rhs->getAttrRef()->getSynonymString()) == DesignEntity::PROG_LINE)
-            throw "Semantic Error: AttrRef cannot be of syn type PROG_LINE";
+            throw runtime_error("Semantic Error: AttrRef cannot be of syn type PROG_LINE");
 
         if (!isValidAttrRef(selectCl, rhs->getAttrRef()))
-            throw "Semantic Error: Bad AttrRef";
+            throw runtime_error("Semantic Error: Bad AttrRef");
 
         isRhsInt = attrType == AttrNameType::STMT_NUMBER || attrType == AttrNameType::VALUE;
     }
 
     if (isLhsInt != isRhsInt) {
-        throw "Bad PQL Query: The with-clause is checking equality on different types.\n";
+        throw runtime_error("Bad PQL Query: The with-clause is checking equality on different types.\n");
     }
 }
 

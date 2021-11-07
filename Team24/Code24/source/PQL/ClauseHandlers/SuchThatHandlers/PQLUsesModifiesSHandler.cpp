@@ -51,7 +51,7 @@ void UsesModifiesSHandler::evaluate(vector<shared_ptr<ResultTuple>>& toReturn)
 		throw getRelationshipType() + " must NOT have '_' as the first argument!";
 	}
 	else {
-		throw "All 9 cases for UsesS/ModifiesS are being rejected!";
+		throw runtime_error("All 9 cases for UsesS/ModifiesS are being rejected!");
 	}
 }
 

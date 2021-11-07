@@ -55,6 +55,6 @@ void FollowsParentNextAffectsHandler::evaluate(vector<shared_ptr<ResultTuple>>& 
 		evaluateUnderscoreUnderscore(toReturn);
 	}
 	else {
-		throw "All 9 cases for Follows/Parent are being rejected!";
+		throw runtime_error("All 9 cases for Follows/Parent are being rejected!");
 	}
 }

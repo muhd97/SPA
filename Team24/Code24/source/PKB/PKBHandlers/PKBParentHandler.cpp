@@ -204,7 +204,7 @@ const unordered_set<int>& PKBParentHandler::getParentTSynUnderscore(PKBDesignEnt
 /*PRE-CONDITION: TargetParentType IS a container and statement type type. */
 const unordered_set<int>& PKBParentHandler::getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo)
 {
-	if (!mpPKB->statementExists(childStatementNo)) throw "Statement doesn't exist: " + to_string(childStatementNo);
+	if (!mpPKB->statementExists(childStatementNo)) throw runtime_error("Statement doesn't exist: " + to_string(childStatementNo));
 	return mpPKB->parentTSynIntTable[childStatementNo][targetParentType];
 }
 

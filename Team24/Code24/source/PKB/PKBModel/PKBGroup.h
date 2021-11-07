@@ -46,7 +46,6 @@ class PKBGroup
     // returns index (statement number) of statement which owns this group
     int getOwner()
     {
-        //if (mOwnerIndex == -1) throw "No owner but attempting to getOwner()\n";
         return mOwnerIndex;
     }
 
