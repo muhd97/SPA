@@ -28,7 +28,7 @@ enum class ExpressionType
 class Expression : public Node
 {
   public:
-      virtual ExpressionType getExpressionType();
+    virtual ExpressionType getExpressionType();
 };
 
 class Constant : public Expression
@@ -97,7 +97,7 @@ enum class ConditionalType
 class ConditionalExpression : public Node
 {
   public:
-      virtual ConditionalType getConditionalType();
+    virtual ConditionalType getConditionalType();
 };
 
 enum class BooleanOperator
@@ -192,7 +192,7 @@ enum class StatementType
     CALL,
     ASSIGN,
     STATEMENT, // Used for Next* (meant to be AllStatement)
-    NONE, // Should not happen
+    NONE,      // Should not happen
 };
 
 class Statement : public Node

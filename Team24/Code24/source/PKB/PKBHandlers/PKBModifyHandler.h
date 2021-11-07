@@ -1,8 +1,9 @@
 #include "PKB.h"
 #pragma once
 
-class PKBModifyHandler {
-public:
+class PKBModifyHandler
+{
+  public:
     using SharedPtr = std::shared_ptr<PKBModifyHandler>;
 
     static SharedPtr create(PKB::SharedPtr pkb)
@@ -12,7 +13,7 @@ public:
 
     // Modifies
 
-/* Check if the given stmt Index MODIFIES any variables. */
+    /* Check if the given stmt Index MODIFIES any variables. */
     bool checkModified(int statementIndex);
     /* Check if the given stmt Index MODIFIES a specific variable specified by
      * {ident} */
@@ -47,10 +48,11 @@ public:
     vector<int> getModifiers(PKBDesignEntity entityType); /* Get all stmts of a given type
                                                              that modify variable(s) */
 
-private:
+  private:
     PKB::SharedPtr mpPKB;
 
-    PKBModifyHandler(PKB::SharedPtr pkb) {
+    PKBModifyHandler(PKB::SharedPtr pkb)
+    {
         mpPKB = pkb;
     };
 
@@ -58,15 +60,15 @@ private:
     bool checkModified(PKBDesignEntity entityType);
 
     // we want to return only vector<int>, not vector<PKBStmt::SharedPtr>
-    vector<int> stmtToInt(vector<PKBStmt::SharedPtr>& stmts);
+    vector<int> stmtToInt(vector<PKBStmt::SharedPtr> &stmts);
 
-    vector<int> stmtToInt(set<PKBStmt::SharedPtr>& stmts);
-
-    // we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
-    vector<string> varToString(set<PKBVariable::SharedPtr>& vars);
+    vector<int> stmtToInt(set<PKBStmt::SharedPtr> &stmts);
 
     // we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
-    vector<string> varToString(vector<PKBVariable::SharedPtr>& vars);
+    vector<string> varToString(set<PKBVariable::SharedPtr> &vars);
 
-    vector<string> procedureToString(set<PKBProcedure::SharedPtr>& procs);
+    // we want to return only vector<string>, not vector<PKBVariable::SharedPtr>
+    vector<string> varToString(vector<PKBVariable::SharedPtr> &vars);
+
+    vector<string> procedureToString(set<PKBProcedure::SharedPtr> &procs);
 };

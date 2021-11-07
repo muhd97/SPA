@@ -1,12 +1,12 @@
 #pragma once
-#pragma optimize( "gty", on )
+#pragma optimize("gty", on)
 
 #include <iostream>
 #include <unordered_map>
 #include <vector>
 
-#include "PQLLexer.h"
 #include "PQLAST.h"
+#include "PQLLexer.h"
 #include "SimpleAST.h"
 #include "SimpleLexer.h"
 #include "SimpleParser.h"
@@ -54,10 +54,11 @@ const string PQL_AND = "and";
 
 class ArgRef
 {
-protected:
+  protected:
     string stringValue;
-public:
-    const string& getStringVal() const
+
+  public:
+    const string &getStringVal() const
     {
         return stringValue;
     }
@@ -69,19 +70,19 @@ public:
     {
     }
 
-    ~ArgRef() 
+    ~ArgRef()
     {
     }
 };
 
 class PQLParser
 {
-private:
+  private:
     vector<PQLToken> tokens;
     int index;
     int size;
 
-public:
+  public:
     PQLParser(vector<PQLToken> tok) : tokens(move(tok)), index(0)
     {
         size = tokens.size();

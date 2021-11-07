@@ -1,11 +1,12 @@
 #include "PKB.h"
-#include <execution>
 #include <algorithm>
+#include <execution>
 
 #pragma once
 
-class PKBNextBipHandler {
-public:
+class PKBNextBipHandler
+{
+  public:
     using SharedPtr = std::shared_ptr<PKBNextBipHandler>;
 
     static SharedPtr create(PKB::SharedPtr pkb)
@@ -14,7 +15,7 @@ public:
     }
 
     // NextBip
-// Case 1: NextBip(_, _)
+    // Case 1: NextBip(_, _)
     bool getNextBipUnderscoreUnderscore();
 
     // Case 2: NextBip(_, syn)
@@ -41,11 +42,21 @@ public:
     // Case 9: NextBip(int, syn)
     unordered_set<int> getNextBipIntSyn(int fromIndex, PKBDesignEntity to);
 
-    void getNextBipTStatementList(vector<shared_ptr<Statement>>& list, StatementType from, StatementType to, int fromIndex, int toIndex, set<pair<int, int>>* result, bool canExitEarly, unordered_map<string, unordered_set<int>>* procSeenP, unordered_map<string, unordered_set<int>>* procSeenQ, unordered_set<int>* seenP, unordered_set<int>* seenQ, unordered_set<string>* visited, unordered_map<string, shared_ptr<Procedure>>* procs);
+    void getNextBipTStatementList(vector<shared_ptr<Statement>> &list, StatementType from, StatementType to,
+                                  int fromIndex, int toIndex, set<pair<int, int>> *result, bool canExitEarly,
+                                  unordered_map<string, unordered_set<int>> *procSeenP,
+                                  unordered_map<string, unordered_set<int>> *procSeenQ, unordered_set<int> *seenP,
+                                  unordered_set<int> *seenQ, unordered_set<string> *visited,
+                                  unordered_map<string, shared_ptr<Procedure>> *procs);
 
-    void getNextBipTProcedure(shared_ptr<Procedure>& proc, StatementType from, StatementType to, int fromIndex, int toIndex, set<pair<int, int>>* result, bool canExitEarly, unordered_map<string, unordered_set<int>>* procSeenP, unordered_map<string, unordered_set<int>>* procSeenQ, unordered_set<string>* visited, unordered_map<string, shared_ptr<Procedure>>* procs);
+    void getNextBipTProcedure(shared_ptr<Procedure> &proc, StatementType from, StatementType to, int fromIndex,
+                              int toIndex, set<pair<int, int>> *result, bool canExitEarly,
+                              unordered_map<string, unordered_set<int>> *procSeenP,
+                              unordered_map<string, unordered_set<int>> *procSeenQ, unordered_set<string> *visited,
+                              unordered_map<string, shared_ptr<Procedure>> *procs);
 
-    set<pair<int, int>> getNextBipT(shared_ptr<Program>& program, StatementType from, StatementType to, int fromIndex, int toIndex, bool canExitEarly);
+    set<pair<int, int>> getNextBipT(shared_ptr<Program> &program, StatementType from, StatementType to, int fromIndex,
+                                    int toIndex, bool canExitEarly);
 
     // NextBipT
     // Case 1: NextBipT(_, _)
@@ -75,15 +86,17 @@ public:
     // Case 9: NextBipT(int, syn)
     unordered_set<int> getNextBipTIntSyn(int fromIndex, PKBDesignEntity to);
 
-private:
+  private:
     PKB::SharedPtr mpPKB;
 
-    void getNextTStatementList(vector<shared_ptr <Statement>> list, StatementType from, StatementType to, int fromIndex,
-        int toIndex, set<pair<int, int>>* result, set<int>* seenP, bool canExitEarly);
+    void getNextTStatementList(vector<shared_ptr<Statement>> list, StatementType from, StatementType to, int fromIndex,
+                               int toIndex, set<pair<int, int>> *result, set<int> *seenP, bool canExitEarly);
     StatementType getStatementType(PKBDesignEntity de);
-    set<pair<int, int>> getNextBipCallStatements(shared_ptr<PKB> pkb, StatementType from, StatementType to, int fromIndex, int toIndex, bool canExitEarly);
+    set<pair<int, int>> getNextBipCallStatements(shared_ptr<PKB> pkb, StatementType from, StatementType to,
+                                                 int fromIndex, int toIndex, bool canExitEarly);
 
-    PKBNextBipHandler(PKB::SharedPtr pkb) {
+    PKBNextBipHandler(PKB::SharedPtr pkb)
+    {
         mpPKB = pkb;
     };
 };

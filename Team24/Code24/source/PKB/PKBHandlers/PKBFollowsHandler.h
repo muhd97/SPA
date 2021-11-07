@@ -1,8 +1,9 @@
 #include "PKB.h"
 #pragma once
 
-class PKBFollowsHandler {
-public:
+class PKBFollowsHandler
+{
+  public:
     using SharedPtr = std::shared_ptr<PKBFollowsHandler>;
 
     static SharedPtr create(PKB::SharedPtr pkb)
@@ -35,13 +36,13 @@ public:
     bool getFollowsTIntegerUnderscore(int leftStmtNo);
 
     /* Use for Follows*(s1, INT) */
-    const unordered_set<int>& getFollowsT(PKBDesignEntity parentType, int childStmtNo);
+    const unordered_set<int> &getFollowsT(PKBDesignEntity parentType, int childStmtNo);
 
     /* Use for Follows*(s1, s2) */
-    const set<pair<int, int>>& getFollowsT(PKBDesignEntity leftType, PKBDesignEntity rightType);
+    const set<pair<int, int>> &getFollowsT(PKBDesignEntity leftType, PKBDesignEntity rightType);
 
     /* Use for Follows*(s1, _) */
-    const unordered_set<int>& getFollowsTSynUnderscore(PKBDesignEntity leftType);
+    const unordered_set<int> &getFollowsTSynUnderscore(PKBDesignEntity leftType);
 
     /* Use for Follows*(_, INT) */
     bool getFollowsTUnderscoreInteger(int rightStmtNo);
@@ -49,13 +50,14 @@ public:
     /* Use for Follows*(_, s1) */
     unordered_set<int> getFollowsTUnderscoreSyn(PKBDesignEntity rightType);
 
-private:
+  private:
     PKB::SharedPtr mpPKB;
 
-    PKBFollowsHandler(PKB::SharedPtr pkb) {
+    PKBFollowsHandler(PKB::SharedPtr pkb)
+    {
         mpPKB = pkb;
     };
 
-    bool getStatementBefore(PKBStmt::SharedPtr& statementAfter, PKBStmt::SharedPtr& result);
-    bool getStatementAfter(PKBStmt::SharedPtr& statementBefore, PKBStmt::SharedPtr& result);
+    bool getStatementBefore(PKBStmt::SharedPtr &statementAfter, PKBStmt::SharedPtr &result);
+    bool getStatementAfter(PKBStmt::SharedPtr &statementBefore, PKBStmt::SharedPtr &result);
 };

@@ -13,16 +13,16 @@
 #include "PKBProcedure.h"
 #include "PKBStmt.h"
 // handlers
-#include "PKBAffectsHandler.h"
 #include "PKBAffectsBipHandler.h"
+#include "PKBAffectsHandler.h"
 #include "PKBCallsHandler.h"
-#include "PKBPatternHandler.h"
-#include "PKBNextHandler.h"
-#include "PKBNextBipHandler.h"
-#include "PKBModifyHandler.h"
-#include "PKBUseHandler.h"
-#include "PKBParentHandler.h"
 #include "PKBFollowsHandler.h"
+#include "PKBModifyHandler.h"
+#include "PKBNextBipHandler.h"
+#include "PKBNextHandler.h"
+#include "PKBParentHandler.h"
+#include "PKBPatternHandler.h"
+#include "PKBUseHandler.h"
 // for pattern
 #include "SimpleLexer.h"
 #include "SimpleParser.h"
@@ -100,18 +100,18 @@ class PKBPQLEvaluator
     unordered_set<int> getFollowsTUnderscoreSyn(PKBDesignEntity rightType);
 
     /* ======================== Uses ======================== */
-    
-    //int syn
+
+    // int syn
     const unordered_set<string> &getUsesIntSyn(int statementNo);
-    //int ident
+    // int ident
     bool getUsesIntIdent(int statementNo, string ident);
-    //int underscore
+    // int underscore
     bool getUsesIntUnderscore(int statementNo);
-    //syn syn non proc
+    // syn syn non proc
     const vector<pair<int, string>> &getUsesSynSynNonProc(PKBDesignEntity de);
-    //syn syn proc
+    // syn syn proc
     const vector<pair<string, string>> &getUsesSynSynProc();
-    //syn underscore non proc
+    // syn underscore non proc
     const vector<int> &getUsesSynUnderscoreNonProc(PKBDesignEntity de);
     // syn underscore proc
     const vector<string> &getUsesSynUnderscoreProc();
@@ -121,7 +121,7 @@ class PKBPQLEvaluator
     const vector<string> &getUsesSynIdentProc(string ident);
     // Get the names of all variables used by procedure with name {procname}
     vector<string> getUsedByProcName(string procname);
-    // Check if given procedure {procname} uses at least one variable. 
+    // Check if given procedure {procname} uses at least one variable.
     bool checkUsedByProcName(string procname);
     // Check if given procedure {procname} uses the variable specified by {ident}.
     bool checkUsedByProcName(string procname, string ident);
@@ -138,11 +138,11 @@ class PKBPQLEvaluator
     bool checkModified(PKBDesignEntity entityType);
     // Get the names of all variables modified by procedure with name {procname}
     vector<string> getModifiedByProcName(string procname);
-    //Check if given procedure {procname} modifies at least one variable.
+    // Check if given procedure {procname} modifies at least one variable.
     bool checkModifiedByProcName(string procname);
-    //Check if given procedure {procname} modifies the variable specified by {ident}.
+    // Check if given procedure {procname} modifies the variable specified by {ident}.
     bool checkModifiedByProcName(string procname, string ident);
-    //Get all procedures that modify at least one variable 
+    // Get all procedures that modify at least one variable
     vector<string> getProceduresThatModifyVars();
     // Get all procedures that modify the given variable of {variableName}
     vector<string> getProceduresThatModifyVar(string variableName);
@@ -153,7 +153,7 @@ class PKBPQLEvaluator
     // Get all statements that modify at least one variable
     vector<int> getModifiers();
     // Get all stmts of a given type that modify variable(s)
-    vector<int> getModifiers(PKBDesignEntity entityType); 
+    vector<int> getModifiers(PKBDesignEntity entityType);
 
     /* ======================== Pattern ======================== */
 
@@ -171,7 +171,7 @@ class PKBPQLEvaluator
     /* Use for Calls(proc, proc) */
     bool getCallsStringString(const string &caller, const string &called);
     /* Use for Calls(proc, syn) */
-    const  set<pair<string, string>>& getCallsStringSyn(const string &caller);
+    const set<pair<string, string>> &getCallsStringSyn(const string &caller);
     /* Use for Calls(proc, _) */
     bool getCallsStringUnderscore(const string &caller);
     /* Use for Calls(syn, proc) */
@@ -315,7 +315,7 @@ class PKBPQLEvaluator
 
     const unordered_set<string> &getAllConstants();
 
-    //Get statement type by index
+    // Get statement type by index
     PKBDesignEntity getStmtType(int stmtIdx);
 
     // clause handler
@@ -324,7 +324,7 @@ class PKBPQLEvaluator
     bool statementExists(int statementNo);
 
   protected:
-      PKBPQLEvaluator(PKB::SharedPtr pPKB);
+    PKBPQLEvaluator(PKB::SharedPtr pPKB);
 
     /* ======================== Handlers ======================== */
 

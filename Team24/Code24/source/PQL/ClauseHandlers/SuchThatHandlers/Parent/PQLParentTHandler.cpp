@@ -1,16 +1,18 @@
 #pragma once
 #include "PQLParentTHandler.h"
 
-ParentTHandler::ParentTHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<ParentT>& parentTCl)
+ParentTHandler::ParentTHandler(shared_ptr<PKBPQLEvaluator> &evaluator, shared_ptr<SelectCl> &selectCl,
+                               shared_ptr<ParentT> &parentTCl)
     : FollowsParentNextAffectsHandler(evaluator, selectCl, parentTCl->stmtRef1, parentTCl->stmtRef2)
 {
 }
 
-const string& ParentTHandler::getRelationshipType() {
+const string &ParentTHandler::getRelationshipType()
+{
     return PQL_PARENT_T;
 }
 
-void ParentTHandler::evaluateIntInt(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentTHandler::evaluateIntInt(vector<shared_ptr<ResultTuple>> &toReturn)
 {
     int s1 = getLeftArg()->getIntVal();
     int s2 = getRightArg()->getIntVal();
@@ -29,12 +31,12 @@ void ParentTHandler::evaluateIntInt(vector<shared_ptr<ResultTuple>>& toReturn)
     }
 }
 
-void ParentTHandler::evaluateIntSyn(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentTHandler::evaluateIntSyn(vector<shared_ptr<ResultTuple>> &toReturn)
 {
-    const string& rightSynonym = getRightArg()->getStringVal();
+    const string &rightSynonym = getRightArg()->getStringVal();
     PKBDesignEntity rightPkbDe = getPKBDesignEntityOfSynonym(rightSynonym);
 
-    for (auto& i : getEvaluator()->getParentTIntSyn(getLeftArg()->getIntVal(), rightPkbDe))
+    for (auto &i : getEvaluator()->getParentTIntSyn(getLeftArg()->getIntVal(), rightPkbDe))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(rightSynonym, to_string(i));
@@ -42,7 +44,7 @@ void ParentTHandler::evaluateIntSyn(vector<shared_ptr<ResultTuple>>& toReturn)
     }
 }
 
-void ParentTHandler::evaluateIntUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentTHandler::evaluateIntUnderscore(vector<shared_ptr<ResultTuple>> &toReturn)
 {
     int leftInt = getLeftArg()->getIntVal();
     PKBStmt::SharedPtr stmt = nullptr;
@@ -58,12 +60,12 @@ void ParentTHandler::evaluateIntUnderscore(vector<shared_ptr<ResultTuple>>& toRe
     }
 }
 
-void ParentTHandler::evaluateSynInt(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentTHandler::evaluateSynInt(vector<shared_ptr<ResultTuple>> &toReturn)
 {
-    const string& leftSynonym = getLeftArg()->getStringVal();
+    const string &leftSynonym = getLeftArg()->getStringVal();
     PKBDesignEntity leftPkbDe = getPKBDesignEntityOfSynonym(leftSynonym);
 
-    for (const int& x : getEvaluator()->getParentTSynInt(leftPkbDe, getRightArg()->getIntVal()))
+    for (const int &x : getEvaluator()->getParentTSynInt(leftPkbDe, getRightArg()->getIntVal()))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(leftSynonym, to_string(x));
@@ -71,20 +73,21 @@ void ParentTHandler::evaluateSynInt(vector<shared_ptr<ResultTuple>>& toReturn)
     }
 }
 
-void ParentTHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentTHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>> &toReturn)
 {
-    const string& leftSynonym = getLeftArg()->getStringVal();
-    const string& rightSynonym = getRightArg()->getStringVal();
+    const string &leftSynonym = getLeftArg()->getStringVal();
+    const string &rightSynonym = getRightArg()->getStringVal();
 
     /* Statement cannot be a parent of itself. Therefore, no results. */
-    if (leftSynonym == rightSynonym) {
+    if (leftSynonym == rightSynonym)
+    {
         return;
     }
 
     PKBDesignEntity pkbDe1 = getPKBDesignEntityOfSynonym(leftSynonym);
     PKBDesignEntity pkbDe2 = getPKBDesignEntityOfSynonym(rightSynonym);
 
-    for (auto& p : getEvaluator()->getParentTSynSyn(pkbDe1, pkbDe2))
+    for (auto &p : getEvaluator()->getParentTSynSyn(pkbDe1, pkbDe2))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(leftSynonym, to_string(p.first));
@@ -93,12 +96,12 @@ void ParentTHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
     }
 }
 
-void ParentTHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentTHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>> &toReturn)
 {
-    const string& leftSynonym = getLeftArg()->getStringVal();
+    const string &leftSynonym = getLeftArg()->getStringVal();
     PKBDesignEntity leftPkbDe = getPKBDesignEntityOfSynonym(leftSynonym);
 
-    for (const int& x : getEvaluator()->getParentTSynUnderscore(leftPkbDe))
+    for (const int &x : getEvaluator()->getParentTSynUnderscore(leftPkbDe))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(leftSynonym, to_string(x));
@@ -106,7 +109,7 @@ void ParentTHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toRe
     }
 }
 
-void ParentTHandler::evaluateUnderscoreInt(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentTHandler::evaluateUnderscoreInt(vector<shared_ptr<ResultTuple>> &toReturn)
 {
     int rightInt = getRightArg()->getIntVal();
     if (getEvaluator()->getParentTUnderscoreInt(rightInt))
@@ -117,12 +120,12 @@ void ParentTHandler::evaluateUnderscoreInt(vector<shared_ptr<ResultTuple>>& toRe
     }
 }
 
-void ParentTHandler::evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentTHandler::evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>> &toReturn)
 {
-    const string& rightSynonym = getRightArg()->getStringVal();
+    const string &rightSynonym = getRightArg()->getStringVal();
     PKBDesignEntity rightPkbDe = getPKBDesignEntityOfSynonym(rightSynonym);
 
-    for (const int& x : getEvaluator()->getParentTUnderscoreSyn(rightPkbDe))
+    for (const int &x : getEvaluator()->getParentTUnderscoreSyn(rightPkbDe))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(rightSynonym, to_string(x));
@@ -130,7 +133,7 @@ void ParentTHandler::evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>>& toRe
     }
 }
 
-void ParentTHandler::evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentTHandler::evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>> &toReturn)
 {
     if (getEvaluator()->getParentT())
     {

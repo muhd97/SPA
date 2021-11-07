@@ -3,28 +3,28 @@
 #define WARMUP_THREADS 1
 #include "PKB.h"
 
+#include "PKBGroup.h"
+#include "PKBProcedure.h"
+#include "PKBStmt.h"
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <queue>
 #include <vector>
-#include <functional>
-#include "PKBGroup.h"
-#include "PKBProcedure.h"
-#include "PKBStmt.h"
 
-#include <thread>
-#include <execution>
 #include <algorithm>
+#include <execution>
+#include <thread>
 
 void PKB::initialise()
 {
 #if WARMUP_THREADS
     vector<vector<int>> dummy(max(std::thread::hardware_concurrency() - 1, 1U));
-    std::for_each(execution::par, dummy.begin(), dummy.end(), [](auto&& v) {
+    std::for_each(execution::par, dummy.begin(), dummy.end(), [](auto &&v) {
         int i = 0;
         while (i < 10000)
             i++;
-    }); 
+    });
 #endif
     for (PKBDesignEntity de : PKBDesignEntityIterator())
     {
@@ -48,13 +48,10 @@ void PKB::initializeRelationshipTables()
 {
 
     vector<function<void(void)>> funcs = {
-        [this]() {this->initializeUsesTables(); },
-        [this]() {this->initializeFollowsTTables(); },
-        [this]() {this->initializeParentTTables(); },
-        [this]() {this->initializeNextTables(); }
-    };
+        [this]() { this->initializeUsesTables(); }, [this]() { this->initializeFollowsTTables(); },
+        [this]() { this->initializeParentTTables(); }, [this]() { this->initializeNextTables(); }};
 
-    std::for_each(execution::seq, funcs.begin(), funcs.end(), [](auto&& f) {f(); });
+    std::for_each(execution::seq, funcs.begin(), funcs.end(), [](auto &&f) { f(); });
 }
 
 void PKB::initializeWithTables()
@@ -105,7 +102,7 @@ void PKB::initializeWithTables()
         const auto &keyToNameMap = entityToKeyNameMap[de];
         for (auto &otherDe : entitiesWithName)
         {
-            
+
             attrRefMatchingNameTable[de][otherDe] = set<pair<string, string>>();
             const auto &otherKeyToNameMap = entityToKeyNameMap[otherDe];
 
@@ -153,56 +150,69 @@ void PKB::computeGoNextCFG(shared_ptr<CFG> cfg)
     set<shared_ptr<BasicBlock>> seen;
     vector<shared_ptr<BasicBlock>> frontier;
     shared_ptr<BasicBlock> current;
-    for (const auto& p : cfg->getAllCFGs()) {
+    for (const auto &p : cfg->getAllCFGs())
+    {
         seen.insert(p.second);
         frontier.emplace_back(p.second);
     }
 
-    while (!frontier.empty()) {
+    while (!frontier.empty())
+    {
         current = frontier.back();
         frontier.pop_back();
 
         // Check for End of Procedure terminating delimiter
-        if (current->getStatements().size() == 1 && current->getStatements()[0]->isEOFStatement) {
+        if (current->getStatements().size() == 1 && current->getStatements()[0]->isEOFStatement)
+        {
             continue;
         }
 
-        for (const auto& bb : current->getNext()) {
-            if (!seen.count(bb)) {
+        for (const auto &bb : current->getNext())
+        {
+            if (!seen.count(bb))
+            {
                 seen.insert(bb);
                 frontier.emplace_back(bb);
             }
         }
         // is while block
-        if (current->getStatements().size() == 1 && current->getStatements()[0]->type == PKBDesignEntity::While) {
+        if (current->getStatements().size() == 1 && current->getStatements()[0]->type == PKBDesignEntity::While)
+        {
             PKBStmt::SharedPtr firstStmt;
             PKBStmt::SharedPtr nextStmt;
             if (current->getNextImmediateStatements().size() > 1 &&
                 getStatement(current->getNextImmediateStatements()[1]->index, nextStmt) &&
                 getStatement(current->getFirstStatement()->index, firstStmt) &&
-                firstStmt->getGroup() == nextStmt->getGroup()) {
+                firstStmt->getGroup() == nextStmt->getGroup())
+            {
                 current->goNext = true;
             }
         }
-        else if (current->getStatements().size() > 0 && current->getStatements().back()->type == PKBDesignEntity::If) {
+        else if (current->getStatements().size() > 0 && current->getStatements().back()->type == PKBDesignEntity::If)
+        {
             PKBStmt::SharedPtr thisStmt;
             getStatement(current->getStatements().back()->index, thisStmt);
             PKBGroup::SharedPtr grp = thisStmt->getGroup();
-            vector<int>& members = grp->getMembers(PKBDesignEntity::AllStatements);
-            for (size_t i = 0; i < members.size(); i++) {
-                if (thisStmt->getIndex() == members[i] && i != members.size() - 1) {
+            vector<int> &members = grp->getMembers(PKBDesignEntity::AllStatements);
+            for (size_t i = 0; i < members.size(); i++)
+            {
+                if (thisStmt->getIndex() == members[i] && i != members.size() - 1)
+                {
                     current->goNext = true;
                     break;
                 }
             }
         }
-        else if (current->getNextImmediateStatements().size() == 1) {
+        else if (current->getNextImmediateStatements().size() == 1)
+        {
             PKBStmt::SharedPtr thisStmt;
             PKBStmt::SharedPtr nextStmt;
-            if (getStatement(current->getNextImmediateStatements().back()->index, nextStmt) && // we can get the next statement
+            if (getStatement(current->getNextImmediateStatements().back()->index,
+                             nextStmt) &&              // we can get the next statement
                 current->getStatements().size() > 0 && // this block has at least one statement
                 getStatement(current->getFirstStatement()->index, thisStmt) &&
-                thisStmt->getGroup() == nextStmt->getGroup()) {
+                thisStmt->getGroup() == nextStmt->getGroup())
+            {
                 current->goNext = true;
             }
         }
@@ -523,7 +533,6 @@ void PKB::initializeParentTTables()
 
             parentStmts.insert(parentStmts.end(), ifStmts.begin(), ifStmts.end());
             parentStmts.insert(parentStmts.end(), whileStmts.begin(), whileStmts.end());
-
         }
         else
         {
@@ -740,7 +749,6 @@ void PKB::initializeNextTables()
             runtime_error("Cannot find CFG for " + proc->getName());
         }
 
-
         bool visitedFirstStatementInProc = false;
 
         queue<shared_ptr<BasicBlock>> frontier;
@@ -758,7 +766,8 @@ void PKB::initializeNextTables()
 
             for (unsigned int i = 0; i < statements.size(); i++)
             {
-                if (!visitedFirstStatementInProc) {
+                if (!visitedFirstStatementInProc)
+                {
                     visitedFirstStatementInProc = true;
                     firstStatementInProc[proc->getName()] = statements[i];
                 }
@@ -781,7 +790,8 @@ void PKB::initializeNextTables()
 
             for (auto p : relationships)
             {
-                if (p.second->isEOFStatement) {
+                if (p.second->isEOFStatement)
+                {
                     lastStatmenetsInProc[proc->getName()].insert(p.first);
                     continue;
                 }
@@ -801,9 +811,9 @@ void PKB::initializeNextTables()
                 nextSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(
                     make_pair(p.first->index, p.second->index));
 
-
                 // For NextBip we need next relationships without those originating from call statements
-                if (p.first->type != PKBDesignEntity::Call) {
+                if (p.first->type != PKBDesignEntity::Call)
+                {
                     nextWithoutCallsIntIntTable.insert(make_pair(p.first->index, p.second->index));
                     nextWithoutCallsSynIntTable[p.second->index][p.first->type].insert(p.first->index);
                     nextWithoutCallsSynIntTable[p.second->index][PKBDesignEntity::AllStatements].insert(p.first->index);
@@ -816,8 +826,9 @@ void PKB::initializeNextTables()
                         make_pair(p.first->index, p.second->index));
                     nextWithoutCallsSynSynTable[make_pair(p.first->type, PKBDesignEntity::AllStatements)].insert(
                         make_pair(p.first->index, p.second->index));
-                    nextWithoutCallsSynSynTable[make_pair(PKBDesignEntity::AllStatements, PKBDesignEntity::AllStatements)].insert(
-                        make_pair(p.first->index, p.second->index));
+                    nextWithoutCallsSynSynTable[make_pair(PKBDesignEntity::AllStatements,
+                                                          PKBDesignEntity::AllStatements)]
+                        .insert(make_pair(p.first->index, p.second->index));
                 }
             }
 
@@ -835,32 +846,35 @@ void PKB::initializeNextTables()
     unordered_set<string> visited = {};
 
     for (auto proc : mAllProcedures)
-    {   
+    {
         buildTerminalStatements(proc->getName(), visited);
     }
-
-
-    
 }
 
 // terminal statements are possible bip last statements for each procedure!
-void PKB::buildTerminalStatements(string procedure, unordered_set<string> visited) {
-    if (visited.find(procedure) != visited.end()) {
+void PKB::buildTerminalStatements(string procedure, unordered_set<string> visited)
+{
+    if (visited.find(procedure) != visited.end())
+    {
         return;
     }
     visited.insert(procedure);
     unordered_set<shared_ptr<CFGStatement>> result = {};
 
-    for (auto stmt : lastStatmenetsInProc[procedure]) {
-        if (stmt->type == PKBDesignEntity::Call) {
+    for (auto stmt : lastStatmenetsInProc[procedure])
+    {
+        if (stmt->type == PKBDesignEntity::Call)
+        {
             string callee = callStmtToProcNameTable[to_string(stmt->index)];
             buildTerminalStatements(callee, visited);
 
-            for (auto s : terminalStatmenetsInProc[callee]) {
+            for (auto s : terminalStatmenetsInProc[callee])
+            {
                 result.insert(s);
             }
         }
-        else {
+        else
+        {
             result.insert(stmt);
         }
     }

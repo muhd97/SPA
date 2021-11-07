@@ -1,27 +1,28 @@
 #include "PKB.h"
 #pragma once
 
-class PKBCallsHandler {
-public:
+class PKBCallsHandler
+{
+  public:
     using SharedPtr = std::shared_ptr<PKBCallsHandler>;
 
     static SharedPtr create(PKB::SharedPtr pkb)
     {
         return SharedPtr(new PKBCallsHandler(pkb));
     }
-    
+
     // Calls
-/* Use for Calls(proc, proc) */
-    bool getCallsStringString(const string& caller, const string& called);
+    /* Use for Calls(proc, proc) */
+    bool getCallsStringString(const string &caller, const string &called);
 
     /* Use for Calls(proc, syn) */
-    const  set<pair<string, string>>& getCallsStringSyn(const string& caller);
+    const set<pair<string, string>> &getCallsStringSyn(const string &caller);
 
     /* Use for Calls(proc, _) */
-    bool getCallsStringUnderscore(const string& caller);
+    bool getCallsStringUnderscore(const string &caller);
 
     /* Use for Calls(syn, proc) */
-    unordered_set<string> getCallsSynString(const string& called);
+    unordered_set<string> getCallsSynString(const string &called);
 
     /* Use for Calls(syn, syn) */
     set<pair<string, string>> getCallsSynSyn();
@@ -30,7 +31,7 @@ public:
     unordered_set<string> getCallsSynUnderscore();
 
     /* Use for Calls(_, proc) */
-    bool getCallsUnderscoreString(const string& called);
+    bool getCallsUnderscoreString(const string &called);
 
     /* Use for Calls(_, syn) */
     unordered_set<string> getCallsUnderscoreSyn();
@@ -40,16 +41,16 @@ public:
 
     // CallsT
     /* Use for CallsT(proc, proc) */
-    bool getCallsTStringString(const string& caller, const string& called);
+    bool getCallsTStringString(const string &caller, const string &called);
 
     /* Use for CallsT(proc, syn) */
-    unordered_set<string> getCallsTStringSyn(const string& caller);
+    unordered_set<string> getCallsTStringSyn(const string &caller);
 
     /* Use for CallsT(proc, _) */
-    bool getCallsTStringUnderscore(const string& caller);
+    bool getCallsTStringUnderscore(const string &caller);
 
     /* Use for CallsT(syn, proc) */
-    unordered_set<string> getCallsTSynString(const string& called);
+    unordered_set<string> getCallsTSynString(const string &called);
 
     /* Use for CallsT(syn, syn) */
     set<pair<string, string>> getCallsTSynSyn();
@@ -58,7 +59,7 @@ public:
     unordered_set<string> getCallsTSynUnderscore();
 
     /* Use for CallsT(_, proc) */
-    bool getCallsTUnderscoreString(const string& called);
+    bool getCallsTUnderscoreString(const string &called);
 
     /* Use for CallsT(_, syn) */
     unordered_set<string> getCallsTUnderscoreSyn();
@@ -66,10 +67,11 @@ public:
     /* Use for CallsT(_, _) */
     bool getCallsTUnderscoreUnderscore();
 
-private:
+  private:
     PKB::SharedPtr mpPKB;
 
-    PKBCallsHandler(PKB::SharedPtr pkb) {
+    PKBCallsHandler(PKB::SharedPtr pkb)
+    {
         mpPKB = pkb;
     };
 };

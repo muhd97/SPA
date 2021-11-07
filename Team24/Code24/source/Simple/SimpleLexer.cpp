@@ -257,4 +257,3 @@ string getSimpleTokenLabel(SimpleToken token)
     }
     return "";
 }
-

@@ -4,10 +4,11 @@
 
 class AffectsBipTHandler : public AffectsBipHandler
 {
-private:
+  private:
+    set<pair<int, int>> evaluateAffectsBip() override;
+    const string &getRelationshipType() override;
 
-	set<pair<int, int>> evaluateAffectsBip() override;
-	const string& getRelationshipType() override;
-public:
-	AffectsBipTHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsBip>& affectsBipCl);
+  public:
+    AffectsBipTHandler(shared_ptr<PKBPQLEvaluator> &evaluator, shared_ptr<SelectCl> &selectCl,
+                       shared_ptr<AffectsBip> &affectsBipCl);
 };

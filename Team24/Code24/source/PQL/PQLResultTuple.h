@@ -1,11 +1,11 @@
 #pragma once
-#pragma optimize( "gty", on )
+#pragma optimize("gty", on)
 
 //#include <functional>
-#include <vector>
-#include <string>
 #include "PKBPQLEvaluator.h"
 #include "PQLParser.h"
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -22,7 +22,7 @@ enum class ResultType
 
 class Result
 {
-public:
+  public:
     static string dummy;
     static string TRUE_STRING;
     static string FALSE_STRING;
@@ -31,7 +31,7 @@ public:
     {
         return ResultType::StringSingleResult;
     }
-    virtual string& getResultAsString()
+    virtual string &getResultAsString()
     {
         return dummy;
     }
@@ -39,7 +39,7 @@ public:
 
 class ResultTuple
 {
-public:
+  public:
     static string INTEGER_PLACEHOLDER;
     static string SYNONYM_PLACEHOLDER;
     static string UNDERSCORE_PLACEHOLDER;
@@ -56,36 +56,38 @@ public:
         synonymKeyToValMap.reserve(sizeToReserve);
     }
 
-    ResultTuple(const unordered_map<string, string>& map) : synonymKeyToValMap(map) {
-
+    ResultTuple(const unordered_map<string, string> &map) : synonymKeyToValMap(map)
+    {
     }
 
-    inline void insertKeyValuePair(const string& key, const string& value)
+    inline void insertKeyValuePair(const string &key, const string &value)
     {
         /* Yida note: Pass by ref argument, please don't use move(value) or else
          * original string becomes empty */
         synonymKeyToValMap[key] = value;
     }
 
-    inline const string& get(const string& key)
+    inline const string &get(const string &key)
     {
         return synonymKeyToValMap[key];
     }
 
-    inline bool synonymKeyAlreadyExists(const string& key)
+    inline bool synonymKeyAlreadyExists(const string &key)
     {
         return synonymKeyToValMap.count(key);
     }
 
-    inline const unordered_map<string, string>& getMap() const
+    inline const unordered_map<string, string> &getMap() const
     {
         return synonymKeyToValMap;
     }
 
-     string toString() {
+    string toString()
+    {
         string s = "[";
 
-        for (const auto& kv : synonymKeyToValMap) {
+        for (const auto &kv : synonymKeyToValMap)
+        {
             s += "(";
             s += kv.first + ", " + kv.second;
             s += ") ";
@@ -93,14 +95,12 @@ public:
 
         s += "]";
         return move(s);
-
     }
 };
 
-
 class StringSingleResult : public Result
 {
-public:
+  public:
     string res;
 
     StringSingleResult(string s) : res(move(s))
@@ -112,7 +112,7 @@ public:
         return ResultType::StringSingleResult;
     }
 
-    string& getResultAsString() override
+    string &getResultAsString() override
     {
         return res;
     }

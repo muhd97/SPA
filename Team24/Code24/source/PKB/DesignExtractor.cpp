@@ -17,17 +17,18 @@ void DesignExtractor::extractDesigns(shared_ptr<Program> programToExtract)
         }
     }
 
-    //sort all the vectors of statements in ascending order
-    for (auto& vec : mpPKB->mStatements)
+    // sort all the vectors of statements in ascending order
+    for (auto &vec : mpPKB->mStatements)
     {
         std::sort(vec.second.begin(), vec.second.end(),
-            [](const PKBStmt::SharedPtr& a, const PKBStmt::SharedPtr& b) -> bool {
-                return a->getIndex() < b->getIndex();
-            });
+                  [](const PKBStmt::SharedPtr &a, const PKBStmt::SharedPtr &b) -> bool {
+                      return a->getIndex() < b->getIndex();
+                  });
     }
 }
 
-PKBStmt::SharedPtr DesignExtractor::extractStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr group, string procName)
+PKBStmt::SharedPtr DesignExtractor::extractStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr group,
+                                                     string procName)
 {
     // determine statement type
     PKBDesignEntity designEntity = simpleToPKBType(statement->getStatementType());
@@ -60,7 +61,7 @@ PKBProcedure::SharedPtr DesignExtractor::extractProcedure(shared_ptr<Procedure> 
     PKBProcedure::SharedPtr res = PKBProcedure::create(procedureSimple->getName());
     // add this procedureCalled to the list of extracted simpleProcedures (used to
     // prevent repeat extraction during DesignExtraction)
-    mpPKB->procedureNameToProcedureMap.insert({ procedureSimple->getName(), res });
+    mpPKB->procedureNameToProcedureMap.insert({procedureSimple->getName(), res});
     mpPKB->mAllProcedures.insert(res);
     // add this statement to our 'global' list of all simpleStatements
     addProcedure(res);
@@ -70,8 +71,6 @@ PKBProcedure::SharedPtr DesignExtractor::extractProcedure(shared_ptr<Procedure> 
     // create and link group of procedureSimple (linking in createPKBGroup
     // function)
     PKBGroup::SharedPtr group = createPKBGroup(procedureSimple->getName(), res);
-
-
 
     vector<shared_ptr<Statement>> simpleStatements = procedureSimple->getStatementList()->getStatements();
 
@@ -89,11 +88,12 @@ PKBProcedure::SharedPtr DesignExtractor::extractProcedure(shared_ptr<Procedure> 
 
     set<PKBVariable::SharedPtr> varsUsedByGroup = group->getUsedVariables();
 
-    for (auto& ptr : varsUsedByGroup)
+    for (auto &ptr : varsUsedByGroup)
     {
-        if (mpPKB->variableNameToProceduresThatUseVarMap.find(ptr->getName()) == mpPKB->variableNameToProceduresThatUseVarMap.end())
+        if (mpPKB->variableNameToProceduresThatUseVarMap.find(ptr->getName()) ==
+            mpPKB->variableNameToProceduresThatUseVarMap.end())
         {
-            mpPKB->variableNameToProceduresThatUseVarMap[ptr->getName()] = { res };
+            mpPKB->variableNameToProceduresThatUseVarMap[ptr->getName()] = {res};
         }
         else
         {
@@ -102,12 +102,12 @@ PKBProcedure::SharedPtr DesignExtractor::extractProcedure(shared_ptr<Procedure> 
     }
 
     set<PKBVariable::SharedPtr> varsModifiedByGroup = group->getModifiedVariables();
-    for (auto& ptr : varsModifiedByGroup)
+    for (auto &ptr : varsModifiedByGroup)
     {
         if (mpPKB->mVariableNameToProceduresThatModifyVarsMap.find(ptr->getName()) ==
             mpPKB->mVariableNameToProceduresThatModifyVarsMap.end())
         {
-            mpPKB->mVariableNameToProceduresThatModifyVarsMap[ptr->getName()] = { res };
+            mpPKB->mVariableNameToProceduresThatModifyVarsMap[ptr->getName()] = {res};
         }
         else
         {
@@ -132,7 +132,8 @@ PKBProcedure::SharedPtr DesignExtractor::extractProcedure(shared_ptr<Procedure> 
     return res;
 }
 
-PKBStmt::SharedPtr DesignExtractor::extractAssignStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup)
+PKBStmt::SharedPtr DesignExtractor::extractAssignStatement(shared_ptr<Statement> statement,
+                                                           PKBGroup::SharedPtr parentGroup)
 {
     // 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles
     // PARENTS and FOLLOWS
@@ -165,7 +166,7 @@ PKBStmt::SharedPtr DesignExtractor::extractAssignStatement(shared_ptr<Statement>
         mpPKB->designEntityToStatementsThatUseVarsMap[PKBDesignEntity::Assign].insert(res);
     }
 
-    for (auto& identifier : identifiers)
+    for (auto &identifier : identifiers)
     {
         // for each string, we get the variable
         PKBVariable::SharedPtr var = getVariable(identifier);
@@ -184,7 +185,8 @@ PKBStmt::SharedPtr DesignExtractor::extractAssignStatement(shared_ptr<Statement>
     return res;
 }
 
-PKBStmt::SharedPtr DesignExtractor::extractReadStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup)
+PKBStmt::SharedPtr DesignExtractor::extractReadStatement(shared_ptr<Statement> statement,
+                                                         PKBGroup::SharedPtr parentGroup)
 {
     // 1. PARENT/FOLLOW - create the PKBStatement, createPKBStatement() handles
     // PARENTS and FOLLOWS
@@ -200,7 +202,7 @@ PKBStmt::SharedPtr DesignExtractor::extractReadStatement(shared_ptr<Statement> s
     var->addModifierStatement(res->getIndex());
 
     string indexToString = to_string(res->getIndex());
-    const string& varName = var->getName();
+    const string &varName = var->getName();
     mpPKB->readStmtToVarNameTable[indexToString] = varName;
     if (mpPKB->varNameToReadStmtTable.find(varName) == mpPKB->varNameToReadStmtTable.end())
     {
@@ -224,7 +226,8 @@ PKBStmt::SharedPtr DesignExtractor::extractReadStatement(shared_ptr<Statement> s
     return res;
 }
 
-PKBStmt::SharedPtr DesignExtractor::extractPrintStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup)
+PKBStmt::SharedPtr DesignExtractor::extractPrintStatement(shared_ptr<Statement> statement,
+                                                          PKBGroup::SharedPtr parentGroup)
 {
     // create the PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -239,7 +242,7 @@ PKBStmt::SharedPtr DesignExtractor::extractPrintStatement(shared_ptr<Statement> 
     var->addUserStatement(res->getIndex());
 
     string indexToString = to_string(res->getIndex());
-    const string& varName = var->getName();
+    const string &varName = var->getName();
     mpPKB->printStmtToVarNameTable[indexToString] = varName;
     if (mpPKB->varNameToPrintStmtTable.find(varName) == mpPKB->varNameToPrintStmtTable.end())
     {
@@ -261,7 +264,8 @@ PKBStmt::SharedPtr DesignExtractor::extractPrintStatement(shared_ptr<Statement> 
     return res;
 }
 
-PKBStmt::SharedPtr DesignExtractor::extractIfStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup, string procName)
+PKBStmt::SharedPtr DesignExtractor::extractIfStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup,
+                                                       string procName)
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -277,7 +281,7 @@ PKBStmt::SharedPtr DesignExtractor::extractIfStatement(shared_ptr<Statement> sta
     if (!identifiers.empty())
         mpPKB->ifPatternTable[idx] = unordered_set<string>();
 
-    for (auto& identifier : identifiers)
+    for (auto &identifier : identifiers)
     {
         // for each string, we get the variable
         PKBVariable::SharedPtr var = getVariable(identifier);
@@ -326,8 +330,8 @@ PKBStmt::SharedPtr DesignExtractor::extractIfStatement(shared_ptr<Statement> sta
         alternativeGroup->addModifiedVariables(child->getModifiedVariables());
     }
 
-    set<PKBVariable::SharedPtr>& consequentGroupVars = consequentGroup->getUsedVariables();
-    set<PKBVariable::SharedPtr>& altGroupVars = alternativeGroup->getUsedVariables();
+    set<PKBVariable::SharedPtr> &consequentGroupVars = consequentGroup->getUsedVariables();
+    set<PKBVariable::SharedPtr> &altGroupVars = alternativeGroup->getUsedVariables();
 
     // now the original statement inherits from the group
     res->addUsedVariables(consequentGroupVars);
@@ -343,7 +347,7 @@ PKBStmt::SharedPtr DesignExtractor::extractIfStatement(shared_ptr<Statement> sta
     addUsedVariable(PKBDesignEntity::If, alternativeGroup->getUsedVariables());
 
     // if statement also uses this variable
-    for (auto& var : res->getUsedVariables())
+    for (auto &var : res->getUsedVariables())
     {
         var->addUserStatement(res->getIndex());
     }
@@ -354,7 +358,7 @@ PKBStmt::SharedPtr DesignExtractor::extractIfStatement(shared_ptr<Statement> sta
     addModifiedVariable(PKBDesignEntity::If, alternativeGroup->getModifiedVariables());
 
     // if statement also modifies this variable
-    for (auto& var : res->getModifiedVariables())
+    for (auto &var : res->getModifiedVariables())
     {
         var->addModifierStatement(res->getIndex());
     }
@@ -368,7 +372,8 @@ PKBStmt::SharedPtr DesignExtractor::extractIfStatement(shared_ptr<Statement> sta
     return res;
 }
 
-PKBStmt::SharedPtr DesignExtractor::extractWhileStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup, string procName)
+PKBStmt::SharedPtr DesignExtractor::extractWhileStatement(shared_ptr<Statement> statement,
+                                                          PKBGroup::SharedPtr parentGroup, string procName)
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -389,7 +394,7 @@ PKBStmt::SharedPtr DesignExtractor::extractWhileStatement(shared_ptr<Statement> 
     if (!identifiers.empty())
         mpPKB->whilePatternTable[idx] = unordered_set<string>();
 
-    for (auto& identifier : identifiers)
+    for (auto &identifier : identifiers)
     {
         // for each string, we get the variable
         PKBVariable::SharedPtr var = getVariable(identifier);
@@ -429,12 +434,12 @@ PKBStmt::SharedPtr DesignExtractor::extractWhileStatement(shared_ptr<Statement> 
     res->addModifiedVariables(group->getModifiedVariables());
 
     // while statement also uses this variable
-    for (auto& var : res->getUsedVariables())
+    for (auto &var : res->getUsedVariables())
     {
         var->addUserStatement(res->getIndex());
     }
     // while statement also modifies this variable
-    for (auto& var : res->getModifiedVariables())
+    for (auto &var : res->getModifiedVariables())
     {
         var->addModifierStatement(res->getIndex());
     }
@@ -456,7 +461,8 @@ PKBStmt::SharedPtr DesignExtractor::extractWhileStatement(shared_ptr<Statement> 
     return res;
 }
 
-PKBStmt::SharedPtr DesignExtractor::extractCallStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup)
+PKBStmt::SharedPtr DesignExtractor::extractCallStatement(shared_ptr<Statement> statement,
+                                                         PKBGroup::SharedPtr parentGroup)
 {
     // 1. create a PKBStatement
     PKBStmt::SharedPtr res = createPKBStatement(statement, parentGroup);
@@ -491,7 +497,7 @@ PKBStmt::SharedPtr DesignExtractor::extractCallStatement(shared_ptr<Statement> s
         // we need to locate the simple node for called procedure
         vector<shared_ptr<Procedure>> simpleProcedures = program->getProcedures();
         // loop through simpleProcedures to find the desired procedure node
-        for (auto& p : simpleProcedures)
+        for (auto &p : simpleProcedures)
         {
             if (p->getName() == procedureName)
             {
@@ -531,19 +537,18 @@ PKBStmt::SharedPtr DesignExtractor::extractCallStatement(shared_ptr<Statement> s
     }
 
     // call statement also uses this variable
-    for (auto& var : res->getUsedVariables())
+    for (auto &var : res->getUsedVariables())
     {
         var->addUserStatement(res->getIndex());
     }
     // call statement also modifies this variable
-    for (auto& var : res->getModifiedVariables())
+    for (auto &var : res->getModifiedVariables())
     {
         var->addModifierStatement(res->getIndex());
     }
 
     return res;
 }
-
 
 // this is a wrapper around PKBStatement::create()
 // we need a wrapper because there are administrative tasks after creating the
@@ -635,7 +640,7 @@ inline void DesignExtractor::addUsedVariable(PKBDesignEntity designEntity, PKBVa
     }
 }
 
-void DesignExtractor::addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr>& variables)
+void DesignExtractor::addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr> &variables)
 {
     for (auto v : variables)
     {
@@ -654,7 +659,7 @@ void DesignExtractor::addModifiedVariable(PKBDesignEntity designEntity, PKBVaria
     }
 }
 
-void DesignExtractor::addModifiedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr>& variables)
+void DesignExtractor::addModifiedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr> &variables)
 {
     for (auto v : variables)
     {
@@ -665,7 +670,7 @@ void DesignExtractor::addModifiedVariable(PKBDesignEntity designEntity, set<PKBV
 vector<string> DesignExtractor::getIdentifiers(shared_ptr<Expression> expr)
 {
     set<string> res; // using a set to prevent duplicates
-    vector<shared_ptr<Expression>> queue = { expr };
+    vector<shared_ptr<Expression>> queue = {expr};
 
     // comb through the expression and pick out all identifiers' names
     while (!queue.empty())
@@ -704,7 +709,7 @@ vector<string> DesignExtractor::getIdentifiers(shared_ptr<Expression> expr)
 vector<string> DesignExtractor::getIdentifiers(shared_ptr<ConditionalExpression> expr)
 {
     set<string> res; // using a set to prevent duplicates
-    vector<shared_ptr<ConditionalExpression>> queue = { expr };
+    vector<shared_ptr<ConditionalExpression>> queue = {expr};
 
     // comb through the expression and pick out all identifiers' names
     while (!queue.empty())
@@ -769,19 +774,19 @@ PKBDesignEntity DesignExtractor::simpleToPKBType(StatementType simpleStatementTy
     }
 }
 
-void DesignExtractor::insertCallsRelationship(const string& caller, string& called)
+void DesignExtractor::insertCallsRelationship(const string &caller, string &called)
 {
     pair<string, string> res = make_pair(caller, called);
 
     // add to CallsT upstream (upstream, called)
-    for (auto& downstream : mpPKB->callsTTable[called])
+    for (auto &downstream : mpPKB->callsTTable[called])
     {
         pair<string, string> toAdd = make_pair(caller, downstream.second);
         mpPKB->calledTTable[downstream.second].insert(toAdd);
         mpPKB->callsTTable[caller].insert(toAdd);
     }
     // add to CallsT downstream (caller, downstream)
-    for (auto& upstream : mpPKB->calledTTable[caller])
+    for (auto &upstream : mpPKB->calledTTable[caller])
     {
         pair<string, string> toAdd = make_pair(upstream.first, called);
         mpPKB->callsTTable[upstream.first].insert(toAdd);
@@ -789,9 +794,9 @@ void DesignExtractor::insertCallsRelationship(const string& caller, string& call
     }
 
     // add to CallsT between upstream and downstream
-    for (auto& downstream : mpPKB->callsTTable[called])
+    for (auto &downstream : mpPKB->callsTTable[called])
     {
-        for (auto& upstream : mpPKB->calledTTable[caller])
+        for (auto &upstream : mpPKB->calledTTable[caller])
         {
             pair<string, string> toAdd = make_pair(upstream.first, downstream.second);
             mpPKB->callsTTable[upstream.first].insert(toAdd);

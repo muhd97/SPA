@@ -2,8 +2,9 @@
 #include <queue>
 #pragma once
 
-class PKBParentHandler {
-public:
+class PKBParentHandler
+{
+  public:
     using SharedPtr = std::shared_ptr<PKBParentHandler>;
 
     static SharedPtr create(PKB::SharedPtr pkb)
@@ -25,7 +26,7 @@ public:
     bool getParents();
 
     /* Use for Parent*(INT, synonym) */
-    const vector<int>& getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
+    const vector<int> &getParentTIntSyn(int statementNo, PKBDesignEntity targetChildrenType);
 
     /* Use for Parent*(INT, _) */
     bool getParentTIntUnderscore(int statementNo);
@@ -34,13 +35,13 @@ public:
     bool getParentTIntInt(int parentStatementNo, int childStatementNo);
 
     /* Use for Parent*(synonym, _) */
-    const unordered_set<int>& getParentTSynUnderscore(PKBDesignEntity targetParentType);
+    const unordered_set<int> &getParentTSynUnderscore(PKBDesignEntity targetParentType);
 
     /* Use for Parent*(synonym, INT) */
-    const unordered_set<int>& getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
+    const unordered_set<int> &getParentTSynInt(PKBDesignEntity targetParentType, int childStatementNo);
 
     /* Use for Parent*(synonym1, synonym2) */
-    const set<pair<int, int>>& getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType);
+    const set<pair<int, int>> &getParentTSynSyn(PKBDesignEntity parentType, PKBDesignEntity childType);
 
     /* Use for Parent*(_, INT) */
     bool getParentTUnderscoreInt(int childStatementNo);
@@ -51,15 +52,16 @@ public:
     /* Use for Parent*(_, _) */
     bool getParentT();
 
-private:
+  private:
     PKB::SharedPtr mpPKB;
 
-    PKBParentHandler(PKB::SharedPtr pkb) {
+    PKBParentHandler(PKB::SharedPtr pkb)
+    {
         mpPKB = pkb;
     };
 
     unordered_set<int> getAllChildAndSubChildrenOfGivenType(PKBStmt::SharedPtr targetParent,
-        PKBDesignEntity targetChildrenType);
+                                                            PKBDesignEntity targetChildrenType);
     bool isContainerType(PKBDesignEntity s);
-    void addParentStmts(vector<PKBStmt::SharedPtr>& stmts);
+    void addParentStmts(vector<PKBStmt::SharedPtr> &stmts);
 };
