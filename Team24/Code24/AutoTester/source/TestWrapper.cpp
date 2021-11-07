@@ -10,12 +10,13 @@
 #include "SimpleLexer.h"
 #include "SimpleParser.h" 
 #include "PKB.h"
-#include "../PQL/PQLParser.h"
-#include "../PQL/PQLAST.h"
-#include "../PQL/PQLLexer.h"
-#include "../PQL/PQLProcessor.h"
+#include "PQLParser.h"
+#include "PQLAST.h"
+#include "PQLLexer.h"
+#include "PQLProcessor.h"
 #include "CFG.h"
 #include <memory>
+#include "DesignExtractor.h"
 
 
 using namespace std;
@@ -57,8 +58,9 @@ void TestWrapper::parse(std::string filename) {
         cout << root->format();
         cout << "\n==== Building PKB ====\n";
 #endif
+        DesignExtractor::SharedPtr de = DesignExtractor::create(this->pkb);
         this->pkb->initialise();
-        this->pkb->extractDesigns(root);
+        de->extractDesigns(root);
         this->pkb->initializeCFG(root);
         this->pkb->computeGoNextCFG(pkb->cfg);
         this->pkb->initializeRelationshipTables();

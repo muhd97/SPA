@@ -687,14 +687,14 @@ bool PKBPQLEvaluator::procExists(string procname)
 PKBPQLEvaluator::PKBPQLEvaluator(PKB::SharedPtr pPKB)
 {
 	mpPKB = pPKB;
-	affectsHandler = PKBPQLAffectsHandler::create(pPKB);
-	affectsBipHandler = PKBPQLAffectsBipHandler::create(pPKB);
-	callsHandler = PKBPQLCallsHandler::create(pPKB);
-	patternHandler = PKBPQLPatternHandler::create(pPKB);
+	affectsHandler = PKBAffectsHandler::create(pPKB);
+	affectsBipHandler = PKBAffectsBipHandler::create(pPKB);
+	callsHandler = PKBCallsHandler::create(pPKB);
+	patternHandler = PKBPatternHandler::create(pPKB);
 	nextHandler = PKBPQLNextHandler::create(pPKB);
-	nextBipHandler = PKBPQLNextBipHandler::create(pPKB);
-	modifyHandler = PKBPQLModifyHandler::create(pPKB);
-	useHandler = PKBPQLUseHandler::create(pPKB);
-	parentHandler = PKBPQLParentHandler::create(pPKB);
-	followsHandler = PKBPQLFollowsHandler::create(pPKB);
+	nextBipHandler = PKBNextBipHandler::create(pPKB);
+	modifyHandler = PKBModifyHandler::create(pPKB);
+	useHandler = PKBUseHandler::create(pPKB);
+	parentHandler = PKBParentHandler::create(pPKB);
+	followsHandler = PKBFollowsHandler::create(pPKB);
 }

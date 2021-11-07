@@ -5,12 +5,10 @@
 #include <set>
 #include <unordered_map>
 
-#include "../CFG.h"
-#include "PKBProcedure.h"
-#include "PKBStmt.h"
-#include "PKBVariable.h"
-
-using namespace std;
+#include "PKBModel/CFG.h"
+#include "PKBModel/PKBProcedure.h"
+#include "PKBModel/PKBStmt.h"
+#include "PKBModel/PKBVariable.h"
 
 class PKB
 {
@@ -18,7 +16,6 @@ class PKB
     using SharedPtr = std::shared_ptr<PKB>;
 
     void initialise();
-    void extractDesigns(shared_ptr<Program> program);
     void initializeCFG(shared_ptr<Program> program);
     void initializeRelationshipTables();
     void initializeWithTables();
@@ -317,43 +314,11 @@ class PKB
     unordered_map<int, unordered_set<string>> ifPatternTable;
 
   protected:
-    void addStatement(PKBStmt::SharedPtr statement, PKBDesignEntity designEntity);
-    void addProcedure(PKBProcedure::SharedPtr procedure);
     void initializeFollowsTTables();
     void initializeParentTTables();
     void initializeUsesTables();
     void initializeNextTables();
 
-    inline void addUsedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr variable);
-    void addUsedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr> &variables);
-    inline void addModifiedVariable(PKBDesignEntity designEntity, PKBVariable::SharedPtr variable);
-    void addModifiedVariable(PKBDesignEntity designEntity, set<PKBVariable::SharedPtr> &variables);
-
-    PKBVariable::SharedPtr getVariable(string name);
-
-    PKBProcedure::SharedPtr extractProcedure(shared_ptr<Procedure> procedure);
-    PKBStmt::SharedPtr extractStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup, string procName);
-
-    PKBStmt::SharedPtr extractAssignStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup);
-    PKBStmt::SharedPtr extractReadStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup);
-    PKBStmt::SharedPtr extractPrintStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup);
-    PKBStmt::SharedPtr extractIfStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup, string procName);
-    PKBStmt::SharedPtr extractWhileStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup, string procName);
-    PKBStmt::SharedPtr extractCallStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup);
-
-    PKBStmt::SharedPtr createPKBStatement(shared_ptr<Statement> statement, PKBGroup::SharedPtr parentGroup);
-    PKBGroup::SharedPtr createPKBGroup(string name, PKBProcedure::SharedPtr ownerGroupEntity);
-    PKBGroup::SharedPtr createPKBGroup(PKBStmt::SharedPtr ownerGroupEntity, PKBGroup::SharedPtr parentGroup);
-
-    vector<string> getIdentifiers(shared_ptr<Expression> expr);
-    vector<string> getIdentifiers(shared_ptr<ConditionalExpression> expr);
-
-    PKBDesignEntity simpleToPKBType(StatementType);
-
   private:
-    // remembers the procedure we are currently extracting, helper for calls
-    shared_ptr<PKBProcedure> currentProcedureToExtract;
-    // calls relationship table helper
-    void PKB::insertCallsRelationship(const string &caller, string &called);
     void buildTerminalStatements(string procedure, unordered_set<string> visited);
 };

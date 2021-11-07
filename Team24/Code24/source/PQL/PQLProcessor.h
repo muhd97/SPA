@@ -2,7 +2,7 @@
 #pragma optimize( "gty", on )
 
 #include <functional>
-#include "..\PKB\PKBPQLEvaluator.h"
+#include "PKBPQLEvaluator.h"
 #include "PQLParser.h"
 #include "PQLOptimizer.h"
 #include "PQLResultTuple.h"

@@ -1,113 +1,373 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\source\SimpleAST.cpp" />
-    <ClCompile Include="..\source\SimpleLexer.cpp" />
-    <ClCompile Include="..\source\SimpleParser.cpp" />
-    <ClCompile Include="..\source\PKB\PKBGroup.cpp" />
-    <ClCompile Include="..\source\PKB\PKB.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLEvaluator.cpp" />
-    <ClCompile Include="..\source\PQL\PQLLexer.cpp" />
-    <ClCompile Include="..\source\PQL\PQLParser.cpp" />
-    <ClCompile Include="..\source\PQL\PQLProcessor.cpp" />
-    <ClCompile Include="..\source\PKB\PKBStmt.cpp" />
-    <ClCompile Include="..\source\PKB\PKBProcedure.cpp" />
     <ClCompile Include="..\source\Source.cpp" />
-    <ClCompile Include="..\source\CFG.cpp" />
-    <ClCompile Include="..\source\PQL\PQLOptimizer.cpp" />
-    <ClCompile Include="..\source\PQL\PQLClauseHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLPatternHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLWithHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLSuchThatHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLFollowsParentNextAffectsHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLNextHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLNextTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLNextBipHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLNextBipTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLAffectsHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLAffectsTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLAffectsBipHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLAffectsBipTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLUsesModifiesSHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLUsesModifiesPHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLUsesSHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLModifiesSHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLModifiesPHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLUsesPHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLFollowsHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLFollowsTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLParentHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLParentTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLCallsCallsTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLCallsHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLCallsTHandler.cpp" />
-    <ClCompile Include="..\source\PQL\PQLAST.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLAffectsHandler.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLAffectsBipHandler.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLCallsHandler.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLPatternHandler.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLNextHandler.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLNextBipHandler.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLModifyHandler.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLUseHandler.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLFollowsHandler.cpp" />
-    <ClCompile Include="..\source\PKB\PKBPQLParentHandler.cpp" />
+    <ClCompile Include="..\source\PKB\PKB.cpp">
+      <Filter>PKB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\DesignExtractor.cpp">
+      <Filter>PKB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBPQLEvaluator.cpp">
+      <Filter>PKB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\PQLProcessor.cpp">
+      <Filter>PQL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\PQLOptimizer.cpp">
+      <Filter>PQL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\PQLAST.cpp">
+      <Filter>PQL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\PQLLexer.cpp">
+      <Filter>PQL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\PQLParser.cpp">
+      <Filter>PQL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBAffectsBipHandler.cpp">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBAffectsHandler.cpp">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBCallsHandler.cpp">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBFollowsHandler.cpp">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBModifyHandler.cpp">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBNextBipHandler.cpp">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBNextHandler.cpp">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBParentHandler.cpp">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBPatternHandler.cpp">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBHandlers\PKBUseHandler.cpp">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBModel\CFG.cpp">
+      <Filter>PKB\PKBModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBModel\PKBGroup.cpp">
+      <Filter>PKB\PKBModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBModel\PKBProcedure.cpp">
+      <Filter>PKB\PKBModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKB\PKBModel\PKBStmt.cpp">
+      <Filter>PKB\PKBModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Simple\SimpleAST.cpp">
+      <Filter>Simple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Simple\SimpleLexer.cpp">
+      <Filter>Simple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Simple\SimpleParser.cpp">
+      <Filter>Simple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\PQLClauseHandler.cpp">
+      <Filter>PQL\ClauseHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\PQLPatternHandler.cpp">
+      <Filter>PQL\ClauseHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\PQLSuchThatHandler.cpp">
+      <Filter>PQL\ClauseHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\PQLWithHandler.cpp">
+      <Filter>PQL\ClauseHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLFollowsParentNextAffectsHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLUsesModifiesPHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLUsesModifiesSHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsBipHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Affects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsBipTHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Affects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Affects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsTHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Affects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsCallsTHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Calls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Calls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsTHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Calls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Follows\PQLFollowsHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Follows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Follows\PQLFollowsTHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Follows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Modifies\PQLModifiesPHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Modifies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Modifies\PQLModifiesSHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Modifies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextBipHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Next</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextBipTHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Next</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Next</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextTHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Next</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Parent\PQLParentHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Parent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Parent\PQLParentTHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Parent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Uses\PQLUsesPHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Uses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Uses\PQLUsesSHandler.cpp">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Uses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\source\PQL\PQLLexer.h" />
-    <ClInclude Include="..\source\PQL\PQLParser.h" />
-    <ClInclude Include="..\source\SimpleAST.h" />
-    <ClInclude Include="..\source\PKB\PKBGroup.h" />
-    <ClInclude Include="..\source\PKB\PKB.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLEvaluator.h" />
-    <ClInclude Include="..\source\PKB\PKBDesignEntity.h" />
-    <ClInclude Include="..\source\PKB\PKBVariable.h" />
-    <ClInclude Include="..\source\SimpleLexer.h" />
-    <ClInclude Include="..\source\SimpleParser.h" />
-    <ClInclude Include="..\source\PQL\PQLProcessor.h" />
-    <ClInclude Include="..\source\PQL\PQLProcessorUtils.h" />
-    <ClInclude Include="..\source\PQL\PQLOptimizerUtils.h" />
-    <ClInclude Include="..\source\PQL\PQLResultTuple.h" />
-    <ClInclude Include="..\source\PKB\PKBStmt.h" />
-    <ClInclude Include="..\source\PKB\PKBProcedure.h" />
-    <ClInclude Include="..\source\PQL\PQLOptimizer.h" />
-    <ClInclude Include="..\source\CFG.h" />
-    <ClInclude Include="..\source\PQL\PQLClauseHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLWithHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLPatternHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLSuchThatHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLUsesModifiesSHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLUsesModifiesPHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLUsesSHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLModifiesSHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLModifiesPHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLUsesPHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLFollowsHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLFollowsTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLParentHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLParentTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLFollowsParentNextAffectsHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLNextHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLNextTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLNextBipHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLNextBipTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLAffectsHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLAffectsTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLAffectsBipHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLAffectsBipTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLCallsCallsTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLCallsHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLCallsTHandler.h" />
-    <ClInclude Include="..\source\PQL\PQLAST.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLAffectsHandler.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLAffectsBipHandler.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLCallsHandler.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLPatternHandler.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLNextHandler.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLNextBipHandler.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLModifyHandler.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLUseHandler.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLFollowsHandler.h" />
-    <ClInclude Include="..\source\PKB\PKBPQLParentHandler.h" />
+    <ClInclude Include="..\source\PKB\PKB.h">
+      <Filter>PKB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\DesignExtractor.h">
+      <Filter>PKB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBPQLEvaluator.h">
+      <Filter>PKB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\PQLProcessor.h">
+      <Filter>PQL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\PQLProcessorUtils.h">
+      <Filter>PQL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\PQLOptimizer.h">
+      <Filter>PQL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\PQLOptimizerUtils.h">
+      <Filter>PQL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\PQLAST.h">
+      <Filter>PQL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\PQLLexer.h">
+      <Filter>PQL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\PQLParser.h">
+      <Filter>PQL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\PQLResultTuple.h">
+      <Filter>PQL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBAffectsBipHandler.h">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBAffectsHandler.h">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBCallsHandler.h">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBFollowsHandler.h">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBModifyHandler.h">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBNextBipHandler.h">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBNextHandler.h">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBParentHandler.h">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBPatternHandler.h">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBHandlers\PKBUseHandler.h">
+      <Filter>PKB\PKBHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBModel\CFG.h">
+      <Filter>PKB\PKBModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBModel\PKBDesignEntity.h">
+      <Filter>PKB\PKBModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBModel\PKBGroup.h">
+      <Filter>PKB\PKBModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBModel\PKBProcedure.h">
+      <Filter>PKB\PKBModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBModel\PKBStmt.h">
+      <Filter>PKB\PKBModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKB\PKBModel\PKBVariable.h">
+      <Filter>PKB\PKBModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Simple\SimpleAST.h">
+      <Filter>Simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Simple\SimpleLexer.h">
+      <Filter>Simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Simple\SimpleParser.h">
+      <Filter>Simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\PQLWithHandler.h">
+      <Filter>PQL\ClauseHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\PQLClauseHandler.h">
+      <Filter>PQL\ClauseHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\PQLPatternHandler.h">
+      <Filter>PQL\ClauseHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\PQLSuchThatHandler.h">
+      <Filter>PQL\ClauseHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLFollowsParentNextAffectsHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLUsesModifiesPHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\PQLUsesModifiesSHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsBipHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Affects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsBipTHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Affects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Affects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Affects\PQLAffectsTHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Affects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsCallsTHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Calls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Calls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Calls\PQLCallsTHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Calls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Follows\PQLFollowsHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Follows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Follows\PQLFollowsTHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Follows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Modifies\PQLModifiesPHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Modifies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Modifies\PQLModifiesSHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Modifies</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextBipHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Next</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextBipTHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Next</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Next</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Next\PQLNextTHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Next</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Parent\PQLParentHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Parent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Parent\PQLParentTHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Parent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Uses\PQLUsesPHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Uses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PQL\ClauseHandlers\SuchThatHandlers\Uses\PQLUsesSHandler.h">
+      <Filter>PQL\ClauseHandlers\SuchThatHandlers\Uses</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="PKB">
+      <UniqueIdentifier>{eab23c5f-103a-4a9b-8ebe-f443fbc49b08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PKB\PKBHandlers">
+      <UniqueIdentifier>{fe888c76-bb10-4a72-847b-41e2318869b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PKB\PKBModel">
+      <UniqueIdentifier>{d3094efa-01c7-4bb1-b0a4-c21d9aaf101a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PQL">
+      <UniqueIdentifier>{ff9befd5-37af-47c7-bc20-a7b249b4d3a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PQL\ClauseHandlers">
+      <UniqueIdentifier>{693cb9f7-2195-45bb-9d80-4b914a9cfc09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PQL\ClauseHandlers\SuchThatHandlers">
+      <UniqueIdentifier>{64c65a4d-c0db-438f-be52-919bf4c189ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Simple">
+      <UniqueIdentifier>{ae5d12fb-8eb3-46c8-960c-941bf1172aec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PQL\ClauseHandlers\SuchThatHandlers\Follows">
+      <UniqueIdentifier>{22bba917-5298-4f93-8d55-14efc432d7ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PQL\ClauseHandlers\SuchThatHandlers\Parent">
+      <UniqueIdentifier>{73cd85bb-6a27-4572-a61d-9fd7ebfb4030}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PQL\ClauseHandlers\SuchThatHandlers\Calls">
+      <UniqueIdentifier>{2aec0a56-bb1c-49ba-9277-01c647673311}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PQL\ClauseHandlers\SuchThatHandlers\Affects">
+      <UniqueIdentifier>{499aad0d-0721-4531-9953-6f0e141b6e14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PQL\ClauseHandlers\SuchThatHandlers\Next">
+      <UniqueIdentifier>{3912933d-bf21-4ec5-8bc6-552aed5fea93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PQL\ClauseHandlers\SuchThatHandlers\Modifies">
+      <UniqueIdentifier>{5dd907e8-439e-46f0-ae36-01b17056ae42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PQL\ClauseHandlers\SuchThatHandlers\Uses">
+      <UniqueIdentifier>{6d65b4c2-3eae-4a01-ba58-730b4f7bef10}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

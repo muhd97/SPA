@@ -4,7 +4,7 @@
 //#include <functional>
 #include <vector>
 #include <string>
-#include "../PKB/PKBPQLEvaluator.h"
+#include "PKBPQLEvaluator.h"
 #include "PQLParser.h"
 
 using namespace std;

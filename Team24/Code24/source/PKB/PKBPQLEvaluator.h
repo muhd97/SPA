@@ -13,19 +13,19 @@
 #include "PKBProcedure.h"
 #include "PKBStmt.h"
 // handlers
-#include "PKBPQLAffectsHandler.h"
-#include "PKBPQLAffectsBipHandler.h"
-#include "PKBPQLCallsHandler.h"
-#include "PKBPQLPatternHandler.h"
-#include "PKBPQLNextHandler.h"
-#include "PKBPQLNextBipHandler.h"
-#include "PKBPQLModifyHandler.h"
-#include "PKBPQLUseHandler.h"
-#include "PKBPQLParentHandler.h"
-#include "PKBPQLFollowsHandler.h"
+#include "PKBAffectsHandler.h"
+#include "PKBAffectsBipHandler.h"
+#include "PKBCallsHandler.h"
+#include "PKBPatternHandler.h"
+#include "PKBNextHandler.h"
+#include "PKBNextBipHandler.h"
+#include "PKBModifyHandler.h"
+#include "PKBUseHandler.h"
+#include "PKBParentHandler.h"
+#include "PKBFollowsHandler.h"
 // for pattern
-#include "../SimpleLexer.h"
-#include "../SimpleParser.h"
+#include "SimpleLexer.h"
+#include "SimpleParser.h"
 
 using namespace std;
 
@@ -328,14 +328,14 @@ class PKBPQLEvaluator
 
     /* ======================== Handlers ======================== */
 
-    PKBPQLAffectsHandler::SharedPtr affectsHandler;
-    PKBPQLAffectsBipHandler::SharedPtr affectsBipHandler;
-    PKBPQLCallsHandler::SharedPtr callsHandler;
-    PKBPQLPatternHandler::SharedPtr patternHandler;
+    PKBAffectsHandler::SharedPtr affectsHandler;
+    PKBAffectsBipHandler::SharedPtr affectsBipHandler;
+    PKBCallsHandler::SharedPtr callsHandler;
+    PKBPatternHandler::SharedPtr patternHandler;
     PKBPQLNextHandler::SharedPtr nextHandler;
-    PKBPQLNextBipHandler::SharedPtr nextBipHandler;
-    PKBPQLModifyHandler::SharedPtr modifyHandler;
-    PKBPQLUseHandler::SharedPtr useHandler;
-    PKBPQLParentHandler::SharedPtr parentHandler;
-    PKBPQLFollowsHandler::SharedPtr followsHandler;
+    PKBNextBipHandler::SharedPtr nextBipHandler;
+    PKBModifyHandler::SharedPtr modifyHandler;
+    PKBUseHandler::SharedPtr useHandler;
+    PKBParentHandler::SharedPtr parentHandler;
+    PKBFollowsHandler::SharedPtr followsHandler;
 };

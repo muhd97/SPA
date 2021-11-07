@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "PQLLexer.h"
-#include "..\SimpleAST.h"
-#include "..\SimpleLexer.h"
-#include "..\SimpleParser.h"
+#include "SimpleAST.h"
+#include "SimpleLexer.h"
+#include "SimpleParser.h"
 
 using namespace std;
 
