@@ -99,17 +99,22 @@ class SimpleParser
     size_t index;
     size_t size;
 
-    static void visitProc(string callee, unordered_set<string> current, unordered_set<string> visited, map<string, vector<string>> callGraph) {
-        if (current.find(callee) != current.end()) {
+    static void visitProc(string callee, unordered_set<string> current, unordered_set<string> visited,
+                          map<string, vector<string>> callGraph)
+    {
+        if (current.find(callee) != current.end())
+        {
             throw runtime_error("Cycles in SIMPLE code is not allowed. Found cycle in procedure  " + callee + "\n");
         }
-        else if (visited.find(callee) != visited.end()) {
+        else if (visited.find(callee) != visited.end())
+        {
             return;
         }
 
         visited.insert(callee);
         current.insert(callee);
-        for (string proc: callGraph[callee]) {
+        for (string proc : callGraph[callee])
+        {
             visitProc(proc, current, visited, callGraph);
         }
         current.erase(callee);
@@ -120,8 +125,10 @@ class SimpleParser
         unordered_set<string> visited = {};
         unordered_set<string> current = {};
 
-        for (auto procedure : procedures) {
-            if (visited.find(procedure->getName()) != visited.end()) {
+        for (auto procedure : procedures)
+        {
+            if (visited.find(procedure->getName()) != visited.end())
+            {
                 continue;
             }
             unordered_set<string> current = {};

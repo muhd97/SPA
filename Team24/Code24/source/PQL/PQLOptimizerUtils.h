@@ -1,30 +1,34 @@
-#pragma optimize( "gty", on )
+#pragma optimize("gty", on)
 #pragma once
 #include "PQLParser.h"
 
-inline int getEvalClPriority(const shared_ptr<EvalCl>& evalCl, const shared_ptr<SelectCl>& selectCl) {
+inline int getEvalClPriority(const shared_ptr<EvalCl> &evalCl, const shared_ptr<SelectCl> &selectCl)
+{
 
-    const auto& evalClType = evalCl->getEvalClType();
+    const auto &evalClType = evalCl->getEvalClType();
     int numSyns = evalCl->getAllSynonymsAsString().size();
 
     /* 0 Syn */
     if (numSyns == 0)
         return 0;
     /* With First */
-    else if (evalClType == EvalClType::With) {
+    else if (evalClType == EvalClType::With)
+    {
         if (numSyns == 1)
             return 1;
         else
             return 2;
     }
     /* 1 Syn */
-    else {
+    else
+    {
         int priority = -1;
         int shift = numSyns == 1 ? 100 : 200;
 
-        if (evalClType == EvalClType::SuchThat) {
-            const auto& suchThatCl = static_pointer_cast<SuchThatCl>(evalCl);
-            const auto& suchThatType = suchThatCl->relRef->getType();
+        if (evalClType == EvalClType::SuchThat)
+        {
+            const auto &suchThatCl = static_pointer_cast<SuchThatCl>(evalCl);
+            const auto &suchThatType = suchThatCl->relRef->getType();
             if (suchThatType == RelRefType::FOLLOWS)
                 priority = 3;
             else if (suchThatType == RelRefType::CALLS)
@@ -66,29 +70,32 @@ inline int getEvalClPriority(const shared_ptr<EvalCl>& evalCl, const shared_ptr<
             else if (suchThatType == RelRefType::MODIFIES_S)
                 priority = 12;
         }
-        else if (evalClType == EvalClType::Pattern) {
+        else if (evalClType == EvalClType::Pattern)
+        {
 
-            const auto& pattern = static_pointer_cast<PatternCl>(evalCl);
-            const auto& patternType = pattern->getPatternClType(selectCl->synonymToParentDeclarationMap);
-            if (patternType == PatternClType::PatternIf) {
+            const auto &pattern = static_pointer_cast<PatternCl>(evalCl);
+            const auto &patternType = pattern->getPatternClType(selectCl->synonymToParentDeclarationMap);
+            if (patternType == PatternClType::PatternIf)
+            {
                 priority = 7;
             }
-            else if (patternType == PatternClType::PatternWhile) {
+            else if (patternType == PatternClType::PatternWhile)
+            {
                 priority = 8;
             }
-            else if (patternType == PatternClType::PatternAssign) {
+            else if (patternType == PatternClType::PatternAssign)
+            {
                 priority = 13;
             }
         }
-       
-        if (priority == -1) {
-            throw runtime_error("Could not match EvalCl type to match priority, priority is negative\n");
 
+        if (priority == -1)
+        {
+            throw runtime_error("Could not match EvalCl type to match priority, priority is negative\n");
         }
-            
+
         return priority + shift;
-    }   
+    }
 
     throw runtime_error("Could not match EvalCl type to match priority");
-
 }

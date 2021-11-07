@@ -1,15 +1,17 @@
 #include "PQLParentHandler.h"
 
-ParentHandler::ParentHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<Parent>& parentCl)
+ParentHandler::ParentHandler(shared_ptr<PKBPQLEvaluator> &evaluator, shared_ptr<SelectCl> &selectCl,
+                             shared_ptr<Parent> &parentCl)
     : FollowsParentNextAffectsHandler(evaluator, selectCl, parentCl->stmtRef1, parentCl->stmtRef2)
 {
 }
 
-const string& ParentHandler::getRelationshipType() {
+const string &ParentHandler::getRelationshipType()
+{
     return PQL_PARENT;
 }
 
-void ParentHandler::evaluateIntInt(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentHandler::evaluateIntInt(vector<shared_ptr<ResultTuple>> &toReturn)
 {
     int s1 = getLeftArg()->getIntVal();
     int s2 = getRightArg()->getIntVal();
@@ -18,7 +20,7 @@ void ParentHandler::evaluateIntInt(vector<shared_ptr<ResultTuple>>& toReturn)
 
     if (getEvaluator()->mpPKB->getStatement(s1, stmt))
     {
-        set<int>& childrenIds = getEvaluator()->getChildren(PKBDesignEntity::AllStatements, stmt->getIndex());
+        set<int> &childrenIds = getEvaluator()->getChildren(PKBDesignEntity::AllStatements, stmt->getIndex());
 
         if (childrenIds.size() > 0u && (childrenIds.find(s2) != childrenIds.end()))
         {
@@ -30,11 +32,11 @@ void ParentHandler::evaluateIntInt(vector<shared_ptr<ResultTuple>>& toReturn)
     }
 }
 
-void ParentHandler::evaluateIntSyn(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentHandler::evaluateIntSyn(vector<shared_ptr<ResultTuple>> &toReturn)
 {
-    const string& rightSynonym = getRightArg()->getStringVal();
+    const string &rightSynonym = getRightArg()->getStringVal();
     PKBDesignEntity pkbDe = getPKBDesignEntityOfSynonym(rightSynonym);
-    for (auto& i : getEvaluator()->getChildren(pkbDe, getLeftArg()->getIntVal()))
+    for (auto &i : getEvaluator()->getChildren(pkbDe, getLeftArg()->getIntVal()))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(rightSynonym, to_string(i));
@@ -42,7 +44,7 @@ void ParentHandler::evaluateIntSyn(vector<shared_ptr<ResultTuple>>& toReturn)
     }
 }
 
-void ParentHandler::evaluateIntUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentHandler::evaluateIntUnderscore(vector<shared_ptr<ResultTuple>> &toReturn)
 {
     PKBStmt::SharedPtr stmt = nullptr;
     int leftInt = getLeftArg()->getIntVal();
@@ -57,14 +59,14 @@ void ParentHandler::evaluateIntUnderscore(vector<shared_ptr<ResultTuple>>& toRet
     }
 }
 
-void ParentHandler::evaluateSynInt(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentHandler::evaluateSynInt(vector<shared_ptr<ResultTuple>> &toReturn)
 {
-    const string& leftSynonym = getLeftArg()->getStringVal();
+    const string &leftSynonym = getLeftArg()->getStringVal();
     PKBDesignEntity pkbDe = getPKBDesignEntityOfSynonym(leftSynonym);
 
     PKBStmt::SharedPtr stmt = nullptr;
 
-    for (const int& x : getEvaluator()->getParents(pkbDe, getRightArg()->getIntVal()))
+    for (const int &x : getEvaluator()->getParents(pkbDe, getRightArg()->getIntVal()))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(leftSynonym, to_string(x));
@@ -72,20 +74,21 @@ void ParentHandler::evaluateSynInt(vector<shared_ptr<ResultTuple>>& toReturn)
     }
 }
 
-void ParentHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>> &toReturn)
 {
-    const string& leftSynonym = getLeftArg()->getStringVal();
-    const string& rightSynonym = getRightArg()->getStringVal();
+    const string &leftSynonym = getLeftArg()->getStringVal();
+    const string &rightSynonym = getRightArg()->getStringVal();
 
     /* Statement cannot be a parent of itself. Therefore, no results. */
-    if (leftSynonym == rightSynonym) {
+    if (leftSynonym == rightSynonym)
+    {
         return;
     }
 
     PKBDesignEntity pkbDe1 = getPKBDesignEntityOfSynonym(leftSynonym);
     PKBDesignEntity pkbDe2 = getPKBDesignEntityOfSynonym(rightSynonym);
 
-    for (auto& p : getEvaluator()->getChildren(pkbDe1, pkbDe2))
+    for (auto &p : getEvaluator()->getChildren(pkbDe1, pkbDe2))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(leftSynonym, to_string(p.first));
@@ -94,12 +97,12 @@ void ParentHandler::evaluateSynSyn(vector<shared_ptr<ResultTuple>>& toReturn)
     }
 }
 
-void ParentHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>> &toReturn)
 {
-    const string& leftSynonym = getLeftArg()->getStringVal();
+    const string &leftSynonym = getLeftArg()->getStringVal();
     PKBDesignEntity pkbDe = getPKBDesignEntityOfSynonym(leftSynonym);
 
-    for (const int& x : getEvaluator()->getParentsSynUnderscore(pkbDe))
+    for (const int &x : getEvaluator()->getParentsSynUnderscore(pkbDe))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(leftSynonym, to_string(x));
@@ -107,7 +110,7 @@ void ParentHandler::evaluateSynUnderscore(vector<shared_ptr<ResultTuple>>& toRet
     }
 }
 
-void ParentHandler::evaluateUnderscoreInt(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentHandler::evaluateUnderscoreInt(vector<shared_ptr<ResultTuple>> &toReturn)
 {
     int rightInt = getRightArg()->getIntVal();
     if (!getEvaluator()->getParents(PKBDesignEntity::AllStatements, rightInt).empty())
@@ -118,12 +121,12 @@ void ParentHandler::evaluateUnderscoreInt(vector<shared_ptr<ResultTuple>>& toRet
     }
 }
 
-void ParentHandler::evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentHandler::evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>> &toReturn)
 {
-    const string& rightSynonym = getRightArg()->getStringVal();
+    const string &rightSynonym = getRightArg()->getStringVal();
     PKBDesignEntity pkbDe = getPKBDesignEntityOfSynonym(rightSynonym);
 
-    for (const int& x : getEvaluator()->getChildrenUnderscoreSyn(pkbDe))
+    for (const int &x : getEvaluator()->getChildrenUnderscoreSyn(pkbDe))
     {
         shared_ptr<ResultTuple> tupleToAdd = make_shared<ResultTuple>();
         tupleToAdd->insertKeyValuePair(rightSynonym, to_string(x));
@@ -131,7 +134,7 @@ void ParentHandler::evaluateUnderscoreSyn(vector<shared_ptr<ResultTuple>>& toRet
     }
 }
 
-void ParentHandler::evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>>& toReturn)
+void ParentHandler::evaluateUnderscoreUnderscore(vector<shared_ptr<ResultTuple>> &toReturn)
 {
     if (getEvaluator()->getParents())
     {

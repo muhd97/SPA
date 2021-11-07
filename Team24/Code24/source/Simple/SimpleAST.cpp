@@ -306,7 +306,8 @@ vector<shared_ptr<Statement>> WhileStatement::getStatementList()
     return block->getStatements();
 }
 
-shared_ptr<StatementList> WhileStatement::getBody() {
+shared_ptr<StatementList> WhileStatement::getBody()
+{
     return block;
 }
 
@@ -327,8 +328,7 @@ vector<shared_ptr<Statement>> IfStatement::getStatementList()
 {
     vector<shared_ptr<Statement>> consequentStatements = consequent->getStatements();
     vector<shared_ptr<Statement>> alternativeStatements = alternative->getStatements();
-    consequentStatements.insert(end(consequentStatements), begin(alternativeStatements),
-        end(alternativeStatements));
+    consequentStatements.insert(end(consequentStatements), begin(alternativeStatements), end(alternativeStatements));
     return consequentStatements;
 }
 

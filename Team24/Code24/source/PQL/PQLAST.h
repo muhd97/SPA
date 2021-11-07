@@ -1,5 +1,5 @@
 #pragma once
-#pragma optimize( "gty", on )
+#pragma optimize("gty", on)
 
 #include <iostream>
 #include <unordered_map>
@@ -12,31 +12,32 @@
 
 using namespace std;
 
-enum class ElementType {
+enum class ElementType
+{
     Synonym,
     AttrRef
 };
 
 class Element
 {
-public:
+  public:
     virtual string format() = 0;
     virtual ElementType getElementType() = 0;
-    virtual const string& getSynonymString() = 0;
+    virtual const string &getSynonymString() = 0;
 };
 
 class Synonym : public Element, public enable_shared_from_this<Synonym>
 {
-private:
+  private:
     string value;
 
-public:
+  public:
     Synonym(string value) : value(move(value))
     {
     }
 
-    const string& getValue() const;
-    const string& getSynonymString();
+    const string &getValue() const;
+    const string &getSynonymString();
     string format();
     ElementType getElementType();
 };
@@ -49,10 +50,12 @@ enum class AttrNameType
     STMT_NUMBER
 };
 
-class AttrName {
-private:
+class AttrName
+{
+  private:
     AttrNameType name;
-public:
+
+  public:
     AttrName(AttrNameType name)
     {
         this->name = name;
@@ -63,11 +66,13 @@ public:
     AttrNameType getAttrNameType();
 };
 
-class AttrRef : public Element {
-private:
+class AttrRef : public Element
+{
+  private:
     shared_ptr<Synonym> synonym;
     shared_ptr<AttrName> attrName;
-public:
+
+  public:
     AttrRef(shared_ptr<Synonym> synonym, shared_ptr<AttrName> attrName)
         : synonym(move(synonym)), attrName(move(attrName))
     {
@@ -75,17 +80,17 @@ public:
 
     string format();
     ElementType getElementType();
-    const string& getSynonymString();
-    const shared_ptr<Synonym>& getSynonym();
-    const shared_ptr<AttrName>& getAttrName();
+    const string &getSynonymString();
+    const shared_ptr<Synonym> &getSynonym();
+    const shared_ptr<AttrName> &getAttrName();
 };
 
 class DesignEntity
 {
-private:
+  private:
     string entityTypeName;
 
-public:
+  public:
     static string STMT;
     static string READ;
     static string PRINT;
@@ -102,28 +107,26 @@ public:
     {
     }
 
-    DesignEntity(const DesignEntity& other)
+    DesignEntity(const DesignEntity &other)
     { // copy constructor
         entityTypeName = other.entityTypeName;
     }
 
-    const string& getEntityTypeName() const;
+    const string &getEntityTypeName() const;
 };
 
 class Declaration
 {
-private:
+  private:
     vector<shared_ptr<Synonym>> synonyms;
     shared_ptr<DesignEntity> de;
 
-public:
-
-
+  public:
     Declaration(shared_ptr<DesignEntity> ent, vector<shared_ptr<Synonym>> vec) : synonyms(move(vec)), de(move(ent))
     {
     }
 
-    const vector<shared_ptr<Synonym>>& getSynonyms() const;
+    const vector<shared_ptr<Synonym>> &getSynonyms() const;
     shared_ptr<DesignEntity> getDesignEntity();
     string format();
 };
@@ -137,12 +140,12 @@ enum class StmtRefType
 
 class StmtRef
 {
-private:
+  private:
     string stringValue;
     StmtRefType stmtRefType;
     int intValue = 0;
 
-public:
+  public:
     StmtRef(StmtRefType type)
     {
         stmtRefType = type;
@@ -159,7 +162,7 @@ public:
         stmtRefType = type;
     }
 
-    StmtRef(const StmtRef& other)
+    StmtRef(const StmtRef &other)
     {
         intValue = other.intValue;
         stringValue = other.stringValue;
@@ -168,7 +171,7 @@ public:
 
     StmtRefType getStmtRefType();
     string getStmtRefTypeName();
-    const string& getStringVal() const;
+    const string &getStringVal() const;
     int getIntVal();
 };
 
@@ -181,17 +184,17 @@ enum class EntRefType
 
 class EntRef
 {
-private:
+  private:
     string stringValue;
     EntRefType entRefType;
 
-public:
+  public:
     EntRef(EntRefType type)
     {
         entRefType = type;
     }
 
-    EntRef(const EntRef& other)
+    EntRef(const EntRef &other)
     {
         stringValue = other.stringValue;
         entRefType = other.entRefType;
@@ -202,7 +205,7 @@ public:
         entRefType = type;
     }
 
-    const string& getStringVal() const;
+    const string &getStringVal() const;
     EntRefType getEntRefType();
     string getEntRefTypeName();
     string format();
@@ -218,13 +221,13 @@ enum class RefType
 
 class Ref
 {
-private:
+  private:
     string stringValue;
     RefType refType;
     shared_ptr<AttrRef> attrRef;
     int intValue = 0;
 
-public:
+  public:
     Ref(RefType type)
     {
         refType = type;
@@ -249,17 +252,17 @@ public:
         attrRef = NULL;
     }
 
-    Ref(const Ref& other)
+    Ref(const Ref &other)
     {
         stringValue = other.stringValue;
         refType = other.refType;
         attrRef = other.attrRef;
     }
 
-    const string& getStringVal() const;
+    const string &getStringVal() const;
     int getIntVal();
     RefType getRefType();
-    const shared_ptr<AttrRef>& getAttrRef();
+    const shared_ptr<AttrRef> &getAttrRef();
     string format();
 };
 
@@ -287,10 +290,11 @@ enum class RelRefType
 
 class RelRef
 {
-public:
+  public:
     virtual string format() = 0;
     virtual bool containsSynonym(shared_ptr<Element> s) = 0;
-    virtual RelRefType getType() {
+    virtual RelRefType getType()
+    {
         return RelRefType::USES_S;
     }
     virtual vector<string> getAllSynonymsAsString() = 0;
@@ -298,7 +302,7 @@ public:
 
 class UsesS : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef;
     shared_ptr<EntRef> entRef;
 
@@ -314,7 +318,7 @@ public:
 
 class UsesP : public RelRef
 {
-public:
+  public:
     shared_ptr<EntRef> entRef1;
     shared_ptr<EntRef> entRef2;
 
@@ -330,7 +334,7 @@ public:
 
 class ModifiesS : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef;
     shared_ptr<EntRef> entRef;
 
@@ -339,14 +343,14 @@ public:
     }
 
     string format() override;
-     bool containsSynonym(shared_ptr<Element> s);
+    bool containsSynonym(shared_ptr<Element> s);
     RelRefType getType() override;
     vector<string> getAllSynonymsAsString();
 };
 
 class ModifiesP : public RelRef
 {
-public:
+  public:
     shared_ptr<EntRef> entRef1;
     shared_ptr<EntRef> entRef2;
 
@@ -362,7 +366,7 @@ public:
 
 class Parent : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -378,7 +382,7 @@ public:
 
 class ParentT : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -394,7 +398,7 @@ public:
 
 class Follows : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -410,7 +414,7 @@ public:
 
 class FollowsT : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -424,8 +428,9 @@ public:
     vector<string> getAllSynonymsAsString();
 };
 
-class Calls : public RelRef {
-public:
+class Calls : public RelRef
+{
+  public:
     shared_ptr<EntRef> entRef1;
     shared_ptr<EntRef> entRef2;
 
@@ -439,8 +444,9 @@ public:
     vector<string> getAllSynonymsAsString();
 };
 
-class CallsT : public RelRef {
-public:
+class CallsT : public RelRef
+{
+  public:
     shared_ptr<EntRef> entRef1;
     shared_ptr<EntRef> entRef2;
 
@@ -456,7 +462,7 @@ public:
 
 class Next : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -472,7 +478,7 @@ public:
 
 class NextT : public Next
 {
-public:
+  public:
     NextT(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : Next(sRef1, sRef2)
     {
     }
@@ -481,11 +487,9 @@ public:
     RelRefType getType() override;
 };
 
-
-
 class NextBip : public Next
 {
-public:
+  public:
     NextBip(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : Next(sRef1, sRef2)
     {
     }
@@ -496,7 +500,7 @@ public:
 
 class NextBipT : public Next
 {
-public:
+  public:
     NextBipT(shared_ptr<StmtRef> sRef1, shared_ptr<StmtRef> sRef2) : Next(sRef1, sRef2)
     {
     }
@@ -507,7 +511,7 @@ public:
 
 class AffectsT : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -523,7 +527,7 @@ public:
 
 class Affects : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -538,7 +542,7 @@ public:
 };
 class AffectsBip : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -554,7 +558,7 @@ public:
 
 class AffectsBipT : public RelRef
 {
-public:
+  public:
     shared_ptr<StmtRef> stmtRef1;
     shared_ptr<StmtRef> stmtRef2;
 
@@ -568,26 +572,28 @@ public:
     vector<string> getAllSynonymsAsString();
 };
 
-enum class EvalClType {
+enum class EvalClType
+{
     Pattern,
     SuchThat,
     With
 };
 
 /* Generic class representing a clause to be evaluated */
-class EvalCl {
-public:
-    virtual const vector<string>& getAllSynonymsAsString() = 0;
+class EvalCl
+{
+  public:
+    virtual const vector<string> &getAllSynonymsAsString() = 0;
     virtual EvalClType getEvalClType() = 0;
     virtual string format() = 0;
 };
 
 class SuchThatCl : public EvalCl
 {
-private:
+  private:
     vector<string> synonymsUsed;
 
-public:
+  public:
     shared_ptr<RelRef> relRef;
 
     SuchThatCl(shared_ptr<RelRef> ref) : relRef(move(ref))
@@ -598,12 +604,12 @@ public:
     EvalClType getEvalClType();
     string format();
     bool containsSynonym(shared_ptr<Element> s);
-    const vector<string>& getAllSynonymsAsString();
+    const vector<string> &getAllSynonymsAsString();
 };
 
 class ExpressionSpec
 {
-public:
+  public:
     bool isAnything;
     bool isPartialMatch;
     shared_ptr<Expression> expression;
@@ -620,37 +626,42 @@ public:
 
 class ResultCl
 {
-private:
+  private:
     vector<shared_ptr<Element>> elements;
     bool isBoolean;
-public:
+
+  public:
     ResultCl()
     {
         this->elements = {};
         this->isBoolean = true;
     }
 
-    ResultCl(vector<shared_ptr<Element>> elements)
-        : elements(move(elements))
+    ResultCl(vector<shared_ptr<Element>> elements) : elements(move(elements))
     {
         this->isBoolean = false;
     }
 
-    const vector<shared_ptr<Element>>& getElements() const;
+    const vector<shared_ptr<Element>> &getElements() const;
     string format();
     bool isBooleanReturnType();
     bool isMultiTupleReturnType();
     bool isSingleValReturnType();
 };
 
-enum class PatternClType { PatternIf, PatternWhile, PatternAssign };
+enum class PatternClType
+{
+    PatternIf,
+    PatternWhile,
+    PatternAssign
+};
 
 class PatternCl : public EvalCl
 {
-private:
+  private:
     vector<string> synonymsUsed;
 
-public:
+  public:
     shared_ptr<Synonym> synonym;
     shared_ptr<EntRef> entRef;
     shared_ptr<ExpressionSpec> exprSpec;
@@ -664,39 +675,38 @@ public:
         {
             synonymsUsed.emplace_back(this->entRef->getStringVal());
         }
-
     }
 
     EvalClType getEvalClType();
     string format();
     bool containsSynonym(shared_ptr<Element> s);
-    const vector<string>& getAllSynonymsAsString();
-    const string& getSynonymType(unordered_map<string, shared_ptr<Declaration>>& synonymToParentDeclarationMap);
-    PatternClType getPatternClType(unordered_map<string, shared_ptr<Declaration>>& synonymToParentDeclarationMap);
+    const vector<string> &getAllSynonymsAsString();
+    const string &getSynonymType(unordered_map<string, shared_ptr<Declaration>> &synonymToParentDeclarationMap);
+    PatternClType getPatternClType(unordered_map<string, shared_ptr<Declaration>> &synonymToParentDeclarationMap);
 };
-
 
 class WithCl : public EvalCl
 {
-private:
+  private:
     vector<string> synonymsUsed;
 
-public:
+  public:
     shared_ptr<Ref> lhs;
     shared_ptr<Ref> rhs;
 
-    WithCl(shared_ptr<Ref> l, shared_ptr<Ref> r)
-        : lhs(move(l)), rhs(move(r))
+    WithCl(shared_ptr<Ref> l, shared_ptr<Ref> r) : lhs(move(l)), rhs(move(r))
     {
         if (lhs->getRefType() == RefType::SYNONYM)
             synonymsUsed.emplace_back(lhs->getStringVal());
         if (rhs->getRefType() == RefType::SYNONYM)
             synonymsUsed.emplace_back(rhs->getStringVal());
 
-        if (lhs->getRefType() == RefType::ATTR) {
+        if (lhs->getRefType() == RefType::ATTR)
+        {
             synonymsUsed.emplace_back(lhs->getAttrRef()->getSynonymString());
         }
-        if (rhs->getRefType() == RefType::ATTR) {
+        if (rhs->getRefType() == RefType::ATTR)
+        {
             synonymsUsed.emplace_back(rhs->getAttrRef()->getSynonymString());
         }
     }
@@ -704,26 +714,28 @@ public:
     EvalClType getEvalClType();
     string format();
     bool containsSynonym(shared_ptr<Element> s);
-    const vector<string>& getAllSynonymsAsString();
+    const vector<string> &getAllSynonymsAsString();
 };
 
 class SelectCl
 {
-private:
+  private:
     vector<shared_ptr<SuchThatCl>> suchThatClauses;
     vector<shared_ptr<PatternCl>> patternClauses;
     vector<shared_ptr<WithCl>> withClauses;
-public:
+
+  public:
     vector<shared_ptr<Declaration>> declarations;
     vector<shared_ptr<EvalCl>> evalClauses;
     shared_ptr<ResultCl> target;
     unordered_map<string, shared_ptr<Declaration>> synonymToParentDeclarationMap;
 
     SelectCl(shared_ptr<ResultCl> target, vector<shared_ptr<Declaration>> decl, vector<shared_ptr<SuchThatCl>> stht,
-        vector<shared_ptr<PatternCl>> pttn, vector<shared_ptr<WithCl>> with)
-        : target(move(target)), declarations(move(decl)), suchThatClauses(move(stht)), patternClauses(move(pttn)), withClauses(move(with))
+             vector<shared_ptr<PatternCl>> pttn, vector<shared_ptr<WithCl>> with)
+        : target(move(target)), declarations(move(decl)), suchThatClauses(move(stht)), patternClauses(move(pttn)),
+          withClauses(move(with))
     {
-        for (auto& d : declarations)
+        for (auto &d : declarations)
         {
             for (auto syn : d->getSynonyms())
             {
@@ -740,24 +752,27 @@ public:
             }
         }
 
-        for (const auto& ptr : suchThatClauses) evalClauses.emplace_back(ptr);
-        for (const auto& ptr : patternClauses) evalClauses.emplace_back(ptr);
-        for (const auto& ptr : withClauses) evalClauses.emplace_back(ptr);
+        for (const auto &ptr : suchThatClauses)
+            evalClauses.emplace_back(ptr);
+        for (const auto &ptr : patternClauses)
+            evalClauses.emplace_back(ptr);
+        for (const auto &ptr : withClauses)
+            evalClauses.emplace_back(ptr);
     }
 
-    shared_ptr<Declaration>& getParentDeclarationForSynonym(const string& s);
-    shared_ptr<Declaration>& getParentDeclarationForSynonym(shared_ptr<Synonym> s);
+    shared_ptr<Declaration> &getParentDeclarationForSynonym(const string &s);
+    shared_ptr<Declaration> &getParentDeclarationForSynonym(shared_ptr<Synonym> s);
     bool isSynonymDeclared(string toTest);
-    const string& getDesignEntityTypeBySynonym(const string& s);
-    const string& getDesignEntityTypeBySynonym(const shared_ptr<Synonym>& s);
+    const string &getDesignEntityTypeBySynonym(const string &s);
+    const string &getDesignEntityTypeBySynonym(const shared_ptr<Synonym> &s);
     string format();
     bool hasSuchThatClauses();
     bool hasPatternClauses();
     bool hasWithClauses();
     bool hasEvalClauses();
-    const vector<shared_ptr<EvalCl>>& getEvalClauses();
+    const vector<shared_ptr<EvalCl>> &getEvalClauses();
     bool suchThatContainsSynonym(shared_ptr<Element> s);
     bool patternContainsSynonym(shared_ptr<Element> s);
     bool withContainsSynonym(shared_ptr<Element> e);
-    const shared_ptr<ResultCl>& getTarget();
+    const shared_ptr<ResultCl> &getTarget();
 };

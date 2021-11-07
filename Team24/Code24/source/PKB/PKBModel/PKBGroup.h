@@ -3,9 +3,9 @@
 #include <map>
 #include <set>
 
-#include "SimpleAST.h"
 #include "PKBDesignEntity.h"
 #include "PKBVariable.h"
+#include "SimpleAST.h"
 
 using namespace std;
 
@@ -29,8 +29,8 @@ class PKBGroup
     int mIndex = 0;
 
     // statements
-    int mOwnerIndex = 0;                            // index of statement that owns this group
-    string mOwnerName = "$";                          // name of procedure, only for procedures that own it
+    int mOwnerIndex = 0;                        // index of statement that owns this group
+    string mOwnerName = "$";                    // name of procedure, only for procedures that own it
     map<PKBDesignEntity, vector<int>> mMembers; // members, mapped by synonym
 
     // variables
@@ -40,7 +40,7 @@ class PKBGroup
     set<PKBVariable::SharedPtr> mModifies;
 
     // groups
-    PKBGroup::SharedPtr mParentGroup;           // Weak pointer to parentGroup
+    PKBGroup::SharedPtr mParentGroup;         // Weak pointer to parentGroup
     vector<PKBGroup::SharedPtr> mChildGroups; // vector of shared pointer to all of it's child groups.
 
     // returns index (statement number) of statement which owns this group
@@ -105,7 +105,7 @@ class PKBGroup
 
     void setParentGroup(PKBGroup::SharedPtr parentGroup)
     {
-     
+
         mParentGroup = parentGroup;
     }
 
@@ -114,7 +114,7 @@ class PKBGroup
     {
         mIndex = totalGroupCount;
         totalGroupCount++;
-        mOwnerIndex = ownerStatementIndex;        
+        mOwnerIndex = ownerStatementIndex;
         mOwnerName = "$";
     }
 
@@ -167,7 +167,7 @@ class PKBGroupEntity
 
     void addModifiedVariable(PKBVariable::SharedPtr variable);
 
-    void addUsedVariables(set<PKBVariable::SharedPtr>& variables);
+    void addUsedVariables(set<PKBVariable::SharedPtr> &variables);
 
     void addModifiedVariables(set<PKBVariable::SharedPtr> variables);
 

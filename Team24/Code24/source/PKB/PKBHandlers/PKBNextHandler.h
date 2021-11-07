@@ -1,11 +1,12 @@
 #include "PKB.h"
-#include <execution>
 #include <algorithm>
+#include <execution>
 
 #pragma once
 
-class PKBPQLNextHandler {
-public:
+class PKBPQLNextHandler
+{
+  public:
     using SharedPtr = std::shared_ptr<PKBPQLNextHandler>;
 
     static SharedPtr create(PKB::SharedPtr pkb)
@@ -14,7 +15,7 @@ public:
     }
 
     // Next
-// Case 1: Next(_, _)
+    // Case 1: Next(_, _)
     bool getNextUnderscoreUnderscore();
 
     // Case 2: Next(_, syn)
@@ -69,15 +70,18 @@ public:
     // Case 9: NextT(int, syn)
     unordered_set<int> getNextTIntSyn(int fromIndex, PKBDesignEntity to);
 
-private:
+  private:
     PKB::SharedPtr mpPKB;
 
-    static void getNextTStatementList(vector<shared_ptr <Statement>> list, StatementType from, StatementType to, int fromIndex,
-        int toIndex, set<pair<int, int>>* result, set<int>* seenP, bool canExitEarly);
-    set<pair<int, int>> getNextT(shared_ptr<Program> program, StatementType from, StatementType to, int fromIndex, int toIndex, bool canExitEarly);
+    static void getNextTStatementList(vector<shared_ptr<Statement>> list, StatementType from, StatementType to,
+                                      int fromIndex, int toIndex, set<pair<int, int>> *result, set<int> *seenP,
+                                      bool canExitEarly);
+    set<pair<int, int>> getNextT(shared_ptr<Program> program, StatementType from, StatementType to, int fromIndex,
+                                 int toIndex, bool canExitEarly);
     static StatementType getStatementType(PKBDesignEntity de);
 
-    PKBPQLNextHandler(PKB::SharedPtr pkb) {
+    PKBPQLNextHandler(PKB::SharedPtr pkb)
+    {
         mpPKB = pkb;
     };
 };

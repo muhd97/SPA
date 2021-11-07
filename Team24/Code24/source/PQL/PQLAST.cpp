@@ -12,12 +12,13 @@ string DesignEntity::PROCEDURE = "procedure";
 string DesignEntity::CALL = "call";
 string DesignEntity::PROG_LINE = "prog_line";
 
-const string& Synonym::getValue() const
+const string &Synonym::getValue() const
 {
     return value;
 }
 
-const string& Synonym::getSynonymString() {
+const string &Synonym::getSynonymString()
+{
     return getValue();
 }
 
@@ -26,15 +27,18 @@ string Synonym::format()
     return "$" + value;
 }
 
-ElementType Synonym::getElementType() {
+ElementType Synonym::getElementType()
+{
     return ElementType::Synonym;
 }
 
-AttrNameType AttrName::getType() {
+AttrNameType AttrName::getType()
+{
     return this->name;
 }
 
-string AttrName::format() {
+string AttrName::format()
+{
     switch (name)
     {
     case AttrNameType::PROC_NAME:
@@ -49,36 +53,42 @@ string AttrName::format() {
     return "";
 }
 
-AttrNameType AttrName::getAttrNameType() {
+AttrNameType AttrName::getAttrNameType()
+{
     return name;
 }
 
-string AttrRef::format() {
+string AttrRef::format()
+{
     return synonym->format() + "." + attrName->format();
 }
 
-ElementType AttrRef::getElementType() {
+ElementType AttrRef::getElementType()
+{
     return ElementType::AttrRef;
 }
 
-const string& AttrRef::getSynonymString() {
+const string &AttrRef::getSynonymString()
+{
     return synonym->getValue();
 }
 
-const shared_ptr<Synonym>& AttrRef::getSynonym() {
+const shared_ptr<Synonym> &AttrRef::getSynonym()
+{
     return synonym;
 }
 
-const shared_ptr<AttrName>& AttrRef::getAttrName() {
+const shared_ptr<AttrName> &AttrRef::getAttrName()
+{
     return attrName;
 }
 
-const string& DesignEntity::getEntityTypeName() const
+const string &DesignEntity::getEntityTypeName() const
 {
     return entityTypeName;
 }
 
-const vector<shared_ptr<Synonym>>& Declaration::getSynonyms() const
+const vector<shared_ptr<Synonym>> &Declaration::getSynonyms() const
 {
     return synonyms;
 }
@@ -117,7 +127,7 @@ string StmtRef::getStmtRefTypeName()
     return "";
 }
 
-const string& StmtRef::getStringVal() const
+const string &StmtRef::getStringVal() const
 {
     return stringValue;
 }
@@ -127,7 +137,7 @@ int StmtRef::getIntVal()
     return intValue;
 }
 
-const string& EntRef::getStringVal() const
+const string &EntRef::getStringVal() const
 {
     return stringValue;
 }
@@ -156,7 +166,7 @@ string EntRef::format()
     return getEntRefTypeName();
 }
 
-const string& Ref::getStringVal() const
+const string &Ref::getStringVal() const
 {
     return stringValue;
 }
@@ -171,7 +181,7 @@ RefType Ref::getRefType()
     return refType;
 }
 
-const shared_ptr<AttrRef>& Ref::getAttrRef()
+const shared_ptr<AttrRef> &Ref::getAttrRef()
 {
     return attrRef;
 }
@@ -817,7 +827,8 @@ vector<string> AffectsBipT::getAllSynonymsAsString()
     return move(toReturn);
 }
 
-EvalClType SuchThatCl::getEvalClType() {
+EvalClType SuchThatCl::getEvalClType()
+{
     return EvalClType::SuchThat;
 }
 
@@ -831,7 +842,7 @@ bool SuchThatCl::containsSynonym(shared_ptr<Element> s)
     return relRef->containsSynonym(s);
 }
 
-const vector<string>& SuchThatCl::getAllSynonymsAsString()
+const vector<string> &SuchThatCl::getAllSynonymsAsString()
 {
     return synonymsUsed;
 }
@@ -852,38 +863,45 @@ string ExpressionSpec::format()
     }
 }
 
-
-const vector<shared_ptr<Element>>& ResultCl::getElements() const {
+const vector<shared_ptr<Element>> &ResultCl::getElements() const
+{
     return elements;
 }
 
 string ResultCl::format()
 {
-    if (isBoolean) {
+    if (isBoolean)
+    {
         return "BOOLEAN";
     }
-    else {
+    else
+    {
         string str = "<";
-        for (auto elem : elements) {
+        for (auto elem : elements)
+        {
             str += elem->format() + ", ";
         }
         return str + ">";
     }
 }
 
-bool ResultCl::isBooleanReturnType() {
+bool ResultCl::isBooleanReturnType()
+{
     return isBoolean;
 }
 
-bool ResultCl::isMultiTupleReturnType() {
+bool ResultCl::isMultiTupleReturnType()
+{
     return elements.size() > 1;
 }
 
-bool ResultCl::isSingleValReturnType() {
+bool ResultCl::isSingleValReturnType()
+{
     return elements.size() == 1;
 }
 
-EvalClType PatternCl::getEvalClType() {
+EvalClType PatternCl::getEvalClType()
+{
     return EvalClType::Pattern;
 }
 
@@ -895,32 +913,38 @@ string PatternCl::format()
 bool PatternCl::containsSynonym(shared_ptr<Element> s)
 {
     return synonym->getSynonymString() == s->getSynonymString() ||
-        (entRef->getEntRefType() == EntRefType::SYNONYM && entRef->getStringVal() == s->getSynonymString());
+           (entRef->getEntRefType() == EntRefType::SYNONYM && entRef->getStringVal() == s->getSynonymString());
 }
 
-const vector<string>& PatternCl::getAllSynonymsAsString()
+const vector<string> &PatternCl::getAllSynonymsAsString()
 {
     return synonymsUsed;
 }
 
-const string& PatternCl::getSynonymType(unordered_map<string, shared_ptr<Declaration>>& synonymToParentDeclarationMap)
+const string &PatternCl::getSynonymType(unordered_map<string, shared_ptr<Declaration>> &synonymToParentDeclarationMap)
 {
     auto it = synonymToParentDeclarationMap.find(synonym->getValue());
-    if (it == synonymToParentDeclarationMap.end()) throw runtime_error("Failed to resolve synonym. It was not declared");
+    if (it == synonymToParentDeclarationMap.end())
+        throw runtime_error("Failed to resolve synonym. It was not declared");
     return (*it).second->getDesignEntity()->getEntityTypeName();
 }
-PatternClType PatternCl::getPatternClType(unordered_map<string, shared_ptr<Declaration>>& synonymToParentDeclarationMap)
+PatternClType PatternCl::getPatternClType(unordered_map<string, shared_ptr<Declaration>> &synonymToParentDeclarationMap)
 {
-    const string& synonymType = getSynonymType(synonymToParentDeclarationMap);
-    if (synonymType == DesignEntity::ASSIGN) return PatternClType::PatternAssign;
-    else if (synonymType == DesignEntity::WHILE) return PatternClType::PatternWhile;
-    else if (synonymType == DesignEntity::IF) return PatternClType::PatternIf;
-    else {
+    const string &synonymType = getSynonymType(synonymToParentDeclarationMap);
+    if (synonymType == DesignEntity::ASSIGN)
+        return PatternClType::PatternAssign;
+    else if (synonymType == DesignEntity::WHILE)
+        return PatternClType::PatternWhile;
+    else if (synonymType == DesignEntity::IF)
+        return PatternClType::PatternIf;
+    else
+    {
         throw runtime_error("Unsupported Synonym Type for Pattern Clause");
     }
 }
 
-EvalClType WithCl::getEvalClType() {
+EvalClType WithCl::getEvalClType()
+{
     return EvalClType::With;
 }
 
@@ -931,38 +955,39 @@ string WithCl::format()
 
 bool WithCl::containsSynonym(shared_ptr<Element> s)
 {
-    const string& toCheck = s->getSynonymString();
-    for (auto& x : synonymsUsed) {
-        if (x == toCheck) return true;
+    const string &toCheck = s->getSynonymString();
+    for (auto &x : synonymsUsed)
+    {
+        if (x == toCheck)
+            return true;
     }
 
     return false;
 }
 
-const vector<string>& WithCl::getAllSynonymsAsString()
+const vector<string> &WithCl::getAllSynonymsAsString()
 {
     return synonymsUsed;
 }
 
-
-shared_ptr<Declaration>& SelectCl::getParentDeclarationForSynonym(const string& s)
+shared_ptr<Declaration> &SelectCl::getParentDeclarationForSynonym(const string &s)
 {
     if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end())
     {
         throw runtime_error("Warning: requested synonym of value [" + s +
-            "] is NOT declared in this SelectCl. Null DesignEntityType is "
-            "returned.\n");
+                            "] is NOT declared in this SelectCl. Null DesignEntityType is "
+                            "returned.\n");
     }
     return synonymToParentDeclarationMap[s];
 }
 
-shared_ptr<Declaration>& SelectCl::getParentDeclarationForSynonym(shared_ptr<Synonym> s)
+shared_ptr<Declaration> &SelectCl::getParentDeclarationForSynonym(shared_ptr<Synonym> s)
 {
     if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end())
     {
         throw runtime_error("Warning: requested synonym of value [" + s->getValue() +
-            "] is NOT declared in this SelectCl. Null DesignEntityType is "
-            "returned.\n");
+                            "] is NOT declared in this SelectCl. Null DesignEntityType is "
+                            "returned.\n");
     }
     return synonymToParentDeclarationMap[s->getValue()];
 }
@@ -972,20 +997,20 @@ bool SelectCl::isSynonymDeclared(string toTest)
     return synonymToParentDeclarationMap.find(toTest) != synonymToParentDeclarationMap.end();
 }
 
-const string& SelectCl::getDesignEntityTypeBySynonym(const string& s)
+const string &SelectCl::getDesignEntityTypeBySynonym(const string &s)
 {
     if (synonymToParentDeclarationMap.find(s) == synonymToParentDeclarationMap.end())
     {
         string toThrow = "Warning: requested synonym of value [" + s +
-            "] is NOT declared in this SelectCl. Null "
-            "DesignEntityType is returned.\n";
+                         "] is NOT declared in this SelectCl. Null "
+                         "DesignEntityType is returned.\n";
         throw toThrow;
     }
 
     return synonymToParentDeclarationMap[s]->getDesignEntity()->getEntityTypeName();
 }
 
-const string& SelectCl::getDesignEntityTypeBySynonym(const shared_ptr<Synonym>& s)
+const string &SelectCl::getDesignEntityTypeBySynonym(const shared_ptr<Synonym> &s)
 {
     if (synonymToParentDeclarationMap.find(s->getValue()) == synonymToParentDeclarationMap.end())
     {
@@ -998,24 +1023,24 @@ const string& SelectCl::getDesignEntityTypeBySynonym(const shared_ptr<Synonym>& 
 string SelectCl::format()
 {
     string builder = "";
-    for (auto& d : declarations)
+    for (auto &d : declarations)
     {
         builder += d->format() + ", ";
     }
 
     builder += "\nSELECT " + target->format();
 
-    for (auto& st : suchThatClauses)
+    for (auto &st : suchThatClauses)
     {
         builder += st->format();
     }
 
-    for (auto& pt : patternClauses)
+    for (auto &pt : patternClauses)
     {
         builder += pt->format();
     }
 
-    for (auto& wt : withClauses)
+    for (auto &wt : withClauses)
     {
         builder += wt->format();
     }
@@ -1043,7 +1068,7 @@ bool SelectCl::hasEvalClauses()
     return hasSuchThatClauses() || hasPatternClauses() || hasWithClauses();
 }
 
-const vector<shared_ptr<EvalCl>>& SelectCl::getEvalClauses()
+const vector<shared_ptr<EvalCl>> &SelectCl::getEvalClauses()
 {
     return evalClauses;
 }
@@ -1051,7 +1076,7 @@ const vector<shared_ptr<EvalCl>>& SelectCl::getEvalClauses()
 bool SelectCl::suchThatContainsSynonym(shared_ptr<Element> s)
 {
     bool flag = false;
-    for (auto& st : this->suchThatClauses)
+    for (auto &st : this->suchThatClauses)
     {
         flag = st->containsSynonym(s);
         if (flag)
@@ -1063,7 +1088,7 @@ bool SelectCl::suchThatContainsSynonym(shared_ptr<Element> s)
 bool SelectCl::patternContainsSynonym(shared_ptr<Element> s)
 {
     bool flag = false;
-    for (auto& pt : this->patternClauses)
+    for (auto &pt : this->patternClauses)
     {
         flag = pt->containsSynonym(s);
         if (flag)
@@ -1072,9 +1097,10 @@ bool SelectCl::patternContainsSynonym(shared_ptr<Element> s)
     return flag;
 }
 
-bool SelectCl::withContainsSynonym(shared_ptr<Element> e) {
+bool SelectCl::withContainsSynonym(shared_ptr<Element> e)
+{
     bool flag = false;
-    for (auto& pt : this->withClauses)
+    for (auto &pt : this->withClauses)
     {
         flag = pt->containsSynonym(e);
         if (flag)
@@ -1084,7 +1110,7 @@ bool SelectCl::withContainsSynonym(shared_ptr<Element> e) {
     return flag;
 }
 
-
-const shared_ptr<ResultCl>& SelectCl::getTarget() {
+const shared_ptr<ResultCl> &SelectCl::getTarget()
+{
     return target;
 }

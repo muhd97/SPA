@@ -92,44 +92,53 @@ vector<PQLToken> pqlLex(string &program)
                 curr = lookahead;
                 lookahead = program[++i + 1];
             }
-            
-            if (value == SPECIAL_STMT && curr == '#') {
+
+            if (value == SPECIAL_STMT && curr == '#')
+            {
                 // stmt# in AttrName
                 i++;
                 tokens.emplace_back(PQLTokenType::STMT_NUMBER);
             }
-            else if (value == SPECIAL_PARENT && curr == '*') {
+            else if (value == SPECIAL_PARENT && curr == '*')
+            {
                 i++;
                 tokens.emplace_back(PQLTokenType::PARENT_T);
             }
-            else if (value == SPECIAL_FOLLOWS && curr == '*') {
+            else if (value == SPECIAL_FOLLOWS && curr == '*')
+            {
                 i++;
                 tokens.emplace_back(PQLTokenType::FOLLOWS_T);
             }
-            else if (value == SPECIAL_CALLS && curr == '*') {
+            else if (value == SPECIAL_CALLS && curr == '*')
+            {
                 i++;
                 tokens.emplace_back(PQLTokenType::CALLS_T);
             }
-            else if (value == SPECIAL_NEXT && curr == '*') {
+            else if (value == SPECIAL_NEXT && curr == '*')
+            {
                 i++;
                 tokens.emplace_back(PQLTokenType::NEXT_T);
             }
-            else if (value == SPECIAL_NEXT_BIP && curr == '*') {
+            else if (value == SPECIAL_NEXT_BIP && curr == '*')
+            {
                 i++;
                 tokens.emplace_back(PQLTokenType::NEXT_BIP_T);
             }
-            else if (value == SPECIAL_AFFECTS && curr == '*') {
+            else if (value == SPECIAL_AFFECTS && curr == '*')
+            {
                 i++;
                 tokens.emplace_back(PQLTokenType::AFFECTS_T);
             }
-            else if (value == SPECIAL_AFFECTS_BIP && curr == '*') {
+            else if (value == SPECIAL_AFFECTS_BIP && curr == '*')
+            {
                 i++;
                 tokens.emplace_back(PQLTokenType::AFFECTS_BIP_T);
             }
-            else {
+            else
+            {
                 tokens.emplace_back(std::move(value));
             }
-            
+
             continue;
         }
         else if (isdigit(curr))

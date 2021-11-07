@@ -1,12 +1,14 @@
 #include "PQLAffectsBipTHandler.h"
 #include "PQLProcessorUtils.h"
 
-AffectsBipTHandler::AffectsBipTHandler(shared_ptr<PKBPQLEvaluator>& evaluator, shared_ptr<SelectCl>& selectCl, shared_ptr<AffectsBip>& affectsBipCl)
+AffectsBipTHandler::AffectsBipTHandler(shared_ptr<PKBPQLEvaluator> &evaluator, shared_ptr<SelectCl> &selectCl,
+                                       shared_ptr<AffectsBip> &affectsBipCl)
     : AffectsBipHandler(evaluator, selectCl, affectsBipCl)
 {
 }
 
-const string& AffectsBipTHandler::getRelationshipType() {
+const string &AffectsBipTHandler::getRelationshipType()
+{
     return PQL_AFFECTS_BIP_T;
 }
 
